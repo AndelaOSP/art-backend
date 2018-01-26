@@ -1,0 +1,2 @@
+SECRET_KEY="sth"
+DATABASE_URL="Thedatabaseurl"

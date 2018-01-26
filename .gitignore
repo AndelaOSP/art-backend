@@ -6,10 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
-art/art/settings.py
-
 art/db.sqlite3
-
+.env
 
 # Distribution / packaging
 .Python
