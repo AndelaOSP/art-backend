@@ -31,24 +31,30 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'SECRET_KEY'
 
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL')
-    )
-}
+DATABASES = {'default': dj_database_url.config(default=config('DATABASE_URL'))}
+
+# uncomment to do a localhost db setup
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'art-backend', #your art-DB name
+#           'USER': 'yourusername',
+#         'PASSWORD': 'yourpassword',
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',
+#     }}
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
-  'art-backend.herokuapp.com',
-  '0.0.0.0',
-  '127.0.0.1',
+    'art-backend.herokuapp.com',
+    '0.0.0.0',
+    '127.0.0.1',
 ]
-
 
 # Application definition
 
@@ -91,7 +97,13 @@ TEMPLATES = [
         },
     },
 ]
-
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 WSGI_APPLICATION = 'art.wsgi.application'
 
 
