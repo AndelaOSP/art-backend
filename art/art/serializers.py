@@ -18,12 +18,8 @@ class CheckinLogsSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ('date_created','time_created', 'app_time_stamp')
 
 class CheckoutLogsSerializer(serializers.HyperlinkedModelSerializer):
+    user_id = serializers.IntegerField()
     class Meta:
         model = CheckoutLogs
-        fields = ('user_id', 'mac_book', 'charger', 'tb_dongle', 'head_set', 'date_created')
+        fields = ('id', 'user_id', 'mac_book', 'charger', 'tb_dongle', 'head_set', 'date_created')
         read_only_fields = ('date_created','time_created', 'app_time_stamp')
-
-        
-
-
-

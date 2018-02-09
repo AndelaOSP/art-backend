@@ -6,7 +6,9 @@ urlpatterns = {
     url(r'^art_api/$', AssetCreateApiView.as_view()),
     url(r'^art_api/$', AssetGetUpdateDelete.as_view()),
     url(r'^art_api/$', CheckinCreateApiView.as_view()),
-    url(r'^art_api/$', CheckoutCreateApiView.as_view()),
+    url(r'^art_api/checkout$', CheckoutCreateApiView.as_view()),
+    url(r'^art_api/checkout/(?P<pk>[0-9]+)$',
+        CheckoutCreateApiView.as_view()),
 }
 
 urlpatterns = format_suffix_patterns(urlpatterns)
