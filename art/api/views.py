@@ -18,10 +18,27 @@ class AssetGetUpdateDelete(RetrieveUpdateDestroyAPIView):
 """Checkin activity logic"""
 
 class CheckinCreateApiView(ListCreateAPIView):
-    """This creates, lists chekin entries"""
-    serializer_class = CheckinLogsSerializer
-    # To Add code with Josiah
+    """
+    perform_create
+    saves a checkin log for a user
 
+    get_queryset:
+    list a checkin log for a user
+    """
+
+    serializer_class = CheckinLogsSerializer
+
+    def perform_create(self, serializer):
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_queryset(self):
+        queryset = CheckinLogs.objects.all()
+        if 'pk' in self.kwargs:
+            queryset = queryset.filter(id=self.kwargs['pk'])
+        return queryset
 
 """checkout activity logic"""
 

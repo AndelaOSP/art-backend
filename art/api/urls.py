@@ -5,7 +5,8 @@ from .views import AssetCreateApiView, AssetGetUpdateDelete, CheckinCreateApiVie
 urlpatterns = {
     url(r'^art_api/$', AssetCreateApiView.as_view()),
     url(r'^art_api/$', AssetGetUpdateDelete.as_view()),
-    url(r'^art_api/$', CheckinCreateApiView.as_view()),
+    url(r'^art_api/checkin', CheckinCreateApiView.as_view(), name="create-checkin"),
+    url(r'^art_api/checkin/(?P<pk>[0-9]+)$', CheckinCreateApiView.as_view(), name="get-checkin"),
     url(r'^art_api/$', CheckoutCreateApiView.as_view()),
 }
 

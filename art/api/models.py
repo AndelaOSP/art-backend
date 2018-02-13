@@ -18,7 +18,7 @@ class Asset(models.Model):
          self.date_created, self.date_modified
 
 class CheckinLogs(models.Model):
-    user_id = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    user = models.ForeignKey(Asset, on_delete=models.CASCADE)
     mac_book = models.BooleanField(default=False)
     charger = models.BooleanField(default=False)
     tb_dongle = models.BooleanField(default=False)
@@ -26,7 +26,7 @@ class CheckinLogs(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.user_id, self.mac_book, self.charger, self.tb_dongle, \
+        return self.user, self.mac_book, self.charger, self.tb_dongle, \
         self.head_set, self.date_created
 
 class CheckoutLogs(models.Model):

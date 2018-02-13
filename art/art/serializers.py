@@ -11,11 +11,15 @@ class AssetSerializer(serializers.HyperlinkedModelSerializer):
          'date_created', 'date_modified')
         read_only_fields = ('date_created', 'date_modified')
 
+
 class CheckinLogsSerializer(serializers.HyperlinkedModelSerializer):
+    user_id = serializers.IntegerField(required=True)
+
     class Meta:
         model = CheckinLogs
-        fields = ('user_id', 'mac_book', 'charger', 'tb_dongle', 'head_set', 'date_created')
-        read_only_fields = ('date_created','time_created', 'app_time_stamp')
+        fields = ('id', 'user_id', 'mac_book', 'charger', 'tb_dongle', 'head_set', 'date_created')
+        read_only_fields = ('date_created', 'time_created', 'app_time_stamp')
+
 
 class CheckoutLogsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
