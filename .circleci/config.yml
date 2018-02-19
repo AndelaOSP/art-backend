@@ -49,3 +49,8 @@ jobs:
           name: pep8 checks on project 
           command: |
             pipenv run "flake8 art/art"
+
+      - run:
+          name: run coveralls
+          command: |
+            pipenv run "coveralls"
