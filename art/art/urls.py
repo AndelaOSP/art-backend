@@ -13,9 +13,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+
+from django.contrib import admin 
+from django.conf.urls import url, include
 from django.urls import path
+from rest_framework.documentation import include_docs_urls
+
+API_TITLE = 'Art.API'
+API_DESCRIPTION = 'This a documentation of all the API endpoints being used in this project, what they do and how to use them.'
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^api-auth/', include('rest_framework.urls')),
+    url(r'^docs/', include_docs_urls(title=API_TITLE, description=API_DESCRIPTION, public=False)),
+    url(r'^', include('api.urls')),
 ]
