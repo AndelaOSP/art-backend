@@ -51,6 +51,11 @@ jobs:
             pipenv run "flake8 art/art"
 
       - run:
+         name: django-nose
+         command: |
+           pipenv run "nosetests api"
+
+      - run:
           name: run coveralls
           command: |
             pipenv run "coveralls"
