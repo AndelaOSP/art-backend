@@ -13,7 +13,7 @@ jobs:
           PIPENV_VENV_IN_PROJECT: 'true'
           DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
       - image: circleci/postgres:9.4
-        environment: 
+        environment:
           POSTGRES_USER: root
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: ""
@@ -46,14 +46,14 @@ jobs:
             pipenv run "python art/manage.py migrate"
 
       - run:
-          name: pep8 checks on project 
+          name: pep8 checks on project
           command: |
             pipenv run "flake8 art/art"
 
       - run:
          name: run tests
          command: |
-           pipenv run "python art/manage.py test"
+           pipenv run "coverage run art/manage.py test -v 2"
 
       - run:
           name: run coveralls
