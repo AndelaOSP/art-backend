@@ -53,7 +53,7 @@ jobs:
       - run:
          name: django-nose
          command: |
-           pipenv run "nosetests api"
+           pipenv run "nosetests"
 
       - run:
           name: run coveralls
