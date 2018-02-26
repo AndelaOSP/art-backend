@@ -35,20 +35,11 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 SECRET_KEY = 'SECRET_KEY'
 
 SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
 DATABASES = {
     'default': dj_database_url.config(
         default=config('DATABASE_URL')
     )
 }
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = [
-    'art-backend.herokuapp.com',
-    '0.0.0.0',
-    '127.0.0.1',
-]
 
 
 # Application definition
