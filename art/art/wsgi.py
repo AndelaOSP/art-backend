@@ -16,9 +16,9 @@ from whitenoise.django import DjangoWhiteNoise
 
 
 dotenv.read_dotenv(os.path.join(
-  os.path.dirname(os.path.dirname(__file__)), '.env'))
+    os.path.dirname(os.path.dirname(__file__)), '.env'))
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "art.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 
 application = get_wsgi_application()
 application = DjangoWhiteNoise(application)
