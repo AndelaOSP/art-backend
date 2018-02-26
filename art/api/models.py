@@ -19,3 +19,13 @@ class AssetType(models.Model):
 
     def __str__(self):
         return self.asset_type
+
+
+class AssetMake(models.Model):
+    """ stores all asset makes """
+    make_label = models.CharField(max_length=40, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified_at = models.DateTimeField(auto_now=True, editable=False)
+
+    def __str__(self):
+        return self.make_label
