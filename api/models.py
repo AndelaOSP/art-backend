@@ -16,7 +16,7 @@ class AssetCategory(models.Model):
 
 class AssetType(models.Model):
     """Stores all asset types"""
-    asset_type = models.CharField(max_length=500)
+    asset_type = models.CharField(max_length=500, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
@@ -32,3 +32,13 @@ class AssetMake(models.Model):
 
     def __str__(self):
         return self.make_label
+
+
+class Item(models.Model):
+    """Stores all items"""
+    item_name = models.CharField(max_length=50, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, editable=False)
+
+    def __str__(self):
+        return self.item_name
