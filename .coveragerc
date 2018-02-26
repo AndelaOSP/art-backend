@@ -1,3 +1,5 @@
 [report]
 omit = 
     */migrations/*
+    */site-packages/*
+    .venv/*
