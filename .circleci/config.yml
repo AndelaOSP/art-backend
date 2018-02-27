@@ -48,7 +48,7 @@ jobs:
       - run:
           name: pep8 checks on project
           command: |
-            pipenv run "flake8 art"
+            pipenv run "flake8 --exclude=*/migrations/* ."
 
       - run:
          name: run tests
