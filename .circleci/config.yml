@@ -25,13 +25,13 @@ jobs:
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-
       - run:
           command: |
             sudo pip install pipenv
             pipenv install -r requirements.txt
       - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-
           paths:
             - ".venv"
             - "/usr/local/bin"
@@ -39,21 +39,21 @@ jobs:
       - run:
           name: make migrations
           command: |
-            pipenv run "python art/manage.py makemigrations"
+            pipenv run "python manage.py makemigrations"
       - run:
           name: migrate
           command: |
-            pipenv run "python art/manage.py migrate"
+            pipenv run "python manage.py migrate"
 
       - run:
           name: pep8 checks on project
           command: |
-            pipenv run "flake8 art/art"
+            pipenv run "flake8 ."
 
       - run:
          name: run tests
          command: |
-           pipenv run "coverage run art/manage.py test -v 2"
+           pipenv run "coverage run manage.py test -v 2"
 
       - run:
           name: run coveralls
