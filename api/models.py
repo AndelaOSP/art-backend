@@ -43,7 +43,8 @@ class Item(models.Model):
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
     def clean(self):
-        raise ValidationError(('Please provide either the serial number,\
+        if not self.item_code and not self.serial_number:
+            raise ValidationError(('Please provide either the serial number,\
                                asset code or both.'), code='required')
 
     def save(self, *args, **kwargs):
