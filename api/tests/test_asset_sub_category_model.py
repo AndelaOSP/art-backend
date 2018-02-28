@@ -27,3 +27,6 @@ class AssetSubCategoryModelTest(TestCase):
         self.assertEqual(AssetSubCategory.objects.count(), 1)
         self.subcategory.delete()
         self.assertEqual(AssetSubCategory.objects.count(), 0)
+
+    def test_asset_subcategory_model_string_representation(self):
+        self.assertEquals(str(self.subcategory), "Computer Accessories")
