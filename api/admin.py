@@ -1,8 +1,6 @@
 from django.contrib import admin
-from .models import AssetMake
-from .models import AssetCategory, AssetType, AssetSubCategory
+from .models import AssetCategory, AssetType, AssetSubCategory, Item, AssetMake
 
-admin.site.register(AssetType)
-admin.site.register(AssetCategory)
-admin.site.register(AssetMake)
-admin.site.register(AssetSubCategory)
+admin.register(
+    [AssetCategory, AssetType, AssetSubCategory, Item, AssetMake]
+)
