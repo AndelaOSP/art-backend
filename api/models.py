@@ -15,11 +15,23 @@ class AssetCategory(models.Model):
         return self.category_name
 
 
+class AssetSubCategory(models.Model):
+    """Stores all asset sub categories"""
+    sub_category_name = models.CharField(max_length=40, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __str__(self):
+        return self.sub_category_name
+
+
 class AssetType(models.Model):
     """Stores all asset types"""
     asset_type = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
+    asset_sub_category = models.ForeignKey(AssetSubCategory,
+                                           on_delete=models.CASCADE)
 
     def __str__(self):
         return self.asset_type
@@ -56,13 +68,3 @@ class Item(models.Model):
 
     def __str__(self):
         return '{}{}'.format(self.item_code, self.serial_number)
-
-
-class AssetSubCategory(models.Model):
-    """Stores all asset sub categories"""
-    sub_category_name = models.CharField(max_length=40, null=False)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    last_modified = models.DateTimeField(auto_now_add=True, editable=False)
-
-    def __str__(self):
-        return self.sub_category_name
