@@ -53,7 +53,7 @@ jobs:
       - run:
          name: run tests
          command: |
-           pipenv run "python manage.py test"
+           pipenv run "coverage run manage.py test"
 
       - run:
           name: run coveralls
