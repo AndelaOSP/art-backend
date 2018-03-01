@@ -34,6 +34,7 @@ class AssetMake(models.Model):
     def __str__(self):
         return self.make_label
 
+
 class Item(models.Model):
     """Stores all items"""
     item_code = models.CharField(max_length=50, blank=True)
@@ -55,6 +56,7 @@ class Item(models.Model):
 
     def __str__(self):
         return '{}{}'.format(self.item_code, self.serial_number)
+
 
 class AssetSubCategory(models.Model):
     """Stores all asset sub categories"""
