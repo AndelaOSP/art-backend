@@ -33,3 +33,7 @@ class AssetTypeModelTest(TestCase):
         get_asset = AssetType.objects.get(asset_type="TestAsset")
         get_asset.delete()
         self.assertEqual(self.all_assettypes.count(), 0)
+
+    def test_asset_type_model_string_representation(self):
+        get_asset = AssetType.objects.get(asset_type="TestAsset")
+        self.assertEquals(str(get_asset), "TestAsset")
