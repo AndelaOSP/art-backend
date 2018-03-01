@@ -50,6 +50,15 @@ class AssetMake(models.Model):
         return self.make_label
 
 
+class ItemModelNumber(models.Model):
+    model_number = models.CharField(max_length=100, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, editable=False)
+
+    def __str__(self):
+        return self.model_number
+
+
 class Item(models.Model):
     """Stores all items"""
     item_code = models.CharField(max_length=50, blank=True)
