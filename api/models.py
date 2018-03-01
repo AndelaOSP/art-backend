@@ -22,7 +22,7 @@ class AssetSubCategory(models.Model):
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
-        verbose_name_plural = 'Asset Categories'
+        verbose_name_plural = 'Asset SubCategories'
 
     def __str__(self):
         return self.sub_category_name
