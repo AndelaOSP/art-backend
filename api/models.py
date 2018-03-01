@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class AssetCategory(models.Model):
@@ -14,11 +15,26 @@ class AssetCategory(models.Model):
         return self.category_name
 
 
+class AssetSubCategory(models.Model):
+    """Stores all asset sub categories"""
+    sub_category_name = models.CharField(max_length=40, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now_add=True, editable=False)
+
+    class Meta:
+        verbose_name_plural = 'Asset Categories'
+
+    def __str__(self):
+        return self.sub_category_name
+
+
 class AssetType(models.Model):
     """Stores all asset types"""
-    asset_type = models.CharField(max_length=500)
+    asset_type = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
+    asset_sub_category = models.ForeignKey(AssetSubCategory,
+                                           on_delete=models.CASCADE)
 
     def __str__(self):
         return self.asset_type
@@ -34,14 +50,24 @@ class AssetMake(models.Model):
         return self.make_label
 
 
-class AssetSubCategory(models.Model):
-    """Stores all asset sub categories"""
-    sub_category_name = models.CharField(max_length=40, null=False)
+class Item(models.Model):
+    """Stores all items"""
+    item_code = models.CharField(max_length=50, blank=True)
+    serial_number = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    last_modified = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, editable=False)
 
-    class Meta:
-        verbose_name_plural = 'Asset Sub Categories'
+    def clean(self):
+        if not self.item_code and not self.serial_number:
+            raise ValidationError(('Please provide either the serial number,\
+                               asset code or both.'), code='required')
+
+    def save(self, *args, **kwargs):
+        """Validate either item code or serial number are provided"""
+        if not self.item_code and not self.serial_number:
+            self.full_clean()
+        else:
+            super(Item, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.sub_category_name
+        return '{}{}'.format(self.item_code, self.serial_number)

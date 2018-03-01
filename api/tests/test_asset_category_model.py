@@ -29,3 +29,6 @@ class AssetCategoryModelTest(TestCase):
 
         self.assertEqual(new_category_count, 2)
         self.assertEqual(count_after_deletion, 1)
+
+    def test_asset_category_model_string_representation(self):
+        self.assertEquals(str(self.category), "Accessories")

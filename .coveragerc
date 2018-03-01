@@ -4,3 +4,4 @@ omit =
     */site-packages/*
     .venv/*
     */manage.py
+show_missing = True
