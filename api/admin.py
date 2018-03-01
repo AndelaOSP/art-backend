@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (AssetCategory, AssetType,
                      AssetSubCategory, Item, AssetMake, ItemModelNumber)
-admin.register(
+admin.site.register(
     [
         AssetCategory,
         AssetType,
