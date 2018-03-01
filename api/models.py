@@ -21,6 +21,9 @@ class AssetSubCategory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
 
+    class Meta:
+        verbose_name_plural = 'Asset Categories'
+
     def __str__(self):
         return self.sub_category_name
 
