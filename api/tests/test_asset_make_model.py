@@ -23,3 +23,6 @@ class AssetMakeTestCase(TestCase):
         self.assertEqual(AssetMake.objects.count(), 1)
         self.laptop_make.delete()
         self.assertEqual(AssetMake.objects.count(), 0)
+
+    def test_asset_make_model_string_representation(self):
+        self.assertEquals(str(self.laptop_make), "Microsoft Lifechat LX-6000")
