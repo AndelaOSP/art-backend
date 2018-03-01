@@ -32,3 +32,13 @@ class AssetMake(models.Model):
 
     def __str__(self):
         return self.make_label
+
+
+class AssetSubCategory(models.Model):
+    """Stores all asset sub categories"""
+    sub_category_name = models.CharField(max_length=40, null=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __str__(self):
+        return self.sub_category_name
