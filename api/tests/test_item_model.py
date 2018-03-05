@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.db.models.deletion import ProtectedError
 
 from ..models import Item, ItemModelNumber
 
@@ -60,13 +61,14 @@ class ItemTypeModelTest(TestCase):
         self.assertEqual(str(get_item.model_number), "IMN50987")
 
     def test_delete_itemmodel_cascades(self):
-        """Test that the Item is deleted when model number is deleted"""
+        """Test that the Item is not deleted when model number is deleted"""
         self.assertEqual(self.all_items.count(), 1)
         self.assertEqual(self.all_itemmodels.count(), 1)
         get_itemmodel = ItemModelNumber.objects.get(model_number="IMN50987")
         get_item = Item.objects.get(item_code="IC001")
         get_item.model_number = get_itemmodel
         get_item.save()
-        get_itemmodel.delete()
-        self.assertEqual(self.all_items.count(), 0)
-        self.assertEqual(self.all_itemmodels.count(), 0)
+        with self.assertRaises(ProtectedError):
+            get_itemmodel.delete()
+        self.assertEqual(self.all_items.count(), 1)
+        self.assertEqual(self.all_itemmodels.count(), 1)
