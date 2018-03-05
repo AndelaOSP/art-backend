@@ -20,6 +20,8 @@ class AssetSubCategory(models.Model):
     sub_category_name = models.CharField(max_length=40, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
+    asset_category = models.ForeignKey(AssetCategory,
+                                       on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = 'Asset SubCategories'
