@@ -1,14 +1,22 @@
 from django.test import TestCase
 
-from ..models import AssetType, AssetSubCategory
+from ..models import AssetType, AssetSubCategory, AssetCategory
 
 
 class AssetTypeModelTest(TestCase):
     """Tests for the Asset Types Model"""
 
     def setUp(self):
+        AssetCategory.objects.create(
+            category_name="Accessories"
+        )
+        self.category = AssetCategory.objects.get(
+            category_name="Accessories"
+        )
         self.new_sub_category = AssetSubCategory(
-            sub_category_name="Computer Assessories")
+            sub_category_name="Computer Assessories",
+            asset_category=self.category
+        )
         self.new_sub_category.save()
         AssetType.objects.create(asset_type="Headset",
                                  asset_sub_category=self.new_sub_category)
