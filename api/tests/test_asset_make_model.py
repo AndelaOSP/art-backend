@@ -5,11 +5,13 @@ from ..models import AssetMake, AssetType, AssetSubCategory, AssetCategory
 
 
 class AssetMakeTestCase(TestCase):
+
     def setUp(self):
-        category = AssetCategory.objects.create(category_name="Accessories")
+        AssetCategory.objects.create(category_name="Accessories")
+        self.category = AssetCategory.objects.get(category_name="Accessories")
         self.new_sub_category = AssetSubCategory(
             sub_category_name="Computers Accessories",
-            asset_category=category
+            asset_category=self.category
         )
         self.new_sub_category.save()
         self.new_type = AssetType(
@@ -52,7 +54,6 @@ class AssetMakeTestCase(TestCase):
                 make_label="Skull Candy",
                 asset_type=6
             )
-
         self.assertTrue('Cannot assign "6": '
                         '"AssetMake.asset_type" '
                         'must be a "AssetType" instance'
