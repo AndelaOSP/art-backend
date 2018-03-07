@@ -57,6 +57,9 @@ class ItemModelNumber(models.Model):
     model_number = models.CharField(max_length=100, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
+    make_label = models.ForeignKey(AssetMake,
+                                   null=True,
+                                   on_delete=models.PROTECT)
 
     def __str__(self):
         return self.model_number
