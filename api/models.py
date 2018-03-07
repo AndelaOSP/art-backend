@@ -71,6 +71,8 @@ class Item(models.Model):
     serial_number = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
+    model_number = models.ForeignKey(ItemModelNumber, null=True,
+                                     on_delete=models.PROTECT)
 
     def clean(self):
         if not self.item_code and not self.serial_number:
@@ -85,4 +87,5 @@ class Item(models.Model):
             super(Item, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '{}{}'.format(self.item_code, self.serial_number)
+        return '{}{}{}'.format(self.item_code, self.serial_number,
+                               self.model_number)
