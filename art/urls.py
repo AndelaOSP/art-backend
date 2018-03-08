@@ -24,6 +24,8 @@ from api import urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include(urls)),
+    path('jet/', include('jet.urls', 'jet')),
+    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
 ]
 if settings.DEBUG:
     import debug_toolbar

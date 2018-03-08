@@ -41,6 +41,8 @@ DATABASES = {'default': dj_database_url.config()}
 # Application definition
 
 INSTALLED_APPS = [
+    'jet',
+    'jet.dashboard',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
