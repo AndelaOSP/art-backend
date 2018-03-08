@@ -58,3 +58,25 @@ class UserTestCase(TestCase):
                 email='test1@site.com', name='test_name',
                 cohort=20, slack_handle='',
                 password='devpassword')
+
+    def test_create_normal_user(self):
+        new_user_1 = User.objects.create_user(
+            email='test-1@site.com', cohort=20,
+            slack_handle='@test_user-1', password='devpassword'
+        )
+        new_user_2 = User.objects._create_user(
+            email='test-2@site.com', cohort=20,
+            slack_handle='@test_user-2', password='devpassword'
+        )
+        self.assertFalse(new_user_1.is_staff)
+        self.assertFalse(new_user_1.is_superuser)
+        self.assertFalse(new_user_2.is_staff)
+        self.assertFalse(new_user_2.is_superuser)
+
+    def test_create_superuser(self):
+        new_user_1 = User.objects.create_superuser(
+            email='test-2@site.com', cohort=20,
+            slack_handle='@test_user-2', password='devpassword'
+        )
+        self.assertTrue(new_user_1.is_staff)
+        self.assertTrue(new_user_1.is_superuser)
