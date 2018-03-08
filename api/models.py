@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 
 class AssetCategory(models.Model):
@@ -93,101 +93,55 @@ class Item(models.Model):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, name, cohort, slack_handle,
-                    is_active=True, is_admin=False, is_staff=False,
-                    phone_number=None, picture=None, password=None):
+    use_in_migrations = True
+
+    def _create_user(self, **fields):
+        """
+        Create and save a user with the given username, email, and password.
+        """
+        email = fields.pop('email')
+        password = fields.get('password')
+        cohort = fields.get('cohort')
+        slack_handle = fields.get('slack_handle')
         if not email:
             raise ValueError("Email address is required")
-        elif not name:
-            raise ValueError("Name is required")
         elif not cohort:
             raise ValueError("Cohort is required")
         elif not slack_handle:
             raise ValueError("Slack handle is required")
-
-        user = self.model(
-            email=self.normalize_email(email),
-            name=name,
-            cohort=cohort,
-            slack_handle=slack_handle,
-        )
-
+        email = self.normalize_email(email)
+        user = self.model(email=email, **fields)
         user.set_password(password)
-        user.picture = picture
-        user.staff = is_staff
-        user.admin = is_admin
-        user.active = is_active
-        user.phone_number = phone_number
         user.save(using=self._db)
         return user
 
-    def create_staffuser(self, email, name, cohort,
-                         slack_handle, password=None):
-        user = self.create_user(
-            email=email,
-            name=name,
-            cohort=cohort,
-            slack_handle=slack_handle,
-            password=password,
-            is_staff=True,
-        )
-        return user
+    def create_user(self, **fields):
+        fields.setdefault('is_staff', False)
+        fields.setdefault('is_superuser', False)
+        return self._create_user(**fields)
 
-    def create_superuser(self, email, name, cohort,
-                         slack_handle, password=None):
-        user = self.create_user(
-            email=email,
-            name=name,
-            cohort=cohort,
-            slack_handle=slack_handle,
-            password=password,
-            is_staff=True,
-            is_admin=True
-        )
-        return user
+    def create_superuser(self,  **fields):
+        fields.setdefault('is_staff', True)
+        fields.setdefault('is_superuser', True)
+
+        if fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self._create_user(**fields)
 
 
-class User(AbstractBaseUser):
+class User(AbstractUser):
+    username = None
     email = models.EmailField(max_length=50, unique=True)
-    name = models.CharField(max_length=50, blank=True, null=True)
     cohort = models.IntegerField(blank=True, null=True)
-    slack_handle = models.CharField(max_length=50, unique=True,
+    slack_handle = models.CharField(max_length=50,
                                     blank=True, null=True)
     picture = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True, null=True)
-    admin = models.BooleanField(default=False)
-    active = models.BooleanField(default=True)
-    staff = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'cohort', 'slack_handle']
+    REQUIRED_FIELDS = ['cohort', 'slack_handle']
     objects = UserManager()
-
-    def get_full_name(self):
-        return self.name
-
-    def get_short_name(self):
-        return self.name
-
-    def has_perm(self, perm, obj=None):
-        return True
-
-    def has_module_perms(self, app_label):
-        return True
-
-    @property
-    def is_admin(self):
-        return self.admin
-
-    @property
-    def is_staff(self):
-        return self.staff
-
-    @property
-    def is_active(self):
-        return self.active
-
-    def __str__(self):
-        return self.email

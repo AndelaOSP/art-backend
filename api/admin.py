@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import Group
-from .forms import UserChangeForm, UserCreationForm
 from .models import (AssetCategory, AssetType,
                      AssetSubCategory, Item, AssetMake, ItemModelNumber)
 
@@ -21,39 +19,35 @@ admin.site.register(
 
 
 class UserAdmin(BaseUserAdmin):
-    form = UserChangeForm
-    add_form = UserCreationForm
-
     list_display = (
-        'email', 'name', 'cohort', 'slack_handle', 'admin'
+        'email', 'cohort', 'slack_handle'
     )
     list_filter = (
-        'cohort', 'admin'
+        'cohort',
     )
 
     fieldsets = (
         ('Account', {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('name', 'cohort',
-                                      'slack_handle',
-                                      'picture',
-                                      'phone_number')}),
-        ('Permissions', {'fields': ('admin',)}),
+        ('Personal info', {'fields': (
+            'first_name', 'last_name',
+            'cohort', 'slack_handle',
+            'phone_number', 'picture',)}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'name',
-                       'cohort', 'slack_handle',
-                       'password1', 'password2')
+            'fields': ('email', 'first_name',
+                       'last_name', 'cohort',
+                       'slack_handle', 'phone_number',
+                       'picture', 'password1',
+                       'password2')
         }),
     )
 
     ordering = (
-        'email', 'name', 'cohort', 'slack_handle'
+        'email', 'cohort', 'slack_handle'
     )
-    filter_horizontal = ()
 
 
 admin.site.register(User, UserAdmin)
-admin.site.unregister(Group)
