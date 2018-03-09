@@ -37,7 +37,6 @@ SECRET_KEY = config('SECRET_KEY')
 
 DATABASES = {'default': dj_database_url.config()}
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -127,4 +126,45 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-STATIC_URL = '/static/'
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=api',
+    '--verbosity=2'
+]
+
+
+JET_THEMES = [
+    {
+        'theme': 'default', # theme folder name
+        'color': '#0834D0', # color of the theme's button in user menu
+        'title': 'Default' # theme title
+    },
+    {
+        'theme': 'green',
+        'color': '#3359DF',
+        'title': 'Green'
+    },
+    {
+        'theme': 'light-green',
+        'color': '#49AAAF',
+        'title': 'Light Green'
+    },
+    {
+        'theme': 'light-violet',
+        'color': '#FFAF30',
+        'title': 'Light Violet'
+    },
+    {
+        'theme': 'light-blue',
+        'color': '#7C0AED',
+        'title': 'Light Blue'
+    },
+    {
+        'theme': 'light-gray',
+        'color': '#E4EBF1',
+        'title': 'Light Gray'
+    }
+]
