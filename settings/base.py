@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'django_nose',
 ]
 
+AUTH_USER_MODEL = 'api.User'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
