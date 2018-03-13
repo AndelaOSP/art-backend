@@ -1,7 +1,9 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
 
 User = get_user_model()
+client = APIClient()
 
 
 class UserTestCase(TestCase):
@@ -9,6 +11,10 @@ class UserTestCase(TestCase):
         self.user = User.objects.create(
             email='test@site.com', cohort=20,
             slack_handle='@test_user', password='devpassword'
+        )
+        self.admin_user = User.objects.create_superuser(
+            email='admin@site.com', cohort=20,
+            slack_handle='@admin', password='devpassword'
         )
 
     def test_can_add_user(self):
@@ -100,3 +106,75 @@ class UserTestCase(TestCase):
                 slack_handle='@test_user-2', password='devpassword',
                 is_staff=True, is_superuser=False
             )
+
+    def test_non_authenticated_user_add_user_from_api_endpoint(self):
+        response = client.post('/api/v1/user/')
+        self.assertEqual(response.data, {
+            'detail': 'Authentication credentials were not provided.'
+        })
+        self.assertEqual(response.status_code, 403)
+
+    def test_non_authenticated_user_get_user_from_api_endpoint(self):
+        response = client.get('/api/v1/user/')
+        self.assertEqual(response.data, {
+            'detail': 'Authentication credentials were not provided.'
+        })
+        self.assertEqual(response.status_code, 403)
+
+    def test_non_admin_user_add_user_from_api_endpoint(self):
+        client.login(username='test@site.com', password='devpassword')
+        response = client.post('/api/v1/user/')
+        self.assertEqual(response.data, {
+            'detail': 'Authentication credentials were not provided.'
+        })
+        self.assertEqual(response.status_code, 403)
+
+    def test_non_admin_user_et_user_from_api_endpoint(self):
+        client.login(username='test@site.com', password='devpassword')
+        response = client.get('/api/v1/user/')
+        self.assertEqual(response.data, {
+            'detail': 'Authentication credentials were not provided.'
+        })
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_user_add_users_from_api_endpoint(self):
+        users_count_before = User.objects.count()
+        client.login(username='admin@site.com', password='devpassword')
+        data = {
+            "password": "devpassword",
+            "email": "test_user@mail.com",
+        }
+        response = client.post('/api/v1/user/', data=data, format='json')
+        users_count_after = User.objects.count()
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(users_count_after, users_count_before + 1)
+
+    def test_admin_user_get_users_from_api_endpoint(self):
+        client.login(username='admin@site.com', password='devpassword')
+        response = client.get('/api/v1/user/')
+        self.assertEqual(len(response.data), User.objects.count())
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_user_from_api_endpoint_without_password(self):
+        client.login(username='admin@site.com', password='devpassword')
+        data = {
+            "password": "",
+            "email": "test_user@mail.com",
+        }
+        response = client.post('/api/v1/user/', data=data, format='json')
+        self.assertEqual(response.data, {
+            'password': ['This field may not be blank.']
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_add_user_from_api_endpoint_without_email(self):
+        client.login(username='admin@site.com', password='devpassword')
+        data = {
+            "password": "devpassword",
+            "email": "",
+        }
+        response = client.post('/api/v1/user/', data=data, format='json')
+        self.assertEqual(response.data, {
+            'email': ['This field may not be blank.']
+        })
+        self.assertEqual(response.status_code, 400)
