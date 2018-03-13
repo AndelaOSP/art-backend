@@ -29,7 +29,7 @@ jobs:
       - run:
           command: |
             sudo pip install pipenv
-            pipenv install -r requirements.txt
+            pipenv install --skip-lock -r requirements.txt
       - save_cache:
           key: deps9-{{ .Branch }}-
           paths:
@@ -53,7 +53,7 @@ jobs:
       - run:
          name: run tests
          command: |
-           pipenv run "coverage run manage.py test"
+           pipenv run "coverage run --source api manage.py test -v 2"
 
       - run:
           name: run coveralls
