@@ -5,4 +5,5 @@ omit =
     .venv/*
     */manage.py
     */tests/*
+    */static/*
 show_missing = True
