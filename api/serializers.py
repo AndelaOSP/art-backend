@@ -6,4 +6,22 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = "__all__"
+        fields = (
+            'id', 'first_name', 'last_name', 'email', 'cohort',
+            'slack_handle', 'picture', 'phone_number', 'password',
+            'last_modified', 'date_joined', 'last_login'
+        )
+
+        extra_kwargs = {
+            'last_modified': {'read_only': True},
+            'date_joined': {'read_only': True},
+            'last_login': {'read_only': True},
+            'cohort': {'min_value': 0}
+        }
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user

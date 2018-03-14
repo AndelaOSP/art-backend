@@ -178,3 +178,30 @@ class UserTestCase(TestCase):
             'email': ['This field may not be blank.']
         })
         self.assertEqual(response.status_code, 400)
+
+    def test_add_user_api_endpoint_cant_allow_put(self):
+        client.login(username='admin@site.com', password='devpassword')
+        user = User.objects.filter(
+            email='test@site.com').first()
+        response = client.put('/api/v1/user/{}/'.format(user.id))
+        self.assertEqual(response.data, {
+            'detail': 'Method "PUT" not allowed.'
+        })
+
+    def test_add_user_api_endpoint_cant_allow_patch(self):
+        client.login(username='admin@site.com', password='devpassword')
+        user = User.objects.filter(
+            email='test@site.com').first()
+        response = client.patch('/api/v1/user/{}/'.format(user.id))
+        self.assertEqual(response.data, {
+            'detail': 'Method "PATCH" not allowed.'
+        })
+
+    def test_add_user_api_endpoint_cant_allow_delete(self):
+        client.login(username='admin@site.com', password='devpassword')
+        user = User.objects.filter(
+            email='test@site.com').first()
+        response = client.delete('/api/v1/user/{}/'.format(user.id))
+        self.assertEqual(response.data, {
+            'detail': 'Method "DELETE" not allowed.'
+        })
