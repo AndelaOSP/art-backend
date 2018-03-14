@@ -345,7 +345,7 @@
   border-color: #f1f2f4; }
 
 .ui-widget.ui-widget-content, .ui-timepicker-table.ui-widget-content {
-  background: #fff;
+  background: #7f8fa4;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5); }
 
 .ui-widget {
@@ -354,11 +354,11 @@
 
 .ui-widget-header {
   border: 0;
-  background: #E4EBF1;
-  color: #000;
+  background: #0834D0;
+  color: #FFAF30;
   font-weight: bold; }
   .ui-widget-header a {
-    color: #000; }
+    color: #FFAF30; }
 
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
   border: 1px solid #EDEDED;
@@ -369,7 +369,7 @@
 
 .ui-widget-header .ui-state-default {
   background: none;
-  color: #000;
+  color: #FFAF30;
   border: 0; }
 
 .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
@@ -396,7 +396,7 @@
     width: auto !important; } }
 
 .ui-dialog-buttonpane {
-  background: #E4EBF1;
+  background: #0834D0;
   margin: .5em -0.2em -0.2em -0.2em; }
   .ui-dialog-buttonpane .ui-button {
     border: 0 !important;

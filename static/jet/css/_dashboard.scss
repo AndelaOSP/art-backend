@@ -183,7 +183,7 @@ ul.actionlist li {
   }
 
   &-item {
-    background: $background-color;
+    background: $content-contrast2-background-color;
     border-radius: 4px;
     margin-bottom: 20px;
     transition: background $transitions-duration;
@@ -224,6 +224,7 @@ ul.actionlist li {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        color: $content-contrast2-text-color;
       }
 
       &-drag {
@@ -252,6 +253,7 @@ ul.actionlist li {
 
         a {
           vertical-align: middle;
+          color: #FFFF;
         }
 
         html.touchevents & {

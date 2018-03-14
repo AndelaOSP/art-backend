@@ -7,12 +7,12 @@
  * General
  */
 
-$background-color: #f8fafc;
+$background-color: #E4EBF1;
 $text-color: #000;
 $dim-text-color: #c0c6cc;
 $error-text-color: #c7254e;
 
-$link-color: #000;
+$link-color: #FFFF;;
 $hover-link-color: #1cacfc;
 
 $contrast-color: #A464C4;
@@ -39,7 +39,7 @@ $sidebar-hover-action-color: #FDBB5E;
 $sidebar-title-action-color: #fff;
 $sidebar-hover-title-action-item-color: #FDBB5E;
 
-$sidebar-text-color: #FFFF;
+$sidebar-text-color: #FFAF30;
 $sidebar-icon-color: #FFFF;
 $sidebar-link-color: #FFFF;
 $sidebar-hover-link-color: #fff;
@@ -63,14 +63,14 @@ $sidebar-popup-hover-link-background-color: #1cacfc;
 
 $top-height: 32px;
 
-$top-text-color: #8B9EAB;
+$top-text-color: #000;
 $top-separator-color: #C6D8E4;
-$top-link-color: #C6D8E4;
+$top-link-color: #000;
 $top-hover-link-color: #1cacfc;
 $top-border-color: #dce0e6;
 $top-icon-color: $link-color;
 
-$top-dropdown-background-color: #5e4d99;
+$top-dropdown-background-color: #3359DF;
 $top-dropdown-text-color: #fff;
 $top-dropdown-contrast-background-color: #4d3b73;
 $top-dropdown-contrast-text-color: #c8beeb;
@@ -84,12 +84,12 @@ $top-dropdown-selected-color: #EFEDC8;
  * Content
  */
 
-$content-background-color: #fff;
+$content-background-color: #7f8fa4;
 $content-contrast-background-color: #F8FAFC; //inline list bg
-$content-contrast2-background-color: #E4EBF1;; //table header
+$content-contrast2-background-color: #0834D0; //table header
 $content-contrast3-background-color: #EEF3F7; //dashboard, delete collapsable
 $content-selected-background-color: #FFFDDB;
-$content-contrast2-text-color: $text-color;
+$content-contrast2-text-color: #FFAF30;
 $content-border-color: #f1f2f4; //row bottom
 $content-border2-color: #D5E3EC; //table bottom
 $content-selected-border-color: #EFEDC8;
@@ -108,8 +108,8 @@ $button-text-color: #7f8fa4;
 $button-hover-text-color: #fff;
 $button-active-text-color: #fff;
 
-$primary-button-background-color: $contrast-color;
-$primary-button-text-color: #fff;
+$primary-button-background-color: #FFAF30;
+$primary-button-text-color: #000;
 
 $danger-button-background-color: #c7254e;
 $danger-button-text-color: #fff;
@@ -129,7 +129,7 @@ $input-icon-color: $link-color;
 $input-text-color: $text-color;
 $input-contrast-text-color: #7f8fa4;
 $input-hover-text-color: #fff;
-$input-selected-text-color: $contrast-color;
+$input-selected-text-color: #FFAF30;
 $input-disabled-text-color: $dim-text-color;
 $input-placeholder-color: #999;
 $input-shadow-color: transparentize($contrast-color, 0.25);
