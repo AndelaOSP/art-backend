@@ -16,6 +16,7 @@ class UserTestCase(TestCase):
             email='admin@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
         )
+        self.users_url = "/api/v1/users/"
 
     def test_can_add_user(self):
         users_count_before = User.objects.count()
@@ -108,14 +109,14 @@ class UserTestCase(TestCase):
             )
 
     def test_non_authenticated_user_add_user_from_api_endpoint(self):
-        response = client.post('/api/v1/user/')
+        response = client.post(self.users_url)
         self.assertEqual(response.data, {
             'detail': 'Authentication credentials were not provided.'
         })
         self.assertEqual(response.status_code, 403)
 
     def test_non_authenticated_user_get_user_from_api_endpoint(self):
-        response = client.get('/api/v1/user/')
+        response = client.get(self.users_url)
         self.assertEqual(response.data, {
             'detail': 'Authentication credentials were not provided.'
         })
@@ -123,7 +124,7 @@ class UserTestCase(TestCase):
 
     def test_non_admin_user_add_user_from_api_endpoint(self):
         client.login(username='test@site.com', password='devpassword')
-        response = client.post('/api/v1/user/')
+        response = client.post(self.users_url)
         self.assertEqual(response.data, {
             'detail': 'Authentication credentials were not provided.'
         })
@@ -131,7 +132,7 @@ class UserTestCase(TestCase):
 
     def test_non_admin_user_et_user_from_api_endpoint(self):
         client.login(username='test@site.com', password='devpassword')
-        response = client.get('/api/v1/user/')
+        response = client.get(self.users_url)
         self.assertEqual(response.data, {
             'detail': 'Authentication credentials were not provided.'
         })
@@ -144,14 +145,14 @@ class UserTestCase(TestCase):
             "password": "devpassword",
             "email": "test_user@mail.com",
         }
-        response = client.post('/api/v1/user/', data=data, format='json')
+        response = client.post(self.users_url, data=data, format='json')
         users_count_after = User.objects.count()
         self.assertEqual(response.status_code, 201)
         self.assertEqual(users_count_after, users_count_before + 1)
 
     def test_admin_user_get_users_from_api_endpoint(self):
         client.login(username='admin@site.com', password='devpassword')
-        response = client.get('/api/v1/user/')
+        response = client.get(self.users_url)
         self.assertEqual(len(response.data), User.objects.count())
         self.assertEqual(response.status_code, 200)
 
@@ -161,7 +162,7 @@ class UserTestCase(TestCase):
             "password": "",
             "email": "test_user@mail.com",
         }
-        response = client.post('/api/v1/user/', data=data, format='json')
+        response = client.post(self.users_url, data=data, format='json')
         self.assertEqual(response.data, {
             'password': ['This field may not be blank.']
         })
@@ -173,7 +174,7 @@ class UserTestCase(TestCase):
             "password": "devpassword",
             "email": "",
         }
-        response = client.post('/api/v1/user/', data=data, format='json')
+        response = client.post(self.users_url, data=data, format='json')
         self.assertEqual(response.data, {
             'email': ['This field may not be blank.']
         })
@@ -183,7 +184,7 @@ class UserTestCase(TestCase):
         client.login(username='admin@site.com', password='devpassword')
         user = User.objects.filter(
             email='test@site.com').first()
-        response = client.put('/api/v1/user/{}/'.format(user.id))
+        response = client.put('{}{}/'.format(self.users_url, user.id))
         self.assertEqual(response.data, {
             'detail': 'Method "PUT" not allowed.'
         })
@@ -192,7 +193,7 @@ class UserTestCase(TestCase):
         client.login(username='admin@site.com', password='devpassword')
         user = User.objects.filter(
             email='test@site.com').first()
-        response = client.patch('/api/v1/user/{}/'.format(user.id))
+        response = client.patch('{}{}/'.format(self.users_url, user.id))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'
         })
@@ -201,7 +202,7 @@ class UserTestCase(TestCase):
         client.login(username='admin@site.com', password='devpassword')
         user = User.objects.filter(
             email='test@site.com').first()
-        response = client.delete('/api/v1/user/{}/'.format(user.id))
+        response = client.delete('{}{}/'.format(self.users_url, user.id))
         self.assertEqual(response.data, {
             'detail': 'Method "DELETE" not allowed.'
         })
