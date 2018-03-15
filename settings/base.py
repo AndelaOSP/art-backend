@@ -130,13 +130,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-NOSE_ARGS = [
-    '--with-coverage',
-    '--cover-package=api',
-    '--verbosity=2'
-]
 JET_SIDE_MENU_COMPACT = True
 
 JET_DEFAULT_THEME = 'andela'
