@@ -18,9 +18,12 @@ from django.conf import settings
 from django.conf.urls import include
 from django.urls import path
 
+from api import urls
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v1/', include(urls)),
 ]
 if settings.DEBUG:
     import debug_toolbar
