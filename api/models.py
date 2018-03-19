@@ -149,8 +149,11 @@ class User(AbstractUser):
     objects = UserManager()
 
 
-class SecurityUser(models.Model):
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
-    phone = models.CharField(max_length=12)
+class SecurityUser(User, UserManager):
+    security_first_name = User.first_name
+    security_last_name = User.last_name
+    security_phone_number = User.phone_number
     security_badge_number = models.CharField(max_length=30, unique=True)
+
+    class Meta:
+        verbose_name = "Security User"

@@ -4,12 +4,15 @@ from ..models import SecurityUser
 
 class SecurityUserModelTest(TestCase):
     """ Tests for the Security User Model """
-
     def setUp(self):
         SecurityUser.objects.create(
+            email='security@site.com',
+            cohort=0,
+            slack_handle='@test_security_user',
+            password='devpassword',
             first_name="TestFirst",
             last_name="TestLast",
-            phone="254720900900",
+            phone_number="254720900900",
             security_badge_number="AE23"
         )
 
@@ -19,9 +22,12 @@ class SecurityUserModelTest(TestCase):
 
     def test_can_save_a_security_user(self):
         SecurityUser.objects.create(
+            email='security@site2.com',
+            cohort=0,
+            slack_handle='@test_security_user2',
             first_name="NewPerson",
             last_name="LastName",
-            phone="254720400400",
+            phone_number="254720400400",
             security_badge_number="AE34"
         )
         new_security_user = SecurityUser.objects.get(
