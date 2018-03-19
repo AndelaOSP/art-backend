@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls import include
+from django.conf.urls.static import static
 from django.urls import path
 
 from api import urls
@@ -24,9 +25,11 @@ from api import urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include(urls)),
+    path('jet/', include('jet.urls', 'jet')),
+    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
 ]
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns += [
         path('__debug__/', include(debug_toolbar.urls)),
-    ]
+    ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
