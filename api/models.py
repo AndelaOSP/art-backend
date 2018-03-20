@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 
 class AssetCategory(models.Model):
@@ -117,27 +119,9 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def _create_securitydesk_user(self, **fields):
-        password = fields.get('password')
-        badge_number = fields.get('badge_number')
-
-        if not password:
-            raise ValueError("Password is Required")
-
-        if not badge_number:
-            raise ValueError("Badge Number is required")
-
-        user = self.model(**fields)
-        user.save(self._db)
-        return user
-
     def create_user(self, **fields):
         fields.setdefault('is_staff', False)
         fields.setdefault('is_superuser', False)
-        security_user = fields.get('badge_number')
-
-        if security_user:
-            return self._create_securitydesk_user(**fields)
 
         return self._create_user(**fields)
 
@@ -169,13 +153,27 @@ class User(AbstractUser):
 
 
 class SecurityUser(User):
-    username = None
     badge_number = models.CharField(max_length=30, unique=True)
 
     USERNAME_FIELD = 'badge_number'
     REQUIRED_FIELDS = ['first_name', 'last_name',
                        'badge_number']
-    objects = UserManager()
 
     class Meta:
         verbose_name = "Security User"
+
+
+@receiver(post_save, sender=User)
+def set_username(sender, instance, *args, **kwargs):
+    if not instance.username:
+        instance.username = instance.email
+        instance.save()
+
+
+@receiver(post_save, sender=SecurityUser)
+def set_email(sender, instance, *args, **kwargs):
+    if not instance.email:
+        user_email = "{}@security.com".format(instance.badge_number)
+        instance.email = user_email
+        instance.username = instance.phone_number
+        instance.save()
