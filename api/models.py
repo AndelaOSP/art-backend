@@ -173,7 +173,7 @@ def set_username(sender, instance, *args, **kwargs):
 @receiver(post_save, sender=SecurityUser)
 def set_email(sender, instance, *args, **kwargs):
     if not instance.email:
-        user_email = "{}@security.com".format(instance.badge_number)
+        user_email = "{}@example.com".format(instance.badge_number)
         instance.email = user_email
         instance.username = instance.phone_number
         instance.save()
