@@ -7,6 +7,7 @@ from ..models import Item, ItemModelNumber
 
 User = get_user_model()
 
+
 class ItemTypeModelTest(TestCase):
     """Tests for the Item Model"""
 
