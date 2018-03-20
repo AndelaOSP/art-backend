@@ -19,7 +19,7 @@ class ItemTypeModelTest(TestCase):
         test_item = Item(
             item_code="IC001",
             serial_number="SN001",
-            user_id=self.user
+            assigned_to=self.user
         )
         test_item.save()
         test_itemmodel = ItemModelNumber(model_number="IMN50987")
@@ -30,7 +30,7 @@ class ItemTypeModelTest(TestCase):
     def test_add_new_item(self):
         """Test add new item"""
         self.assertEqual(self.all_items.count(), 1)
-        new_item = Item(item_code="IC002", user_id=self.user)
+        new_item = Item(item_code="IC002", assigned_to=self.user)
         new_item.save()
         self.assertEqual(self.all_items.count(), 2)
 

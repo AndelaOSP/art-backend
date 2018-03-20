@@ -72,9 +72,8 @@ class Item(models.Model):
     serial_number = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    user_id = models.ForeignKey('User',
-                                blank=True,
-                                on_delete=models.PROTECT)
+    assigned_to = models.ForeignKey('User', blank=True,
+                                    on_delete=models.PROTECT)
     model_number = models.ForeignKey(ItemModelNumber, null=True,
                                      on_delete=models.PROTECT)
 
