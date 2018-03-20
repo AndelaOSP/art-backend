@@ -119,22 +119,26 @@ class UserManager(BaseUserManager):
 
     def _create_securitydesk_user(self, **fields):
         password = fields.get('password')
-        email = fields.pop('email')
+        badge_number = fields.get('badge_number')
+
         if not password:
             raise ValueError("Password is Required")
 
-        user = self.model(password, **fields)
+        if not badge_number:
+            raise ValueError("Badge Number is required")
+
+        user = self.model(**fields)
         user.save(self._db)
         return user
-
-    def create_securitydesk_user(self, **fields):
-        fields.setdefault('is_staff', True)
-        fields.setdefault('is_superuser', False)
-        return self._create_securitydesk_user(**fields)
 
     def create_user(self, **fields):
         fields.setdefault('is_staff', False)
         fields.setdefault('is_superuser', False)
+        security_user = fields.get('badge_number')
+
+        if security_user:
+            return self._create_securitydesk_user(**fields)
+
         return self._create_user(**fields)
 
     def create_superuser(self, **fields):
@@ -166,14 +170,11 @@ class User(AbstractUser):
 
 class SecurityUser(User):
     username = None
-    security_first_name = User.first_name
-    security_last_name = User.last_name
-    security_phone_number = User.phone_number
-    security_badge_number = models.CharField(max_length=30, unique=True)
+    badge_number = models.CharField(max_length=30, unique=True)
 
-    USERNAME_FIELD = 'security_phone_number'
-    REQUIRED_FIELDS = ['security_first_name', 'security_last_name',
-                       'security_badge_number']
+    USERNAME_FIELD = 'badge_number'
+    REQUIRED_FIELDS = ['first_name', 'last_name',
+                       'badge_number']
     objects = UserManager()
 
     class Meta:

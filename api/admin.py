@@ -18,9 +18,42 @@ admin.site.register(
         Item,
         AssetMake,
         ItemModelNumber,
-        SecurityUser
     ]
 )
+
+
+class SecurityUserAdmin(BaseUserAdmin):
+    list_display = (
+        'first_name', 'last_name',
+        'badge_number', 'phone_number',
+    )
+
+    list_filter = (
+        'badge_number',
+    )
+
+    fieldsets = (
+        ('Account', {'fields': ('first_name', 'last_name',
+                                'badge_number',
+                                'phone_number',
+                                'password')}),
+
+    )
+
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('first_name',
+                       'last_name', 'badge_number',
+                       'phone_number',
+                       'password1',
+                       'password2')
+        }),
+    )
+
+    ordering = (
+        'first_name', 'last_name', 'badge_number'
+    )
 
 
 class UserAdmin(BaseUserAdmin):
@@ -56,3 +89,4 @@ class UserAdmin(BaseUserAdmin):
 
 
 admin.site.register(User, UserAdmin)
+admin.site.register(SecurityUser, SecurityUserAdmin)
