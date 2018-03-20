@@ -103,7 +103,7 @@ class UserManager(BaseUserManager):
         """
         email = fields.pop('email')
         password = fields.get('password')
-        cohort = fields.get('cohort')
+        cohort = fields.pop('cohort')
         slack_handle = fields.get('slack_handle')
         if not email:
             raise ValueError("Email address is required")
@@ -116,6 +116,21 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
+
+    def _create_securitydesk_user(self, **fields):
+        password = fields.get('password')
+        email = fields.pop('email')
+        if not password:
+            raise ValueError("Password is Required")
+
+        user = self.model(password, **fields)
+        user.save(self._db)
+        return user
+
+    def create_securitydesk_user(self, **fields):
+        fields.setdefault('is_staff', True)
+        fields.setdefault('is_superuser', False)
+        return self._create_securitydesk_user(**fields)
 
     def create_user(self, **fields):
         fields.setdefault('is_staff', False)
@@ -149,11 +164,17 @@ class User(AbstractUser):
     objects = UserManager()
 
 
-class SecurityUser(User, UserManager):
+class SecurityUser(User):
+    username = None
     security_first_name = User.first_name
     security_last_name = User.last_name
     security_phone_number = User.phone_number
     security_badge_number = models.CharField(max_length=30, unique=True)
+
+    USERNAME_FIELD = 'security_phone_number'
+    REQUIRED_FIELDS = ['security_first_name', 'security_last_name',
+                       'security_badge_number']
+    objects = UserManager()
 
     class Meta:
         verbose_name = "Security User"
