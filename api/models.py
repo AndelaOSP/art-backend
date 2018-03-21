@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from .statuses import status_list
 
 
 class AssetCategory(models.Model):
@@ -68,14 +69,27 @@ class ItemModelNumber(models.Model):
 
 class Item(models.Model):
     """Stores all items"""
+
+    item_statuses = (
+        (status_list[0], "Available"),
+        (status_list[1], "Allocated"),
+        (status_list[2], "Lost"),
+        (status_list[3], "Damaged")
+    )
+
     item_code = models.CharField(max_length=50, blank=True)
     serial_number = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    assigned_to = models.ForeignKey('User', blank=True,
+    assigned_to = models.ForeignKey('User',
+                                    blank=True,
+                                    default=1,
                                     on_delete=models.PROTECT)
     model_number = models.ForeignKey(ItemModelNumber, null=True,
                                      on_delete=models.PROTECT)
+    status = models.CharField(max_length=9,
+                              choices=item_statuses,
+                              default="Available")
 
     def clean(self):
         if not self.item_code and not self.serial_number:
@@ -87,7 +101,11 @@ class Item(models.Model):
         if not self.item_code and not self.serial_number:
             self.full_clean()
         else:
-            super(Item, self).save(*args, **kwargs)
+            if (self.status in status for status in status_list):
+                super(Item, self).save(*args, **kwargs)
+
+            else:
+                raise ValueError('Status provided does not exist')
 
     def __str__(self):
         return '{}{}{}'.format(self.item_code, self.serial_number,

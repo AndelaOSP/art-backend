@@ -80,3 +80,9 @@ class ItemTypeModelTest(TestCase):
             get_itemmodel.delete()
         self.assertEqual(self.all_items.count(), 1)
         self.assertEqual(self.all_itemmodels.count(), 1)
+
+    def test_item_status_can_be_changed(self):
+        item = Item.objects.get(item_code="IC001")
+        item.status = "Allocated"
+
+        self.assertIn("Allocated", item.status)
