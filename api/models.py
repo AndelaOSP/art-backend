@@ -149,6 +149,9 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['cohort', 'slack_handle']
     objects = UserManager()
 
+    class Meta:
+        verbose_name_plural = "All Users"
+
 
 class SecurityUser(User):
     badge_number = models.CharField(max_length=30, unique=True)
