@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from .statuses import status_list
+# from .statuses import status_list
 
 
 class AssetCategory(models.Model):
@@ -70,6 +70,8 @@ class ItemModelNumber(models.Model):
 class Item(models.Model):
     """Stores all items"""
 
+    status_list = ["Available", "Allocated", "Lost", "Damaged"]
+
     item_statuses = (
         (status_list[0], "Available"),
         (status_list[1], "Allocated"),
@@ -96,16 +98,22 @@ class Item(models.Model):
             raise ValidationError(('Please provide either the serial number,\
                                asset code or both.'), code='required')
 
+        elif (self.status in status for status in self.status_list):
+            raise ValueError('Status provided does not exist')
+
+        self.full_clean()
+
     def save(self, *args, **kwargs):
-        """Validate either item code or serial number are provided"""
+        """
+        Validate either item code, serial number
+        are provided and an existing status is given
+        """
         if not self.item_code and not self.serial_number:
             self.full_clean()
+        elif (self.status in status for status in self.status_list):
+            super(Item, self).save(*args, **kwargs)
         else:
-            if (self.status in status for status in status_list):
-                super(Item, self).save(*args, **kwargs)
-
-            else:
-                raise ValueError('Status provided does not exist')
+            raise ValueError('Status provided does not exist')
 
     def __str__(self):
         return '{}{}{}'.format(self.item_code, self.serial_number,
