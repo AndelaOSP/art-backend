@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User
+from .models import User, Item
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -25,3 +25,11 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ("id", "item_code", "serial_number", "model_number",
+                  "assigned_to", "created_at", "last_modified",
+                  )

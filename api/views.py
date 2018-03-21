@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 
-from .serializers import UserSerializer
+from .models import Item
+from .serializers import UserSerializer, ItemSerializer
 
 User = get_user_model()
 
@@ -12,3 +13,14 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated, IsAdminUser)
     http_method_names = ['get', 'post']
+
+
+class ItemViewSet(ModelViewSet):
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated, ]
+    http_method_names = ['get']
+
+    def get_queryset(self):
+
+        user = self.request.user
+        return Item.objects.filter(assigned_to=user)
