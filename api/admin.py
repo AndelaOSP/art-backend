@@ -37,7 +37,6 @@ class SecurityUserAdmin(BaseUserAdmin):
                                 'badge_number',
                                 'phone_number',
                                 'password')}),
-
     )
 
     add_fieldsets = (
