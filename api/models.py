@@ -162,18 +162,10 @@ class SecurityUser(User):
     class Meta:
         verbose_name = "Security User"
 
+    def save(self, *args, **kwargs):
 
-@receiver(post_save, sender=User)
-def set_username(sender, instance, *args, **kwargs):
-    if not instance.username:
-        instance.username = instance.email
-        instance.save()
+        if not self.email:
+            user_email = "{}@example.com".format(self.badge_number)
+            self.email = user_email
 
-
-@receiver(post_save, sender=SecurityUser)
-def set_email(sender, instance, *args, **kwargs):
-    if not instance.email:
-        user_email = "{}@example.com".format(instance.badge_number)
-        instance.email = user_email
-        instance.username = instance.phone_number
-        instance.save()
+        super().save(*args, **kwargs)
