@@ -120,9 +120,10 @@ class UserManager(BaseUserManager):
     def create_user(self, **fields):
         fields.setdefault('is_staff', False)
         fields.setdefault('is_superuser', False)
+
         return self._create_user(**fields)
 
-    def create_superuser(self,  **fields):
+    def create_superuser(self, **fields):
         fields.setdefault('is_staff', True)
         fields.setdefault('is_superuser', True)
 
@@ -147,3 +148,24 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cohort', 'slack_handle']
     objects = UserManager()
+
+    class Meta:
+        verbose_name_plural = "All Users"
+
+
+class SecurityUser(User):
+    badge_number = models.CharField(max_length=30, unique=True)
+
+    USERNAME_FIELD = 'badge_number'
+    REQUIRED_FIELDS = ['first_name', 'last_name',
+                       'badge_number']
+
+    class Meta:
+        verbose_name = "Security User"
+
+    def save(self, *args, **kwargs):
+        if not self.email:
+            user_email = "{}@example.com".format(self.badge_number)
+            self.email = user_email
+
+        super().save(*args, **kwargs)
