@@ -1,17 +1,25 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
+from django.contrib.auth import get_user_model
 
 from ..models import Item, ItemModelNumber
+
+User = get_user_model()
 
 
 class ItemTypeModelTest(TestCase):
     """Tests for the Item Model"""
 
     def setUp(self):
+        self.user = User.objects.create(
+            email='test@site.com', cohort=10,
+            slack_handle='@test_user', password='devpassword'
+        )
         test_item = Item(
             item_code="IC001",
-            serial_number="SN001"
+            serial_number="SN001",
+            assigned_to=self.user
         )
         test_item.save()
         test_itemmodel = ItemModelNumber(model_number="IMN50987")
@@ -22,7 +30,7 @@ class ItemTypeModelTest(TestCase):
     def test_add_new_item(self):
         """Test add new item"""
         self.assertEqual(self.all_items.count(), 1)
-        new_item = Item(item_code="IC002")
+        new_item = Item(item_code="IC002", assigned_to=self.user)
         new_item.save()
         self.assertEqual(self.all_items.count(), 2)
 
