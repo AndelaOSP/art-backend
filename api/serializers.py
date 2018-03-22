@@ -31,5 +31,5 @@ class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ("id", "item_code", "serial_number", "model_number",
-                  "assigned_to", "created_at", "last_modified",
+                  "status", "assigned_to", "created_at", "last_modified",
                   )

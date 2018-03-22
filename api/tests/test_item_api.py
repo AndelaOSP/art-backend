@@ -25,7 +25,8 @@ class ItemTestCase(TestCase):
             item_code="IC001",
             serial_number="SN001",
             assigned_to=self.user,
-            model_number=itemmodel
+            model_number=itemmodel,
+            status="Allocated"
         )
         item.save()
         self.item = item
