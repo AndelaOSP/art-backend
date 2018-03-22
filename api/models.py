@@ -98,10 +98,8 @@ class Item(models.Model):
             raise ValidationError(('Please provide either the serial number,\
                                asset code or both.'), code='required')
 
-        elif (self.status in status for status in self.status_list):
+        elif self.status in self.status_list:
             raise ValueError('Status provided does not exist')
-
-        self.full_clean()
 
     def save(self, *args, **kwargs):
         """
@@ -110,14 +108,15 @@ class Item(models.Model):
         """
         if not self.item_code and not self.serial_number:
             self.full_clean()
-        elif (self.status in status for status in self.status_list):
+        elif self.status in self.status_list:
             super(Item, self).save(*args, **kwargs)
         else:
             raise ValueError('Status provided does not exist')
 
     def __str__(self):
-        return '{}{}{}'.format(self.item_code, self.serial_number,
-                               self.model_number)
+        return '{}, {}, {}'.format(self.item_code,
+                                   self.serial_number,
+                                   self.model_number)
 
 
 class UserManager(BaseUserManager):
