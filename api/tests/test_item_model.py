@@ -98,7 +98,7 @@ class ItemTypeModelTest(TestCase):
     def test_item_status_cannot_be_non_existing_status(self):
         item = Item.objects.get(item_code="IC001")
         item.status = "Unused"
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             item.save()
 
         self.assertIn("Available", Item.objects.get(item_code="IC001").status)
