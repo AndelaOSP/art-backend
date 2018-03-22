@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from ..models import Item, ItemModelNumber
@@ -28,7 +29,7 @@ class ItemTestCase(TestCase):
         )
         item.save()
         self.item = item
-        self.items_url = "/api/v1/items/"
+        self.items_url = reverse('items-list')
 
     def test_non_authenticated_user_view_items(self):
         response = client.get(self.items_url)
