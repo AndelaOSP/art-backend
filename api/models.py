@@ -68,30 +68,53 @@ class ItemModelNumber(models.Model):
 
 class Item(models.Model):
     """Stores all items"""
+
+    AVAILABLE = "Available"
+    ALLOCATED = "Allocated"
+    LOST = "Lost"
+    DAMAGED = "Damaged"
+
+    item_statuses = (
+        (AVAILABLE, "Available"),
+        (ALLOCATED, "Allocated"),
+        (LOST, "Lost"),
+        (DAMAGED, "Damaged")
+    )
+
     item_code = models.CharField(max_length=50, blank=True)
     serial_number = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    assigned_to = models.ForeignKey('User', blank=True,
+    assigned_to = models.ForeignKey('User',
+                                    blank=True,
+                                    default=1,
                                     on_delete=models.PROTECT)
     model_number = models.ForeignKey(ItemModelNumber, null=True,
                                      on_delete=models.PROTECT)
+    status = models.CharField(max_length=9,
+                              choices=item_statuses,
+                              default="Available")
 
     def clean(self):
         if not self.item_code and not self.serial_number:
             raise ValidationError(('Please provide either the serial number,\
                                asset code or both.'), code='required')
 
+        elif self.status not in dict(self.item_statuses):
+            raise ValueError('Status provided does not exist')
+
     def save(self, *args, **kwargs):
-        """Validate either item code or serial number are provided"""
-        if not self.item_code and not self.serial_number:
-            self.full_clean()
-        else:
-            super(Item, self).save(*args, **kwargs)
+        """
+        Validate either item code, serial number
+        are provided and an existing status is given
+        """
+        self.full_clean()
+        super(Item, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '{}{}{}'.format(self.item_code, self.serial_number,
-                               self.model_number)
+        return '{}, {}, {}'.format(self.item_code,
+                                   self.serial_number,
+                                   self.model_number)
 
 
 class UserManager(BaseUserManager):

@@ -16,21 +16,26 @@ class ItemTypeModelTest(TestCase):
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
-        test_item = Item(
+        self.test_itemmodel = ItemModelNumber(model_number="IMN50987")
+        self.test_itemmodel.save()
+
+        self.test_item = Item(
             item_code="IC001",
             serial_number="SN001",
+            model_number=self.test_itemmodel,
             assigned_to=self.user
         )
-        test_item.save()
-        test_itemmodel = ItemModelNumber(model_number="IMN50987")
-        test_itemmodel.save()
+        self.test_item.save()
+
         self.all_items = Item.objects.all()
         self.all_itemmodels = ItemModelNumber.objects.all()
 
     def test_add_new_item(self):
         """Test add new item"""
         self.assertEqual(self.all_items.count(), 1)
-        new_item = Item(item_code="IC002", assigned_to=self.user)
+        new_item = Item(item_code="IC002",
+                        serial_number="SN001",
+                        model_number=self.test_itemmodel)
         new_item.save()
         self.assertEqual(self.all_items.count(), 2)
 
@@ -80,3 +85,20 @@ class ItemTypeModelTest(TestCase):
             get_itemmodel.delete()
         self.assertEqual(self.all_items.count(), 1)
         self.assertEqual(self.all_itemmodels.count(), 1)
+
+    def test_item_status_can_be_changed(self):
+        item = Item.objects.get(item_code="IC001")
+        item.status = "Allocated"
+
+        self.assertIn("Allocated", item.status)
+
+    def test_item_model_string_representation(self):
+        self.assertEqual(str(self.test_item), "IC001, SN001, IMN50987")
+
+    def test_item_status_cannot_be_non_existing_status(self):
+        item = Item.objects.get(item_code="IC001")
+        item.status = "Unused"
+        with self.assertRaises(ValueError):
+            item.save()
+
+        self.assertIn("Available", Item.objects.get(item_code="IC001").status)
