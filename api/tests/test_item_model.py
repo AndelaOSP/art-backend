@@ -35,7 +35,8 @@ class ItemTypeModelTest(TestCase):
         self.assertEqual(self.all_items.count(), 1)
         new_item = Item(item_code="IC002",
                         serial_number="SN001",
-                        model_number=self.test_itemmodel)
+                        model_number=self.test_itemmodel,
+                        assigned_to=self.user)
         new_item.save()
         self.assertEqual(self.all_items.count(), 2)
 
