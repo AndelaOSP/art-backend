@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 
@@ -20,8 +21,11 @@ class ItemViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     http_method_names = ['get']
 
-    def get_queryset(self, pk=1):
-        if pk:
-            return Item.objects.filter(serial_number=pk)          
+    def get_queryset(self):
         user = self.request.user
         return Item.objects.filter(assigned_to=user)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
+        return obj
