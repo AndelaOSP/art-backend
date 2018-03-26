@@ -20,7 +20,8 @@ class ItemViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     http_method_names = ['get']
 
-    def get_queryset(self):
-
+    def get_queryset(self, pk=1):
+        if pk:
+            return Item.objects.filter(serial_number=pk)          
         user = self.request.user
         return Item.objects.filter(assigned_to=user)
