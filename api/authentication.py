@@ -28,8 +28,7 @@ class FirebaseTokenAuthentication(TokenAuthentication):
             email = token['email']
             user = User.objects.get(email=email)
         except Exception:
-            raise exceptions.AuthenticationFailed('Unable to authenticate \
-             at this time. Please try again later.')
+            raise exceptions.AuthenticationFailed('Unable to authenticate.')
 
         if not user.is_active:
             raise exceptions.AuthenticationFailed('User inactive or deleted.')
