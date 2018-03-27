@@ -1,6 +1,6 @@
+from unittest.mock import patch
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 User = get_user_model()
@@ -13,12 +13,12 @@ class UserTestCase(TestCase):
             email='test@site.com', cohort=20,
             slack_handle='@test_user', password='devpassword'
         )
-        self.token_user = Token.objects.create(user=self.user)
+        self.token_user = 'testtoken'
         self.admin_user = User.objects.create_superuser(
             email='admin@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
         )
-        self.token_admin = Token.objects.create(user=self.admin_user)
+        self.token_admin = 'admintesttoken'
         self.users_url = "/api/v1/users/"
 
     def test_can_add_user(self):
@@ -125,7 +125,9 @@ class UserTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 401)
 
-    def test_non_admin_user_add_user_from_api_endpoint(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_non_admin_add_user_from_api_endpoint(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
         response = client.post(
             self.users_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -134,7 +136,9 @@ class UserTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 403)
 
-    def test_non_admin_user_et_user_from_api_endpoint(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_non_admin_user_et_user_from_api_endpoint(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
             self.users_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -143,9 +147,10 @@ class UserTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 403)
 
-    def test_admin_user_add_users_from_api_endpoint(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_add_users_from_api_endpoint(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         users_count_before = User.objects.count()
-        client.login(username='admin@site.com', password='devpassword')
         data = {
             "password": "devpassword",
             "email": "test_user@mail.com",
@@ -159,14 +164,18 @@ class UserTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(users_count_after, users_count_before + 1)
 
-    def test_admin_user_get_users_from_api_endpoint(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_get_users_from_api_endpoint(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             self.users_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         self.assertEqual(len(response.data), User.objects.count())
         self.assertEqual(response.status_code, 200)
 
-    def test_add_user_from_api_endpoint_without_password(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_add_user_from_api_without_password(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
             "password": "",
             "email": "test_user@mail.com",
@@ -181,7 +190,9 @@ class UserTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 400)
 
-    def test_add_user_from_api_endpoint_without_email(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_add_user_from_api_endpoint_without_email(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
             "password": "devpassword",
             "email": "",
@@ -196,7 +207,9 @@ class UserTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 400)
 
-    def test_add_user_api_endpoint_cant_allow_put(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_add_user_api_endpoint_cant_allow_put(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         user = User.objects.filter(
             email='test@site.com').first()
         response = client.put(
@@ -206,7 +219,9 @@ class UserTestCase(TestCase):
             'detail': 'Method "PUT" not allowed.'
         })
 
-    def test_add_user_api_endpoint_cant_allow_patch(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_add_user_api_endpoint_cant_allow_patch(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         user = User.objects.filter(
             email='test@site.com').first()
         response = client.patch(
@@ -216,7 +231,9 @@ class UserTestCase(TestCase):
             'detail': 'Method "PATCH" not allowed.'
         })
 
-    def test_add_user_api_endpoint_cant_allow_delete(self):
+    @patch('api.authentication.auth.verify_id_token')
+    def test_add_user_api_endpoint_cant_allow_delete(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         user = User.objects.filter(
             email='test@site.com').first()
         response = client.delete(

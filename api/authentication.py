@@ -24,7 +24,6 @@ class FirebaseTokenAuthentication(TokenAuthentication):
 
     def authenticate_credentials(self, key):
         try:
-            # import ipdb; ipdb.set_trace()
             token = auth.verify_id_token(key)
             email = token['email']
             user = User.objects.get(email=email)
