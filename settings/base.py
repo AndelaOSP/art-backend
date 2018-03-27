@@ -134,5 +134,3 @@ STATICFILES_DIRS = [
 JET_SIDE_MENU_COMPACT = True
 
 JET_DEFAULT_THEME = 'andela'
-
-CLIENT_ID = os.environ.get('CLIENT_ID')

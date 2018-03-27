@@ -1,3 +1,2 @@
 SECRET_KEY="sth"
 DATABASE_URL="Thedatabaseurl"
-CLIENT_ID="407408718192.apps.googleusercontent.com"
