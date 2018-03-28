@@ -26,6 +26,6 @@ class ItemViewSet(ModelViewSet):
         return Item.objects.filter(assigned_to=user)
 
     def get_object(self):
-        queryset = self.get_queryset()
+        queryset = Item.objects.filter(assigned_to=self.request.user)
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
