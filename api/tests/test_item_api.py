@@ -54,7 +54,8 @@ class ItemTestCase(TestCase):
 
     def test_authenticated_owner_view_single_item(self):
         client.login(username='user@site.com', password='devpassword')
-        response = client.get("{}{}/".format(self.items_url, self.item.id))
+        response = client.get("{}{}/".format(self.items_url,
+                                             self.item.serial_number))
         self.assertIn(self.item.item_code, response.data.values())
         self.assertEqual(response.status_code, 200)
 
