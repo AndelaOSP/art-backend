@@ -6,4 +6,5 @@ omit =
     */manage.py
     */tests/*
     */static/*
+    */api/apps.py
 show_missing = True

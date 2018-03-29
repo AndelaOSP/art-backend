@@ -6,6 +6,7 @@ class SecurityUserModelTest(TestCase):
     """ Tests for the Security User Model """
     def setUp(self):
         SecurityUser.objects.create(
+            email="sectest1@andela.com",
             password="devpassword",
             first_name="TestFirst",
             last_name="TestLast",
@@ -19,6 +20,7 @@ class SecurityUserModelTest(TestCase):
 
     def test_can_save_a_security_user(self):
         SecurityUser.objects.create(
+            email="sectest2@andela.com",
             password="devpassword2",
             first_name="NewPerson",
             last_name="LastName",
