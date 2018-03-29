@@ -185,6 +185,3 @@ class SecurityUser(User):
 
     class Meta:
         verbose_name = "Security User"
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
