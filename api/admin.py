@@ -24,8 +24,11 @@ admin.site.register(
 
 class SecurityUserAdmin(BaseUserAdmin):
     list_display = (
-        'first_name', 'last_name',
-        'badge_number', 'phone_number',
+        'first_name',
+        'last_name',
+        'email',
+        'badge_number',
+        'phone_number',
     )
 
     list_filter = (
@@ -33,7 +36,9 @@ class SecurityUserAdmin(BaseUserAdmin):
     )
 
     fieldsets = (
-        ('Account', {'fields': ('first_name', 'last_name',
+        ('Account', {'fields': ('first_name',
+                                'last_name',
+                                'email',
                                 'badge_number',
                                 'phone_number',
                                 'password')}),
@@ -43,7 +48,9 @@ class SecurityUserAdmin(BaseUserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': ('first_name',
-                       'last_name', 'badge_number',
+                       'last_name',
+                       'email',
+                       'badge_number',
                        'phone_number',
                        'password1',
                        'password2')

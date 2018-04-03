@@ -185,10 +185,3 @@ class SecurityUser(User):
 
     class Meta:
         verbose_name = "Security User"
-
-    def save(self, *args, **kwargs):
-        if not self.email:
-            user_email = "{}@example.com".format(self.badge_number)
-            self.email = user_email
-
-        super().save(*args, **kwargs)

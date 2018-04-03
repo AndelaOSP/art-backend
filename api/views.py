@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
@@ -25,3 +26,8 @@ class ItemViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Item.objects.filter(assigned_to=user)
+
+    def get_object(self):
+        queryset = Item.objects.filter(assigned_to=self.request.user)
+        obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
+        return obj
