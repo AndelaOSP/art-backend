@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Item
+from .models import User, Item, SecurityUser
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -33,3 +33,9 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = ("id", "item_code", "serial_number", "model_number",
                   "status", "assigned_to", "created_at", "last_modified",
                   )
+
+
+class SecuritySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SecurityUser
+        fields = ("id", "email", "badge_number")

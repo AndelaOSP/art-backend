@@ -3,8 +3,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
-from .models import Item
-from .serializers import UserSerializer, ItemSerializer
+from .models import Item, SecurityUser
+from .serializers import UserSerializer, ItemSerializer, SecuritySerializer
 
 User = get_user_model()
 
@@ -31,3 +31,12 @@ class ItemViewSet(ModelViewSet):
         queryset = Item.objects.filter(assigned_to=self.request.user)
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
+
+
+class SecurityUserViewSet(ModelViewSet):
+    serializer_class = SecuritySerializer
+    permission_classes = [IsAuthenticated, ]
+    http_method_names = ['get']
+
+    def get_queryset(self):
+        return SecurityUser.objects.all()
