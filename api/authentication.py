@@ -6,14 +6,14 @@ from firebase_admin import auth, credentials, initialize_app
 
 User = get_user_model()
 
-private_key = config("PRIVATE_KEY").replace('\\n', '\n')
+private_key = config('PRIVATE_KEY').replace('\\n', '\n')
 
 payload = {
-    "type": "service_account",
-    "project_id": config("PROJECT_ID"),
-    "private_key": private_key,
-    "client_email": config("CLIENT_EMAIL"),
-    "token_uri": "https://accounts.google.com/o/oauth2/token"
+    'type': 'service_account',
+    'project_id': config('PROJECT_ID'),
+    'private_key': private_key,
+    'client_email': config('CLIENT_EMAIL'),
+    'token_uri': 'https://accounts.google.com/o/oauth2/token'
 }
 
 cred = credentials.Certificate(payload)
