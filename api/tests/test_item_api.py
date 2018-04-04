@@ -65,7 +65,7 @@ class ItemTestCase(TestCase):
     def test_authenticated_owner_view_single_item(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
-            "{}{}/".format(self.items_url, self.item.id),
+            "{}{}/".format(self.items_url, self.item.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.item.item_code, response.data.values())
         self.assertEqual(response.status_code, 200)
