@@ -38,4 +38,4 @@ class ItemSerializer(serializers.ModelSerializer):
 class SecuritySerializer(serializers.ModelSerializer):
     class Meta:
         model = SecurityUser
-        fields = ("id", "email", "badge_number")
+        fields = ("email", )
