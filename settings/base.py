@@ -133,3 +133,11 @@ STATICFILES_DIRS = [
 JET_SIDE_MENU_COMPACT = True
 
 JET_DEFAULT_THEME = 'andela'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'api.authentication.FirebaseTokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication'
+    )
+}
