@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
@@ -36,7 +38,15 @@ class ItemViewSet(ModelViewSet):
 class SecurityUserViewSet(ModelViewSet):
     serializer_class = SecuritySerializer
     permission_classes = [IsAuthenticated, ]
+    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get']
 
-    def get_queryset(self):
-        return SecurityUser.objects.all()
+    def list(self, request, *args, **kwargs):
+        security_emails = SecurityUser.objects.all()
+
+        list_of_emails = []
+
+        for security_email in security_emails:
+            list_of_emails.append(security_email.email)
+
+        return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
