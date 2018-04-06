@@ -37,8 +37,6 @@ class ItemViewSet(ModelViewSet):
 
 class SecurityUserViewSet(ModelViewSet):
     serializer_class = SecuritySerializer
-    permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get']
 
     def list(self, request, *args, **kwargs):
