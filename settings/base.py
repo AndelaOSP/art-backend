@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'api',
+    'oauth2_provider'
 ]
 
 AUTH_USER_MODEL = 'api.User'
