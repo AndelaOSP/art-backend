@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Item, SecurityUser
+from .models import User, Item, SecurityUser, CheckinCheckout
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,4 +38,13 @@ class ItemSerializer(serializers.ModelSerializer):
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SecurityUser
-        fields = ("email", )
+        fields = ("email",)
+
+
+class CheckinCheckoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CheckinCheckout
+        fields = (
+            "id", "item", "security_user", "created_at", "last_modified",
+            "option"
+        )

@@ -43,8 +43,15 @@ class SecurityUserEmailsViewSet(ModelViewSet):
     permission_classes = (IsApiUser, )
 
     def list(self, request, *args, **kwargs):
-
         list_of_emails = [security_user.email
                           for security_user in SecurityUser.objects.all()]
 
         return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
+
+
+class CheckinCheckoutViewSet(ModelViewSet):
+    serializer_class = CheckinCheckoutSerializer
+    queryset = CheckinCheckout.objects.all()
+    permission_classes = [IsSecurityUser]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    http_method_names = ['get', 'post']
