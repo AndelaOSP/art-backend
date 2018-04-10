@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import exceptions
 from firebase_admin import auth, credentials, initialize_app
-from rest_framework.permissions import BasePermission
 
 User = get_user_model()
 
@@ -33,16 +32,3 @@ class FirebaseTokenAuthentication(TokenAuthentication):
         if not user.is_active:
             raise exceptions.AuthenticationFailed('User inactive or deleted.')
         return (user, token)
-
-
-class IsSecurityUser(BasePermission):
-    """
-    Allows access only to security users.
-    """
-
-    def has_permission(self, request, view):
-        try:
-            user = request.user.securityuser
-        except Exception:
-            return False
-        return request.user and user and request.user.is_authenticated

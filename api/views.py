@@ -8,7 +8,8 @@ from api.authentication import FirebaseTokenAuthentication
 from .models import Item, SecurityUser
 from .serializers import UserSerializer, \
     ItemSerializer, SecurityUserEmailsSerializer
-from .permissions import IsApiUser
+from api.permissions import IsApiUser, IsSecurityUser
+
 
 User = get_user_model()
 
@@ -49,9 +50,9 @@ class SecurityUserEmailsViewSet(ModelViewSet):
         return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
 
 
-class CheckinCheckoutViewSet(ModelViewSet):
-    serializer_class = CheckinCheckoutSerializer
-    queryset = CheckinCheckout.objects.all()
+class AssetLogViewSet(ModelViewSet):
+    serializer_class = AssetLogSerializer
+    queryset = AssetLog.objects.all()
     permission_classes = [IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']

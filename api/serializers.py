@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Item, SecurityUser, CheckinCheckout
+from .models import User, Item, SecurityUser, AssetLog
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,10 +41,10 @@ class SecurityUserEmailsSerializer(serializers.ModelSerializer):
         fields = ("email",)
 
 
-class CheckinCheckoutSerializer(serializers.ModelSerializer):
+class AssetLogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CheckinCheckout
+        model = AssetLog
         fields = (
-            "id", "item", "security_user", "created_at", "last_modified",
-            "option"
+            "id", "item", "checked_by", "log_type",
+            "created_at", "last_modified",
         )

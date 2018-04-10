@@ -4,14 +4,14 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from ..models import CheckinCheckout, ItemModelNumber, Item, SecurityUser
+from ..models import AssetLog, ItemModelNumber, Item, SecurityUser
 
 User = get_user_model()
 client = APIClient()
 
 
-class CheckinModelTest(TestCase):
-    """Tests for the Checkin Model"""
+class AssetLogModelTest(TestCase):
+    """Tests for the AssetLog Model and API"""
 
     def setUp(self):
         self.test_itemmodel = ItemModelNumber(model_number="IMN50987")
@@ -38,7 +38,7 @@ class CheckinModelTest(TestCase):
         )
         self.test_other_item.save()
 
-        self.security_user = SecurityUser.objects.create(
+        self.checked_by = SecurityUser.objects.create(
             email="sectest1@andela.com",
             password="devpassword",
             first_name="TestFirst",
@@ -46,42 +46,42 @@ class CheckinModelTest(TestCase):
             phone_number="254720900900",
             badge_number="AE23"
         )
-        self.checkin = CheckinCheckout.objects.create(
-            security_user=self.security_user,
+        self.checkin = AssetLog.objects.create(
+            checked_by=self.checked_by,
             item=self.test_item,
-            option="Checkin"
+            log_type="Checkin"
         )
-        self.checkout = CheckinCheckout.objects.create(
-            security_user=self.security_user,
+        self.checkout = AssetLog.objects.create(
+            checked_by=self.checked_by,
             item=self.test_item,
-            option="Checkout"
+            log_type="Checkout"
         )
 
-        self.token_security_user = 'test_token'
+        self.token_checked_by = 'test_token'
         self.token_normal_user = 'test_other_token'
 
-        self.checkin_checkout_url = reverse('checkin-checkout-list')
+        self.asset_log_url = reverse('asset-log-list')
 
     def test_add_checkin(self):
-        CheckinCheckout.objects.create(
-            security_user=self.security_user,
+        AssetLog.objects.create(
+            checked_by=self.checked_by,
             item=self.test_other_item,
-            option="Checkin"
+            log_type="Checkin"
         )
-        self.assertEqual(CheckinCheckout.objects.count(), 3)
+        self.assertEqual(AssetLog.objects.count(), 3)
 
     def test_add_checkout(self):
-        CheckinCheckout.objects.create(
-            security_user=self.security_user,
+        AssetLog.objects.create(
+            checked_by=self.checked_by,
             item=self.test_other_item,
-            option="Checkout"
+            log_type="Checkout"
         )
-        self.assertEqual(CheckinCheckout.objects.count(), 3)
+        self.assertEqual(AssetLog.objects.count(), 3)
 
     def test_delete_checkin(self):
-        self.assertEqual(CheckinCheckout.objects.count(), 2)
+        self.assertEqual(AssetLog.objects.count(), 2)
         self.checkin.delete()
-        self.assertEqual(CheckinCheckout.objects.count(), 1)
+        self.assertEqual(AssetLog.objects.count(), 1)
 
     def test_update_checkin(self):
         self.checkin.item = self.test_other_item
@@ -96,7 +96,7 @@ class CheckinModelTest(TestCase):
                          self.test_other_item.item_code)
 
     def test_non_authenticated_user_checkin_checkout(self):
-        response = client.get(self.checkin_checkout_url)
+        response = client.get(self.asset_log_url)
         self.assertEqual(response.data, {
             'detail': 'Authentication credentials were not provided.'
         })
@@ -109,7 +109,7 @@ class CheckinModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.normal_user.email}
         response = client.get(
-            self.checkin_checkout_url,
+            self.asset_log_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_normal_user))
         self.assertEqual(response.data, {
             'detail': 'You do not have permission to perform this action.'
@@ -119,12 +119,12 @@ class CheckinModelTest(TestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_list_checkin_checkout(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.get(
-            self.checkin_checkout_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            self.asset_log_url,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertIn(self.checkin.id, response.data[0].values())
-        self.assertEqual(len(response.data), CheckinCheckout.objects.count())
+        self.assertEqual(len(response.data), AssetLog.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -132,7 +132,7 @@ class CheckinModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.normal_user.email}
         response = client.get(
-            self.checkin_checkout_url,
+            self.asset_log_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_normal_user))
         self.assertEqual(response.data, {
             'detail': 'You do not have permission to perform this action.'
@@ -142,65 +142,65 @@ class CheckinModelTest(TestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_create_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
             'item': self.test_other_item.id,
-            'security_user': self.security_user.id,
-            'option': 'Checkin'
+            'checked_by': self.checked_by.id,
+            'log_type': 'Checkin'
         }
         response = client.post(
-            self.checkin_checkout_url,
+            self.asset_log_url,
             data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['item'], self.test_other_item.id)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_create_checkout(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
             'item': self.test_other_item.id,
-            'security_user': self.security_user.id,
-            'option': 'Checkout'
+            'checked_by': self.checked_by.id,
+            'log_type': 'Checkout'
         }
         response = client.post(
-            self.checkin_checkout_url,
+            self.asset_log_url,
             data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['item'], self.test_other_item.id)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_authenticated_security_user_create_with_invalid_option(
+    def test_authenticated_security_user_create_with_invalid_log_type(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
-        option = "Invalid"
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        log_type = "Invalid"
         data = {
             'item': self.test_other_item.id,
-            'security_user': self.security_user.id,
-            'option': option
+            'checked_by': self.checked_by.id,
+            'log_type': log_type
         }
         response = client.post(
-            self.checkin_checkout_url,
+            self.asset_log_url,
             data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
-            'option': ['"{}" is not a valid choice.'.format(option)]
+            'log_type': ['"{}" is not a valid choice.'.format(log_type)]
         })
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_create_checkin_without_item(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'security_user': self.security_user.id
+            'checked_by': self.checked_by.id
         }
         response = client.post(
-            self.checkin_checkout_url,
+            self.asset_log_url,
             data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'item': ['This field is required.']
         })
@@ -209,20 +209,20 @@ class CheckinModelTest(TestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_view_checkin_detail(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.get(
-            "{}{}/".format(self.checkin_checkout_url, self.checkin.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            "{}{}/".format(self.asset_log_url, self.checkin.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['id'], self.checkin.id)
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_cannot_delete_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.delete(
-            "{}{}/".format(self.checkin_checkout_url, self.checkin.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            "{}{}/".format(self.asset_log_url, self.checkin.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "DELETE" not allowed.'
         })
@@ -231,10 +231,10 @@ class CheckinModelTest(TestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_cannot_put_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.put(
-            "{}{}/".format(self.checkin_checkout_url, self.checkin.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            "{}{}/".format(self.asset_log_url, self.checkin.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "PUT" not allowed.'
         })
@@ -243,10 +243,10 @@ class CheckinModelTest(TestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_cannot_patch_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.patch(
-            "{}{}/".format(self.checkin_checkout_url, self.checkin.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_security_user))
+            "{}{}/".format(self.asset_log_url, self.checkin.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'
         })
