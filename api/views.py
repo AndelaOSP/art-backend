@@ -40,11 +40,8 @@ class SecurityUserViewSet(ModelViewSet):
     http_method_names = ['get']
 
     def list(self, request, *args, **kwargs):
-        security_emails = SecurityUser.objects.all()
 
-        list_of_emails = []
-
-        for security_email in security_emails:
-            list_of_emails.append(security_email.email)
+        list_of_emails = [security_user.email
+                          for security_user in SecurityUser.objects.all()]
 
         return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
