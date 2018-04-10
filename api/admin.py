@@ -6,7 +6,9 @@ from .models import (AssetCategory, AssetType,
                      Item,
                      AssetMake,
                      ItemModelNumber,
-                     SecurityUser)
+                     SecurityUser,
+                     Checkin,
+                     Checkout)
 
 User = get_user_model()
 
@@ -18,6 +20,8 @@ admin.site.register(
         Item,
         AssetMake,
         ItemModelNumber,
+        Checkin,
+        Checkout
     ]
 )
 
