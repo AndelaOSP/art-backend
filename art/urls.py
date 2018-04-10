@@ -27,6 +27,7 @@ urlpatterns = [
     path('jet/', include('jet.urls', 'jet')),
     path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
     path('api-auth/', include('rest_framework.urls')),
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider'))
 ]
 if settings.DEBUG:
     import debug_toolbar
