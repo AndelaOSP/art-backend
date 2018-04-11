@@ -187,10 +187,16 @@ class SecurityUser(User):
     class Meta:
         verbose_name = "Security User"
 
+
 class APIUser(AbstractApplication):
-    client_type = models.CharField(max_length=32, choices=AbstractApplication.CLIENT_TYPES, default=AbstractApplication.CLIENT_CONFIDENTIAL)
+    client_type = models.CharField(
+        max_length=32,
+        choices=AbstractApplication.CLIENT_TYPES,
+        default=AbstractApplication.CLIENT_CONFIDENTIAL)
     authorization_grant_type = models.CharField(
-        max_length=32, choices=AbstractApplication.GRANT_TYPES, default=AbstractApplication.GRANT_CLIENT_CREDENTIALS
+        max_length=32,
+        choices=AbstractApplication.GRANT_TYPES,
+        default=AbstractApplication.GRANT_CLIENT_CREDENTIALS
     )
 
     class Meta:

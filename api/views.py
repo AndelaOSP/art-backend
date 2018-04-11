@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
-from oauth2_provider.contrib.rest_framework.authentication import OAuth2Authentication
 from api.authentication import FirebaseTokenAuthentication
 from .models import Item, SecurityUser
-from .serializers import UserSerializer, ItemSerializer, SecurityUserEmailsSerializer
+from .serializers import UserSerializer, \
+    ItemSerializer, SecurityUserEmailsSerializer
+from .permissions import IsApiUser
 
 User = get_user_model()
 
@@ -34,24 +35,6 @@ class ItemViewSet(ModelViewSet):
         queryset = Item.objects.filter(assigned_to=self.request.user)
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
-
-
-
-
-from rest_framework.permissions import BasePermission
-
-
-class IsApiUser(BasePermission):
-    """
-    Allows access only to API users.
-    """
-
-    def has_permission(self, request, view):
-        try:
-            app = request.auth.application
-        except Exception:
-            return False
-        return app and not request.auth.user
 
 
 class SecurityUserEmailsViewSet(ModelViewSet):
