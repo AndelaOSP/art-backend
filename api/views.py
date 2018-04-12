@@ -6,7 +6,9 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
 from .models import Item, SecurityUser
-from .serializers import UserSerializer, ItemSerializer, SecuritySerializer
+from .serializers import UserSerializer, \
+    ItemSerializer, SecurityUserEmailsSerializer
+from .permissions import IsApiUser
 
 User = get_user_model()
 
@@ -35,9 +37,10 @@ class ItemViewSet(ModelViewSet):
         return obj
 
 
-class SecurityUserViewSet(ModelViewSet):
-    serializer_class = SecuritySerializer
+class SecurityUserEmailsViewSet(ModelViewSet):
+    serializer_class = SecurityUserEmailsSerializer
     http_method_names = ['get']
+    permission_classes = (IsApiUser, )
 
     def list(self, request, *args, **kwargs):
 
