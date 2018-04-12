@@ -10,7 +10,7 @@ client = APIClient()
 
 class SecurityUserTestCase(TestCase):
     def setUp(self):
-        self.security_users_url = reverse('security_user_emails-list')
+        self.security_users_url = reverse('security-user-emails-list')
 
         SecurityUser.objects.create(
             email="sectest1@andela.com",
