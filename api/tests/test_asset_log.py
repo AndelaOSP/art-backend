@@ -31,8 +31,8 @@ class AssetLogModelTest(TestCase):
         self.test_item.save()
 
         self.test_other_item = Item(
-            item_code="IC001",
-            serial_number="SN001",
+            item_code="IC00sf",
+            serial_number="SN00134",
             model_number=self.test_itemmodel,
             assigned_to=self.normal_user
         )
@@ -60,7 +60,7 @@ class AssetLogModelTest(TestCase):
         self.token_checked_by = 'test_token'
         self.token_normal_user = 'test_other_token'
 
-        self.asset_log_url = reverse('asset-log-list')
+        self.asset_logs_url = reverse('asset-logs-list')
 
     def test_add_checkin(self):
         AssetLog.objects.create(
@@ -96,20 +96,21 @@ class AssetLogModelTest(TestCase):
                          self.test_other_item.item_code)
 
     def test_non_authenticated_user_checkin_checkout(self):
-        response = client.get(self.asset_log_url)
+        response = client.get(self.asset_logs_url)
         self.assertEqual(response.data, {
             'detail': 'Authentication credentials were not provided.'
         })
 
     def test_checkout_model_string_representation(self):
-        self.assertEqual(str(self.checkin), self.test_item.serial_number)
+        self.assertEqual(str(self.checkin.item.serial_number),
+                         self.test_item.serial_number)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_normal_user_list_checkin_checkout(
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.normal_user.email}
         response = client.get(
-            self.asset_log_url,
+            self.asset_logs_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_normal_user))
         self.assertEqual(response.data, {
             'detail': 'You do not have permission to perform this action.'
@@ -121,7 +122,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.get(
-            self.asset_log_url,
+            self.asset_logs_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertIn(self.checkin.id, response.data[0].values())
         self.assertEqual(len(response.data), AssetLog.objects.count())
@@ -132,7 +133,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.normal_user.email}
         response = client.get(
-            self.asset_log_url,
+            self.asset_logs_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_normal_user))
         self.assertEqual(response.data, {
             'detail': 'You do not have permission to perform this action.'
@@ -149,7 +150,7 @@ class AssetLogModelTest(TestCase):
             'log_type': 'Checkin'
         }
         response = client.post(
-            self.asset_log_url,
+            self.asset_logs_url,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['item'], self.test_other_item.id)
@@ -165,7 +166,7 @@ class AssetLogModelTest(TestCase):
             'log_type': 'Checkout'
         }
         response = client.post(
-            self.asset_log_url,
+            self.asset_logs_url,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['item'], self.test_other_item.id)
@@ -182,7 +183,7 @@ class AssetLogModelTest(TestCase):
             'log_type': log_type
         }
         response = client.post(
-            self.asset_log_url,
+            self.asset_logs_url,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
@@ -195,13 +196,14 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'checked_by': self.checked_by.id
+            'checked_by': self.checked_by.id,
+            'log_type': 'Checkin'
         }
         response = client.post(
-            self.asset_log_url,
+            self.asset_logs_url,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
-        self.assertEqual(response.data, {
+        self.assertDictEqual(response.data, {
             'item': ['This field is required.']
         })
         self.assertEqual(response.status_code, 400)
@@ -211,7 +213,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.get(
-            "{}{}/".format(self.asset_log_url, self.checkin.id),
+            "{}{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['id'], self.checkin.id)
         self.assertEqual(response.status_code, 200)
@@ -221,7 +223,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.delete(
-            "{}{}/".format(self.asset_log_url, self.checkin.id),
+            "{}{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "DELETE" not allowed.'
@@ -233,7 +235,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.put(
-            "{}{}/".format(self.asset_log_url, self.checkin.id),
+            "{}{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "PUT" not allowed.'
@@ -245,7 +247,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.patch(
-            "{}{}/".format(self.asset_log_url, self.checkin.id),
+            "{}{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'

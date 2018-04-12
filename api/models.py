@@ -82,8 +82,8 @@ class Item(models.Model):
         (DAMAGED, "Damaged")
     )
 
-    item_code = models.CharField(max_length=50, blank=True)
-    serial_number = models.CharField(max_length=50, blank=True)
+    item_code = models.CharField(unique=True, max_length=50, blank=True)
+    serial_number = models.CharField(unique=True, max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
@@ -201,3 +201,26 @@ class APIUser(AbstractApplication):
 
     class Meta:
         verbose_name = "API User"
+
+
+class AssetLog(models.Model):
+    """Stores checkin/Checkout asset logs"""
+    CHECKIN = "Checkin"
+    CHECKOUT = "Checkout"
+    REQUIRED_FIELDS = ['checkin', 'checkout']
+
+    option = (
+        (CHECKIN, "Checkin"),
+        (CHECKOUT, "Checkout"),
+    )
+    item = models.ForeignKey(Item,
+                             null=False,
+                             on_delete=models.PROTECT)
+    checked_by = models.ForeignKey(SecurityUser,
+                                   blank=True,
+                                   on_delete=models.PROTECT)
+    log_type = models.CharField(max_length=10,
+                                blank=False,
+                                choices=option)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, editable=False)

@@ -5,9 +5,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
-from .models import Item, SecurityUser
+from .models import Item, SecurityUser, AssetLog
 from .serializers import UserSerializer, \
-    ItemSerializer, SecurityUserEmailsSerializer
+    ItemSerializer, SecurityUserEmailsSerializer, AssetLogSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 
