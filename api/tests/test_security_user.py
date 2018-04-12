@@ -32,7 +32,7 @@ class SecurityUserTestCase(TestCase):
         api_user = APIUser.objects.create(
             name="test_api_app"
         )
-        url = '/o/token/'
+        url = '/api/v1/o/token/'
 
         payload = {
             "grant_type": "client_credentials",
