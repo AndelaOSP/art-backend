@@ -121,3 +121,11 @@ class ItemTypeModelTest(TestCase):
             item.save()
 
         self.assertIn("Available", Item.objects.get(item_code="IC001").status)
+
+    def test_can_add_item_without_assigned_to_field(self):
+        new_item = Item(item_code="IC0050",
+                        serial_number="SN0055",
+                        model_number=self.test_itemmodel,
+                        status="Available")
+        new_item.save()
+        self.assertIsNone(new_item.assigned_to)
