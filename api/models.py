@@ -88,7 +88,7 @@ class Item(models.Model):
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
                                     blank=True,
-                                    default=1,
+                                    null=True,
                                     on_delete=models.PROTECT)
     model_number = models.ForeignKey(ItemModelNumber, null=True,
                                      on_delete=models.PROTECT)
