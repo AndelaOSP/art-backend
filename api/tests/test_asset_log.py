@@ -159,7 +159,6 @@ class AssetLogModelTest(TestCase):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
             'asset': self.test_other_item.serial_number,
-            'checked_by': self.checked_by.id,
             'log_type': 'Checkin'
         }
         response = client.post(
@@ -176,7 +175,6 @@ class AssetLogModelTest(TestCase):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
             'asset': self.test_other_item.serial_number,
-            'checked_by': self.checked_by.id,
             'log_type': 'Checkout'
         }
         response = client.post(
@@ -194,7 +192,6 @@ class AssetLogModelTest(TestCase):
         log_type = "Invalid"
         data = {
             'asset': self.test_other_item.serial_number,
-            'checked_by': self.checked_by.id,
             'log_type': log_type
         }
         response = client.post(
@@ -211,7 +208,6 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'checked_by': self.checked_by.id,
             'log_type': 'Checkin'
         }
         response = client.post(
