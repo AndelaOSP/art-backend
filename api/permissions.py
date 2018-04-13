@@ -16,7 +16,6 @@ class IsApiUser(BasePermission):
 class IsSecurityUser(BasePermission):
     """
     Allows access only to security users.
-
     """
     def has_permission(self, request, view):
         try:

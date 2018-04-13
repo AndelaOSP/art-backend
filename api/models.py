@@ -82,8 +82,8 @@ class Item(models.Model):
         (DAMAGED, "Damaged")
     )
 
-    item_code = models.CharField(unique=True, max_length=50, blank=True)
-    serial_number = models.CharField(unique=True, max_length=50, blank=True)
+    item_code = models.CharField(unique=True, max_length=50)
+    serial_number = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
