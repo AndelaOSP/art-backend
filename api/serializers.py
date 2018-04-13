@@ -45,6 +45,6 @@ class AssetLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetLog
         fields = (
-            "id", "item", "checked_by", "log_type",
+            "id", "asset", "checked_by", "log_type",
             "created_at", "last_modified",
         )

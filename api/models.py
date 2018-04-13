@@ -213,9 +213,10 @@ class AssetLog(models.Model):
         (CHECKIN, "Checkin"),
         (CHECKOUT, "Checkout"),
     )
-    item = models.ForeignKey(Item,
-                             null=False,
-                             on_delete=models.PROTECT)
+    asset = models.ForeignKey(Item,
+                              to_field="serial_number",
+                              null=False,
+                              on_delete=models.PROTECT)
     checked_by = models.ForeignKey(SecurityUser,
                                    blank=True,
                                    on_delete=models.PROTECT)
@@ -224,3 +225,11 @@ class AssetLog(models.Model):
                                 choices=option)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
+
+    def clean(self):
+        if not self.log_type:
+            raise ValidationError('Log type is required.', code='required')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

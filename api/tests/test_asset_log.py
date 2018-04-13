@@ -1,4 +1,6 @@
 from unittest.mock import patch
+
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
@@ -48,12 +50,12 @@ class AssetLogModelTest(TestCase):
         )
         self.checkin = AssetLog.objects.create(
             checked_by=self.checked_by,
-            item=self.test_item,
+            asset=self.test_item,
             log_type="Checkin"
         )
         self.checkout = AssetLog.objects.create(
             checked_by=self.checked_by,
-            item=self.test_item,
+            asset=self.test_item,
             log_type="Checkout"
         )
 
@@ -65,7 +67,7 @@ class AssetLogModelTest(TestCase):
     def test_add_checkin(self):
         AssetLog.objects.create(
             checked_by=self.checked_by,
-            item=self.test_other_item,
+            asset=self.test_other_item,
             log_type="Checkin"
         )
         self.assertEqual(AssetLog.objects.count(), 3)
@@ -73,10 +75,21 @@ class AssetLogModelTest(TestCase):
     def test_add_checkout(self):
         AssetLog.objects.create(
             checked_by=self.checked_by,
-            item=self.test_other_item,
+            asset=self.test_other_item,
             log_type="Checkout"
         )
         self.assertEqual(AssetLog.objects.count(), 3)
+
+    def test_add_checkin_without_log_type(self):
+        with self.assertRaises(ValidationError) as e:
+            AssetLog.objects.create(
+                checked_by=self.checked_by,
+                asset=self.test_other_item,
+            )
+
+        self.assertEqual(e.exception.message_dict, {
+            'log_type': ['This field cannot be blank.'],
+            '__all__': ['Log type is required.']})
 
     def test_delete_checkin(self):
         self.assertEqual(AssetLog.objects.count(), 2)
@@ -84,15 +97,15 @@ class AssetLogModelTest(TestCase):
         self.assertEqual(AssetLog.objects.count(), 1)
 
     def test_update_checkin(self):
-        self.checkin.item = self.test_other_item
+        self.checkin.asset = self.test_other_item
         self.checkin.save()
-        self.assertEqual(self.checkin.item.item_code,
+        self.assertEqual(self.checkin.asset.item_code,
                          self.test_other_item.item_code)
 
     def test_update_checkout(self):
-        self.checkout.item = self.test_other_item
+        self.checkout.asset = self.test_other_item
         self.checkout.save()
-        self.assertEqual(self.checkout.item.item_code,
+        self.assertEqual(self.checkout.asset.item_code,
                          self.test_other_item.item_code)
 
     def test_non_authenticated_user_checkin_checkout(self):
@@ -102,7 +115,7 @@ class AssetLogModelTest(TestCase):
         })
 
     def test_checkout_model_string_representation(self):
-        self.assertEqual(str(self.checkin.item.serial_number),
+        self.assertEqual(str(self.checkin.asset.serial_number),
                          self.test_item.serial_number)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -145,7 +158,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'item': self.test_other_item.id,
+            'asset': self.test_other_item.serial_number,
             'checked_by': self.checked_by.id,
             'log_type': 'Checkin'
         }
@@ -153,7 +166,8 @@ class AssetLogModelTest(TestCase):
             self.asset_logs_url,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
-        self.assertEqual(response.data['item'], self.test_other_item.id)
+        self.assertEqual(response.data['asset'],
+                         self.test_other_item.serial_number)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -161,7 +175,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'item': self.test_other_item.id,
+            'asset': self.test_other_item.serial_number,
             'checked_by': self.checked_by.id,
             'log_type': 'Checkout'
         }
@@ -169,7 +183,8 @@ class AssetLogModelTest(TestCase):
             self.asset_logs_url,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
-        self.assertEqual(response.data['item'], self.test_other_item.id)
+        self.assertEqual(response.data['asset'],
+                         self.test_other_item.serial_number)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -178,7 +193,7 @@ class AssetLogModelTest(TestCase):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         log_type = "Invalid"
         data = {
-            'item': self.test_other_item.id,
+            'asset': self.test_other_item.serial_number,
             'checked_by': self.checked_by.id,
             'log_type': log_type
         }
@@ -204,7 +219,7 @@ class AssetLogModelTest(TestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertDictEqual(response.data, {
-            'item': ['This field is required.']
+            'asset': ['This field is required.']
         })
         self.assertEqual(response.status_code, 400)
 
