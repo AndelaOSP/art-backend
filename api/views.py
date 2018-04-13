@@ -56,3 +56,6 @@ class AssetLogViewSet(ModelViewSet):
     permission_classes = [IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
+
+    def perform_create(self, serializer):
+        serializer.save(checked_by=self.request.user.securityuser)
