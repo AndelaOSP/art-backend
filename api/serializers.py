@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Item, SecurityUser
+from .models import User, Item, SecurityUser, AssetLog
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,4 +38,13 @@ class ItemSerializer(serializers.ModelSerializer):
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SecurityUser
-        fields = ("email", )
+        fields = ("email",)
+
+
+class AssetLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetLog
+        fields = (
+            "id", "asset", "checked_by", "log_type",
+            "created_at", "last_modified",
+        )

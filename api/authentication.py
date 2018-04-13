@@ -21,7 +21,6 @@ initialize_app(cred)
 
 
 class FirebaseTokenAuthentication(TokenAuthentication):
-
     def authenticate_credentials(self, key):
         try:
             token = auth.verify_id_token(key)

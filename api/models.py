@@ -82,8 +82,8 @@ class Item(models.Model):
         (DAMAGED, "Damaged")
     )
 
-    item_code = models.CharField(max_length=50, blank=True)
-    serial_number = models.CharField(max_length=50, blank=True)
+    item_code = models.CharField(unique=True, max_length=50)
+    serial_number = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
@@ -201,3 +201,35 @@ class APIUser(AbstractApplication):
 
     class Meta:
         verbose_name = "API User"
+
+
+class AssetLog(models.Model):
+    """Stores checkin/Checkout asset logs"""
+    CHECKIN = "Checkin"
+    CHECKOUT = "Checkout"
+    REQUIRED_FIELDS = ['checkin', 'checkout']
+
+    option = (
+        (CHECKIN, "Checkin"),
+        (CHECKOUT, "Checkout"),
+    )
+    asset = models.ForeignKey(Item,
+                              to_field="serial_number",
+                              null=False,
+                              on_delete=models.PROTECT)
+    checked_by = models.ForeignKey(SecurityUser,
+                                   blank=True,
+                                   on_delete=models.PROTECT)
+    log_type = models.CharField(max_length=10,
+                                blank=False,
+                                choices=option)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, editable=False)
+
+    def clean(self):
+        if not self.log_type:
+            raise ValidationError('Log type is required.', code='required')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

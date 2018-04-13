@@ -5,10 +5,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
-from .models import Item, SecurityUser
+from .models import Item, SecurityUser, AssetLog
 from .serializers import UserSerializer, \
-    ItemSerializer, SecurityUserEmailsSerializer
-from .permissions import IsApiUser
+    ItemSerializer, SecurityUserEmailsSerializer, AssetLogSerializer
+from api.permissions import IsApiUser, IsSecurityUser
+
 
 User = get_user_model()
 
@@ -43,8 +44,15 @@ class SecurityUserEmailsViewSet(ModelViewSet):
     permission_classes = (IsApiUser, )
 
     def list(self, request, *args, **kwargs):
-
         list_of_emails = [security_user.email
                           for security_user in SecurityUser.objects.all()]
 
         return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
+
+
+class AssetLogViewSet(ModelViewSet):
+    serializer_class = AssetLogSerializer
+    queryset = AssetLog.objects.all()
+    permission_classes = [IsSecurityUser]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    http_method_names = ['get', 'post']

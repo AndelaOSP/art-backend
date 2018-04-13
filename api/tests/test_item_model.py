@@ -34,11 +34,29 @@ class ItemTypeModelTest(TestCase):
         """Test add new item"""
         self.assertEqual(self.all_items.count(), 1)
         new_item = Item(item_code="IC002",
-                        serial_number="SN001",
+                        serial_number="SN0045",
                         model_number=self.test_itemmodel,
                         assigned_to=self.user)
         new_item.save()
         self.assertEqual(self.all_items.count(), 2)
+
+    def test_cannot_add_existing_serial_number(self):
+        """Test cannot add an item existing serial number"""
+        self.assertEqual(self.all_items.count(), 1)
+        serial_number = "SN001"
+        new_item = Item(serial_number, "SN001")
+        with self.assertRaises(ValidationError):
+            new_item.save()
+        self.assertEqual(self.all_items.count(), 1)
+
+    def test_cannot_add_existing_item_code(self):
+        """Test cannot add an item existing item code"""
+        self.assertEqual(self.all_items.count(), 1)
+        item_code = "IC002"
+        new_item = Item(item_code, "SN001")
+        with self.assertRaises(ValidationError):
+            new_item.save()
+        self.assertEqual(self.all_items.count(), 1)
 
     def test_item_without_code(self):
         """Test error when new item lacks serial number and item code"""

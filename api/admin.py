@@ -6,7 +6,9 @@ from .models import (AssetCategory, AssetType,
                      Item,
                      AssetMake,
                      ItemModelNumber,
-                     SecurityUser)
+                     SecurityUser,
+                     AssetLog
+                     )
 
 User = get_user_model()
 
@@ -18,6 +20,7 @@ admin.site.register(
         Item,
         AssetMake,
         ItemModelNumber,
+        AssetLog,
     ]
 )
 
