@@ -234,19 +234,19 @@ class AssetLog(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+
 class UserFeedback(models.Model):
-    """ Stores user feedback data"""
+    """ Stores user feedback data """
     FEEDBACK = "feedback"
     BUG = "bug"
     option = (
         (FEEDBACK, "feedback"),
         (BUG, "bug"),
     )
-    reported_by= models.EmailField(max_length=50, unique=False, null=False)
-    message=models.CharField(max_length=100, unique=False, null=False)
-    report_type= models.CharField(max_length=10,
-                                blank=False,
-                                choices=option,
-                                null=False)
+    reported_by = models.EmailField(max_length=50, unique=False, null=False)
+    message = models.CharField(max_length=100, unique=False, null=False)
+    report_type = models.CharField(max_length=10,
+                                   blank=False,
+                                   choices=option,
+                                   null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    

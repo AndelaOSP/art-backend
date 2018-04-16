@@ -1,25 +1,89 @@
-from django.db.models import ProtectedError
 from django.test import TestCase
-from ..models import UserFeedback
+from rest_framework.test import APIClient
+from unittest.mock import patch
+
+from ..models import User, UserFeedback
+
+client = APIClient()
 
 
- 
 class UserFeedbackModelTest(TestCase):
     """ Tests for the UserFeedback endpoint"""
 
-def setUp(self):
-        UserFeedback.objects.create(reported_by = "X.Y@andela.com", message = "This is feedback", report_type = "bug")
-        self.feedback = UserFeedback.objects.get(reported_by ="X.Y@andela.com")
+    def setUp(self):
+        self.user = User.objects.create(
+            email='test4@site.com', cohort=20,
+            slack_handle='@test_user4', password='devpassword'
+        )
 
+        UserFeedback.objects.create(reported_by="X.Y@andela.com",
+                                    message="This is feedback",
+                                    report_type="bug")
 
-def test_feedback_without_message(self):
-        UserFeedback.objects.create(reported_by = "Y.Y@andela.com", message = "", report_type = "bug")
-        feedback = UserFeedback.objects.get(reported_by ="Y.Y@andela.com")
-    
-    # def test_feedback_without_email(self):
-    #     UserFeedback.objects.create(reported_by = "", message = "This is feedback from hawi", report_type = "bug")
-    #     self.feedback = UserFeedback.objects.get(message = "This is feedback from hawi",)
+        self.feedback_url = '/api/v1/user-feedback/'
+        self.token_user = 'testtoken'
 
-    # def test_feedback_with_wrong_report_type(self):
-    #     UserFeedback.objects.create(reported_by = "X.Y@andela.com", message = "This is feedback", report_type = "Hawi")
-    #     self.feedback = UserFeedback.objects.get(reported_by ="X.Y@andela.com")
+    @patch('api.authentication.auth.verify_id_token')
+    def test_can_post_feedback(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
+        data = {
+            "reported_by": "test4@site.com",
+            "message": "This is feedback",
+            "report_type": "bug"
+        }
+        response = client.post(
+            self.feedback_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+
+        self.assertEqual(response.status_code, 201)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_cant_post_feedback_without_message(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
+        data = {
+            "reported_by": "test4@site.com",
+            "report_type": "bug"
+        }
+        response = client.post(
+            self.feedback_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data,
+                         {"message": ["This field is required."]})
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_cant_post_feedback_without_an_email(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
+        data = {
+            "message": "This is feedback",
+            "report_type": "bug"
+        }
+        response = client.post(
+            self.feedback_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+
+        self.assertEqual(response.data,
+                         {"reported_by": ["This field is required."]})
+        self.assertEqual(response.status_code, 400)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_cant_post_with_wrong_report_type(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
+        data = {
+            "reported_by": "test4@site.com",
+            "message": "This is feedback",
+            "report_type": "fellow feedback"
+        }
+        response = client.post(
+            self.feedback_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+
+        self.assertEqual(
+            response.data,
+            {"report_type": ["\"fellow feedback\" is not a valid choice."]})
+        self.assertEqual(response.status_code, 400)

@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
-from .models import Item, SecurityUser, AssetLog, UserFeedback
+from .models import Item, SecurityUser, AssetLog
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, AssetDetailSerializer, UserFeedbackSerializer
@@ -70,6 +70,7 @@ class AssetLogViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(checked_by=self.request.user.securityuser)
 
+
 class UserFeedbackViewSet(ModelViewSet):
     serializer_class = UserFeedbackSerializer
     permission_classes = [IsAuthenticated]
@@ -77,4 +78,4 @@ class UserFeedbackViewSet(ModelViewSet):
     http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
-        serializer.save(reported_by = self.request.user)
+        serializer.save(reported_by=self.request.user)
