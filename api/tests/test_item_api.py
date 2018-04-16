@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from ..models import Item, ItemModelNumber
+from ..models import Item, ItemModelNumber, SecurityUser, AssetLog
 
 User = get_user_model()
 client = APIClient()
@@ -32,6 +32,14 @@ class ItemTestCase(TestCase):
             allocation_status="Allocated"
         )
         item.save()
+        self.checked_by = SecurityUser.objects.create(
+            email="sectest1@andela.com",
+            password="devpassword",
+            first_name="TestFirst",
+            last_name="TestLast",
+            phone_number="254720900900",
+            badge_number="AE23"
+        )
         self.item = item
         self.items_url = reverse('items-list')
 
@@ -133,11 +141,46 @@ class ItemTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_items_details_checkin_status(self, mock_verify_id_token):
+    def test_checkin_status_for_non_checked_asset(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
             '{}{}/'.format(self.items_url, self.item.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'], None)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_checkin_status__for_checked_in_asset(
+            self, mock_verify_id_token):
+        AssetLog.objects.create(
+            checked_by=self.checked_by,
+            asset=self.item,
+            log_type="Checkin"
+        )
+
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            '{}{}/'.format(self.items_url, self.item.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn('checkin_status', response.data.keys())
+        self.assertEqual(response.data['checkin_status'],
+                         "checked_in")
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_checkin_status_for_checkout_in_asset(
+            self, mock_verify_id_token):
+        AssetLog.objects.create(
+            checked_by=self.checked_by,
+            asset=self.item,
+            log_type="Checkout"
+        )
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            '{}{}/'.format(self.items_url, self.item.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn('checkin_status', response.data.keys())
+        self.assertEqual(response.data['checkin_status'],
+                         "checked_out")
         self.assertEqual(response.status_code, 200)

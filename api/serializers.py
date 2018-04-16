@@ -45,9 +45,14 @@ class AssetSerializer(serializers.ModelSerializer):
 
     def get_checkin_status(self, obj):
         try:
-            asset_log = AssetLog.objects.get(asset=obj)
-            return asset_log.log_type
-        except AssetLog.DoesNotExist:
+            asset_log = AssetLog.objects.filter(asset=obj) \
+                .order_by('-created_at').first()
+
+            if asset_log.log_type == AssetLog.CHECKIN:
+                return "checked_in"
+            elif asset_log.log_type == AssetLog.CHECKOUT:
+                return "checked_out"
+        except AttributeError:
             return None
 
 
