@@ -116,16 +116,17 @@ class ItemTypeModelTest(TestCase):
 
     def test_item_status_cannot_be_non_existing_status(self):
         item = Item.objects.get(item_code="IC001")
-        item.status = "Unused"
+        item.allocation_status = "Unused"
         with self.assertRaises(ValueError):
             item.save()
 
-        self.assertIn("Available", Item.objects.get(item_code="IC001").status)
+        self.assertIn("Available",
+                      Item.objects.get(item_code="IC001").allocation_status)
 
     def test_can_add_item_without_assigned_to_field(self):
         new_item = Item(item_code="IC0050",
                         serial_number="SN0055",
                         model_number=self.test_itemmodel,
-                        status="Available")
+                        allocation_status="Available")
         new_item.save()
         self.assertIsNone(new_item.assigned_to)

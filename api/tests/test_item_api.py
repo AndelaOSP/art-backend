@@ -29,7 +29,7 @@ class ItemTestCase(TestCase):
             serial_number="SN001",
             assigned_to=self.user,
             model_number=itemmodel,
-            status="Allocated"
+            allocation_status="Allocated"
         )
         item.save()
         self.item = item
@@ -85,7 +85,7 @@ class ItemTestCase(TestCase):
     def test_items_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.put(
-            '{}{}/'.format(self.items_url, self.item.id),
+            '{}{}/'.format(self.items_url, self.item.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PUT" not allowed.'
@@ -95,7 +95,7 @@ class ItemTestCase(TestCase):
     def test_items_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.patch(
-            '{}{}/'.format(self.items_url, self.item.id),
+            '{}{}/'.format(self.items_url, self.item.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'
@@ -105,8 +105,39 @@ class ItemTestCase(TestCase):
     def test_items_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.delete(
-            '{}{}/'.format(self.items_url, self.item.id),
+            '{}{}/'.format(self.items_url, self.item.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "DELETE" not allowed.'
         })
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_items_detail_api_endpoint_contain_assigned_to_details(
+            self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            '{}{}/'.format(self.items_url, self.item.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn(self.user.email,
+                      response.data['assigned_to'].values())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_items_assigned_to_details_has_no_password(
+            self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            '{}{}/'.format(self.items_url, self.item.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertNotIn('password', response.data['assigned_to'].keys())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_items_details_checkin_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            '{}{}/'.format(self.items_url, self.item.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn('checkin_status', response.data.keys())
+        self.assertEqual(response.data['checkin_status'], None)
+        self.assertEqual(response.status_code, 200)

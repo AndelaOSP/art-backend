@@ -7,7 +7,8 @@ from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
 from .models import Item, SecurityUser, AssetLog
 from .serializers import UserSerializer, \
-    ItemSerializer, SecurityUserEmailsSerializer, AssetLogSerializer
+    AssetSerializer, SecurityUserEmailsSerializer, \
+    AssetLogSerializer, AssetDetailSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 
@@ -23,7 +24,10 @@ class UserViewSet(ModelViewSet):
 
 
 class ItemViewSet(ModelViewSet):
-    serializer_class = ItemSerializer
+    serializer_class = AssetSerializer
+    action_serializers = {
+        'retrieve': AssetDetailSerializer,
+    }
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get']
@@ -36,6 +40,12 @@ class ItemViewSet(ModelViewSet):
         queryset = Item.objects.filter(assigned_to=self.request.user)
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
+
+    def get_serializer_class(self):
+        if hasattr(self, 'action_serializers'):
+            if self.action in self.action_serializers:
+                return self.action_serializers[self.action]
+        return super().get_serializer_class()
 
 
 class SecurityUserEmailsViewSet(ModelViewSet):

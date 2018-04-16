@@ -92,16 +92,16 @@ class Item(models.Model):
                                     on_delete=models.PROTECT)
     model_number = models.ForeignKey(ItemModelNumber, null=True,
                                      on_delete=models.PROTECT)
-    status = models.CharField(max_length=9,
-                              choices=item_statuses,
-                              default="Available")
+    allocation_status = models.CharField(max_length=9,
+                                         choices=item_statuses,
+                                         default="Available")
 
     def clean(self):
         if not self.item_code and not self.serial_number:
             raise ValidationError(('Please provide either the serial number,\
                                asset code or both.'), code='required')
 
-        elif self.status not in dict(self.item_statuses):
+        elif self.allocation_status not in dict(self.item_statuses):
             raise ValueError('Status provided does not exist')
 
     def save(self, *args, **kwargs):
