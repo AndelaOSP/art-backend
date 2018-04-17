@@ -1,6 +1,8 @@
 from django.test import TestCase
-from rest_framework.test import APIClient
 from unittest.mock import patch
+from rest_framework.test import APIClient
+from rest_framework.reverse import reverse
+
 
 from ..models import User, UserFeedback
 
@@ -20,7 +22,7 @@ class UserFeedbackModelTest(TestCase):
                                     message="This is feedback",
                                     report_type="bug")
 
-        self.feedback_url = '/api/v1/user-feedback/'
+        self.feedback_url = reverse('user-feedback-list')
         self.token_user = 'testtoken'
 
     @patch('api.authentication.auth.verify_id_token')
