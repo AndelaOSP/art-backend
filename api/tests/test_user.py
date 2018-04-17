@@ -196,23 +196,6 @@ class UserTestCase(TestCase):
         })
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_add_user_from_api_without_password(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
-        data = {
-            "password": "",
-            "email": "test_user@mail.com",
-        }
-        response = client.post(
-            self.users_url,
-            data=data,
-            format='json',
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data, {
-            'password': ['This field may not be blank.']
-        })
-        self.assertEqual(response.status_code, 400)
-
-    @patch('api.authentication.auth.verify_id_token')
     def test_add_user_from_api_endpoint_without_email(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
