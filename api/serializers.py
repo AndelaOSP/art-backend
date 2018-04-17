@@ -80,3 +80,4 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
         model = UserFeedback
         fields = ("reported_by", "message", "report_type", "created_at")
 
+        read_only_fields = ("reported_by", )

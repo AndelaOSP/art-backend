@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
 
-from ..models import User, UserFeedback
+from ..models import User
 
 client = APIClient()
 
@@ -17,10 +17,6 @@ class UserFeedbackModelTest(TestCase):
             email='test4@site.com', cohort=20,
             slack_handle='@test_user4', password='devpassword'
         )
-
-        UserFeedback.objects.create(reported_by="X.Y@andela.com",
-                                    message="This is feedback",
-                                    report_type="bug")
 
         self.feedback_url = reverse('user-feedback-list')
         self.token_user = 'testtoken'
