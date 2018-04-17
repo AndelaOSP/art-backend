@@ -71,13 +71,12 @@ class AssetLogSerializer(serializers.ModelSerializer):
         )
 
 
-
 class AssetDetailSerializer(AssetSerializer):
     assigned_to = UserSerializer(read_only=True)
+
 
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFeedback
         fields = ("reported_by", "message", "report_type", "created_at")
-
         read_only_fields = ("reported_by", )
