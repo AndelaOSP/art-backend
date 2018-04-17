@@ -73,12 +73,10 @@ class AssetLogViewSet(ModelViewSet):
 
 class UserFeedbackViewSet(ModelViewSet):
     serializer_class = UserFeedbackSerializer
+    queryset = UserFeedback.objects.all()
     permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
         serializer.save(reported_by=self.request.user)
-
-    def get_queryset(self):
-        return UserFeedback.objects.all()
