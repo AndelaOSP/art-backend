@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
-from .models import Item, SecurityUser, AssetLog
+from .models import Item, SecurityUser, AssetLog, UserFeedback
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, AssetDetailSerializer, UserFeedbackSerializer
@@ -79,3 +79,6 @@ class UserFeedbackViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(reported_by=self.request.user)
+
+    def get_queryset(self):
+        return UserFeedback.objects.all()
