@@ -151,7 +151,7 @@ class ItemTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_checkin_status__for_checked_in_asset(
+    def test_checkin_status_for_checked_in_asset(
             self, mock_verify_id_token):
         AssetLog.objects.create(
             checked_by=self.checked_by,
