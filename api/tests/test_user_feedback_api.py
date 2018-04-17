@@ -27,7 +27,6 @@ class UserFeedbackModelTest(TestCase):
     def test_can_post_feedback(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "reported_by": "test4@site.com",
             "message": "This is feedback",
             "report_type": "bug"
         }
@@ -36,13 +35,13 @@ class UserFeedbackModelTest(TestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
 
+        self.assertIn("created_at", response.data)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cant_post_feedback_without_message(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "reported_by": "test4@site.com",
             "report_type": "bug"
         }
         response = client.post(
@@ -55,26 +54,9 @@ class UserFeedbackModelTest(TestCase):
                          {"message": ["This field is required."]})
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_cant_post_feedback_without_an_email(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.user.email}
-        data = {
-            "message": "This is feedback",
-            "report_type": "bug"
-        }
-        response = client.post(
-            self.feedback_url,
-            data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-
-        self.assertEqual(response.data,
-                         {"reported_by": ["This field is required."]})
-        self.assertEqual(response.status_code, 400)
-
-    @patch('api.authentication.auth.verify_id_token')
     def test_cant_post_with_wrong_report_type(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "reported_by": "test4@site.com",
             "message": "This is feedback",
             "report_type": "fellow feedback"
         }

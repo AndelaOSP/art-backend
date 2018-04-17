@@ -243,8 +243,8 @@ class UserFeedback(models.Model):
         (FEEDBACK, "feedback"),
         (BUG, "bug"),
     )
-    reported_by = models.EmailField(max_length=50, unique=False, null=False)
-    message = models.CharField(max_length=100, unique=False, null=False)
+    reported_by = models.EmailField(max_length=50, unique=False, null=True)
+    message = models.CharField(max_length=200, unique=False, null=False)
     report_type = models.CharField(max_length=10,
                                    blank=False,
                                    choices=option,
