@@ -8,7 +8,7 @@ from api.authentication import FirebaseTokenAuthentication
 from .models import Item, SecurityUser, AssetLog
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
-    AssetLogSerializer, AssetDetailSerializer
+    AssetLogSerializer, AssetDetailSerializer, UserFeedbackSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 
@@ -69,3 +69,13 @@ class AssetLogViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(checked_by=self.request.user.securityuser)
+
+
+class UserFeedbackViewSet(ModelViewSet):
+    serializer_class = UserFeedbackSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    http_method_names = ['get', 'post']
+
+    def perform_create(self, serializer):
+        serializer.save(reported_by=self.request.user)
