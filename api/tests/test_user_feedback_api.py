@@ -9,7 +9,7 @@ from ..models import User
 client = APIClient()
 
 
-class UserFeedbackModelTest(TestCase):
+class UserFeedbackAPITest(TestCase):
     """ Tests for the UserFeedback endpoint"""
 
     def setUp(self):
