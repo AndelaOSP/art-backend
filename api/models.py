@@ -68,7 +68,7 @@ class AssetModelNumber(models.Model):
 
 
 class Asset(models.Model):
-    """Stores all items"""
+    """Stores all assets"""
 
     AVAILABLE = "Available"
     ALLOCATED = "Allocated"
@@ -106,7 +106,7 @@ class Asset(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Validate either item code, serial number
+        Validate either asset code, serial number
         are provided and an existing status is given
         """
         self.full_clean()
