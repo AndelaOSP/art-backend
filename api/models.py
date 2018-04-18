@@ -55,7 +55,7 @@ class AssetMake(models.Model):
         return self.make_label
 
 
-class ItemModelNumber(models.Model):
+class AssetModelNumber(models.Model):
     model_number = models.CharField(max_length=100, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
@@ -67,22 +67,22 @@ class ItemModelNumber(models.Model):
         return self.model_number
 
 
-class Item(models.Model):
-    """Stores all items"""
+class Asset(models.Model):
+    """Stores all assets"""
 
     AVAILABLE = "Available"
     ALLOCATED = "Allocated"
     LOST = "Lost"
     DAMAGED = "Damaged"
 
-    item_statuses = (
+    asset_statuses = (
         (AVAILABLE, "Available"),
         (ALLOCATED, "Allocated"),
         (LOST, "Lost"),
         (DAMAGED, "Damaged")
     )
 
-    item_code = models.CharField(unique=True, max_length=50)
+    asset_code = models.CharField(unique=True, max_length=50)
     serial_number = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
@@ -90,30 +90,30 @@ class Item(models.Model):
                                     blank=True,
                                     null=True,
                                     on_delete=models.PROTECT)
-    model_number = models.ForeignKey(ItemModelNumber, null=True,
+    model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
     allocation_status = models.CharField(max_length=9,
-                                         choices=item_statuses,
+                                         choices=asset_statuses,
                                          default="Available")
 
     def clean(self):
-        if not self.item_code and not self.serial_number:
+        if not self.asset_code and not self.serial_number:
             raise ValidationError(('Please provide either the serial number,\
                                asset code or both.'), code='required')
 
-        elif self.allocation_status not in dict(self.item_statuses):
+        elif self.allocation_status not in dict(self.asset_statuses):
             raise ValueError('Status provided does not exist')
 
     def save(self, *args, **kwargs):
         """
-        Validate either item code, serial number
+        Validate either asset code, serial number
         are provided and an existing status is given
         """
         self.full_clean()
-        super(Item, self).save(*args, **kwargs)
+        super(Asset, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '{}, {}, {}'.format(self.item_code,
+        return '{}, {}, {}'.format(self.asset_code,
                                    self.serial_number,
                                    self.model_number)
 
@@ -213,7 +213,7 @@ class AssetLog(models.Model):
         (CHECKIN, "Checkin"),
         (CHECKOUT, "Checkout"),
     )
-    asset = models.ForeignKey(Item,
+    asset = models.ForeignKey(Asset,
                               to_field="serial_number",
                               null=False,
                               on_delete=models.PROTECT)

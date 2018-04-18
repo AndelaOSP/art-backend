@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
-from .models import Item, SecurityUser, AssetLog, UserFeedback
+from .models import Asset, SecurityUser, AssetLog, UserFeedback
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, AssetDetailSerializer, UserFeedbackSerializer
@@ -23,7 +23,7 @@ class UserViewSet(ModelViewSet):
     http_method_names = ['get', 'post']
 
 
-class ItemViewSet(ModelViewSet):
+class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
     action_serializers = {
         'retrieve': AssetDetailSerializer,
@@ -34,10 +34,10 @@ class ItemViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Item.objects.filter(assigned_to=user)
+        return Asset.objects.filter(assigned_to=user)
 
     def get_object(self):
-        queryset = Item.objects.filter(assigned_to=self.request.user)
+        queryset = Asset.objects.filter(assigned_to=self.request.user)
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
 

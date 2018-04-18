@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Item, SecurityUser, AssetLog, UserFeedback
+from .models import User, Asset, SecurityUser, AssetLog, UserFeedback
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -37,8 +37,8 @@ class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
 
     class Meta:
-        model = Item
-        fields = ("id", "item_code", "serial_number", "model_number",
+        model = Asset
+        fields = ("id", "asset_code", "serial_number", "model_number",
                   "allocation_status", "checkin_status", "assigned_to",
                   "created_at", "last_modified",
                   )
