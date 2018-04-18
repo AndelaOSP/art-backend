@@ -8,7 +8,7 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
 
 router = SimpleRouter()
 router.register('users', UserViewSet)
-router.register('asset', AssetViewSet, 'asset')
+router.register('assets', AssetViewSet, 'assets')
 router.register('security-user-emails',
                 SecurityUserEmailsViewSet, 'security-user-emails')
 router.register('asset-logs', AssetLogViewSet, 'asset-logs')
