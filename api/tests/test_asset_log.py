@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from ..models import AssetLog, ItemModelNumber, Item, SecurityUser
+from ..models import AssetLog, AssetModelNumber, Asset, SecurityUser
 
 User = get_user_model()
 client = APIClient()
@@ -16,29 +16,29 @@ class AssetLogModelTest(TestCase):
     """Tests for the AssetLog Model and API"""
 
     def setUp(self):
-        self.test_itemmodel = ItemModelNumber(model_number="IMN50987")
-        self.test_itemmodel.save()
+        self.test_assetmodel = AssetModelNumber(model_number="IMN50987")
+        self.test_assetmodel.save()
 
         self.normal_user = User.objects.create(
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
 
-        self.test_item = Item(
-            item_code="IC001",
+        self.test_asset = Asset(
+            asset_code="IC001",
             serial_number="SN001",
-            model_number=self.test_itemmodel,
+            model_number=self.test_assetmodel,
             assigned_to=self.normal_user
         )
-        self.test_item.save()
+        self.test_asset.save()
 
-        self.test_other_item = Item(
-            item_code="IC00sf",
+        self.test_other_asset = Asset(
+            asset_code="IC00sf",
             serial_number="SN00134",
-            model_number=self.test_itemmodel,
+            model_number=self.test_assetmodel,
             assigned_to=self.normal_user
         )
-        self.test_other_item.save()
+        self.test_other_asset.save()
 
         self.checked_by = SecurityUser.objects.create(
             email="sectest1@andela.com",
@@ -50,12 +50,12 @@ class AssetLogModelTest(TestCase):
         )
         self.checkin = AssetLog.objects.create(
             checked_by=self.checked_by,
-            asset=self.test_item,
+            asset=self.test_asset,
             log_type="Checkin"
         )
         self.checkout = AssetLog.objects.create(
             checked_by=self.checked_by,
-            asset=self.test_item,
+            asset=self.test_asset,
             log_type="Checkout"
         )
 
@@ -67,7 +67,7 @@ class AssetLogModelTest(TestCase):
     def test_add_checkin(self):
         AssetLog.objects.create(
             checked_by=self.checked_by,
-            asset=self.test_other_item,
+            asset=self.test_other_asset,
             log_type="Checkin"
         )
         self.assertEqual(AssetLog.objects.count(), 3)
@@ -75,7 +75,7 @@ class AssetLogModelTest(TestCase):
     def test_add_checkout(self):
         AssetLog.objects.create(
             checked_by=self.checked_by,
-            asset=self.test_other_item,
+            asset=self.test_other_asset,
             log_type="Checkout"
         )
         self.assertEqual(AssetLog.objects.count(), 3)
@@ -84,7 +84,7 @@ class AssetLogModelTest(TestCase):
         with self.assertRaises(ValidationError) as e:
             AssetLog.objects.create(
                 checked_by=self.checked_by,
-                asset=self.test_other_item,
+                asset=self.test_other_asset,
             )
 
         self.assertEqual(e.exception.message_dict, {
@@ -97,16 +97,16 @@ class AssetLogModelTest(TestCase):
         self.assertEqual(AssetLog.objects.count(), 1)
 
     def test_update_checkin(self):
-        self.checkin.asset = self.test_other_item
+        self.checkin.asset = self.test_other_asset
         self.checkin.save()
-        self.assertEqual(self.checkin.asset.item_code,
-                         self.test_other_item.item_code)
+        self.assertEqual(self.checkin.asset.asset_code,
+                         self.test_other_asset.asset_code)
 
     def test_update_checkout(self):
-        self.checkout.asset = self.test_other_item
+        self.checkout.asset = self.test_other_asset
         self.checkout.save()
-        self.assertEqual(self.checkout.asset.item_code,
-                         self.test_other_item.item_code)
+        self.assertEqual(self.checkout.asset.asset_code,
+                         self.test_other_asset.asset_code)
 
     def test_non_authenticated_user_checkin_checkout(self):
         response = client.get(self.asset_logs_url)
@@ -116,7 +116,7 @@ class AssetLogModelTest(TestCase):
 
     def test_checkout_model_string_representation(self):
         self.assertEqual(str(self.checkin.asset.serial_number),
-                         self.test_item.serial_number)
+                         self.test_asset.serial_number)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_normal_user_list_checkin_checkout(
@@ -158,7 +158,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'asset': self.test_other_item.serial_number,
+            'asset': self.test_other_asset.serial_number,
             'log_type': 'Checkin'
         }
         response = client.post(
@@ -166,7 +166,7 @@ class AssetLogModelTest(TestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['asset'],
-                         self.test_other_item.serial_number)
+                         self.test_other_asset.serial_number)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -174,7 +174,7 @@ class AssetLogModelTest(TestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'asset': self.test_other_item.serial_number,
+            'asset': self.test_other_asset.serial_number,
             'log_type': 'Checkout'
         }
         response = client.post(
@@ -182,7 +182,7 @@ class AssetLogModelTest(TestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['asset'],
-                         self.test_other_item.serial_number)
+                         self.test_other_asset.serial_number)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -191,7 +191,7 @@ class AssetLogModelTest(TestCase):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         log_type = "Invalid"
         data = {
-            'asset': self.test_other_item.serial_number,
+            'asset': self.test_other_asset.serial_number,
             'log_type': log_type
         }
         response = client.post(
@@ -204,7 +204,7 @@ class AssetLogModelTest(TestCase):
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_authenticated_security_user_create_checkin_without_item(
+    def test_authenticated_security_user_create_checkin_without_asset(
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
