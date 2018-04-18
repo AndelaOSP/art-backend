@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .forms import UserRegistrationForm
 from .models import (AssetCategory, AssetType,
                      AssetSubCategory,
                      Asset,
@@ -66,6 +67,7 @@ class SecurityUserAdmin(BaseUserAdmin):
 
 
 class UserAdmin(BaseUserAdmin):
+    add_form = UserRegistrationForm
     list_display = (
         'email', 'cohort', 'slack_handle'
     )
