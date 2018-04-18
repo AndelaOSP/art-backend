@@ -34,6 +34,16 @@ class UserTestCase(TestCase):
         self.assertEqual(new_user.password, 'devpassword')
         self.assertEqual(users_count_before, users_count_after - 1)
 
+    def test_add_user_without_password(self):
+        users_count_before = User.objects.count()
+        new_user = User.objects.create(
+            email='test-1@site.com', cohort=20,
+            slack_handle='@test_user-1'
+        )
+        users_count_after = User.objects.count()
+        self.assertEqual(new_user.password, None)
+        self.assertEqual(users_count_before, users_count_after - 1)
+
     def test_can_update_user(self):
         self.user.name = 'edited_name'
         self.user.save()
