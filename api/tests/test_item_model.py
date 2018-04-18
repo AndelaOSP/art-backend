@@ -34,9 +34,9 @@ class AssetTypeModelTest(TestCase):
         """Test add new asset"""
         self.assertEqual(self.all_assets.count(), 1)
         new_asset = Asset(asset_code="IC002",
-                        serial_number="SN0045",
-                        model_number=self.test_assetmodel,
-                        assigned_to=self.user)
+                          serial_number="SN0045",
+                          model_number=self.test_assetmodel,
+                          assigned_to=self.user)
         new_asset.save()
         self.assertEqual(self.all_assets.count(), 2)
 
@@ -125,8 +125,8 @@ class AssetTypeModelTest(TestCase):
 
     def test_can_add_asset_without_assigned_to_field(self):
         new_asset = Asset(asset_code="IC0050",
-                        serial_number="SN0055",
-                        model_number=self.test_assetmodel,
-                        allocation_status="Available")
+                          serial_number="SN0055",
+                          model_number=self.test_assetmodel,
+                          allocation_status="Available")
         new_asset.save()
         self.assertIsNone(new_asset.assigned_to)

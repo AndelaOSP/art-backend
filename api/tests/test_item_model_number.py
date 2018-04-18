@@ -34,7 +34,7 @@ class AssetModelNumberTestCase(TestCase):
     def test_can_create_new_model_number(self):
         self.assertEqual(AssetModelNumber.objects.count(), 1)
         AssetModelNumber.objects.create(model_number="101505401",
-                                       make_label=self.asset_make)
+                                        make_label=self.asset_make)
         self.assertEqual(AssetModelNumber.objects.count(), 2)
 
     def test_can_edit_model_number(self):
