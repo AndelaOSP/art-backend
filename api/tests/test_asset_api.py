@@ -70,8 +70,8 @@ class AssetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_authenticated_owner_view_single_asset(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+    def test_authenticated_user_get_single_asset(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.other_user.email}
         response = client.get(
             "{}{}/".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))

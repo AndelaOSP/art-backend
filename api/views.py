@@ -37,7 +37,7 @@ class AssetViewSet(ModelViewSet):
         return Asset.objects.filter(assigned_to=user)
 
     def get_object(self):
-        queryset = Asset.objects.filter(assigned_to=self.request.user)
+        queryset = Asset.objects.all()
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
 
