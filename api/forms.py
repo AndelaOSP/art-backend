@@ -19,7 +19,3 @@ class UserRegistrationForm(UserCreationForm):
         help_text=_("Enter the same password as before, for verification."),
         required=False
     )
-
-
-class SecurityUserRegistrationForm(UserRegistrationForm):
-    pass

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .forms import UserRegistrationForm, SecurityUserRegistrationForm
+from .forms import UserRegistrationForm
 from .models import (AssetCategory, AssetType,
                      AssetSubCategory,
                      Asset,
@@ -26,7 +26,7 @@ admin.site.register(
 
 
 class SecurityUserAdmin(BaseUserAdmin):
-    add_form = SecurityUserRegistrationForm
+    add_form = UserRegistrationForm
     list_display = (
         'first_name',
         'last_name',
