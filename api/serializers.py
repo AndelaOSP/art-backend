@@ -39,8 +39,8 @@ class AssetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asset
         fields = ("id", "asset_code", "serial_number", "model_number",
-                  "allocation_status", "checkin_status", "assigned_to",
-                  "created_at", "last_modified",
+                  "checkin_status", "assigned_to", "created_at",
+                  "last_modified",
                   )
 
     def get_checkin_status(self, obj):

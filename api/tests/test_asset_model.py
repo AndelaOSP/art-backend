@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 from django.contrib.auth import get_user_model
 
-from ..models import Asset, AssetModelNumber
+from ..models import Asset, AssetModelNumber, AssetStatus
 
 User = get_user_model()
 
@@ -79,6 +79,9 @@ class AssetTypeModelTest(TestCase):
         """Test delete an asset type in model"""
         self.assertEqual(self.all_assets.count(), 1)
         get_asset = Asset.objects.get(asset_code="IC001")
+        statuses = AssetStatus.objects.filter(asset=get_asset)
+        for status in statuses:
+            status.delete()
         get_asset.delete()
         self.assertEqual(self.all_assets.count(), 0)
 
@@ -114,19 +117,18 @@ class AssetTypeModelTest(TestCase):
     def test_asset_model_string_representation(self):
         self.assertEqual(str(self.test_asset), "IC001, SN001, IMN50987")
 
-    def test_asset_status_cannot_be_non_existing_status(self):
-        asset = Asset.objects.get(asset_code="IC001")
-        asset.allocation_status = "Unused"
-        with self.assertRaises(ValueError):
-            asset.save()
-
-        self.assertIn("Available",
-                      Asset.objects.get(asset_code="IC001").allocation_status)
+    # def test_asset_status_cannot_be_non_existing_status(self):
+    #     asset = Asset.objects.get(asset_code="IC001")
+    #     asset.allocation_status = "Unused"
+    #     with self.assertRaises(ValueError):
+    #         asset.save()
+    #
+    #     self.assertIn("Available",
+    #                   Asset.objects.get(asset_code="IC001").allocation_status)
 
     def test_can_add_asset_without_assigned_to_field(self):
         new_asset = Asset(asset_code="IC0050",
                           serial_number="SN0055",
-                          model_number=self.test_assetmodel,
-                          allocation_status="Available")
+                          model_number=self.test_assetmodel)
         new_asset.save()
         self.assertIsNone(new_asset.assigned_to)
