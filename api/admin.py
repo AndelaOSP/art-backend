@@ -26,6 +26,7 @@ admin.site.register(
 
 
 class SecurityUserAdmin(BaseUserAdmin):
+    add_form = UserRegistrationForm
     list_display = (
         'first_name',
         'last_name',
