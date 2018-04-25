@@ -40,16 +40,23 @@ class AssetType(models.Model):
     asset_sub_category = models.ForeignKey(AssetSubCategory,
                                            on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name = "Asset Type"
+
     def __str__(self):
         return self.asset_type
 
 
 class AssetMake(models.Model):
     """ stores all asset makes """
-    make_label = models.CharField(max_length=40, null=False)
+    make_label = models.CharField(
+        max_length=40, null=False, verbose_name="Asset Make")
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     asset_type = models.ForeignKey(AssetType, on_delete=models.PROTECT)
+
+    class Meta:
+        verbose_name = "Asset Make"
 
     def __str__(self):
         return self.make_label
@@ -61,7 +68,11 @@ class AssetModelNumber(models.Model):
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     make_label = models.ForeignKey(AssetMake,
                                    null=True,
-                                   on_delete=models.PROTECT)
+                                   on_delete=models.PROTECT,
+                                   verbose_name="Asset Make")
+
+    class Meta:
+        verbose_name = "Asset Model Number"
 
     def __str__(self):
         return self.model_number
@@ -234,6 +245,9 @@ class AssetLog(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Asset Log"
 
 
 class UserFeedback(models.Model):
