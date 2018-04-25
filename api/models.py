@@ -92,7 +92,7 @@ class Asset(models.Model):
                                     on_delete=models.PROTECT)
     model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
-    current_status = models.CharField(editable=False, max_length=9)
+    current_status = models.CharField(editable=False, max_length=50)
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
@@ -269,9 +269,9 @@ class AssetStatus(models.Model):
                               null=False,
                               on_delete=models.PROTECT)
 
-    current_status = models.CharField(max_length=9,
+    current_status = models.CharField(max_length=50,
                                       choices=asset_statuses)
-    previous_status = models.CharField(max_length=9, choices=asset_statuses,
+    previous_status = models.CharField(max_length=50, choices=asset_statuses,
                                        null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
