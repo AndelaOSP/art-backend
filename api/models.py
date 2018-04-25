@@ -275,10 +275,8 @@ class AssetStatus(models.Model):
                                        null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
-    def clean(self):
-        def save(self, *args, **kwargs):
-            if self.current_status not in dict(self.asset_statuses):
-                raise ValidationError
+    class Meta:
+        verbose_name_plural = 'Asset Statuses'
 
     def save(self, *args, **kwargs):
         try:

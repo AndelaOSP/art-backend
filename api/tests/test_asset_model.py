@@ -117,15 +117,6 @@ class AssetTypeModelTest(TestCase):
     def test_asset_model_string_representation(self):
         self.assertEqual(str(self.test_asset), "IC001, SN001, IMN50987")
 
-    # def test_asset_status_cannot_be_non_existing_status(self):
-    #     asset = Asset.objects.get(asset_code="IC001")
-    #     asset.allocation_status = "Unused"
-    #     with self.assertRaises(ValueError):
-    #         asset.save()
-    #
-    #     self.assertIn("Available",
-    #                   Asset.objects.get(asset_code="IC001").allocation_status)
-
     def test_can_add_asset_without_assigned_to_field(self):
         new_asset = Asset(asset_code="IC0050",
                           serial_number="SN0055",

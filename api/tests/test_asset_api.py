@@ -29,7 +29,6 @@ class AssetTestCase(TestCase):
             serial_number="SN001",
             assigned_to=self.user,
             model_number=assetmodel,
-            # allocation_status="Allocated"
         )
         asset.save()
         self.checked_by = SecurityUser.objects.create(

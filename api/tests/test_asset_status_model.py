@@ -31,8 +31,8 @@ class AssetStatusModelTest(TestCase):
             assigned_to=self.normal_user
         )
         self.test_asset.save()
-        self.get_asset = Asset.objects.get(asset_code="IC001")
-        self.asset_status = AssetStatus.objects.get(asset=self.get_asset)
+        self.asset = Asset.objects.get(asset_code="IC001")
+        self.asset_status = AssetStatus.objects.get(asset=self.asset)
 
     def test_create_asset_creates_new_status(self):
         """Tests that creating a new asset creates a new asset status log"""
@@ -57,10 +57,10 @@ class AssetStatusModelTest(TestCase):
         """
         self.assertEqual(AssetStatus.objects.all().count(), 1)
         asset_status = AssetStatus(
-            asset=self.get_asset,
+            asset=self.asset,
             current_status="Damaged")
         asset_status.save()
-        new_asset_status = AssetStatus.objects.filter(asset=self.get_asset).\
+        new_asset_status = AssetStatus.objects.filter(asset=self.asset).\
             latest('created_at')
         self.assertEqual(new_asset_status.previous_status, "Available")
         self.assertEqual(new_asset_status.current_status, "Damaged")
@@ -75,16 +75,16 @@ class AssetStatusModelTest(TestCase):
         self.assertEqual(self.asset_status.previous_status, None)
         self.assertEqual(model_count, 1)
 
-    def test_status_has_to_be_in_options(self):
+    def test_status_validation(self):
         """Test that status has to be in list of choices"""
         model_count = AssetStatus.objects.all().count()
         self.assertEqual(model_count, 1)
         asset_status = AssetStatus(
-            asset=self.get_asset,
+            asset=self.asset,
             current_status="Unused")
         with self.assertRaises(ValidationError):
             asset_status.save()
-        new_asset_status = AssetStatus.objects.filter(asset=self.get_asset).\
+        new_asset_status = AssetStatus.objects.filter(asset=self.asset).\
             latest('created_at')
         self.assertEqual(new_asset_status.current_status, "Available")
         self.assertEqual(new_asset_status.previous_status, None)
