@@ -86,7 +86,11 @@ class Asset(models.Model):
     serial_number = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    current_owner = models.CharField(editable=False, max_length=50)
+    current_owner = models.ForeignKey('User',
+                                      blank=True,
+                                      editable=False,
+                                      null=True,
+                                      on_delete=models.PROTECT)
     model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
@@ -299,25 +303,29 @@ class AllocationHistory(models.Model):
                                       blank=True,
                                       null=True,
                                       on_delete=models.PROTECT)
-    previous_owner = models.CharField(max_length=50, null=True, blank=True,
-                                      editable=False)
+    previous_owner = models.ForeignKey('User',
+                                       related_name='previous_owner_asset',
+                                       editable=False,
+                                       blank=True,
+                                       null=True,
+                                       on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
         verbose_name_plural = "Allocation Histories"
 
     def clean(self):
-        latest_record = AllocationHistory.objects.filter(asset=self.asset).\
-            latest('created_at')
         if self.asset.current_status != "Available":
             raise ValidationError("You can only allocate available assets")
-        if latest_record:
-            self.previous_owner = latest_record.current_owner
-        else:
-            self.previous_owner = None
 
     def save(self, *args, **kwargs):
         self.full_clean()
+        try:
+            latest_record = AllocationHistory.objects.filter(asset=self.asset).\
+                latest('created_at')
+            self.previous_owner = latest_record.current_owner
+        except Exception:
+            self.previous_owner = None
         super(AllocationHistory, self).save(*args, **kwargs)
 
 
