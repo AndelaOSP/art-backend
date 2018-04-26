@@ -10,7 +10,8 @@ from .models import (AssetCategory, AssetType,
                      SecurityUser,
                      AssetLog,
                      AssetStatus,
-                     UserFeedback)
+                     UserFeedback,
+                     AllocationHistory)
 
 User = get_user_model()
 
@@ -115,8 +116,13 @@ class UserFeedbackAdmin(admin.ModelAdmin):
     list_display = ('message', 'report_type', 'reported_by')
 
 
+class AllocationsHistoryAdmin(admin.ModelAdmin):
+    list_display = ('asset', 'current_owner', 'previous_owner', 'created_at')
+
+
 admin.site.register(Asset, AssetAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(SecurityUser, SecurityUserAdmin)
 admin.site.register(AssetStatus, AssetStatusAdmin)
 admin.site.register(UserFeedback, UserFeedbackAdmin)
+admin.site.register(AllocationHistory, AllocationsHistoryAdmin)
