@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 from oauth2_provider.models import AbstractApplication
 
 
@@ -80,19 +82,6 @@ class AssetModelNumber(models.Model):
 
 class Asset(models.Model):
     """Stores all assets"""
-
-    AVAILABLE = "Available"
-    ALLOCATED = "Allocated"
-    LOST = "Lost"
-    DAMAGED = "Damaged"
-
-    asset_statuses = (
-        (AVAILABLE, "Available"),
-        (ALLOCATED, "Allocated"),
-        (LOST, "Lost"),
-        (DAMAGED, "Damaged")
-    )
-
     asset_code = models.CharField(unique=True, max_length=50)
     serial_number = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -103,17 +92,12 @@ class Asset(models.Model):
                                     on_delete=models.PROTECT)
     model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
-    allocation_status = models.CharField(max_length=9,
-                                         choices=asset_statuses,
-                                         default="Available")
+    current_status = models.CharField(editable=False, max_length=50)
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
             raise ValidationError(('Please provide either the serial number,\
                                asset code or both.'), code='required')
-
-        elif self.allocation_status not in dict(self.asset_statuses):
-            raise ValueError('Status provided does not exist')
 
     def save(self, *args, **kwargs):
         """
@@ -265,3 +249,59 @@ class UserFeedback(models.Model):
                                    choices=option,
                                    null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+
+class AssetStatus(models.Model):
+    """Stores the previous and current status of models"""
+    AVAILABLE = "Available"
+    ALLOCATED = "Allocated"
+    LOST = "Lost"
+    DAMAGED = "Damaged"
+
+    asset_statuses = (
+        (AVAILABLE, "Available"),
+        (ALLOCATED, "Allocated"),
+        (LOST, "Lost"),
+        (DAMAGED, "Damaged")
+    )
+    asset = models.ForeignKey(Asset,
+                              to_field="serial_number",
+                              null=False,
+                              on_delete=models.PROTECT)
+
+    current_status = models.CharField(max_length=50,
+                                      choices=asset_statuses)
+    previous_status = models.CharField(max_length=50, choices=asset_statuses,
+                                       null=True, blank=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    class Meta:
+        verbose_name_plural = 'Asset Statuses'
+
+    def save(self, *args, **kwargs):
+        try:
+            latest_record = AssetStatus.objects.filter(asset=self.asset).\
+                latest('created_at')
+            self.previous_status = latest_record.current_status
+        except Exception:
+            self.previous_status = None
+        self.full_clean()
+        super(AssetStatus, self).save(*args, **kwargs)
+
+
+@receiver(post_save, sender=AssetStatus)
+def set_current_asset_status(sender, **kwargs):
+    asset_status = kwargs.get('instance')
+    asset_status.asset.current_status = asset_status.current_status
+    asset_status.asset.save()
+
+
+@receiver(post_save, sender=Asset)
+def save_initial_asset_status(sender, **kwargs):
+    current_asset = kwargs.get('instance')
+    existing_status = AssetStatus.objects.filter(asset=current_asset)
+    if not existing_status:
+        current_asset.current_status = "Available"
+        AssetStatus.objects.create(asset=current_asset,
+                                   current_status="Available")
+        current_asset.save()

@@ -8,7 +8,8 @@ from .models import (AssetCategory, AssetType,
                      AssetMake,
                      AssetModelNumber,
                      SecurityUser,
-                     AssetLog
+                     AssetLog,
+                     AssetStatus,
                      )
 
 User = get_user_model()
@@ -105,6 +106,11 @@ class AssetAdmin(admin.ModelAdmin):
     )
 
 
+class AssetStatusAdmin(admin.ModelAdmin):
+    list_display = ('asset', 'current_status', 'previous_status', 'created_at')
+
+
 admin.site.register(Asset, AssetAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(SecurityUser, SecurityUserAdmin)
+admin.site.register(AssetStatus, AssetStatusAdmin)
