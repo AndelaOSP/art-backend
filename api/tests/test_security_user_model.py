@@ -55,3 +55,21 @@ class SecurityUserModelTest(TestCase):
         new_security_member.delete()
         self.assertEqual(new_security_team, 2)
         self.assertEqual(SecurityUser.objects.count(), 1)
+
+    def test_can_add_security_user_without_password(self):
+        initial_count = SecurityUser.objects.count()
+        SecurityUser.objects.create(
+            email="sectest98@andela.com",
+            first_name="TestNew",
+            last_name="TestLastNew",
+            phone_number="254720900901",
+            badge_number="AXW23"
+        )
+
+        new_security_user = SecurityUser.objects.get(
+            badge_number="AXW23"
+        )
+
+        self.assertEqual(initial_count, 1)
+        self.assertEqual(SecurityUser.objects.count(), 2)
+        self.assertIn("TestNew", new_security_user.first_name)

@@ -18,7 +18,6 @@ admin.site.register(
         AssetCategory,
         AssetType,
         AssetSubCategory,
-        Asset,
         AssetMake,
         AssetModelNumber,
         AssetLog,
@@ -27,6 +26,7 @@ admin.site.register(
 
 
 class SecurityUserAdmin(BaseUserAdmin):
+    add_form = UserRegistrationForm
     list_display = (
         'first_name',
         'last_name',
@@ -99,5 +99,12 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
+class AssetAdmin(admin.ModelAdmin):
+    list_filter = (
+        'model_number', 'model_number__make_label__asset_type__asset_type'
+    )
+
+
+admin.site.register(Asset, AssetAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(SecurityUser, SecurityUserAdmin)
