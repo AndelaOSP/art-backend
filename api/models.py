@@ -250,6 +250,9 @@ class UserFeedback(models.Model):
                                    null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
+    class Meta:
+        verbose_name_plural = "User Feedback"
+
 
 class AssetStatus(models.Model):
     """Stores the previous and current status of models"""

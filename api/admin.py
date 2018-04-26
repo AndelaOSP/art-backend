@@ -10,7 +10,7 @@ from .models import (AssetCategory, AssetType,
                      SecurityUser,
                      AssetLog,
                      AssetStatus,
-                     )
+                     UserFeedback)
 
 User = get_user_model()
 
@@ -21,7 +21,7 @@ admin.site.register(
         AssetSubCategory,
         AssetMake,
         AssetModelNumber,
-        AssetLog,
+        AssetLog
     ]
 )
 
@@ -110,7 +110,13 @@ class AssetStatusAdmin(admin.ModelAdmin):
     list_display = ('asset', 'current_status', 'previous_status', 'created_at')
 
 
+class UserFeedbackAdmin(admin.ModelAdmin):
+    list_filter = ('report_type',)
+    list_display = ('message', 'report_type', 'reported_by')
+
+
 admin.site.register(Asset, AssetAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(SecurityUser, SecurityUserAdmin)
 admin.site.register(AssetStatus, AssetStatusAdmin)
+admin.site.register(UserFeedback, UserFeedbackAdmin)
