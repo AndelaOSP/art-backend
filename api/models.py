@@ -306,13 +306,17 @@ class AllocationHistory(models.Model):
     class Meta:
         verbose_name_plural = "Allocation Histories"
 
-    def save(self, *args, **kwargs):
-        try:
-            latest_record = AllocationHistory.objects.\
-                filter(asset=self.asset).latest('created_at')
+    def clean(self):
+        latest_record = AllocationHistory.objects.filter(asset=self.asset).\
+            latest('created_at')
+        if self.asset.current_status != "Available":
+            raise ValidationError("You can only allocate available assets")
+        if latest_record:
             self.previous_owner = latest_record.current_owner
-        except Exception:
+        else:
             self.previous_owner = None
+
+    def save(self, *args, **kwargs):
         self.full_clean()
         super(AllocationHistory, self).save(*args, **kwargs)
 

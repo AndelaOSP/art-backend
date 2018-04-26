@@ -105,6 +105,10 @@ class AssetAdmin(admin.ModelAdmin):
     list_filter = (
         'model_number', 'model_number__make_label__asset_type__asset_type'
     )
+    list_display = (
+        'asset_code', 'serial_number', 'model_number', 'created_at',
+        'current_owner', 'current_status'
+    )
 
 
 class AssetStatusAdmin(admin.ModelAdmin):
@@ -116,7 +120,7 @@ class UserFeedbackAdmin(admin.ModelAdmin):
     list_display = ('message', 'report_type', 'reported_by')
 
 
-class AllocationsHistoryAdmin(admin.ModelAdmin):
+class AllocationHistoryAdmin(admin.ModelAdmin):
     list_display = ('asset', 'current_owner', 'previous_owner', 'created_at')
 
 
@@ -125,4 +129,4 @@ admin.site.register(User, UserAdmin)
 admin.site.register(SecurityUser, SecurityUserAdmin)
 admin.site.register(AssetStatus, AssetStatusAdmin)
 admin.site.register(UserFeedback, UserFeedbackAdmin)
-admin.site.register(AllocationHistory, AllocationsHistoryAdmin)
+admin.site.register(AllocationHistory, AllocationHistoryAdmin)
