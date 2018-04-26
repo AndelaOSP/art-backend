@@ -292,6 +292,10 @@ class AssetStatus(models.Model):
         super(AssetStatus, self).save(*args, **kwargs)
 
 
+class AllocationsHistory(models.Model):
+    pass
+
+
 @receiver(post_save, sender=AssetStatus)
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
@@ -308,3 +312,13 @@ def save_initial_asset_status(sender, **kwargs):
         AssetStatus.objects.create(asset=current_asset,
                                    current_status="Available")
         current_asset.save()
+
+
+@receiver(post_save, sender=AllocationsHistory)
+def save_current_asset_owner(sender, **kwargs):
+    pass
+
+
+@receiver(post_save, sender=Asset)
+def save_previous_asset_owner(sender, **kwargs):
+    pass
