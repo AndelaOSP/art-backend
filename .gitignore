@@ -108,8 +108,9 @@ ENV/
 # static files
 staticfiles
 
+
 # Docker
 docker-compose.yml
 
-# Visual Studio Code
-.vscode/*
+#vscode files
+.vscode
