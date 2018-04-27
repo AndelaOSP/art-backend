@@ -81,4 +81,16 @@ To start the services you run the make start task i.e.
 $ make start
 ```
 
+### Create the superuser account
+To create the superuser account, we are going to first connect the container of our application using the exec task in the Makefile. Run the task as shown:
+```
+$ make exec
+```
+If the task runs successfully, you will land inside a terminal session in the container. The prompt should look as follows:
+```
+root@<container-id>:/usr/src/app#
+```
+The `<container-id>` will vary on different machines but should be string of random letters and numbers for instance `6c6f455638d8`. While on this prompt, run the command `python manage.py createsuperuser` and enter the different values you are prompted for i.e. email address, cohort number, Slack handle and password.
+After successfully completing this, navigate to `http://127.0.0.1:8000/admin/` on your browser or run `make open` and use the credentials you just created to login.
+
 [Click here](https://art-backend.herokuapp.com/admin/) to view the app on Heroku.
