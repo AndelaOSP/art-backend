@@ -86,11 +86,11 @@ class Asset(models.Model):
     serial_number = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    current_owner = models.ForeignKey('User',
-                                      blank=True,
-                                      editable=False,
-                                      null=True,
-                                      on_delete=models.PROTECT)
+    assigned_to = models.ForeignKey('User',
+                                    blank=True,
+                                    editable=False,
+                                    null=True,
+                                    on_delete=models.PROTECT)
     model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
@@ -321,8 +321,8 @@ class AllocationHistory(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         try:
-            latest_record = AllocationHistory.objects.filter(asset=self.asset).\
-                latest('created_at')
+            latest_record = AllocationHistory.objects.\
+                filter(asset=self.asset).latest('created_at')
             self.previous_owner = latest_record.current_owner
         except Exception:
             self.previous_owner = None

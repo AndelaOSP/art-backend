@@ -107,7 +107,7 @@ class AssetAdmin(admin.ModelAdmin):
     )
     list_display = (
         'asset_code', 'serial_number', 'model_number', 'created_at',
-        'current_owner', 'current_status'
+        'assigned_to', 'current_status'
     )
 
 
