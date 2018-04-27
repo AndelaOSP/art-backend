@@ -60,4 +60,25 @@ This repository contains the API endpoints and models for the ART project implem
 - You can log into the admin dashboard using those credentials on `http://127.0.0.1:8000/admin/`
 
 
+## Local Development Docker Setup
+To use the Docker setup, ensure you have Docker installed.
+
+### Create the `docker-compose.yml` file
+Run the `make compose` task to create the docker-compose file from the template alredy in the repository.
+```
+$ make compose
+```
+This will generate the file. Open the file with your preferred editor and make changes on the environment section under the `art-backend` service in the `docker-compose.yml` file that you just created. Replace the values of the varaibles whose values are enclosed in angle brackets with values provided by a fellow team member or team lead:
+```
+PRIVATE_KEY: "<enter-provided-private-key>"
+PROJECT_ID: "<enter-project-id>"
+CLIENT_EMAIL: "<enter-client-email>"
+```
+
+### Start The Services
+To start the services you run the make start task i.e.
+```
+$ make start
+```
+
 [Click here](https://art-backend.herokuapp.com/admin/) to view the app on Heroku.
