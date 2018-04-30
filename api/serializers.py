@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from .models import User, Asset, SecurityUser, AssetLog, UserFeedback
+from core.models import (
+    User, Asset, SecurityUser, AssetLog,
+    UserFeedback, CHECKIN, CHECKOUT
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,9 +51,9 @@ class AssetSerializer(serializers.ModelSerializer):
             asset_log = AssetLog.objects.filter(asset=obj) \
                 .order_by('-created_at').first()
 
-            if asset_log.log_type == AssetLog.CHECKIN:
+            if asset_log.log_type == CHECKIN:
                 return "checked_in"
-            elif asset_log.log_type == AssetLog.CHECKOUT:
+            elif asset_log.log_type == CHECKOUT:
                 return "checked_out"
         except AttributeError:
             return None

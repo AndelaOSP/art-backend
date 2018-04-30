@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from ..models import AssetLog, AssetModelNumber, Asset, SecurityUser
+from core.models import AssetLog, AssetModelNumber, Asset, SecurityUser
 
 User = get_user_model()
 client = APIClient()

@@ -2,16 +2,16 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .forms import UserRegistrationForm
-from .models import (AssetCategory, AssetType,
-                     AssetSubCategory,
-                     Asset,
-                     AssetMake,
-                     AssetModelNumber,
-                     SecurityUser,
-                     AssetLog,
-                     AssetStatus,
-                     UserFeedback,
-                     AllocationHistory)
+from .models.asset import (
+        AssetCategory, AssetType,
+        AssetSubCategory,
+        Asset,
+        AssetMake,
+        AssetLog,
+        AssetStatus,
+        AssetModelNumber,
+        AllocationHistory)
+from .models.user import SecurityUser, UserFeedback
 
 User = get_user_model()
 
@@ -91,6 +91,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'first_name',
                        'last_name', 'cohort',
                        'slack_handle', 'phone_number',
+                       'is_staff', 'is_superuser',
                        'picture', 'password1',
                        'password2')
         }),
