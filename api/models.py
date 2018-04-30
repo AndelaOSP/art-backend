@@ -88,6 +88,7 @@ class Asset(models.Model):
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
                                     blank=True,
+                                    editable=False,
                                     null=True,
                                     on_delete=models.PROTECT)
     model_number = models.ForeignKey(AssetModelNumber, null=True,
@@ -292,6 +293,42 @@ class AssetStatus(models.Model):
         super(AssetStatus, self).save(*args, **kwargs)
 
 
+class AllocationHistory(models.Model):
+    asset = models.ForeignKey(Asset,
+                              to_field="serial_number",
+                              null=False,
+                              on_delete=models.PROTECT)
+    current_owner = models.ForeignKey('User',
+                                      related_name='current_owner_asset',
+                                      blank=True,
+                                      null=True,
+                                      on_delete=models.PROTECT)
+    previous_owner = models.ForeignKey('User',
+                                       related_name='previous_owner_asset',
+                                       editable=False,
+                                       blank=True,
+                                       null=True,
+                                       on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    class Meta:
+        verbose_name_plural = "Allocation History"
+
+    def clean(self):
+        if self.asset.current_status != "Available":
+            raise ValidationError("You can only allocate available assets")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        try:
+            latest_record = AllocationHistory.objects.\
+                filter(asset=self.asset).latest('created_at')
+            self.previous_owner = latest_record.current_owner
+        except Exception:
+            self.previous_owner = None
+        super(AllocationHistory, self).save(*args, **kwargs)
+
+
 @receiver(post_save, sender=AssetStatus)
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
@@ -308,3 +345,10 @@ def save_initial_asset_status(sender, **kwargs):
         AssetStatus.objects.create(asset=current_asset,
                                    current_status="Available")
         current_asset.save()
+
+
+@receiver(post_save, sender=AllocationHistory)
+def save_current_asset_owner(sender, **kwargs):
+    asset_owner = kwargs.get('instance')
+    asset_owner.asset.assigned_to = asset_owner.current_owner
+    asset_owner.asset.save()
