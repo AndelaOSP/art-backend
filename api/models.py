@@ -312,7 +312,7 @@ class AllocationHistory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
-        verbose_name_plural = "Allocation Histories"
+        verbose_name_plural = "Allocation History"
 
     def clean(self):
         if self.asset.current_status != "Available":
@@ -350,5 +350,5 @@ def save_initial_asset_status(sender, **kwargs):
 @receiver(post_save, sender=AllocationHistory)
 def save_current_asset_owner(sender, **kwargs):
     asset_owner = kwargs.get('instance')
-    asset_owner.asset.current_owner = asset_owner.current_owner
+    asset_owner.asset.assigned_to = asset_owner.current_owner
     asset_owner.asset.save()
