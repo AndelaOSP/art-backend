@@ -49,11 +49,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'core',
     'api',
     'oauth2_provider'
 ]
 
-AUTH_USER_MODEL = 'api.User'
+AUTH_USER_MODEL = 'core.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -144,4 +145,4 @@ REST_FRAMEWORK = {
     )
 }
 
-OAUTH2_PROVIDER_APPLICATION_MODEL = 'api.APIUser'
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.APIUser'
