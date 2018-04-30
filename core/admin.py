@@ -91,6 +91,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'first_name',
                        'last_name', 'cohort',
                        'slack_handle', 'phone_number',
+                       'is_staff', 'is_superuser',
                        'picture', 'password1',
                        'password2')
         }),
