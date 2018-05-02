@@ -49,7 +49,7 @@ class AssetTestCase(TestCase):
         })
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_authenticated_non_owner_view_assets(self, mock_verify_id_token):
+    def test_authenticated_user_view_assets(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.other_user.email}
         response = client.get(
             self.asset_urls,

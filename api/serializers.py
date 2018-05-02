@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
-    UserFeedback, CHECKIN, CHECKOUT
+    UserFeedback, CHECKIN, CHECKOUT, AssetStatus
 )
 
 
@@ -83,3 +83,25 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
         model = UserFeedback
         fields = ("reported_by", "message", "report_type", "created_at")
         read_only_fields = ("reported_by", )
+
+
+class AssetStatusSerializer(AssetSerializer):
+    status_history = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AssetStatus
+        fields = ("id", "asset", "current_status", "status_history",
+                  "previous_status", "created_at")
+
+    def get_status_history(self, obj):
+        asset_status = AssetStatus.objects.filter(asset=obj.asset)
+        return [
+            {
+                "id": asset.id,
+                "asset": asset.asset_id,
+                "current_status": asset.current_status,
+                "previous_status": asset.previous_status,
+                "created_at": asset.created_at
+            }
+            for asset in asset_status if obj.created_at > asset.created_at
+        ]
