@@ -2,11 +2,7 @@ from rest_framework import serializers
 
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
-    << << << < HEAD
-    UserFeedback, CHECKIN, CHECKOUT, AssetStatus
-    == == == =
-    UserFeedback, CHECKIN, CHECKOUT, AllocationHistory
-    >> >>>> > ft(allocations)Allocations API endpoints  # 157103978
+    UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory
 )
 
 
