@@ -2,15 +2,16 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .forms import UserRegistrationForm
-from .models.asset import (
-        AssetCategory, AssetType,
-        AssetSubCategory,
-        Asset,
-        AssetMake,
-        AssetLog,
-        AssetStatus,
-        AssetModelNumber,
-        AllocationHistory)
+from .models.asset import (AssetCategory,
+                           AssetType,
+                           AssetSubCategory,
+                           Asset,
+                           AssetMake,
+                           AssetLog,
+                           AssetStatus,
+                           AssetModelNumber,
+                           AllocationHistory
+                           )
 from .models.user import SecurityUser, UserFeedback
 
 User = get_user_model()
@@ -21,8 +22,7 @@ admin.site.register(
         AssetType,
         AssetSubCategory,
         AssetMake,
-        AssetModelNumber,
-        AssetLog
+        AssetModelNumber
     ]
 )
 
@@ -125,9 +125,14 @@ class AllocationHistoryAdmin(admin.ModelAdmin):
     list_display = ('asset', 'current_owner', 'previous_owner', 'created_at')
 
 
+class AssetLogsAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'asset', 'checked_by', 'log_type')
+
+
 admin.site.register(Asset, AssetAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(SecurityUser, SecurityUserAdmin)
 admin.site.register(AssetStatus, AssetStatusAdmin)
 admin.site.register(UserFeedback, UserFeedbackAdmin)
 admin.site.register(AllocationHistory, AllocationHistoryAdmin)
+admin.site.register(AssetLog, AssetLogsAdmin)
