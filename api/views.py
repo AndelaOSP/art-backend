@@ -86,6 +86,6 @@ class UserFeedbackViewSet(ModelViewSet):
 class AssetStatusViewSet(ModelViewSet):
     serializer_class = AssetStatusSerializer
     queryset = AssetStatus.objects.all()
-    permission_classes = [IsAuthenticated]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
