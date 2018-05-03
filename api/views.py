@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from rest_framework.generics import get_object_or_404
-from django.shortcuts import get_list_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -84,9 +83,6 @@ class UserFeedbackViewSet(ModelViewSet):
         serializer.save(reported_by=self.request.user)
 
 
-<< << << < HEAD
-
-
 class AssetStatusViewSet(ModelViewSet):
     serializer_class = AssetStatusSerializer
     queryset = AssetStatus.objects.all()
@@ -95,23 +91,9 @@ class AssetStatusViewSet(ModelViewSet):
     http_method_names = ['get', 'post']
 
 
-== == == =
-
-
 class AllocationsViewSet(ModelViewSet):
     serializer_class = AllocationsSerializer
     queryset = AllocationHistory.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
-
-    def get_object(self, queryset=None):
-        if queryset is None:
-            queryset = self.filter_queryset(self.get_queryset())
-        serial_number = self.kwargs.get('pk', None)
-        asset = Asset.objects.get(serial_number=serial_number)
-        queryset = get_list_or_404(AllocationHistory, asset=asset)
-        return queryset
-
-
->>>>>> > ft(allocations)Allocations API endpoints  # 157103978
