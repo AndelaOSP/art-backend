@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
 
-from ..models import User
+from core.models import User
 
 client = APIClient()
 

@@ -3,7 +3,7 @@ from django.test import TestCase
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from ..models import SecurityUser, APIUser
+from core.models import SecurityUser, APIUser
 
 client = APIClient()
 
