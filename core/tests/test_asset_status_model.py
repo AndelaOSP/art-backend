@@ -106,5 +106,10 @@ class AssetStatusModelTest(TestCase):
         asset_status.current_status = "Available"
         asset_status.save()
 
+        new_history = AllocationHistory.objects.filter(
+            asset=self.test_asset).latest('created_at')
+
         self.assertIn(test_owner, 'test@site.com')
         self.assertIsNone(self.test_asset.assigned_to)
+        self.assertIsNone(new_history.current_owner)
+        self.assertIn(str(new_history.previous_owner), 'test@site.com')
