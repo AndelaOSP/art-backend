@@ -4,7 +4,11 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from core.models import Asset, AssetModelNumber, SecurityUser, AssetLog
+from core.models import (Asset,
+                         AssetModelNumber,
+                         SecurityUser,
+                         AssetLog,
+                         AllocationHistory)
 
 User = get_user_model()
 client = APIClient()
@@ -31,6 +35,14 @@ class AssetTestCase(TestCase):
             model_number=assetmodel,
         )
         asset.save()
+
+        allocation_history = AllocationHistory(
+            asset=asset,
+            current_owner=self.user
+        )
+
+        allocation_history.save()
+
         self.checked_by = SecurityUser.objects.create(
             email="sectest1@andela.com",
             password="devpassword",

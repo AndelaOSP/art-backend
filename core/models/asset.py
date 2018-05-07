@@ -229,6 +229,11 @@ class AllocationHistory(models.Model):
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
     asset_status.asset.current_status = asset_status.current_status
+    if asset_status.current_status == "Available" and AllocationHistory.\
+            objects.count() > 0:
+        asset_status.asset.assigned_to = None
+        AllocationHistory.objects.create(asset=asset_status.asset,
+                                         current_owner=None)
     asset_status.asset.save()
 
 
