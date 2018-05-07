@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
-    UserFeedback, CHECKIN, CHECKOUT, AssetStatus
+    UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory
 )
 
 
@@ -105,3 +105,10 @@ class AssetStatusSerializer(AssetSerializer):
             }
             for asset in asset_status if obj.created_at > asset.created_at
         ]
+
+
+class AllocationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllocationHistory
+        fields = ("asset", "current_owner", "previous_owner", "created_at")
+        read_only_fields = ("previous_owner",)
