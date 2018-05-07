@@ -229,17 +229,11 @@ class AllocationHistory(models.Model):
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
     asset_status.asset.current_status = asset_status.current_status
-    if asset_status.current_status == "Available":
+    if asset_status.current_status == "Available" and AllocationHistory.\
+            objects.count() > 0:
         asset_status.asset.assigned_to = None
-
-    try:
-        latest_record = AllocationHistory.objects. \
-            filter(asset=asset_status.asset.serial_number).latest('created_at')
         AllocationHistory.objects.create(asset=asset_status.asset,
                                          current_owner=None)
-    except Exception:
-        pass
-
     asset_status.asset.save()
 
 
