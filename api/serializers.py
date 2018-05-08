@@ -38,6 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
+    assigned_to = UserSerializer(read_only=True)
 
     class Meta:
         model = Asset
@@ -72,10 +73,6 @@ class AssetLogSerializer(serializers.ModelSerializer):
             "id", "asset", "log_type",
             "created_at", "last_modified",
         )
-
-
-class AssetDetailSerializer(AssetSerializer):
-    assigned_to = UserSerializer(read_only=True)
 
 
 class UserFeedbackSerializer(serializers.ModelSerializer):

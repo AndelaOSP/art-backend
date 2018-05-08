@@ -9,7 +9,7 @@ from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
-    AssetLogSerializer, AssetDetailSerializer, UserFeedbackSerializer, \
+    AssetLogSerializer, UserFeedbackSerializer, \
     AssetStatusSerializer, AllocationsSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
@@ -26,9 +26,6 @@ class UserViewSet(ModelViewSet):
 
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
-    action_serializers = {
-        'retrieve': AssetDetailSerializer,
-    }
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get']
