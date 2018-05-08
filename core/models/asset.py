@@ -10,7 +10,7 @@ ALLOCATED = "Allocated"
 LOST = "Lost"
 DAMAGED = "Damaged"
 
-asset_statuses = (
+ASSET_STATUSES = (
     (AVAILABLE, "Available"),
     (ALLOCATED, "Allocated"),
     (LOST, "Lost"),
@@ -19,9 +19,8 @@ asset_statuses = (
 
 CHECKIN = "Checkin"
 CHECKOUT = "Checkout"
-REQUIRED_FIELDS = ['checkin', 'checkout']
 
-option = (
+LOG_TYPE_CHOICES = (
     (CHECKIN, "Checkin"),
     (CHECKOUT, "Checkout"),
 )
@@ -146,7 +145,7 @@ class AssetLog(models.Model):
                                    on_delete=models.PROTECT)
     log_type = models.CharField(max_length=10,
                                 blank=False,
-                                choices=option)
+                                choices=LOG_TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
@@ -170,8 +169,8 @@ class AssetStatus(models.Model):
                               on_delete=models.PROTECT)
 
     current_status = models.CharField(max_length=50,
-                                      choices=asset_statuses)
-    previous_status = models.CharField(max_length=50, choices=asset_statuses,
+                                      choices=ASSET_STATUSES)
+    previous_status = models.CharField(max_length=50, choices=ASSET_STATUSES,
                                        null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
@@ -211,7 +210,7 @@ class AllocationHistory(models.Model):
         verbose_name_plural = "Allocation History"
 
     def clean(self):
-        if self.asset.current_status != "Available":
+        if self.asset.current_status != AVAILABLE:
             raise ValidationError("You can only allocate available assets")
 
     def save(self, *args, **kwargs):
@@ -229,7 +228,7 @@ class AllocationHistory(models.Model):
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
     asset_status.asset.current_status = asset_status.current_status
-    if asset_status.current_status == "Available" and AllocationHistory.\
+    if asset_status.current_status == AVAILABLE and AllocationHistory.\
             objects.count() > 0:
         asset_status.asset.assigned_to = None
         AllocationHistory.objects.create(asset=asset_status.asset,
@@ -242,9 +241,9 @@ def save_initial_asset_status(sender, **kwargs):
     current_asset = kwargs.get('instance')
     existing_status = AssetStatus.objects.filter(asset=current_asset)
     if not existing_status:
-        current_asset.current_status = "Available"
+        current_asset.current_status = AVAILABLE
         AssetStatus.objects.create(asset=current_asset,
-                                   current_status="Available")
+                                   current_status=AVAILABLE)
         current_asset.save()
 
 
