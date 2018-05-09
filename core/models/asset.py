@@ -29,9 +29,10 @@ WORKING = "Working"
 ISSUES = "Issues"
 NOT_WORKING = "Not Working"
 asset_condition = ((NEW, "Brand New"),
-                        (WORKING, "Working"),
-                        (ISSUES, "Issues"),
-                        (NOT_WORKING, "Not Working"))
+                   (WORKING, "Working"),
+                   (ISSUES, "Issues"),
+                   (NOT_WORKING, "Not Working"))
+
 
 class AssetCategory(models.Model):
     """ Stores all asset categories """
@@ -121,7 +122,9 @@ class Asset(models.Model):
     model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
-    current_condition = models.CharField(editable=False, max_length=50)
+    current_condition = models.ForeignKey('AssetCondition',
+                                          null=True,
+                                          on_delete=models.PROTECT)
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
@@ -197,35 +200,31 @@ class AssetStatus(models.Model):
 
 
 class AssetCondition(models.Model):
-    
-    asset = models.ForeignKey(Asset,
-                              to_field="serial_number",
-                              null=False,
-                              on_delete=models.PROTECT)
 
     current_condition = models.CharField(max_length=50,
-                                      choices=asset_condition)
+                                         default=NEW,
+                                         choices=asset_condition)
 
     previous_condition = models.CharField(max_length=50,
-                                        choices=asset_condition,
-                                        editable=False,
-                                        blank=True,
-                                        null=True)
-    
-    if current_condition is not "Brand New":
-        condition_description = models.CharField(max_length=50)
-    else: 
-        condition_description = models.CharField(default="Brand New", editable="False")
-
+                                          choices=asset_condition,
+                                          editable=False,
+                                          blank=True,
+                                          null=True)
+    condition_description = models.CharField(max_length=50,
+                                             editable=False,
+                                             blank=True,
+                                             null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
         verbose_name_plural = 'Asset Condition'
-    
-    # def save(self):
-    #    try:
-    #        latest_record = AssetCondition.objects.\
-    #        filter(asset=self.asset).latest('created_at'),
+
+    def save(self, *args, **kwargs):
+        if self.current_condition == NEW:
+            self.condition_description = ''
+
+        self.full_clean()
+        super(AssetCondition, self).save(*args, **kwargs)
 
 
 class AllocationHistory(models.Model):
@@ -262,7 +261,6 @@ class AllocationHistory(models.Model):
         except Exception:
             self.previous_owner = None
         super(AllocationHistory, self).save(*args, **kwargs)
-
 
 
 @receiver(post_save, sender=AssetStatus)

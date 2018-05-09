@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from ..models import Asset, AssetModelNumber, AssetStatus, AllocationHistory
+from ..models import (Asset, AssetCondition, AssetModelNumber,
+                      AssetStatus, AllocationHistory)
 
 User = get_user_model()
 client = APIClient()
@@ -25,10 +26,14 @@ class AllocationHistoryModelTest(TestCase):
         test_assetmodel = AssetModelNumber(model_number="IMN50987")
         test_assetmodel.save()
 
+        self.asset_condition = AssetCondition()
+        self.asset_condition.save()
+
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            model_number=test_assetmodel
+            model_number=test_assetmodel,
+            current_condition=self.asset_condition
         )
         self.test_asset.save()
 

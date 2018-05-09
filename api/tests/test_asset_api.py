@@ -4,15 +4,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from core.models import (Asset,
-                         AssetModelNumber,
-                         SecurityUser,
-                         AssetLog,
-                         AllocationHistory,
-                         AssetMake,
-                         AssetType,
-                         AssetSubCategory,
-                         AssetCategory)
+from core.models import (Asset, AssetCondition,
+                         AssetModelNumber, SecurityUser, AssetLog)
 
 User = get_user_model()
 client = APIClient()
@@ -30,24 +23,18 @@ class AssetTestCase(TestCase):
             slack_handle='@admin', password='devpassword'
         )
         self.token_other_user = 'otherusertesttoken'
-        self.asset_category = AssetCategory.objects.create(
-            category_name="Accessories")
-        self.asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name="Sub Category name",
-            asset_category=self.asset_category)
-        self.asset_type = AssetType.objects.create(
-            asset_type="Asset Type",
-            asset_sub_category=self.asset_sub_category)
-        self.make_label = AssetMake.objects.create(
-            make_label="Asset Make", asset_type=self.asset_type)
-        self.assetmodel = AssetModelNumber(
-            model_number="IMN50987", make_label=self.make_label)
-        self.assetmodel.save()
-        self.asset = Asset(
+        assetmodel = AssetModelNumber(model_number="IMN50987")
+        assetmodel.save()
+
+        self.asset_condition = AssetCondition()
+        self.asset_condition.save()
+
+        asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
             assigned_to=self.user,
-            model_number=self.assetmodel,
+            model_number=assetmodel,
+            current_condition=self.asset_condition
         )
         self.asset.save()
 

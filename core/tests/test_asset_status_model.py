@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from ..models import Asset, AssetModelNumber, AssetStatus, AllocationHistory
+from ..models import Asset, AssetCondition, AssetModelNumber, AssetStatus
 
 User = get_user_model()
 client = APIClient()
@@ -24,10 +24,15 @@ class AssetStatusModelTest(TestCase):
             slack_handle='@test_user', password='devpassword'
         )
 
+        self.asset_condition = AssetCondition()
+        self.asset_condition.save()
+
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            model_number=self.test_assetmodel1
+            model_number=self.test_assetmodel1,
+            assigned_to=self.normal_user,
+            current_condition=self.asset_condition
         )
         self.test_asset.save()
         self.asset = Asset.objects.get(asset_code="IC001")
@@ -40,7 +45,9 @@ class AssetStatusModelTest(TestCase):
         test_asset2 = Asset(
             asset_code="IC002",
             serial_number="SN002",
-            model_number=self.test_assetmodel2
+            model_number=self.test_assetmodel2,
+            assigned_to=self.normal_user,
+            current_condition=self.asset_condition
         )
         test_asset2.save()
         self.assertEqual(AssetStatus.objects.all().count(), 2)
