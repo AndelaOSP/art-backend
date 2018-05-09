@@ -39,12 +39,13 @@ class UserSerializer(serializers.ModelSerializer):
 class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
     assigned_to = UserSerializer(read_only=True)
+    asset_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Asset
         fields = ("id", "asset_code", "serial_number", "model_number",
                   "checkin_status", "assigned_to", "created_at",
-                  "last_modified", "current_status"
+                  "last_modified", "current_status", 'asset_type'
                   )
 
     def get_checkin_status(self, obj):
@@ -58,6 +59,9 @@ class AssetSerializer(serializers.ModelSerializer):
                 return "checked_out"
         except AttributeError:
             return None
+
+    def get_asset_type(self, obj):
+        return obj.model_number.make_label.asset_type.asset_type
 
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
