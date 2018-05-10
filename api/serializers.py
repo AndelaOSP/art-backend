@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
-    UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory
+    UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
+    AssetCategory
 )
 
 
@@ -113,3 +114,9 @@ class AllocationsSerializer(serializers.ModelSerializer):
         model = AllocationHistory
         fields = ("asset", "current_owner", "previous_owner", "created_at")
         read_only_fields = ("previous_owner",)
+
+
+class AssetCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetCategory
+        fields = ("id", "category_name", "created_at", "last_modified")
