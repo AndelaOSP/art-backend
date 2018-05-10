@@ -107,38 +107,6 @@ class AssetModelNumber(models.Model):
     def __str__(self):
         return self.model_number
 
-class AssetCondition(models.Model):
-    
-    current_condition = models.CharField(max_length=50,
-                                         default=NEW,
-                                         choices=asset_condition)
-
-    previous_condition = models.CharField(max_length=50,
-                                          choices=asset_condition,
-                                          editable=False,
-                                          blank=True,
-                                          null=True)
-    condition_description = models.CharField(max_length=50,
-                                             editable=False,
-                                             blank=True,
-                                             null=True)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
-
-    class Meta:
-        verbose_name_plural = 'Asset Condition'
-
-    def save(self, *args, **kwargs):
-        if self.current_condition == NEW:
-            self.condition_description = ''
-        try:
-            latest_record = AssetCondition.objects.latest('created_at')
-            self.previous_condition = latest_record.current_condition
-        except Exception:
-            self.previous_status = ''
-
-        self.full_clean()
-        super(AssetCondition, self).save(*args, **kwargs)
-
 
 class Asset(models.Model):
     """Stores all assets"""
@@ -154,9 +122,10 @@ class Asset(models.Model):
     model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
-    current_condition = models.ForeignKey(AssetCondition,
-                                          null=True,
-                                          on_delete=models.PROTECT)
+    current_condition = models.CharField(editable=False, max_length=50)
+    # current_condition = models.ForeignKey(AssetCondition,
+    #                                       null=True,
+    #                                       on_delete=models.PROTECT)
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
@@ -229,6 +198,42 @@ class AssetStatus(models.Model):
             self.previous_status = None
         self.full_clean()
         super(AssetStatus, self).save(*args, **kwargs)
+
+class AssetCondition(models.Model):
+    asset = models.ForeignKey(Asset,
+                              to_field="serial_number",
+                              null=False,
+                              on_delete=models.PROTECT)
+
+    current_condition = models.CharField(max_length=50,
+                                         default=NEW,
+                                         choices=asset_condition)
+
+    previous_condition = models.CharField(max_length=50,
+                                          choices=asset_condition,
+                                          editable=False,
+                                          blank=True,
+                                          null=True)
+    condition_description = models.CharField(max_length=50,
+                                             editable=False,
+                                             blank=True,
+                                             null=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    class Meta:
+        verbose_name_plural = 'Asset Condition'
+
+    def save(self, *args, **kwargs):
+        if self.current_condition == NEW:
+            self.condition_description = ''
+        try:
+            latest_record = AssetCondition.objects.latest('created_at')
+            self.previous_condition = latest_record.current_condition
+        except Exception:
+            self.previous_status = ''
+
+        self.full_clean()
+        super(AssetCondition, self).save(*args, **kwargs)
 
 
 class AllocationHistory(models.Model):
