@@ -119,4 +119,4 @@ class AllocationsSerializer(serializers.ModelSerializer):
 class AssetCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetCategory
-        fields = ("category_name", "created_at", "last_modified")
+        fields = ("id", "category_name", "created_at", "last_modified")

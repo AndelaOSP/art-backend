@@ -99,6 +99,6 @@ class AllocationsViewSet(ModelViewSet):
 class AssetCategoryViewSet(ModelViewSet):
     serializer_class = AssetCategorySerializer
     queryset = AssetCategory.objects.all()
-    permission_classes = [IsAuthenticated]
-    authentication_classes = (FirebaseTokenAuthentication)
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
