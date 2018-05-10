@@ -6,11 +6,11 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
-    AssetStatus
+    AssetStatus, AllocationHistory
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
-    AssetLogSerializer, AssetDetailSerializer, UserFeedbackSerializer, \
-    AssetStatusSerializer
+    AssetLogSerializer, UserFeedbackSerializer, \
+    AssetStatusSerializer, AllocationsSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -26,9 +26,6 @@ class UserViewSet(ModelViewSet):
 
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
-    action_serializers = {
-        'retrieve': AssetDetailSerializer,
-    }
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get']
@@ -88,4 +85,12 @@ class AssetStatusViewSet(ModelViewSet):
     queryset = AssetStatus.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
+    http_method_names = ['get', 'post']
+
+
+class AllocationsViewSet(ModelViewSet):
+    serializer_class = AllocationsSerializer
+    queryset = AllocationHistory.objects.all()
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']

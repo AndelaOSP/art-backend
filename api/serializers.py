@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
-    UserFeedback, CHECKIN, CHECKOUT, AssetStatus
+    UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory
 )
 
 
@@ -38,12 +38,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
+    assigned_to = UserSerializer(read_only=True)
+    asset_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Asset
         fields = ("id", "asset_code", "serial_number", "model_number",
                   "checkin_status", "assigned_to", "created_at",
-                  "last_modified", "current_status"
+                  "last_modified", "current_status", 'asset_type'
                   )
 
     def get_checkin_status(self, obj):
@@ -57,6 +59,9 @@ class AssetSerializer(serializers.ModelSerializer):
                 return "checked_out"
         except AttributeError:
             return None
+
+    def get_asset_type(self, obj):
+        return obj.model_number.make_label.asset_type.asset_type
 
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
@@ -72,10 +77,6 @@ class AssetLogSerializer(serializers.ModelSerializer):
             "id", "asset", "log_type",
             "created_at", "last_modified",
         )
-
-
-class AssetDetailSerializer(AssetSerializer):
-    assigned_to = UserSerializer(read_only=True)
 
 
 class UserFeedbackSerializer(serializers.ModelSerializer):
@@ -105,3 +106,10 @@ class AssetStatusSerializer(AssetSerializer):
             }
             for asset in asset_status if obj.created_at > asset.created_at
         ]
+
+
+class AllocationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllocationHistory
+        fields = ("asset", "current_owner", "previous_owner", "created_at")
+        read_only_fields = ("previous_owner",)

@@ -4,7 +4,15 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from core.models import Asset, AssetModelNumber, SecurityUser, AssetLog
+from core.models import (Asset,
+                         AssetModelNumber,
+                         SecurityUser,
+                         AssetLog,
+                         AllocationHistory,
+                         AssetMake,
+                         AssetType,
+                         AssetSubCategory,
+                         AssetCategory)
 
 User = get_user_model()
 client = APIClient()
@@ -22,15 +30,34 @@ class AssetTestCase(TestCase):
             slack_handle='@admin', password='devpassword'
         )
         self.token_other_user = 'otherusertesttoken'
-        assetmodel = AssetModelNumber(model_number="IMN50987")
-        assetmodel.save()
-        asset = Asset(
+        self.asset_category = AssetCategory.objects.create(
+            category_name="Accessories")
+        self.asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Sub Category name",
+            asset_category=self.asset_category)
+        self.asset_type = AssetType.objects.create(
+            asset_type="Asset Type",
+            asset_sub_category=self.asset_sub_category)
+        self.make_label = AssetMake.objects.create(
+            make_label="Asset Make", asset_type=self.asset_type)
+        self.assetmodel = AssetModelNumber(
+            model_number="IMN50987", make_label=self.make_label)
+        self.assetmodel.save()
+        self.asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
             assigned_to=self.user,
-            model_number=assetmodel,
+            model_number=self.assetmodel,
         )
-        asset.save()
+        self.asset.save()
+
+        allocation_history = AllocationHistory(
+            asset=self.asset,
+            current_owner=self.user
+        )
+
+        allocation_history.save()
+
         self.checked_by = SecurityUser.objects.create(
             email="sectest1@andela.com",
             password="devpassword",
@@ -39,7 +66,6 @@ class AssetTestCase(TestCase):
             phone_number="254720900900",
             badge_number="AE23"
         )
-        self.asset = asset
         self.asset_urls = reverse('assets-list')
 
     def test_non_authenticated_user_view_assets(self):
@@ -182,4 +208,15 @@ class AssetTestCase(TestCase):
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'],
                          "checked_out")
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_asset_type_in_asset_api(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn('asset_type', response.data.keys())
+        self.assertEqual(response.data['asset_type'],
+                         self.asset_type.asset_type)
         self.assertEqual(response.status_code, 200)
