@@ -124,10 +124,6 @@ class Asset(models.Model):
     current_status = models.CharField(editable=False, max_length=50)
     current_condition = models.CharField(editable=False, max_length=50, default='NA')
     
-    # current_condition = models.ForeignKey(AssetCondition,
-    #                                       null=True,
-    #                                       on_delete=models.PROTECT)
-
     def clean(self):
         if not self.asset_code and not self.serial_number:
             raise ValidationError(('Please provide either the serial number,\
