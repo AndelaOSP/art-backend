@@ -28,11 +28,6 @@ NEW = "Brand New"
 WORKING = "Working"
 ISSUES = "Issues"
 NOT_WORKING = "Not Working"
-asset_condition = ((NEW, "Brand New"),
-                   (WORKING, "Working"),
-                   (ISSUES, "Issues"),
-                   (NOT_WORKING, "Not Working"))
-
 
 class AssetCategory(models.Model):
     """ Stores all asset categories """
@@ -122,8 +117,10 @@ class Asset(models.Model):
     model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
-    current_condition = models.CharField(editable=False, max_length=50, default='NA')
     
+    condition_description = models.CharField(editable=False,
+                                            max_length=50,
+                                            default='Brand New')
     def clean(self):
         if not self.asset_code and not self.serial_number:
             raise ValidationError(('Please provide either the serial number,\
@@ -196,42 +193,6 @@ class AssetStatus(models.Model):
         self.full_clean()
         super(AssetStatus, self).save(*args, **kwargs)
 
-class AssetCondition(models.Model):
-    asset = models.ForeignKey(Asset,
-                              to_field="serial_number",
-                              null=False,
-                              on_delete=models.PROTECT)
-
-    current_condition = models.CharField(max_length=50,
-                                         choices=asset_condition)
-
-    previous_condition = models.CharField(max_length=50,
-                                          choices=asset_condition,
-                                          editable=False,
-                                          blank=True,
-                                          null=True)
-    condition_description = models.CharField(max_length=50,
-                                             editable=True,
-                                             blank=True,
-                                             null=True)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
-
-    class Meta:
-        verbose_name_plural = 'Asset Condition'
-    
-    def save(self, *args, **kwargs):
-        if self.current_condition == NEW:
-            self.condition_description = ''
-        try:
-            latest_record = AssetCondition.objects.latest('created_at')
-            self.previous_condition = latest_record.current_condition
-        except Exception:
-            self.previous_status = ''
-
-        self.full_clean()
-        super(AssetCondition, self).save(*args, **kwargs)
-
-
 class AllocationHistory(models.Model):
     asset = models.ForeignKey(Asset,
                               to_field="serial_number",
@@ -267,6 +228,24 @@ class AllocationHistory(models.Model):
             self.previous_owner = None
         super(AllocationHistory, self).save(*args, **kwargs)
 
+class AssetCondition(models.Model):
+    asset = models.ForeignKey(Asset,
+                              to_field="serial_number",
+                              null=False,
+                              on_delete=models.PROTECT)
+
+    condition_description = models.CharField(max_length=50,
+                                             editable=True,
+                                             blank=True,
+                                             null=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    class Meta:
+        verbose_name_plural = 'Asset Condition'
+        
+    def save(self, *args, **kwargs):
+        super(AssetCondition, self).save(*args, **kwargs)
+
 
 @receiver(post_save, sender=AssetStatus)
 def set_current_asset_status(sender, **kwargs):
@@ -289,7 +268,14 @@ def save_initial_asset_status(sender, **kwargs):
         AssetStatus.objects.create(asset=current_asset,
                                    current_status=AVAILABLE)
         current_asset.save()
-
+@receiver(post_save, sender=AssetCondition)
+def save_asset_condition(sender, **kwargs):
+    new_condition = kwargs.get('instance')
+    related_asset = new_condition.asset
+    if not new_condition.condition_description == related_asset.condition_description:
+        related_asset.condition_description = new_condition.condition_description
+        related_asset.save()
+    
 
 @receiver(post_save, sender=AllocationHistory)
 def save_current_asset_owner(sender, **kwargs):
