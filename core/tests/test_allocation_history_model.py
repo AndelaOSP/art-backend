@@ -26,14 +26,10 @@ class AllocationHistoryModelTest(TestCase):
         test_assetmodel = AssetModelNumber(model_number="IMN50987")
         test_assetmodel.save()
 
-        self.asset_condition = AssetCondition()
-        self.asset_condition.save()
-
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            model_number=test_assetmodel,
-            current_condition=self.asset_condition
+            model_number=test_assetmodel
         )
         self.test_asset.save()
 

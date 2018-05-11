@@ -24,15 +24,11 @@ class AssetStatusModelTest(TestCase):
             slack_handle='@test_user', password='devpassword'
         )
 
-        self.asset_condition = AssetCondition()
-        self.asset_condition.save()
-
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
             model_number=self.test_assetmodel1,
-            assigned_to=self.normal_user,
-            current_condition=self.asset_condition
+            assigned_to=self.normal_user
         )
         self.test_asset.save()
         self.asset = Asset.objects.get(asset_code="IC001")
@@ -46,8 +42,7 @@ class AssetStatusModelTest(TestCase):
             asset_code="IC002",
             serial_number="SN002",
             model_number=self.test_assetmodel2,
-            assigned_to=self.normal_user,
-            current_condition=self.asset_condition
+            assigned_to=self.normal_user
         )
         test_asset2.save()
         self.assertEqual(AssetStatus.objects.all().count(), 2)

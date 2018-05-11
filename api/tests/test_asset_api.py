@@ -26,15 +26,11 @@ class AssetTestCase(TestCase):
         assetmodel = AssetModelNumber(model_number="IMN50987")
         assetmodel.save()
 
-        self.asset_condition = AssetCondition()
-        self.asset_condition.save()
-
         asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
             assigned_to=self.user,
-            model_number=assetmodel,
-            current_condition=self.asset_condition
+            model_number=assetmodel
         )
         self.asset.save()
 

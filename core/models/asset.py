@@ -122,7 +122,8 @@ class Asset(models.Model):
     model_number = models.ForeignKey(AssetModelNumber, null=True,
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
-    current_condition = models.CharField(editable=False, max_length=50)
+    current_condition = models.CharField(editable=False, max_length=50, default='NA')
+    
     # current_condition = models.ForeignKey(AssetCondition,
     #                                       null=True,
     #                                       on_delete=models.PROTECT)
@@ -206,7 +207,6 @@ class AssetCondition(models.Model):
                               on_delete=models.PROTECT)
 
     current_condition = models.CharField(max_length=50,
-                                         default=NEW,
                                          choices=asset_condition)
 
     previous_condition = models.CharField(max_length=50,
@@ -215,14 +215,14 @@ class AssetCondition(models.Model):
                                           blank=True,
                                           null=True)
     condition_description = models.CharField(max_length=50,
-                                             editable=False,
+                                             editable=True,
                                              blank=True,
                                              null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
         verbose_name_plural = 'Asset Condition'
-
+    
     def save(self, *args, **kwargs):
         if self.current_condition == NEW:
             self.condition_description = ''

@@ -21,16 +21,16 @@ class AssetConditionModelTest(TestCase):
         test_assetmodel = AssetModelNumber(model_number="IMN50987")
         test_assetmodel.save()
 
-        self.asset_condition = AssetCondition()
-        self.asset_condition.save()
-
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            model_number=test_assetmodel,
-            current_condition=self.asset_condition
+            model_number=test_assetmodel
         )
         self.test_asset.save()
+
+        self.asset_condition = AssetCondition(current_condition='Brand New',
+                                              asset=self.test_asset)
+        self.asset_condition.save()
 
     def test_create_asset_creates_default_assest_condition(self):
         self.assertEqual(AssetCondition.objects.count(), 1)

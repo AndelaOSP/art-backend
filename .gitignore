@@ -8,7 +8,8 @@ __pycache__/
 
 db.sqlite3
 .env
-
+.DS_Store/
+.DS_Store
 # Distribution / packaging
 .Python
 env/
