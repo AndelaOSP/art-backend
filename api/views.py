@@ -6,12 +6,13 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
-    AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory
+    AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
+    AssetType
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
     AssetStatusSerializer, AllocationsSerializer, AssetCategorySerializer, \
-    AssetSubCategorySerializer
+    AssetSubCategorySerializer, AssetTypeSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -108,6 +109,14 @@ class AssetCategoryViewSet(ModelViewSet):
 class AssetSubCategoryViewSet(ModelViewSet):
     serializer_class = AssetSubCategorySerializer
     queryset = AssetSubCategory.objects.all()
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    http_method_names = ['get', 'post']
+
+
+class AssetTypeViewSet(ModelViewSet):
+    serializer_class = AssetTypeSerializer
+    queryset = AssetType.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
