@@ -6,11 +6,12 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
-    AssetStatus, AllocationHistory, AssetCategory
+    AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
-    AssetStatusSerializer, AllocationsSerializer, AssetCategorySerializer
+    AssetStatusSerializer, AllocationsSerializer, AssetCategorySerializer, \
+    AssetSubCategorySerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -49,7 +50,7 @@ class AssetViewSet(ModelViewSet):
 class SecurityUserEmailsViewSet(ModelViewSet):
     serializer_class = SecurityUserEmailsSerializer
     http_method_names = ['get']
-    permission_classes = (IsApiUser, )
+    permission_classes = (IsApiUser,)
 
     def list(self, request, *args, **kwargs):
         list_of_emails = [security_user.email
@@ -99,6 +100,14 @@ class AllocationsViewSet(ModelViewSet):
 class AssetCategoryViewSet(ModelViewSet):
     serializer_class = AssetCategorySerializer
     queryset = AssetCategory.objects.all()
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    http_method_names = ['get', 'post']
+
+
+class AssetSubCategoryViewSet(ModelViewSet):
+    serializer_class = AssetSubCategorySerializer
+    queryset = AssetSubCategory.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
