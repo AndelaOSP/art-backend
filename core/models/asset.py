@@ -29,6 +29,7 @@ WORKING = "Working"
 ISSUES = "Issues"
 NOT_WORKING = "Not Working"
 
+
 class AssetCategory(models.Model):
     """ Stores all asset categories """
     category_name = models.CharField(max_length=40, null=False)
@@ -114,13 +115,14 @@ class Asset(models.Model):
                                     editable=False,
                                     null=True,
                                     on_delete=models.PROTECT)
-    model_number = models.ForeignKey(AssetModelNumber, null=True,
-                                     on_delete=models.PROTECT)
+    model_number = models.ForeignKey(AssetModelNumber, 
+                                    null=True,
+                                    on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
-    
     condition_description = models.CharField(editable=False,
                                             max_length=50,
                                             default='Brand New')
+
     def clean(self):
         if not self.asset_code and not self.serial_number:
             raise ValidationError(('Please provide either the serial number,\
@@ -193,6 +195,7 @@ class AssetStatus(models.Model):
         self.full_clean()
         super(AssetStatus, self).save(*args, **kwargs)
 
+
 class AllocationHistory(models.Model):
     asset = models.ForeignKey(Asset,
                               to_field="serial_number",
@@ -227,6 +230,7 @@ class AllocationHistory(models.Model):
         except Exception:
             self.previous_owner = None
         super(AllocationHistory, self).save(*args, **kwargs)
+        
 
 class AssetCondition(models.Model):
     asset = models.ForeignKey(Asset,
