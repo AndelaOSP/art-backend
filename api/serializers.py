@@ -3,7 +3,7 @@ from rest_framework import serializers
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
-    AssetCategory
+    AssetCategory, AssetSubCategory
 )
 
 
@@ -84,7 +84,7 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFeedback
         fields = ("reported_by", "message", "report_type", "created_at")
-        read_only_fields = ("reported_by", )
+        read_only_fields = ("reported_by",)
 
 
 class AssetStatusSerializer(AssetSerializer):
@@ -120,3 +120,10 @@ class AssetCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetCategory
         fields = ("id", "category_name", "created_at", "last_modified")
+
+
+class AssetSubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetSubCategory
+        fields = ("id", "sub_category_name", "asset_category",
+                  "created_at", "last_modified")
