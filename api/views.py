@@ -12,7 +12,8 @@ from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
     AssetStatusSerializer, AllocationsSerializer, AssetCategorySerializer, \
-    AssetSubCategorySerializer, AssetTypeSerializer, AssetModelNumberSerializer
+    AssetSubCategorySerializer, AssetTypeSerializer, \
+    AssetModelNumberSerializer, AssetModelNumberGETSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -128,3 +129,8 @@ class AssetModelNumberViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return AssetModelNumberGETSerializer
+        return super().get_serializer_class()

@@ -141,3 +141,15 @@ class AssetModelNumberSerializer(serializers.ModelSerializer):
         model = AssetModelNumber
         fields = ("id", "model_number", "make_label",
                   "created_at", "last_modified")
+
+
+class AssetModelNumberGETSerializer(serializers.ModelSerializer):
+    make_label = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AssetModelNumber
+        fields = ("id", "model_number", "make_label",
+                  "created_at", "last_modified")
+
+    def get_make_label(self, obj):
+        return obj.make_label.make_label
