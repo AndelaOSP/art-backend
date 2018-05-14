@@ -3,7 +3,7 @@ from rest_framework import serializers
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
-    AssetCategory, AssetSubCategory, AssetType
+    AssetCategory, AssetSubCategory, AssetType, AssetModelNumber
 )
 
 
@@ -133,4 +133,11 @@ class AssetTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetType
         fields = ("id", "asset_type", "asset_sub_category",
+                  "created_at", "last_modified")
+
+
+class AssetModelNumberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetModelNumber
+        fields = ("id", "model_number", "make_label",
                   "created_at", "last_modified")
