@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from ..models import Asset, AssetCondition, AssetModelNumber, AssetStatus
+from ..models import Asset, AssetModelNumber, AssetStatus
 
 User = get_user_model()
 client = APIClient()

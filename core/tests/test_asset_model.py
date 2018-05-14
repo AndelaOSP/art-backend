@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 from django.contrib.auth import get_user_model
 
-from ..models import Asset, AssetCondition, AssetModelNumber, AssetStatus
+from ..models import Asset, AssetModelNumber, AssetStatus
 
 User = get_user_model()
 
