@@ -24,10 +24,6 @@ LOG_TYPE_CHOICES = (
     (CHECKIN, "Checkin"),
     (CHECKOUT, "Checkout"),
 )
-NEW = "Brand New"
-WORKING = "Working"
-ISSUES = "Issues"
-NOT_WORKING = "Not Working"
 
 
 class AssetCategory(models.Model):
@@ -119,7 +115,7 @@ class Asset(models.Model):
                                      null=True,
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
-    condition_description = models.CharField(editable=False,
+    asset_condition = models.CharField(editable=False,
                                              max_length=50,
                                              default='Brand New')
 
@@ -238,7 +234,7 @@ class AssetCondition(models.Model):
                               null=False,
                               on_delete=models.PROTECT)
 
-    condition_description = models.CharField(max_length=50,
+    asset_condition = models.CharField(max_length=50,
                                              editable=True,
                                              blank=True,
                                              null=True)

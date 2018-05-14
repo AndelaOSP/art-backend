@@ -109,7 +109,7 @@ class AssetAdmin(admin.ModelAdmin):
     )
     list_display = (
         'asset_code', 'serial_number', 'model_number', 'created_at',
-        'assigned_to', 'current_status', 'condition_description'
+        'assigned_to', 'current_status', 'asset_condition'
     )
 
 
@@ -127,7 +127,7 @@ class AllocationHistoryAdmin(admin.ModelAdmin):
 
 
 class AssetConditionAdmin(admin.ModelAdmin):
-    list_display = ('asset', 'condition_description', 'created_at')
+    list_display = ('asset', 'asset_condition', 'created_at')
 
 class AssetLogsAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'asset', 'checked_by', 'log_type')

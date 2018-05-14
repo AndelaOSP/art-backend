@@ -29,7 +29,7 @@ class AssetConditionModelTest(TestCase):
         self.test_asset.save()
 
         self.asset_condition = AssetCondition(
-                                        condition_description='Brand New',
+                                        asset_condition='Brand New',
                                         asset=self.test_asset
                                         )
         self.asset_condition.save()
