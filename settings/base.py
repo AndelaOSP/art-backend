@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-from decouple import config
+from decouple import config, Csv
 import dj_database_url
 
 
@@ -186,4 +186,4 @@ LOGGING = {
     }
 }
 
-ADMINS = config('ADMINS', default=[])
+ADMINS = config('ADMINS', default=[], cast=Csv())
