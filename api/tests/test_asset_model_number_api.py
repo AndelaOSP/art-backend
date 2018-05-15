@@ -128,3 +128,53 @@ class AssetModelNumberAPITest(TestCase):
             'detail': 'Method "DELETE" not allowed.'
         })
         self.assertEqual(response.status_code, 405)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_can_post_invalid_payload_model_number(
+            self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
+        data = {
+            "model_number": "",
+            "make_label": self.asset_label.id
+        }
+        response = client.post(
+            self.asset_model_no_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEquals(response.data, {
+            'model_number': ['This field may not be blank.']})
+        self.assertEqual(response.status_code, 400)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_can_post_invalid_payload_make_label(
+            self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
+        data = {
+            "model_number": "TEST",
+            "make_label": "Invalid"
+        }
+        response = client.post(
+            self.asset_model_no_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEquals(response.data, {
+            'make_label': [
+                f'Invalid pk "{data["make_label"]}" - object does not exist.'
+            ]})
+        self.assertEqual(response.status_code, 400)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_can_post_empty_payload_make_label(
+            self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
+        data = {
+            "model_number": "TEST",
+            "make_label": ""
+        }
+        response = client.post(
+            self.asset_model_no_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEquals(response.data, {
+            'make_label': ['This field is required.']})
+        self.assertEqual(response.status_code, 400)
