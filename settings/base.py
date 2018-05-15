@@ -186,4 +186,6 @@ LOGGING = {
     }
 }
 
-ADMINS = config('ADMINS', default=[], cast=Csv())
+csv = Csv(cast=lambda s: tuple(s.split(':')))
+
+ADMINS = csv(os.environ.get('ADMINS', ''))
