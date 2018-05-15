@@ -28,19 +28,19 @@ class AssetConditionModelTest(TestCase):
         )
         self.test_asset.save()
 
-        self.asset_condition = AssetCondition(
+        self.assetcondition = AssetCondition(
                                         asset_condition='Brand New',
                                         asset=self.test_asset
                                         )
-        self.asset_condition.save()
+        self.assetcondition.save()
 
     def test_create_asset_creates_default_assest_condition(self):
         self.assertEqual(AssetCondition.objects.count(), 1)
-        self.assertEqual(self.asset_condition.condition_description,
+        self.assertEqual(self.assetcondition.asset_condition,
                          'Brand New')
 
     def test_edit_asset_condition(self):
-        self.asset_condition.condition_description = 'Working'
+        self.assetcondition.asset_condition = 'Working'
 
         self.assertEqual(AssetCondition.objects.count(), 1)
-        self.assertEqual(self.asset_condition.condition_description, 'Working')
+        self.assertEqual(self.assetcondition.asset_condition, 'Working')

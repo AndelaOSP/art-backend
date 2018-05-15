@@ -116,8 +116,8 @@ class Asset(models.Model):
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
     asset_condition = models.CharField(editable=False,
-                                             max_length=50,
-                                             default='Brand New')
+                                       max_length=50,
+                                       default='Brand New')
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
@@ -235,9 +235,9 @@ class AssetCondition(models.Model):
                               on_delete=models.PROTECT)
 
     asset_condition = models.CharField(max_length=50,
-                                             editable=True,
-                                             blank=True,
-                                             null=True)
+                                       editable=True,
+                                       blank=True,
+                                       null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
@@ -274,10 +274,10 @@ def save_initial_asset_status(sender, **kwargs):
 def save_asset_condition(sender, **kwargs):
     new_condition = kwargs.get('instance')
     related_asset = new_condition.asset
-    if not new_condition.condition_description == \
-            related_asset.condition_description:
-        related_asset.condition_description = \
-            new_condition.condition_description
+    if not new_condition.asset_condition == \
+            related_asset.asset_condition:
+        related_asset.asset_condition = \
+            new_condition.asset_condition
         related_asset.save()
 
 

@@ -129,6 +129,7 @@ class AllocationHistoryAdmin(admin.ModelAdmin):
 class AssetConditionAdmin(admin.ModelAdmin):
     list_display = ('asset', 'asset_condition', 'created_at')
 
+
 class AssetLogsAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'asset', 'checked_by', 'log_type')
 
