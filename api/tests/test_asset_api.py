@@ -138,8 +138,8 @@ def test_assets_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
 
 
 @patch('api.authentication.auth.verify_id_token')
-def test_assets_detail_api_endpoint_contain_assigned_to_details(self,
-                                                                mock_verify_id_token):
+def test_assets_detail_api_endpoint_contain_assigned_to_details(
+        self, mock_verify_id_token):
     mock_verify_id_token.return_value = {'email': self.user.email}
     response = client.get(
         '{}{}/'.format(self.asset_urls, self.asset.serial_number),
