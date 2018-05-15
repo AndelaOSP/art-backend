@@ -111,9 +111,13 @@ class Asset(models.Model):
                                     editable=False,
                                     null=True,
                                     on_delete=models.PROTECT)
-    model_number = models.ForeignKey(AssetModelNumber, null=True,
+    model_number = models.ForeignKey(AssetModelNumber,
+                                     null=True,
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
+    asset_condition = models.CharField(editable=False,
+                                       max_length=50,
+                                       default='Brand New')
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
@@ -224,6 +228,25 @@ class AllocationHistory(models.Model):
         super(AllocationHistory, self).save(*args, **kwargs)
 
 
+class AssetCondition(models.Model):
+    asset = models.ForeignKey(Asset,
+                              to_field="serial_number",
+                              null=False,
+                              on_delete=models.PROTECT)
+
+    asset_condition = models.CharField(max_length=50,
+                                       editable=True,
+                                       blank=True,
+                                       null=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    class Meta:
+        verbose_name_plural = 'Asset Condition'
+
+    def save(self, *args, **kwargs):
+        super(AssetCondition, self).save(*args, **kwargs)
+
+
 @receiver(post_save, sender=AssetStatus)
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
@@ -245,6 +268,17 @@ def save_initial_asset_status(sender, **kwargs):
         AssetStatus.objects.create(asset=current_asset,
                                    current_status=AVAILABLE)
         current_asset.save()
+
+
+@receiver(post_save, sender=AssetCondition)
+def save_asset_condition(sender, **kwargs):
+    new_condition = kwargs.get('instance')
+    related_asset = new_condition.asset
+    if not new_condition.asset_condition == \
+            related_asset.asset_condition:
+        related_asset.asset_condition = \
+            new_condition.asset_condition
+        related_asset.save()
 
 
 @receiver(post_save, sender=AllocationHistory)

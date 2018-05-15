@@ -127,5 +127,5 @@ class AssetModelNumberViewSet(ModelViewSet):
     serializer_class = AssetModelNumberSerializer
     queryset = AssetModelNumber.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
