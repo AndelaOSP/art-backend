@@ -8,7 +8,8 @@ __pycache__/
 
 db.sqlite3
 .env
-
+.DS_Store/
+.DS_Store
 # Distribution / packaging
 .Python
 env/
@@ -114,3 +115,6 @@ docker-compose.yml
 
 #vscode files
 .vscode
+
+#DS_Store
+*.DS_Store

@@ -27,7 +27,8 @@ class AssetStatusModelTest(TestCase):
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            model_number=self.test_assetmodel1
+            model_number=self.test_assetmodel1,
+            assigned_to=self.normal_user
         )
         self.test_asset.save()
         self.asset = Asset.objects.get(asset_code="IC001")
@@ -40,7 +41,8 @@ class AssetStatusModelTest(TestCase):
         test_asset2 = Asset(
             asset_code="IC002",
             serial_number="SN002",
-            model_number=self.test_assetmodel2
+            model_number=self.test_assetmodel2,
+            assigned_to=self.normal_user
         )
         test_asset2.save()
         self.assertEqual(AssetStatus.objects.all().count(), 2)
