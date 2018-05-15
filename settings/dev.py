@@ -12,7 +12,8 @@ MIDDLEWARE += [  # noqa ignore=F405
 
 ALLOWED_HOSTS = [
     '0.0.0.0',
-    '127.0.0.1'
+    '127.0.0.1',
+    'art-backend.herokuapp.com'
 ]
 
 INTERNAL_IPS = [
