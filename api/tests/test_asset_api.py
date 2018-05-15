@@ -220,3 +220,4 @@ class AssetTestCase(TestCase):
         self.assertEqual(response.data['asset_type'],
                          self.asset_type.asset_type)
         self.assertEqual(response.status_code, 200)
+        
