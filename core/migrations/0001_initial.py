@@ -81,7 +81,6 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('last_modified', models.DateTimeField(auto_now=True)),
                 ('current_status', models.CharField(editable=False, max_length=50)),
-                ('asset_condition', models.CharField(default='Brand New', editable=False, max_length=50)),
             ],
         ),
         migrations.CreateModel(
@@ -94,18 +93,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name_plural': 'Asset Categories',
-            },
-        ),
-        migrations.CreateModel(
-            name='AssetCondition',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('asset_condition', models.CharField(blank=True, max_length=50, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('asset', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.Asset', to_field='serial_number')),
-            ],
-            options={
-                'verbose_name_plural': 'Asset Condition',
             },
         ),
         migrations.CreateModel(
