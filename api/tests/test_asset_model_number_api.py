@@ -10,7 +10,7 @@ client = APIClient()
 
 
 class AssetModelNumberAPITest(TestCase):
-    """ Tests for the Asset Model Number endpoint"""
+    ''' Tests for the Asset Model Number endpoint'''
 
     def setUp(self):
         self.user = User.objects.create(
@@ -19,24 +19,24 @@ class AssetModelNumberAPITest(TestCase):
         )
 
         self.asset_category = AssetCategory.objects.create(
-            category_name="Accessories"
+            category_name='Accessories'
         )
         self.asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name="Key Board",
+            sub_category_name='Key Board',
             asset_category=self.asset_category
         )
         self.asset_type = AssetType.objects.create(
-            asset_type="Dell",
+            asset_type='Dell',
             asset_sub_category=self.asset_sub_category
         )
 
         self.asset_label = AssetMake.objects.create(
-            make_label="ASSET-LABEL",
+            make_label='ASSET-LABEL',
             asset_type=self.asset_type
         )
 
         self.asset_model_no = AssetModelNumber.objects.create(
-            model_number="TEST-MODEL-NO",
+            model_number='TEST-MODEL-NO',
             make_label=self.asset_label
         )
 
@@ -53,15 +53,15 @@ class AssetModelNumberAPITest(TestCase):
     def test_can_post_asset_model_number(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "model_number": "TEST-MODEL-NO",
-            "make_label": self.asset_label.id
+            'model_number': 'TEST-MODEL-NO',
+            'make_label': self.asset_label.id
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn("model_number", response.data.keys())
-        self.assertIn(data["model_number"], response.data.values())
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
+        self.assertIn('model_number', response.data.keys())
+        self.assertIn(data['model_number'], response.data.values())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -69,20 +69,20 @@ class AssetModelNumberAPITest(TestCase):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
             self.asset_model_no_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
 
         self.assertEqual(len(response.data), AssetCategory.objects.count())
-        self.assertIn("model_number", response.data[0].keys())
+        self.assertIn('model_number', response.data[0].keys())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_get_single_asset_model_number(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
-            f"{self.asset_model_no_url}{self.asset_model_no.id}/",
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            f'{self.asset_model_no_url}{self.asset_model_no.id}/',
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
 
-        self.assertIn("model_number", response.data.keys())
+        self.assertIn('model_number', response.data.keys())
         self.assertIn(self.asset_model_no.model_number,
                       response.data.values())
         self.assertEqual(response.status_code, 200)
@@ -95,7 +95,7 @@ class AssetModelNumberAPITest(TestCase):
         response = client.put(
             self.asset_model_no_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PUT" not allowed.'
         })
@@ -109,7 +109,7 @@ class AssetModelNumberAPITest(TestCase):
         response = client.patch(
             self.asset_model_no_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'
         })
@@ -123,40 +123,40 @@ class AssetModelNumberAPITest(TestCase):
         response = client.delete(
             self.asset_model_no_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "DELETE" not allowed.'
         })
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_can_post_invalid_payload_model_number(
+    def test_cannot_post_empty_model_number(
             self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "model_number": "",
-            "make_label": self.asset_label.id
+            'model_number': '',
+            'make_label': self.asset_label.id
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEquals(response.data, {
             'model_number': ['This field may not be blank.']})
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_can_post_invalid_payload_make_label(
+    def test_cannot_post_invalid_make_label(
             self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "model_number": "TEST",
-            "make_label": "Invalid"
+            'model_number': 'TEST',
+            'make_label': 'Invalid'
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEquals(response.data, {
             'make_label': [
                 f'Invalid pk "{data["make_label"]}" - object does not exist.'
@@ -164,17 +164,17 @@ class AssetModelNumberAPITest(TestCase):
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_can_post_empty_payload_make_label(
+    def test_cannot_post_empty_make_label(
             self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "model_number": "TEST",
-            "make_label": ""
+            'model_number': 'TEST',
+            'make_label': ''
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEquals(response.data, {
             'make_label': ['This field is required.']})
         self.assertEqual(response.status_code, 400)
