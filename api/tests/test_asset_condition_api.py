@@ -1,9 +1,17 @@
 from django.test import TestCase
 from unittest.mock import patch
+from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
-from core.models import User, Asset, AssetModelNumber
+from core.models import (Asset,
+                         AssetModelNumber,
+                         AssetMake,
+                         AssetType,
+                         AssetSubCategory,
+                         AssetCategory)
+
+User = get_user_model()
 client = APIClient()
 
 
@@ -15,8 +23,19 @@ class AssetConditionAPITest(TestCase):
             email='testuser@gmail.com', cohort=19,
             slack_handle='tester', password='qwerty123'
         )
+        self.asset_category = AssetCategory.objects.create(
+            category_name="Accessories")
+        self.asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Sub Category name",
+            asset_category=self.asset_category)
+        self.asset_type = AssetType.objects.create(
+            asset_type="Asset Type",
+            asset_sub_category=self.asset_sub_category)
+        self.make_label = AssetMake.objects.create(
+            make_label="Asset Make", asset_type=self.asset_type)
         self.assetmodel = AssetModelNumber(
             model_number="IMN50987", make_label=self.make_label)
+        self.assetmodel.save()
         self.asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
@@ -25,7 +44,7 @@ class AssetConditionAPITest(TestCase):
         )
         self.asset.save()
 
-        self.condition_url = reverse('asset-condition')
+        self.condition_url = reverse('asset-condition-list')
         self.token_user = 'testtoken'
 
     @patch('api.authentication.auth.verify_id_token')
