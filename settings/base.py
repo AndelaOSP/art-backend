@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-from decouple import config
+from decouple import config, Csv
 import dj_database_url
 
 
@@ -147,3 +147,46 @@ REST_FRAMEWORK = {
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.APIUser'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} \
+            {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'mail_admins': {
+            'level': 'WARNING',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'WARNING',
+            'propagate': False,
+        }
+    }
+}
+
+csv = Csv(cast=lambda s: tuple(s.split(':')))
+
+ADMINS = csv(os.environ.get('ADMINS', ''))
