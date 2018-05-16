@@ -18,14 +18,18 @@ from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.urls import path
+from rest_framework_swagger.views import get_swagger_view
 
 from api import urls
+
+schema_view = get_swagger_view(title='ART API')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include(urls)),
     path('jet/', include('jet.urls', 'jet')),
-    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard'))
+    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
+    path('docs/', schema_view)
 ]
 if settings.DEBUG:
     import debug_toolbar
