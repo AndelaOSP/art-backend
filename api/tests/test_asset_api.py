@@ -115,6 +115,13 @@ class AssetTestCase(TestCase):
             self.asset_urls,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        res_data = response.data
+        self.assertEqual(
+            data.get("asset_code"), res_data.get("asset_code"))
+        self.assertEqual(
+            data.get("serial_number"), res_data.get("serial_number"))
+        self.assertEqual(
+            data.get("model_number"), res_data.get("model_number"))
         self.assertEqual(Asset.objects.count(), 2)
         self.assertEqual(response.status_code, 201)
 
