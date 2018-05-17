@@ -126,6 +126,27 @@ class AssetTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_can_post_asset_with_invalid_model_number(
+            self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+
+        self.assetmodel.id = 300
+
+        data = {
+            "asset_code": "IC002",
+            "serial_number": "SN002",
+            "model_number": self.assetmodel.id
+        }
+        response = client.post(
+            self.asset_urls,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(response.data, {
+            'model_number': ['Invalid pk "300" - object does not exist.']
+        })
+        self.assertEqual(response.status_code, 400)
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_assets_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.put(
