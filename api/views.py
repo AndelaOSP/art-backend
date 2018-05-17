@@ -31,7 +31,7 @@ class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ['get']
+    http_method_names = ['get', 'post']
 
     def get_queryset(self):
         user = self.request.user
@@ -47,6 +47,9 @@ class AssetViewSet(ModelViewSet):
             if self.action in self.action_serializers:
                 return self.action_serializers[self.action]
         return super().get_serializer_class()
+
+    def perform_create(self, serializer):
+            serializer.save()
 
 
 class SecurityUserEmailsViewSet(ModelViewSet):
