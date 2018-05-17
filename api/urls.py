@@ -6,7 +6,7 @@ from django.urls import path
 from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     AssetLogViewSet, UserFeedbackViewSet, AssetStatusViewSet,\
     AllocationsViewSet, AssetCategoryViewSet, AssetSubCategoryViewSet, \
-    AssetTypeViewSet
+    AssetTypeViewSet, AssetModelNumberViewSet
 
 router = SimpleRouter()
 router.register('users', UserViewSet)
@@ -22,6 +22,8 @@ router.register('asset-sub-categories', AssetSubCategoryViewSet,
                 'asset-sub-categories')
 router.register('asset-types', AssetTypeViewSet,
                 'asset-types')
+router.register('asset-models', AssetModelNumberViewSet,
+                'asset-models')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),

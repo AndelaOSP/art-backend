@@ -3,7 +3,7 @@ from rest_framework import serializers
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
-    AssetCategory, AssetSubCategory, AssetType
+    AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake
 )
 
 
@@ -134,3 +134,36 @@ class AssetTypeSerializer(serializers.ModelSerializer):
         model = AssetType
         fields = ("id", "asset_type", "asset_sub_category",
                   "created_at", "last_modified")
+
+
+class AssetModelNumberSerializer(serializers.ModelSerializer):
+    make_label = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AssetModelNumber
+        fields = ('id', 'model_number', 'make_label',
+                  'created_at', 'last_modified')
+
+    def get_make_label(self, obj):
+        return obj.make_label.make_label
+
+    def to_internal_value(self, data):
+        make_label = data.get('make_label')
+        if not make_label:
+            raise serializers.ValidationError({
+                'make_label': [self.error_messages['required']]
+            })
+        try:
+            make_label_instance = AssetMake.objects.get(
+                id=make_label)
+        except Exception:
+            raise serializers.ValidationError({
+                'make_label': [
+                    f'Invalid pk \"{make_label}\" - object does not exist.'
+                ]})
+
+        internal_value = super().to_internal_value(data)
+        internal_value.update({
+            'make_label': make_label_instance
+        })
+        return internal_value
