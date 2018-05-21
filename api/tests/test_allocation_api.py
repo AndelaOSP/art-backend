@@ -5,7 +5,8 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from core.models import Asset, AssetModelNumber, SecurityUser, \
-    AllocationHistory
+    AllocationHistory, AssetCategory, AssetSubCategory, AssetType, \
+    AssetMake
 
 User = get_user_model()
 client = APIClient()
@@ -23,7 +24,18 @@ class AllocationTestCase(TestCase):
             slack_handle='@admin', password='devpassword'
         )
         self.token_other_user = 'otherusertesttoken'
-        assetmodel = AssetModelNumber(model_number="IMN50987")
+        self.asset_category = AssetCategory.objects.create(
+            category_name="Accessories")
+        self.asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Sub Category name",
+            asset_category=self.asset_category)
+        self.asset_type = AssetType.objects.create(
+            asset_type="Asset Type",
+            asset_sub_category=self.asset_sub_category)
+        self.make_label = AssetMake.objects.create(
+            make_label="Asset Make", asset_type=self.asset_type)
+        assetmodel = AssetModelNumber(
+            model_number="IMN50987", make_label=self.make_label)
         assetmodel.save()
         asset = Asset(
             asset_code="IC001",
@@ -78,27 +90,23 @@ class AllocationTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_rellocate_to_new_owner(self, mock_verify_id_token):
-        """Test post new allocation"""
-        self.assertEqual(AllocationHistory.objects.all().count(), 0)
-        mock_verify_id_token.return_value = {'email': self.other_user.email}
-        data = {"asset": "SN001",
-                "current_owner": self.user.id}
-        response = client.post(self.allocations_urls, data,
-                               HTTP_AUTHORIZATION="Token {}".
-                               format(self.token_user)
-                               )
+    def test_asset_status_changes_to_allocated(self, mock_verify_id_token):
+        """Test allocating asset changes asset status to allocated"""
+
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        data = {
+            'asset': self.asset.serial_number,
+            'current_owner': self.user.id}
+        token = f"Token {self.token_user}"
+        response = client.post(
+            self.allocations_urls, data,
+            HTTP_AUTHORIZATION=token
+        )
         self.assertEqual(response.status_code, 201)
-        data = {"asset": "SN001",
-                "current_owner": self.other_user.id}
-        response = client.post(self.allocations_urls, data,
-                               HTTP_AUTHORIZATION="Token {}".
-                               format(self.token_user)
-                               )
-        self.assertEqual(AllocationHistory.objects.all().count(), 2)
-        self.assertEqual(response.data['asset'], self.asset.serial_number)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data['current_owner'],
-                         self.other_user.id)
-        self.assertEqual(response.data['previous_owner'],
-                         self.user.id)
+        response = client.get(
+            f"{reverse('assets-list')}{self.asset.serial_number}/",
+            HTTP_AUTHORIZATION=token)
+        self.assertEquals(response.data['current_status'], 'Allocated')
+        self.assertEquals(
+            response.data['serial_number'], self.asset.serial_number)
+        self.assertEquals(response.status_code, 200)
