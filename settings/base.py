@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'core',
     'api',
     'oauth2_provider',
-    'rest_framework_swagger'
+    'drf_yasg'
 ]
 
 AUTH_USER_MODEL = 'core.User'
@@ -190,3 +190,17 @@ LOGGING = {
 csv = Csv(cast=lambda s: tuple(s.split(':')))
 
 ADMINS = csv(os.environ.get('ADMINS', ''))
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    },
+}
+
+REDOC_SETTINGS = {
+    'LAZY_RENDERING': True,
+}

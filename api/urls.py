@@ -1,6 +1,8 @@
 from rest_framework.routers import SimpleRouter
 from django.conf.urls import include
 from django.urls import path
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 
 from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
@@ -8,6 +10,17 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     AllocationsViewSet, AssetCategoryViewSet, AssetSubCategoryViewSet, \
     AssetTypeViewSet, AssetModelNumberViewSet, AssetConditionViewSet, \
     AssetMakeViewSet
+
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title='ART API',
+        default_version='v1',
+        description='Assset tracking',
+        license=openapi.License(name='BSD License'),
+    ),
+    public=True,
+)
 
 router = SimpleRouter()
 router.register('users', UserViewSet)
@@ -31,7 +44,9 @@ router.register('asset-makes', AssetMakeViewSet, 'asset-makes')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
-    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider'))
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('docs/', schema_view.with_ui('redoc',
+                                      cache_timeout=None), name='schema-redoc')
 ]
 
 urlpatterns += router.urls
