@@ -35,7 +35,10 @@ class AssetViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Asset.objects.filter(assigned_to=user)
+        is_admin = self.request.user.is_staff
+        if not is_admin:
+            return Asset.objects.filter(assigned_to=user)
+        return Asset.objects.all()
 
     def get_object(self):
         queryset = Asset.objects.all()
@@ -43,7 +46,7 @@ class AssetViewSet(ModelViewSet):
         return obj
 
     def perform_create(self, serializer):
-            serializer.save()
+        serializer.save()
 
 
 class SecurityUserEmailsViewSet(ModelViewSet):
