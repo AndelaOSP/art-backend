@@ -175,3 +175,29 @@ class AssetConditionSerializer(serializers.ModelSerializer):
         model = AssetCondition
         fields = ("id", "asset", "asset_condition",
                   "created_at")
+
+
+class AssetMakeSerializer(serializers.ModelSerializer):
+    asset_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AssetMake
+        fields = ('id', 'make_label', 'asset_type',
+                  'created_at', 'last_modified_at')
+
+    def get_asset_type(self, obj):
+        return obj.asset_type.asset_type
+
+    def to_internal_value(self, data):
+        asset_type = data['asset_type']
+        if not asset_type:
+            raise serializers.ValidationError({'asset_type': [
+                self.error_messages['required']]})
+        try:
+            asset_type_instance = AssetType.objects.get(id=asset_type)
+        except Exception:
+            raise serializers.ValidationError({'asset_type': [
+                f'Invalid pk \"{asset_type}\" - object does not exist.']})
+        internal_value = super().to_internal_value(data)
+        internal_value.update({'asset_type': asset_type_instance})
+        return internal_value
