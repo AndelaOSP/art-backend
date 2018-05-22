@@ -42,12 +42,6 @@ class AssetViewSet(ModelViewSet):
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
 
-    def get_serializer_class(self):
-        if hasattr(self, 'action_serializers'):
-            if self.action in self.action_serializers:
-                return self.action_serializers[self.action]
-        return super().get_serializer_class()
-
     def perform_create(self, serializer):
             serializer.save()
 
