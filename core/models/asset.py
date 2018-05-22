@@ -282,21 +282,15 @@ def save_asset_condition(sender, **kwargs):
 
 
 @receiver(post_save, sender=AllocationHistory)
-def save_current_asset_owner(sender, **kwargs):
-    asset_owner = kwargs.get('instance')
-    asset_owner.asset.assigned_to = asset_owner.current_owner
-    asset_owner.asset.save()
-
-
-@receiver(post_save, sender=AllocationHistory)
-def update_asset_status(sender, **kwargs):
+def allocation_history_post_save(sender, **kwargs):
     allocation_history = kwargs.get('instance')
     asset = allocation_history.asset
-    if asset.assigned_to and asset.current_status == AVAILABLE:
-        asset_status = AssetStatus.objects.get(
-            asset=asset
+    asset.assigned_to = allocation_history.current_owner
+    asset.save()
+
+    if asset.current_status == AVAILABLE:
+        asset_status = AssetStatus.objects.create(
+            asset=asset,
+            current_status=ALLOCATED
         )
-        asset_status.current_status = ALLOCATED
         asset_status.save()
-        asset.current_status = ALLOCATED
-        asset.save()
