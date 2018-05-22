@@ -33,6 +33,13 @@ class AllocationHistoryModelTest(TestCase):
         )
         self.test_asset.save()
 
+        self.test_asset_2 = Asset(
+            asset_code='IC002',
+            serial_number='SN002',
+            model_number=test_assetmodel
+        )
+        self.test_asset_2.save()
+
         self.allocation_history = AllocationHistory(
             asset=self.test_asset,
             current_owner=self.user
@@ -50,7 +57,7 @@ class AllocationHistoryModelTest(TestCase):
 
         self.assertEqual(AllocationHistory.objects.count(), 1)
         new_history = AllocationHistory(
-            asset=self.test_asset,
+            asset=self.test_asset_2,
             current_owner=user3,
             previous_owner=self.user
         )
@@ -62,16 +69,14 @@ class AllocationHistoryModelTest(TestCase):
             email='test23@site.com', cohort=23,
             slack_handle='@test_user', password='devpassword'
         )
+        self.allocation_history.asset.current_status = 'Available'
+        self.allocation_history.current_owner = new_user
+        self.allocation_history.save()
 
-        new_history = AllocationHistory(
-            asset=self.test_asset,
-            current_owner=new_user,
-            previous_owner=self.user
-        )
-
-        new_history.save()
-        self.assertIn(str(new_history.previous_owner), 'test@site.com')
-        self.assertIn(str(new_history.current_owner), 'test23@site.com')
+        self.assertEquals(
+            self.allocation_history.previous_owner.email, self.user.email)
+        self.assertEquals(
+            self.allocation_history.current_owner.email, new_user.email)
 
     def test_can_save_history_without_previous_owner(self):
         new_user = User.objects.create(
@@ -80,12 +85,13 @@ class AllocationHistoryModelTest(TestCase):
         )
 
         new_history = AllocationHistory(
-            asset=self.test_asset,
+            asset=self.test_asset_2,
             current_owner=new_user,
         )
 
         new_history.save()
-        self.assertIn(str(new_history.previous_owner), 'test@site.com')
+        self.assertEquals(new_history.previous_owner, None)
+        self.assertEquals(new_history.current_owner.email, new_user.email)
 
     def test_cannot_add_history_for_allocated_asset(self):
 
