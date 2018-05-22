@@ -18,7 +18,7 @@ class AssetConditionAPITest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
             email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty1234'
+            slack_handle='tester', password='qwerty12345'
         )
         self.assetmodel = AssetModelNumber(model_number='IMN50987')
         self.assetmodel.save()
