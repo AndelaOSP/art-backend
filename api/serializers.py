@@ -3,7 +3,8 @@ from rest_framework import serializers
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
-    AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake
+    AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
+    AssetCondition
 )
 
 
@@ -167,3 +168,10 @@ class AssetModelNumberSerializer(serializers.ModelSerializer):
             'make_label': make_label_instance
         })
         return internal_value
+
+
+class AssetConditionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetCondition
+        fields = ("id", "asset", "asset_condition",
+                  "created_at")
