@@ -20,6 +20,11 @@ client = APIClient()
 
 class AssetTestCase(TestCase):
     def setUp(self):
+        self.admin = User.objects.create_superuser(
+            email='admin@site.com', cohort=20,
+            slack_handle='@admin', password='devpassword'
+        )
+        self.token_admin = "tokenadmin"
         self.user = User.objects.create_user(
             email='user@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
@@ -75,16 +80,6 @@ class AssetTestCase(TestCase):
         })
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_authenticated_user_view_assets(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.other_user.email}
-        response = client.get(
-            self.asset_urls,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_other_user))
-        self.assertEqual(response.data, [])
-        self.assertEqual(len(response.data), Asset.objects.count() - 1)
-        self.assertEqual(response.status_code, 200)
-
-    @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_owner_view_assets(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
@@ -101,6 +96,15 @@ class AssetTestCase(TestCase):
             "{}{}/".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.asset.asset_code, response.data.values())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_admin_view_assets(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        response = client.get(
+            self.asset_urls,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(len(response.data),  Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
