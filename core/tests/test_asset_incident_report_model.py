@@ -21,7 +21,7 @@ class AssetIncidentReportModelTest(TestCase):
         )
         self.test_asset.save()
 
-        AssetIncidentReport.objects.create(
+        self.incident_report = AssetIncidentReport.objects.create(
             asset=self.test_asset,
             incident_type="Loss",
             incident_location="44",
@@ -34,10 +34,35 @@ class AssetIncidentReportModelTest(TestCase):
         self.incident_report = AssetIncidentReport.objects.all()
 
     def test_can_save_incident_report(self):
-        AssetIncidentReport.objects.create(
+        self.incident_report = AssetIncidentReport.objects.create(
             asset=self.test_asset,
             incident_type="Loss",
             incident_location="44",
+            incident_description="Mugging",
+            injuries_sustained="Black eye",
+            loss_of_property="Laptop",
+            witnesses="Omosh wa mtura",
+            police_abstract_obtained=True
+        )
+        self.assertEqual(AssetIncidentReport.objects.count(), 2)
+
+    def test_cannot_submit_invalid_incident_type(self):
+        self.incident_report = AssetIncidentReport.objects.create(
+            asset=self.test_asset,
+            incident_type="Invalid",
+            incident_location="44",
+            incident_description="Mugging",
+            injuries_sustained="Black eye",
+            loss_of_property="Laptop",
+            witnesses="Omosh wa mtura",
+            police_abstract_obtained=True
+        )
+        self.assertEqual(AssetIncidentReport.objects.count(), 2)
+
+    def test_cannot_submit_without_incident_location(self):
+        self.incident_report = AssetIncidentReport.objects.create(
+            asset=self.test_asset,
+            incident_type="Loss",
             incident_description="Mugging",
             injuries_sustained="Black eye",
             loss_of_property="Laptop",
