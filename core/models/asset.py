@@ -288,7 +288,7 @@ def allocation_history_post_save(sender, **kwargs):
     asset.assigned_to = allocation_history.current_owner
     asset.save()
 
-    if asset.current_status == AVAILABLE:
+    if asset.assigned_to and asset.current_status == AVAILABLE:
         asset_status = AssetStatus.objects.create(
             asset=asset,
             current_status=ALLOCATED
