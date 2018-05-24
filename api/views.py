@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import validate_email, ValidationError
+from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
@@ -40,9 +42,21 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         is_admin = self.request.user.is_staff
+        queryset = Asset.objects.all()
+        query_params = self.request.query_params
+
         if not is_admin:
-            return Asset.objects.filter(assigned_to=user)
-        return Asset.objects.all()
+            queryset = Asset.objects.filter(assigned_to=user)
+
+        if query_params.get('email'):
+            email = query_params['email']
+            try:
+                validate_email(email)
+            except ValidationError as error:
+                raise serializers.ValidationError(error.message)
+            queryset = Asset.objects.filter(assigned_to__email=email)
+
+        return queryset
 
     def get_object(self):
         queryset = Asset.objects.all()
