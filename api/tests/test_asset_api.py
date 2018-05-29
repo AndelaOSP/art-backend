@@ -113,7 +113,7 @@ class AssetTestCase(TestCase):
         data = {
             "asset_code": "IC002",
             "serial_number": "SN002",
-            "model_number": self.assetmodel.id,
+            "model_number": self.assetmodel.model_number,
         }
         response = client.post(
             self.asset_urls,
@@ -146,7 +146,7 @@ class AssetTestCase(TestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
-            'model_number': ['Invalid pk "300" - object does not exist.']
+            'model_number': ['Object with model_number=300 does not exist.']
         })
         self.assertEqual(response.status_code, 400)
 

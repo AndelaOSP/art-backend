@@ -42,6 +42,10 @@ class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
     assigned_to = UserSerializer(read_only=True)
     asset_type = serializers.SerializerMethodField()
+    model_number = serializers.SlugRelatedField(
+        queryset=AssetModelNumber.objects.all(),
+        slug_field="model_number"
+    )
 
     class Meta:
         model = Asset
