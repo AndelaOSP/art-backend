@@ -25,6 +25,14 @@ LOG_TYPE_CHOICES = (
     (CHECKOUT, "Checkout"),
 )
 
+LOSS = 'Loss'
+DAMAGE = 'Damage'
+
+INCIDENT_TYPES = (
+    (LOSS, 'Loss'),
+    (DAMAGE, 'Damage')
+)
+
 
 class AssetCategory(models.Model):
     """ Stores all asset categories """
@@ -183,7 +191,7 @@ class AssetStatus(models.Model):
 
     def save(self, *args, **kwargs):
         try:
-            latest_record = AssetStatus.objects.filter(asset=self.asset).\
+            latest_record = AssetStatus.objects.filter(asset=self.asset). \
                 latest('created_at')
             self.previous_status = latest_record.current_status
         except Exception:
@@ -220,7 +228,7 @@ class AllocationHistory(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         try:
-            latest_record = AllocationHistory.objects.\
+            latest_record = AllocationHistory.objects. \
                 filter(asset=self.asset).latest('created_at')
             self.previous_owner = latest_record.current_owner
         except Exception:
@@ -247,11 +255,37 @@ class AssetCondition(models.Model):
         super(AssetCondition, self).save(*args, **kwargs)
 
 
+class AssetIncidentReport(models.Model):
+    asset = models.ForeignKey(Asset,
+                              to_field='serial_number',
+                              null=False,
+                              on_delete=models.PROTECT)
+    incident_type = models.CharField(max_length=50,
+                                     choices=INCIDENT_TYPES)
+    incident_location = models.CharField(max_length=50,
+                                         null=False,
+                                         blank=False)
+    incident_description = models.TextField(null=False,
+                                            blank=False)
+    injuries_sustained = models.TextField(null=True,
+                                          blank=True)
+    loss_of_property = models.TextField(null=True,
+                                        blank=True)
+    witnesses = models.TextField(null=True,
+                                 blank=True)
+    police_abstract_obtained = models.CharField(max_length=255,
+                                                blank=False,
+                                                null=False)
+
+    def __str__(self):
+        return f"{self.incident_type}: {self.asset}"
+
+
 @receiver(post_save, sender=AssetStatus)
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
     asset_status.asset.current_status = asset_status.current_status
-    if asset_status.current_status == AVAILABLE and AllocationHistory.\
+    if asset_status.current_status == AVAILABLE and AllocationHistory. \
             objects.count() > 0:
         asset_status.asset.assigned_to = None
         AllocationHistory.objects.create(asset=asset_status.asset,
