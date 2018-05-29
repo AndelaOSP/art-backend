@@ -29,44 +29,33 @@ class AssetIncidentReportModelTest(TestCase):
             injuries_sustained="Black eye",
             loss_of_property="Laptop",
             witnesses="Omosh wa mtura",
-            police_abstract_obtained=True
+            police_abstract_obtained="Yes"
         )
-        self.incident_report = AssetIncidentReport.objects.all()
+        self.count_before = AssetIncidentReport.objects.count()
 
-    def test_can_save_incident_report(self):
-        self.incident_report = AssetIncidentReport.objects.create(
+    def test_add_incident_report(self):
+        AssetIncidentReport.objects.create(
             asset=self.test_asset,
             incident_type="Loss",
-            incident_location="44",
+            incident_location="CBD",
             incident_description="Mugging",
-            injuries_sustained="Black eye",
-            loss_of_property="Laptop",
-            witnesses="Omosh wa mtura",
-            police_abstract_obtained=True
+            police_abstract_obtained="Yes"
         )
-        self.assertEqual(AssetIncidentReport.objects.count(), 2)
+        self.assertEqual(
+            AssetIncidentReport.objects.count(), self.count_before + 1)
 
-    def test_cannot_submit_invalid_incident_type(self):
-        self.incident_report = AssetIncidentReport.objects.create(
-            asset=self.test_asset,
-            incident_type="Invalid",
-            incident_location="44",
-            incident_description="Mugging",
-            injuries_sustained="Black eye",
-            loss_of_property="Laptop",
-            witnesses="Omosh wa mtura",
-            police_abstract_obtained=True
-        )
-        self.assertEqual(AssetIncidentReport.objects.count(), 2)
+    def test_edit_incident_report(self):
+        self.incident_report.witnesses = "John Doe"
+        self.incident_report.save()
+        self.assertEqual(AssetIncidentReport.objects.get(
+            id=self.incident_report.id).witnesses, "John Doe")
 
-    def test_cannot_submit_without_incident_location(self):
-        self.incident_report = AssetIncidentReport.objects.create(
-            asset=self.test_asset,
-            incident_type="Loss",
-            incident_description="Mugging",
-            injuries_sustained="Black eye",
-            loss_of_property="Laptop",
-            witnesses="Omosh wa mtura",
-            police_abstract_obtained=True
-        )
-        self.assertEqual(AssetIncidentReport.objects.count(), 2)
+    def test_delete_incident_report(self):
+        self.incident_report.delete()
+        self.assertEqual(AssetIncidentReport.objects.count(),
+                         self.count_before - 1)
+
+    def test_model_string_representation(self):
+        self.assertEqual(str(self.incident_report),
+                         f"{self.incident_report.incident_type}: "
+                         f"{self.incident_report.asset}")

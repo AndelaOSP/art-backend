@@ -262,18 +262,23 @@ class AssetIncidentReport(models.Model):
                               on_delete=models.PROTECT)
     incident_type = models.CharField(max_length=50,
                                      choices=INCIDENT_TYPES)
-    incident_location = models.CharField(
-        max_length=50, null=False, blank=False)
-    incident_description = models.CharField(
-        max_length=255, null=False, blank=False)
-    injuries_sustained = models.CharField(
-        max_length=50, null=False, blank=False)
-    loss_of_property = models.CharField(
-        max_length=50, null=False, blank=False)
-    witnesses = models.CharField(
-        max_length=50, null=False, blank=False)
-    police_abstract_obtained = models.BooleanField(
-        blank=False, default=False)
+    incident_location = models.CharField(max_length=50,
+                                         null=False,
+                                         blank=False)
+    incident_description = models.TextField(null=False,
+                                            blank=False)
+    injuries_sustained = models.TextField(null=True,
+                                          blank=True)
+    loss_of_property = models.TextField(null=True,
+                                        blank=True)
+    witnesses = models.TextField(null=True,
+                                 blank=True)
+    police_abstract_obtained = models.CharField(max_length=255,
+                                                blank=False,
+                                                null=False)
+
+    def __str__(self):
+        return f"{self.incident_type}: {self.asset}"
 
 
 @receiver(post_save, sender=AssetStatus)
