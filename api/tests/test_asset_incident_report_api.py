@@ -110,15 +110,26 @@ class AssetIncidentReportAPITest(TestCase):
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_cant_allow_get_incident_report(self, mock_verify_id_token):
+    def test_authenticated_user_get_incident_report(
+            self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
             f"{self.incident_report_url}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data, {
-            'detail': 'Method "GET" not allowed.'
-        })
-        self.assertEquals(response.status_code, 405)
+        self.assertIn(self.incident_report.id, response.data[0].values())
+        self.assertEqual(len(response.data),
+                         AssetIncidentReport.objects.count())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_user_get_single_incident_report(
+            self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            f"{self.incident_report_url}{self.incident_report.id}/",
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn(self.incident_report.id, response.data.values())
+        self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cant_allow_put_incident_report(self, mock_verify_id_token):

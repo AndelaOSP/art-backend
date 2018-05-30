@@ -154,4 +154,4 @@ class AssetIncidentReportViewSet(ModelViewSet):
     queryset = AssetIncidentReport.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
-    http_method_names = ['post']
+    http_method_names = ['get', 'post']
