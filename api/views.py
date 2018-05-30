@@ -7,13 +7,15 @@ from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
-    AssetType, AssetModelNumber, AssetCondition, AssetMake
+    AssetType, AssetModelNumber, AssetCondition, AssetMake, \
+    AssetIncidentReport
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
     AssetStatusSerializer, AllocationsSerializer, AssetCategorySerializer, \
     AssetSubCategorySerializer, AssetTypeSerializer, \
-    AssetModelNumberSerializer, AssetConditionSerializer, AssetMakeSerializer
+    AssetModelNumberSerializer, AssetConditionSerializer, \
+    AssetMakeSerializer, AssetIncidentReportSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -145,3 +147,11 @@ class AssetConditionViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication, )
     http_method_names = ['get', 'post']
+
+
+class AssetIncidentReportViewSet(ModelViewSet):
+    serializer_class = AssetIncidentReportSerializer
+    queryset = AssetIncidentReport.objects.all()
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = [FirebaseTokenAuthentication, ]
+    http_method_names = ['post']

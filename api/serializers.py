@@ -4,7 +4,7 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetCondition
+    AssetCondition, AssetIncidentReport
 )
 
 
@@ -205,3 +205,11 @@ class AssetMakeSerializer(serializers.ModelSerializer):
         internal_value = super().to_internal_value(data)
         internal_value.update({'asset_type': asset_type_instance})
         return internal_value
+
+
+class AssetIncidentReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetIncidentReport
+        fields = ('id', 'asset', 'incident_type', 'incident_location',
+                  'incident_description', 'injuries_sustained',
+                  'loss_of_property', 'witnesses', 'police_abstract_obtained')
