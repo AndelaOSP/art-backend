@@ -9,7 +9,7 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     AssetLogViewSet, UserFeedbackViewSet, AssetStatusViewSet,\
     AllocationsViewSet, AssetCategoryViewSet, AssetSubCategoryViewSet, \
     AssetTypeViewSet, AssetModelNumberViewSet, AssetConditionViewSet, \
-    AssetMakeViewSet
+    AssetMakeViewSet, AssetIncidentReportViewSet
 
 
 schema_view = get_schema_view(
@@ -41,6 +41,8 @@ router.register('asset-models', AssetModelNumberViewSet,
 router.register('asset-condition', AssetConditionViewSet,
                 'asset-condition')
 router.register('asset-makes', AssetMakeViewSet, 'asset-makes')
+router.register('incidence-reports', AssetIncidentReportViewSet,
+                'incidence-reports')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
