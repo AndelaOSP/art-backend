@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
+from itertools import chain
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
@@ -15,7 +16,8 @@ from .serializers import UserSerializer, \
     AssetStatusSerializer, AllocationsSerializer, AssetCategorySerializer, \
     AssetSubCategorySerializer, AssetTypeSerializer, \
     AssetModelNumberSerializer, AssetConditionSerializer, \
-    AssetMakeSerializer, AssetIncidentReportSerializer
+    AssetMakeSerializer, AssetIncidentReportSerializer, \
+    AssetHealthSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -155,3 +157,64 @@ class AssetIncidentReportViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
+
+
+class AssetHealthCountViewSet(ModelViewSet):
+    serializer_class = AssetHealthSerializer
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = (FirebaseTokenAuthentication, )
+    http_method_names = ['get', ]
+    queryset = Asset.objects.all()
+    data = None
+
+    def _get_assets_status_condition(self, asset_models):
+        asset_name, model_numbers = asset_models.popitem()
+
+        def generate_asset_condition(model_number):
+            statuses = {
+                'Allocated': 0,
+                'Available': 0,
+                'Damaged': 0,
+                'Lost': 0
+            }
+
+            def increment_asset_status(asset, model_number=model_number):
+                if asset['asset_type'] == asset_name and \
+                        asset['model_number'] == model_number:
+                    nonlocal statuses
+                    statuses[asset['count_by_status']] += 1
+                return statuses
+
+            list(map(increment_asset_status, self.data))
+            return {
+                'asset_type': asset_name,
+                'model_number': model_number,
+                'count_by_status': statuses
+            }
+
+        return list(map(generate_asset_condition, model_numbers))
+
+    def _get_asset_list(self, asset):
+        asset_with_status = list(map(self._get_assets_status_condition, asset))
+        return list(chain.from_iterable(asset_with_status))
+
+    def _get_asset_type(self, asset):
+        return asset['asset_type']
+
+    def _get_model_numbers(self, asset_type):
+        asset_model_numbers = map(lambda asset: asset['model_number'], filter(
+            lambda asset: asset['asset_type'] == asset_type, self.data))
+        return {asset_type: set(list(asset_model_numbers))}
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        is_admin = self.request.user.is_staff
+        if is_admin:
+            serializer = self.get_serializer(queryset, many=True)
+            self.data = serializer.data
+            asset_types = set(map(self._get_asset_type, self.data))
+            asset = map(self._get_model_numbers, asset_types)
+            asset_list = self._get_asset_list(asset)
+            return Response(asset_list)
+        return Response(exception=True, status=403,
+                        data={'detail': ['You do not have authorization']})
