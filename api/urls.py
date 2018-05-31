@@ -51,8 +51,10 @@ router.register('security-users', SecurityUserViewSet,
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    path('docs/', schema_view.with_ui('redoc',
-                                      cache_timeout=None), name='schema-redoc')
+    path('docs/', schema_view.with_ui(
+        'redoc', cache_timeout=None), name='schema-redoc'),
+    path('docs/live/', schema_view.with_ui(
+        'swagger', cache_timeout=None), name='schema-swagger')
 ]
 
 urlpatterns += router.urls
