@@ -17,7 +17,7 @@ from .serializers import UserSerializer, \
     AssetSubCategorySerializer, AssetTypeSerializer, \
     AssetModelNumberSerializer, AssetConditionSerializer, \
     AssetMakeSerializer, AssetIncidentReportSerializer, \
-    AssetHealthSerializer
+    AssetHealthSerializer, SecurityUserSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -147,7 +147,7 @@ class AssetConditionViewSet(ModelViewSet):
     serializer_class = AssetConditionSerializer
     queryset = AssetCondition.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication, )
+    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
@@ -218,3 +218,11 @@ class AssetHealthCountViewSet(ModelViewSet):
             return Response(asset_list)
         return Response(exception=True, status=403,
                         data={'detail': ['You do not have authorization']})
+
+
+class SecurityUserViewSet(ModelViewSet):
+    serializer_class = SecurityUserSerializer
+    queryset = SecurityUser.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication, ]
+    http_method_names = ['get', 'post']

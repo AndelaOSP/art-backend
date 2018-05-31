@@ -222,7 +222,7 @@ class AssetHealthSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('asset_type', 'model_number', 'count_by_status', )
+        fields = ('asset_type', 'model_number', 'count_by_status',)
 
     def get_asset_type(self, obj):
         return obj.model_number.make_label.asset_type.asset_type
@@ -232,3 +232,19 @@ class AssetHealthSerializer(serializers.ModelSerializer):
 
     def get_model_number(self, obj):
         return obj.model_number.model_number
+
+
+class SecurityUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SecurityUser
+        fields = (
+            'id', 'first_name', 'last_name', 'email',
+            'badge_number', 'phone_number', 'last_modified',
+            'date_joined', 'last_login'
+        )
+
+        extra_kwargs = {
+            'last_modified': {'read_only': True},
+            'date_joined': {'read_only': True},
+            'last_login': {'read_only': True}
+        }
