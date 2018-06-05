@@ -117,12 +117,6 @@ class AllocationsViewSet(ModelViewSet):
     http_method_names = ['get', 'post']
 
 
-    def get_queryset(self):
-          
-        if 'pk' in self.kwargs:
-            return AllocationHistory.objects.filter(asset=self.kwargs['pk'])
-        return AllocationHistory.objects.all()
-
 class AssetCategoryViewSet(ModelViewSet):
     serializer_class = AssetCategorySerializer
     queryset = AssetCategory.objects.all()

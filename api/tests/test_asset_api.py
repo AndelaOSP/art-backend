@@ -285,3 +285,13 @@ class AssetTestCase(TestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data[0], 'Enter a valid email address.')
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_assets_have_allocation_history(
+            self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn('allocation_history', response.data.keys())
+        self.assertEqual(response.status_code, 200)
