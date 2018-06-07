@@ -40,6 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
+    allocation_history = serializers.SerializerMethodField()
     assigned_to = UserSerializer(read_only=True)
     asset_type = serializers.SerializerMethodField()
     model_number = serializers.SlugRelatedField(
@@ -49,9 +50,10 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ("id", "asset_code", "serial_number", "model_number",
-                  "checkin_status", "assigned_to", "created_at",
-                  "last_modified", "current_status", 'asset_type'
+        fields = ('id', 'asset_code', 'serial_number', 'model_number',
+                  'checkin_status', 'assigned_to', 'created_at',
+                  'last_modified', 'current_status', 'asset_type',
+                  'allocation_history'
                   )
 
     def get_checkin_status(self, obj):
@@ -68,6 +70,20 @@ class AssetSerializer(serializers.ModelSerializer):
 
     def get_asset_type(self, obj):
         return obj.model_number.make_label.asset_type.asset_type
+
+    def get_allocation_history(self, obj):
+        allocations = AllocationHistory.objects.filter(asset=obj.serial_number)
+        return [
+            {
+                "id": allocation.id,
+                "current_owner": allocation.current_owner.email
+                if allocation.current_owner else None,
+                "previous_owner": allocation.previous_owner.email
+                if allocation.previous_owner else None,
+                "created_at": allocation.created_at
+            }
+            for allocation in allocations
+        ]
 
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
