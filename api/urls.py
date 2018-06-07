@@ -1,3 +1,4 @@
+from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 from django.conf.urls import include
 from django.urls import path
@@ -54,7 +55,12 @@ urlpatterns = [
     path('docs/', schema_view.with_ui(
         'redoc', cache_timeout=None), name='schema-redoc'),
     path('docs/live/', schema_view.with_ui(
-        'swagger', cache_timeout=None), name='schema-swagger')
+        'swagger', cache_timeout=None), name='schema-swagger'),
+    path('', TemplateView.as_view(
+        template_name='api/api-index.html',
+        extra_context={'api_version': 'V1'}),
+        name='api-version-index'
+    )
 ]
 
 urlpatterns += router.urls
