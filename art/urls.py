@@ -18,6 +18,7 @@ from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.urls import path
+from django.views.generic import TemplateView
 
 from api import urls
 
@@ -26,6 +27,10 @@ urlpatterns = [
     path('api/v1/', include(urls)),
     path('jet/', include('jet.urls', 'jet')),
     path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
+    path('', TemplateView.as_view(
+        template_name='api/api-index.html'),
+        name='api-home'
+    )
 ]
 
 if settings.DEBUG:
