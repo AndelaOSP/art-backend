@@ -8,7 +8,6 @@ sys.path.append(project_dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 django.setup()
 from core.models.asset import Asset, AssetModelNumber   # noqa
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 
 
 def bulk_create_asset():
