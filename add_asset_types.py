@@ -17,7 +17,8 @@ def bulk_create_asset_types():
     file_name = input('Enter the file name without extension:  ')
     print('\n')
 
-    if not is_valid_file(file_name):
+    is_valid = is_valid_file(file_name)
+    if not is_valid:
         return
 
     with open(file_name + '.csv', 'r', ) as f:
@@ -27,7 +28,7 @@ def bulk_create_asset_types():
         inserted_records = []
         data = csv.DictReader(f, delimiter=',')
         counter = 1
-        with tqdm(total=file_length - 1) as pbar:
+        with tqdm(total=file_length) as pbar:
             for row in data:
                 sub_category_name = AssetSubCategory.objects.\
                     filter(sub_category_name=row['sub_category'])\

@@ -2,13 +2,15 @@ import os
 
 
 def is_valid_file(file_name):
-    if not os.path.exists(file_name):
+    if file_name.endswith('.csv'):
+        print("Error. Remove file extension and try again")
+        return False
+
+    elif not os.path.exists(file_name + '.csv'):
         print("Error. File does not exist. Check your path")
         return False
 
-    elif file_name.endswith('.csv'):
-        print("Error. Remove file extension and try again")
-        return False
+    return True
 
 
 def display_inserted(result):
