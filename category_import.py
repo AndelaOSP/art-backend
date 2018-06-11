@@ -4,6 +4,8 @@ import csv
 from tqdm import tqdm
 import django
 
+from import_util import display_inserted, display_skipped
+
 project_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(project_dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
@@ -103,37 +105,7 @@ def load_csv_file(file_name):  # noqa
     return 'File not found'
 
 
-def display_inserted(result):
-    print('----------------------------------------------------------------\n')
-    print('        --------    TRANSACTIONS SUMMARY        --------        \n')
-    print('----------------------------------------------------------------\n')
-    print("There are {0}  successfully inserted records\n".format(len(result)))
-    print('================================================================\n')
-    if len(result) <= 0:
-        print("No record was inserted\n")
-    else:
-        print('{0} \t{1} \t '.format('Line No.', 'Description'))
-        print('------------------------------------------------------------\n')
-        for item in result:
-            print('{0}\t{1}'.format(item[1], item[0]))
-
-
-def display_skipped(result):
-    print('----------------------------------------------------------------\n')
-    print('There are {0}  skipped records \n'.format(len(result)))
-    print('===============================================================\n')
-    if len(result) <= 0:
-        print('No record was skipped \n')
-    else:
-        print('{0} \t{1} \t {2}'.format('Line No.', 'Description',
-                                        'Error Message'))
-        print('------------------------------------------------------------\n')
-        for key, value in result.items():
-
-            print('{0}\t \t{1} \t{2}'.format(value[1], key, value[0]))
-
-
 if __name__ == '__main__':
     print('********* Import the csv file ********')
     input_file = input('Import the file: ')
-    load_csv_asset(input_file)  # noqa
+    load_csv_file(input_file)  # noqa
