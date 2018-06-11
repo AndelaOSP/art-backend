@@ -4,7 +4,7 @@ import csv
 from tqdm import tqdm
 import django
 
-from import_util import display_inserted, display_skipped
+from import_util import display_inserted, display_skipped, is_valid_file
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(project_dir)
@@ -16,6 +16,10 @@ from core.models.asset import AssetType, AssetMake   # noqa
 def bulk_create_asset():
     file_name = input('Enter the file name without extension:  ')
     print('\n')
+
+    is_valid = is_valid_file(file_name)
+    if not is_valid:
+        return
 
     with open(file_name + '.csv', 'r', ) as f:
         file_length = len(f.readlines()) - 1
