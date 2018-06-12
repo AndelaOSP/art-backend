@@ -4,9 +4,9 @@ import csv
 from tqdm import tqdm
 import django
 
-from import_util import is_valid_file, display_inserted, display_skipped
+from helpers import is_valid_file, display_inserted, display_skipped
 
-project_dir = os.path.dirname(os.path.abspath(__file__))
+project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 django.setup()
