@@ -7,6 +7,8 @@ ALLOWED_HOSTS = [
 ]
 
 CORS_ORIGIN_WHITELIST = (
-    'localhost:3000',
     'art-dashboard-staging.herokuapp.com'
 )
+
+CORS_ORIGIN_REGEX_WHITELIST = \
+    (r'^(https?:\/\/)?(\w+\.)?((localhost)|(127\.0\.0\.1)):\d{4}', )
