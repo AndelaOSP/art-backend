@@ -52,12 +52,14 @@ INSTALLED_APPS = [
     'core',
     'api',
     'oauth2_provider',
-    'drf_yasg'
+    'drf_yasg',
+    'corsheaders'
 ]
 
 AUTH_USER_MODEL = 'core.User'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
