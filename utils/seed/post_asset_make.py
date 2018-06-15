@@ -30,32 +30,46 @@ def bulk_create_asset():
         counter = 1
         with tqdm(total=file_length) as pbar:
             for row in data:
-                asset_make = AssetMake.objects.\
-                    filter(make_label=row['make_label'])\
-                    .exists()
-                asset_type = AssetType.objects.filter(asset_type=row[
-                    'asset_type']).exists()
+                make_label = row.get('make_label', None)
+                asset_type = row.get('asset_type', None)
 
-                if asset_make:
+                if make_label is None:
                     skipped[row['make_label']] = [(
-                        'asset_make {0} already exists'.
-                                                  format(row['make_label'])),
-                                                  counter]
-                elif not asset_type:
+                            'asset_make has no value'.
+                            format(row['make_label'])), counter]
+
+                elif asset_type is None:
                     skipped[row['asset_type']] = [
-                        ('asset type {0} does not exist'.
-                         format(row['asset_type'])), counter]
+                            ('asset type {0} does not exist'.
+                                format(row['asset_type'])), counter]
 
                 else:
-                    new_asset_make = AssetMake()
-                    new_asset_make.make_label = row['make_label']
-                    new_asset_make.asset_type = AssetType.objects.get(
-                        asset_type=row['asset_type']
-                    )
-                    new_asset_make.save()
-                    inserted_records.append([new_asset_make, counter])
-                counter += 1
-                pbar.update(1)
+                    asset_make = AssetMake.objects.\
+                        filter(make_label=row['make_label'])\
+                        .exists()
+                    asset_type = AssetType.objects.filter(asset_type=row[
+                        'asset_type']).exists()
+
+                    if asset_make:
+                        skipped[row['make_label']] = [(
+                            'asset_make {0} already exists'.
+                            format(row['make_label'])), counter]
+                    elif not asset_type:
+                        skipped[row['asset_type']] = [
+                            ('asset type {0} does not exist'.
+                                format(row['asset_type'])), counter]
+
+                    else:
+                        new_asset_make = AssetMake()
+                        new_asset_make.make_label = row['make_label']
+                        new_asset_make.asset_type = AssetType.objects.get(
+                            asset_type=row['asset_type']
+                        )
+                        new_asset_make.save()
+                        inserted_records.append([new_asset_make, counter])
+                    counter += 1
+                    pbar.update(1)
+
     print("\n")
     display_inserted(inserted_records)
     display_skipped(skipped)
