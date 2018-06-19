@@ -13,13 +13,13 @@ def is_valid_file(file_name):
     return True
 
 
-def display_inserted(result):
+def display_inserted(result, name=None):
     print('----------------------------------------------------------------\n')
     print('        --------    TRANSACTIONS SUMMARY        --------        \n')
+    print('        --------       {0}       --------        \n'.format(name))
     print('----------------------------------------------------------------\n')
     print("There are {0}  successfully inserted records\n".format(len(result)))
     print('================================================================\n')
-    print(result, '>>>>>>>>>')
 
     if len(result) <= 0:
         print("No record was inserted\n")
@@ -70,5 +70,3 @@ class DependencyChecker():
             if colunm_index > 0:
                 return self.columns[colunm_index - 1]
         return None
-
-

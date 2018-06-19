@@ -11,64 +11,67 @@ sys.path.append(project_dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 django.setup()
 from core.models.asset import (
-    AssetType, AssetMake, Asset, AssetModelNumber, AssetCategory, AssetSubCategory,
+    AssetType, AssetMake, Asset, AssetModelNumber, AssetCategory,
+    AssetSubCategory,
 )   # noqa
 
 
-def post_asset_make(data, file_length):
+def post_asset_make(f, file_length):
     """
     Bulk creates asset make
     :param f: open csv file
     :param file_length: length of csv data
     :return:
     """
+    f.seek(0)
+    data = csv.DictReader(f, delimiter=',')
     skipped = dict()
     inserted_records = []
     counter = 1
     with tqdm(total=file_length) as pbar:
         for row in data:
-            make_label = row.get('make_label', '').strip()
+            make_label = row.get('asset_make', '').strip()
             asset_type = row.get('asset_type', '').strip()
-            print('I reached asset makes')
-
             if not make_label:
-                skipped[row['make_label']] = [
+                skipped[row['']] = [
                     ('asset_make has no value'.
-                    format(row['make_label'])), counter]
+                     format(row['asset_make'])), counter]
 
             elif not asset_type:
                 skipped[row['asset_type']] = [
-                        ('asset type {0} does not exist'.
-                            format(row['asset_type'])), counter]
+                    ('asset type {0} does not exist'.
+                     format(row['asset_type'])), counter]
 
             else:
                 asset_make = AssetMake.objects.\
-                    filter(make_label=row['make_label'])\
+                    filter(make_label=row['asset_make'])\
                     .exists()
                 asset_type = AssetType.objects.filter(asset_type=row[
                     'asset_type']).exists()
 
                 if asset_make:
-                    skipped[row['make_label']] = [(
-                        'asset_make {0} already exists'.
-                            format(row['make_label'])), counter]
+                    skipped[row['asset_make']] = [
+                        ('asset_make {0} already exists'.
+                            format(row['asset_make'])), counter]
                 elif not asset_type:
                     skipped[row['asset_type']] = [
                         ('asset type {0} does not exist'.
                             format(row['asset_type'])), counter]
 
                 else:
-                    new_asset_make = AssetMake()
-                    new_asset_make.make_label = row['make_label']
-                    new_asset_make.asset_type = AssetType.objects.get(
+                    asset_type = AssetType.objects.filter(
                         asset_type=row['asset_type']
-                    )
+                    ).first()
+                    new_asset_make = AssetMake.objects.\
+                        create(make_label=row['asset_make'],
+                               asset_type=asset_type)
+
                     new_asset_make.save()
                     inserted_records.append([new_asset_make, counter])
                 counter += 1
                 pbar.update(1)
     print("\n")
-    display_inserted(inserted_records)
+    display_inserted(inserted_records, "ASSET MAKES")
     display_skipped(skipped)
 
 
@@ -89,7 +92,6 @@ def post_asset(f, file_length):
             model_number = row.get('model_number', '').strip()
             asset_code = row.get('asset_code', '').strip()
             serial_number = row.get('serial_number', '').strip()
-            print('i have reached asset')
 
             if model_number and asset_code and serial_number:
                 model_number_status = AssetModelNumber.objects.\
@@ -100,15 +102,17 @@ def post_asset(f, file_length):
                 serial_number_status = Asset.objects.filter(
                     serial_number=serial_number).exists()
                 if asset_code_status:
-                    skipped[asset_code] = [(
-                        'asset_code {0} already exists'.format(asset_code)),
-                                                counter]
+                    skipped[asset_code] = [
+                        ('asset_code {0} already exists'.
+                         format(asset_code)), counter]
                 elif serial_number_status:
                     skipped[serial_number] = [
-                        ('serial_number {0} already exists'.format(serial_number)), counter]
+                        ('serial_number {0} already exists'.
+                         format(serial_number)), counter]
                 elif not model_number_status:
-                    skipped[model_number] = [('model number {0} does not exist'
-                    .format(model_number)),counter]
+                    skipped[model_number] = [('model number {0} does '
+                                              'not exist'.
+                                              format(model_number)), counter]
                 else:
                     asset = Asset()
                     asset.asset_code = asset_code
@@ -120,7 +124,7 @@ def post_asset(f, file_length):
                 counter += 1
                 pbar.update(1)
     print("\n")
-    display_inserted(inserted_records)
+    display_inserted(inserted_records, "ASSETS")
     display_skipped(skipped)
 
 
@@ -139,81 +143,103 @@ def post_asset_category(f, file_length):
     with tqdm(total=file_length) as pbar:
         for row in data:
             assets_category = row.get('Category', '').strip()
-            assets_sub_category = row.get('Sub Category', '').strip()
-            print('asset category here', assets_category)
-            print('asset sub category here', assets_sub_category)
 
-            if assets_category:
-                assets_category = AssetCategory.objects.\
-                    filter(category_name=row['Category']).exists()
-                assets_sub_category = AssetSubCategory.objects.\
-                    filter(sub_category_name=row['Sub Category']).\
-                    exists()
-                if assets_category:
-                    if assets_sub_category:
-                        skipped[row['Category']] = [(
-                            'Category {0} already exists'.
-                            format(row['Category'])), counter]
-                        skipped[row['Sub Category']] = [(
-                            'Sub Category {0} already exists'.
-                            format(row['Sub Category'])), counter]
-                    else:
-                        category = AssetCategory.objects.get(
-                            category_name=row['Category']
-                        )
-                        assets_sub_category = AssetSubCategory.\
-                            objects.create(
-                                sub_category_name=row['Sub Category'],
-                                asset_category=category
-                            )
-                        assets_sub_category.save()
-                        inserted_records.append([
-                            assets_sub_category,
-                            counter]
-                        )
-                        skipped[row['Category']] = [(
-                            'Category {0} already exists'.
-                            format(row['Category'])), counter]
+            if not assets_category:
+                skipped[assets_category] = [
+                    'Category has no value', counter]
 
-                elif not assets_category:
-                    if assets_sub_category:
-                        asset_category = AssetCategory.objects.create(
-                            category_name=row['Category']
-                        )
-                        asset_category.save()
-                        inserted_records.append([
-                            asset_category,
-                            counter]
-                        )
-                        skipped[row['Sub Category']] = [(
-                            'Sub Category {0} already exists'.
-                            format(row['Sub Category'])), counter]
-                    else:
-                        asset_category = AssetCategory.objects.create(
-                            category_name=row['Category']
-                        )
-                        asset_category.save()
-                        category = AssetCategory.objects.get(
-                            category_name=row['Category']
-                        )
-                        sub_category = AssetSubCategory.objects.create(
-                            sub_category_name=row['Sub Category'],
-                            asset_category=category
-                        )
-                        sub_category.save()
-                        inserted_records.append([
-                            asset_category,
-                            counter]
-                        )
-                        inserted_records.append([
-                            sub_category,
-                            counter]
-                        )
+            else:
+                assets_category_status = AssetCategory.objects. \
+                    filter(category_name=assets_category).exists()
+                if assets_category_status:
+                    skipped[row['Category']] = [('Category {0} already '
+                                                 'exists'.
+                                                 format(assets_category)),
+                                                counter]
+                else:
+                    new_asset_category = AssetCategory.objects.create(
+                        category_name=assets_category
+                    )
+                    new_asset_category.save()
+                    inserted_records.append([
+                        new_asset_category,
+                        counter]
+                    )
 
             counter += 1
             pbar.update(1)
     print("\n")
-    display_inserted(inserted_records)
+    display_inserted(inserted_records, "ASSET CATEGORIES")
+    display_skipped(skipped)
+
+
+def post_asset_subcategory(f, file_length):
+    """
+    Bulk creates asset category
+    :param f: open csv file
+    :param file_length: length of csv data
+    :return:
+    """
+    f.seek(0)
+    data = csv.DictReader(f, delimiter=',')
+    skipped = dict()
+    inserted_records = []
+    counter = 1
+    with tqdm(total=file_length) as pbar:
+        for row in data:
+            assets_category = row.get('Category', '').strip()
+            assets_subcategory = row.get('Sub-Category', '').strip()
+            if not assets_category:
+                skipped[assets_category] = [
+                    'Category has no value', counter]
+            elif not assets_subcategory:
+                skipped[assets_subcategory] = [
+                    'Sub-Category has no value', counter]
+
+            else:
+                assets_category_status = AssetCategory.objects. \
+                    filter(category_name=assets_category).exists()
+                assets_subcategory_status = AssetSubCategory.objects. \
+                    filter(sub_category_name=assets_subcategory).exists()
+                if assets_category_status and assets_subcategory_status:
+                    skipped[assets_subcategory] = [
+                        ('Sub Category {0} already exists'.
+                            format(assets_subcategory)), counter]
+
+                elif assets_category_status and not assets_subcategory_status:
+                    category = AssetCategory.objects.\
+                        filter(category_name=assets_category).first()
+                    new_asset_subcategory = AssetSubCategory.objects.create(
+                        sub_category_name=assets_subcategory,
+                        asset_category=category
+                    )
+                    new_asset_subcategory.save()
+                    inserted_records.append([
+                        new_asset_subcategory,
+                        counter]
+                    )
+                else:
+                    new_asset_category = AssetCategory.objects.create(
+                        category_name=assets_category
+                    )
+                    new_asset_category.save()
+                    category = AssetCategory.objects.filter(
+                        category_name=assets_category).first()
+                    new_asset_subcategory = AssetSubCategory.objects.create(
+                        sub_category_name=assets_subcategory,
+                        assets_category=category
+                    )
+                    new_asset_subcategory.save()
+
+                    inserted_records.append([
+                        new_asset_subcategory,
+                        counter]
+                    )
+
+            counter += 1
+            pbar.update(1)
+    print("\n")
+    display_inserted(inserted_records, "ASSET SUB-CATEGORIES")
     display_skipped(skipped)
 
 
@@ -233,7 +259,6 @@ def post_asset_model_no(f, file_length):
         for row in data:
             asset_make = row.get('asset_make', '')
             model_number = row.get('model_number', '')
-            print('I reached asset model number')
 
             if asset_make and model_number:
                 asset_model_no = AssetModelNumber.objects.\
@@ -243,14 +268,13 @@ def post_asset_model_no(f, file_length):
                     make_label=asset_make).exists()
 
                 if asset_model_no:
-                    skipped[row['make_label']] = [(
-                        'asset_model_no {0} already exists'.
-                            format(model_number)), counter
-                        ]
+                    skipped[row['asset_make']] = [
+                        ('asset_model_no {0} already exists'.
+                         format(model_number)), counter]
                 elif not asset_make_status:
                     skipped[asset_make] = [
                         ('asset make {0} does not exist'.
-                        format(asset_make)), counter]
+                         format(asset_make)), counter]
 
                 else:
                     new_asset_model_no = AssetModelNumber()
@@ -263,7 +287,7 @@ def post_asset_model_no(f, file_length):
                 counter += 1
                 pbar.update(1)
     print("\n")
-    display_inserted(inserted_records)
+    display_inserted(inserted_records, "ASSET MODELS")
     display_skipped(skipped)
 
 
@@ -282,25 +306,22 @@ def post_asset_types(f, file_length):
     with tqdm(total=file_length) as pbar:
         for row in data:
             asset_type = row.get('asset_type', '').strip()
-            sub_category = row.get('Sub Category', '').strip()
-            print('I reached asset types')
+            sub_category = row.get('Sub-Category', '').strip()
             if asset_type and sub_category:
                 sub_category_name = AssetSubCategory.objects.\
                     filter(sub_category_name=sub_category)\
                     .exists()
-                asset_type = AssetType.objects.filter(
+                asset_type_status = AssetType.objects.filter(
                     asset_type=asset_type
                 ).exists()
                 if not sub_category_name:
-                    skipped[sub_category] = [('Sub Category {0} does '
-                                                    'not exist'.format
-                                                    (sub_category)),
-                                                    counter]
-                elif asset_type:
-                    skipped[asset_type] = [(
-                        'asset_type {0} already exists'.
-                                                format(asset_type)),
-                                                counter]
+                    skipped[sub_category] = [
+                        ('Sub Category {0} does not exist'.
+                         format(sub_category)), counter]
+                elif asset_type_status:
+                    skipped[asset_type] = [
+                        ('asset_type {0} already exists'.
+                         format(asset_type)), counter]
                 else:
                     asset = AssetType()
                     asset.asset_type = asset_type
@@ -311,5 +332,5 @@ def post_asset_types(f, file_length):
                 counter += 1
                 pbar.update(1)
     print("\n")
-    display_inserted(inserted_records)
+    display_inserted(inserted_records, "ASSET TYPES")
     display_skipped(skipped)
