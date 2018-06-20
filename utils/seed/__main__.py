@@ -1,41 +1,9 @@
 import sys
 import os
 import csv
+
 from django.utils import timezone
-
-# from tqdm import tqdm
 import django
-# from utils.seed.helpers import DependencyChecker
-
-
-
-# from helpers import display_inserted, display_skipped
-class DependencyChecker():
-    def __init__(self, columns):
-        self.columns = columns
-
-    @classmethod
-    def check_dependency(cls, column, columns):
-        instance = cls(columns)
-        return instance.get_dependency(column)
-
-    @classmethod
-    def has_dep(cls, column, columns):
-        instance = cls(columns)
-        return instance.has_dep(column)
-
-    def has_dep(self, column):
-        if self.columns[0] == column:
-            return False
-        return True
-
-    def get_dependency(self, column):
-        if column in self.columns:
-            colunm_index = self.columns.index(column)
-            if colunm_index > 0:
-                return self.columns[colunm_index - 1]
-        return None
-
 
 project_dir = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -48,17 +16,11 @@ from core.models.asset import (
     AssetSubCategory,
     Asset,
     AssetMake,
-    AssetLog,
-    AssetStatus,
-    AssetCondition,
-    AssetModelNumber,
-    AllocationHistory,
-    AssetIncidentReport,
+    AssetModelNumber
 ) # noqa
 
-# print(os.getcwd())
 filepath = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-# print(filepath)
+
 with open(filepath + "/sample_csv/sample.csv", 'r', ) as f:
     file_length = len(f.readlines()) - 1
     f.seek(0)

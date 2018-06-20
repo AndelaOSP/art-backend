@@ -25,9 +25,6 @@ if __name__ == '__main__':
         with open(filepath + filename + ".csv", 'r', ) as f:
             file_length = len(f.readlines()) - 1
             f.seek(0)
-            # skipped = dict()
-            # inserted_records = []
-            # data = csv.DictReader(f, delimiter=',')
 
             post_asset_category(f, file_length)
             post_asset_subcategory(f, file_length)
