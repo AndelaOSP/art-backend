@@ -109,4 +109,3 @@ if __name__ == '__main__':
     print('********* Import the csv file ********')
     input_file = input('Import the file: ')
     load_csv_file(input_file)  # noqa
-    

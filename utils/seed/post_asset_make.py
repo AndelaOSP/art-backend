@@ -13,7 +13,7 @@ django.setup()
 from core.models.asset import AssetType, AssetMake   # noqa
 
 
-def bulk_create_asset():
+def bulk_create_asset():  # noqa
     file_name = input('Enter the file name without extension:  ')
     print('\n')
 

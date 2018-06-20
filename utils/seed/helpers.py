@@ -1,14 +1,8 @@
-import os
-
 
 def is_valid_file(file_name):
     if file_name.endswith('.csv'):
         print("Error. Remove file extension and try again")
         return False
-
-    # elif not os.path.exists(file_name + '.csv'):
-    #     print("Error. File does not exist. Check your path")
-    #     return False
 
     return True
 
@@ -59,10 +53,10 @@ class DependencyChecker():
         instance = cls(columns)
         return instance.has_dep(column)
 
-    def has_dep(self, column):
-        if self.columns[0] == column:
-            return False
-        return True
+    # def has_dep(self, column):
+    #     if self.columns[0] == column:
+    #         return False
+    #     return True
 
     def get_dependency(self, column):
         if column in self.columns:
