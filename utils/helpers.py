@@ -4,6 +4,10 @@ def is_valid_file(file_name):
         print("Error. Remove file extension and try again")
         return False
 
+    if '/' in file_name or '\\' in file_name:
+        print('File name should not contain "/" or "\\"')
+        return False
+
     return True
 
 
