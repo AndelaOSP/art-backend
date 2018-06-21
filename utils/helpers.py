@@ -1,3 +1,4 @@
+import os
 import urllib3
 import urllib.parse
 
@@ -72,7 +73,8 @@ def get_csv_from_url(url, filepath):
     :return: None or file object
     """
 
-    filename = 'url_sample.csv'
+    _, filename = os.path.split(url)
+
     try:
         res = http.urlopen('GET', url, redirect=True)
     except (urllib3.exceptions.HTTPError):

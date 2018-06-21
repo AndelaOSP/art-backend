@@ -22,16 +22,17 @@ django.setup()
 
 
 if __name__ == '__main__':
-    filename = input('Enter csv filename '
-                     '(without .csv or url link to csv): ').strip()
+    filename_or_url = input('Enter csv filename '
+                            '(without .csv or url link to csv): ').strip()
     filepath = os.path.abspath(os.path.join(os.path.dirname(__file__))) + '/'  # noqa
+    filename = ''
 
-    if is_valid_url(filename):
-        csvfile = get_csv_from_url(filename, filepath)
+    if is_valid_url(filename_or_url):
+        csvfile = get_csv_from_url(filename_or_url, filepath)
         filename = csvfile if csvfile else sys.exit()
 
-    elif is_valid_file(filename):
-        filename += ".csv"
+    elif is_valid_file(filename_or_url):
+        filename = filename_or_url + ".csv"
 
     else:
         sys.exit()
