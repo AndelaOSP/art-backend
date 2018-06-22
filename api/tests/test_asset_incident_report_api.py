@@ -4,13 +4,15 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 from core.models import Asset, AssetModelNumber, User, AssetIncidentReport
 
+from api.tests import APIBaseTestCase
 client = APIClient()
 
 
-class AssetIncidentReportAPITest(TestCase):
+class AssetIncidentReportAPITest(APIBaseTestCase):
     """ Tests for the AssetIncidentReport API """
 
     def setUp(self):
+        super(AssetIncidentReportAPITest, self).setUp()
         self.test_assetmodel = AssetModelNumber(model_number="12345")
         self.test_assetmodel.save()
 

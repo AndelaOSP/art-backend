@@ -6,14 +6,16 @@ from rest_framework.test import APIClient
 
 from ..models import Asset, AssetModelNumber, AssetStatus, AllocationHistory
 
+from core.tests import CoreBaseTestCase
 User = get_user_model()
 client = APIClient()
 
 
-class AssetStatusModelTest(TestCase):
+class AssetStatusModelTest(CoreBaseTestCase):
     """Tests for the Asset Status Model"""
 
     def setUp(self):
+        super(AssetStatusModelTest, self).setUp()
         self.test_assetmodel1 = AssetModelNumber(model_number="IMN50987")
         self.test_assetmodel2 = AssetModelNumber(model_number="IMN50986")
         self.test_assetmodel1.save()

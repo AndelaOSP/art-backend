@@ -6,14 +6,16 @@ from rest_framework.test import APIClient
 
 from core.models import Asset, AssetModelNumber, AssetStatus
 
+from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
 
 
-class AssetStatusAPITest(TestCase):
+class AssetStatusAPITest(APIBaseTestCase):
     """Tests for the Asset Status API"""
 
     def setUp(self):
+        super(AssetStatusAPITest, self).setUp()
         self.test_assetmodel1 = AssetModelNumber(model_number="IMN50987")
         self.test_assetmodel1.save()
         self.token_user = 'testtoken'

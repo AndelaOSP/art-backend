@@ -12,12 +12,14 @@ from core.models import (Asset,
                          AssetSubCategory,
                          AssetCategory)
 
+from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
 
 
-class AssetHealthTestCase(TestCase):
+class AssetHealthTestCase(APIBaseTestCase):
     def setUp(self):
+        super(AssetHealthTestCase, self).setUp()
         self.admin = User.objects.create_superuser(
             email='admin@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'

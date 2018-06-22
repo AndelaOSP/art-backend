@@ -6,13 +6,15 @@ from rest_framework.reverse import reverse
 from core.models import User, AssetCategory, AssetSubCategory, \
     AssetType, AssetMake, AssetModelNumber
 
+from api.tests import APIBaseTestCase
 client = APIClient()
 
 
-class AssetModelNumberAPITest(TestCase):
+class AssetModelNumberAPITest(APIBaseTestCase):
     ''' Tests for the Asset Model Number endpoint'''
 
     def setUp(self):
+        super(AssetModelNumberAPITest, self).setUp()
         self.user = User.objects.create(
             email='testuser@gmail.com', cohort=19,
             slack_handle='tester', password='qwerty123'
