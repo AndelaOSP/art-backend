@@ -1,4 +1,3 @@
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -6,14 +5,16 @@ from rest_framework.test import APIClient
 from ..models import (Asset, AssetModelNumber,
                       AssetStatus, AllocationHistory)
 
+from core.tests import CoreBaseTestCase
 User = get_user_model()
 client = APIClient()
 
 
-class AllocationHistoryModelTest(TestCase):
+class AllocationHistoryModelTest(CoreBaseTestCase):
     """ Test for Allocation History """
 
     def setUp(self):
+        super(AllocationHistoryModelTest, self).setUp()
         self.user = User.objects.create(
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'

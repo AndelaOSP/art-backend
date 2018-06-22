@@ -1,18 +1,19 @@
 import json
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from core.models import SecurityUser, APIUser
 
+from api.tests import APIBaseTestCase
 client = APIClient()
 User = get_user_model()
 
 
-class SecurityUserTestCase(TestCase):
+class SecurityUserTestCase(APIBaseTestCase):
     def setUp(self):
+        super(SecurityUserTestCase, self).setUp()
         self.security_users_url = reverse('security-user-emails-list')
         self.security_users_admin_url = reverse('security-users-list')
 

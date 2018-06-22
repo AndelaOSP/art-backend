@@ -1,12 +1,13 @@
-from django.test import TestCase
 from django.db.models.deletion import ProtectedError
 
 from ..models import AssetModelNumber, AssetMake, AssetType, \
     AssetCategory, AssetSubCategory
+from core.tests import CoreBaseTestCase
 
 
-class AssetModelNumberTestCase(TestCase):
+class AssetModelNumberTestCase(CoreBaseTestCase):
     def setUp(self):
+        super(AssetModelNumberTestCase, self).setUp()
         AssetCategory.objects.create(category_name="Accessories")
         self.category = AssetCategory.objects.get(category_name="Accessories")
         self.new_sub_category = AssetSubCategory(

@@ -1,7 +1,5 @@
 from unittest.mock import patch
-
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
@@ -9,14 +7,16 @@ from rest_framework.test import APIClient
 from core.models import (AssetLog,
                          AssetModelNumber, Asset, SecurityUser)
 
+from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
 
 
-class AssetLogModelTest(TestCase):
+class AssetLogModelTest(APIBaseTestCase):
     """Tests for the AssetLog Model and API"""
 
     def setUp(self):
+        super(AssetLogModelTest, self).setUp()
         self.test_assetmodel = AssetModelNumber(model_number="IMN50987")
         self.test_assetmodel.save()
 

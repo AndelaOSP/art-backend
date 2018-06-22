@@ -1,10 +1,11 @@
-from django.test import TestCase
 from ..models import SecurityUser
+from core.tests import CoreBaseTestCase
 
 
-class SecurityUserModelTest(TestCase):
+class SecurityUserModelTest(CoreBaseTestCase):
     """ Tests for the Security User Model """
     def setUp(self):
+        super(SecurityUserModelTest, self).setUp()
         SecurityUser.objects.create(
             email="sectest1@andela.com",
             password="devpassword",

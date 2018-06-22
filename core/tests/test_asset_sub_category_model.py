@@ -1,11 +1,12 @@
-from django.test import TestCase
 from ..models import AssetSubCategory, AssetCategory
+from core.tests import CoreBaseTestCase
 
 
-class AssetSubCategoryModelTest(TestCase):
+class AssetSubCategoryModelTest(CoreBaseTestCase):
     """Tests for the assets subcategory model"""
 
     def setUp(self):
+        super(AssetSubCategoryModelTest, self).setUp()
         AssetCategory.objects.create(
             category_name="Accessories"
         )

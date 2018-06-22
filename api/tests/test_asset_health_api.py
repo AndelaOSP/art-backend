@@ -1,5 +1,4 @@
 from unittest.mock import patch
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
@@ -12,12 +11,14 @@ from core.models import (Asset,
                          AssetSubCategory,
                          AssetCategory)
 
+from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
 
 
-class AssetHealthTestCase(TestCase):
+class AssetHealthTestCase(APIBaseTestCase):
     def setUp(self):
+        super(AssetHealthTestCase, self).setUp()
         self.admin = User.objects.create_superuser(
             email='admin@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'

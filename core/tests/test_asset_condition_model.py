@@ -1,14 +1,15 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from ..models import Asset, AssetCondition, AssetModelNumber
 
+from core.tests import CoreBaseTestCase
 User = get_user_model()
 
 
-class AssetConditionModelTest(TestCase):
+class AssetConditionModelTest(CoreBaseTestCase):
     """Tests for the Asset Model"""
 
     def setUp(self):
+        super(AssetConditionModelTest, self).setUp()
         self.user = User.objects.create(
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'

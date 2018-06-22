@@ -1,17 +1,18 @@
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 from django.contrib.auth import get_user_model
 
 from ..models import Asset, AssetModelNumber, AssetStatus
 
+from core.tests import CoreBaseTestCase
 User = get_user_model()
 
 
-class AssetTypeModelTest(TestCase):
+class AssetTypeModelTest(CoreBaseTestCase):
     """Tests for the Asset Model"""
 
     def setUp(self):
+        super(AssetTypeModelTest, self).setUp()
         self.user = User.objects.create(
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'

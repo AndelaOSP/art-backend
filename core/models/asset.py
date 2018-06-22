@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 
 from .user import SecurityUser
+from core.slack_bot import SlackIntegration
 
 AVAILABLE = "Available"
 ALLOCATED = "Allocated"
@@ -32,6 +33,8 @@ INCIDENT_TYPES = (
     (LOSS, 'Loss'),
     (DAMAGE, 'Damage')
 )
+
+slack = SlackIntegration()
 
 
 class AssetCategory(models.Model):
@@ -293,6 +296,20 @@ def set_current_asset_status(sender, **kwargs):
     asset_status.asset.save()
 
 
+@receiver(post_save, sender=AssetStatus)
+def check_asset_limit(sender, **kwargs):
+    """Check the assets have not exceeded the limit"""
+    asset_status = kwargs.get('instance')
+    model_number = asset_status.asset.model_number
+    available_assets = Asset.objects.filter(
+        current_status='Available', model_number=model_number
+    ).count()
+    if available_assets <= 10:
+        message = "Warning!! The number of available {} ".format(
+            model_number) + " is {}".format(available_assets)
+        slack.send_message(message)
+
+
 @receiver(post_save, sender=Asset)
 def save_initial_asset_status(sender, **kwargs):
     current_asset = kwargs.get('instance')
@@ -319,10 +336,14 @@ def save_asset_condition(sender, **kwargs):
 def allocation_history_post_save(sender, **kwargs):
     allocation_history = kwargs.get('instance')
     asset = allocation_history.asset
-    asset.assigned_to = allocation_history.current_owner
+    user = allocation_history.current_owner
+    asset.assigned_to = user
     asset.save()
 
     if asset.assigned_to and asset.current_status == AVAILABLE:
+        message = "The asset with serial number {} ".format(
+            asset.serial_number) + "has been allocated to you."
+        slack.send_message(message, user=user)
         asset_status = AssetStatus.objects.create(
             asset=asset,
             current_status=ALLOCATED

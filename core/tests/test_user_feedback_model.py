@@ -1,11 +1,12 @@
-from django.test import TestCase
 from ..models import User, UserFeedback
+from core.tests import CoreBaseTestCase
 
 
-class UserFeedbackModelTest(TestCase):
+class UserFeedbackModelTest(CoreBaseTestCase):
     """ Tests for the UserFeedback Model """
 
     def setUp(self):
+        super(UserFeedbackModelTest, self).setUp()
         self.user = User.objects.create(
             email='test8@site.com', cohort=20,
             slack_handle='@test_user8', password='devpassword'

@@ -1,11 +1,12 @@
-from django.test import TestCase
 from core.models import Asset, AssetModelNumber, User, AssetIncidentReport
+from core.tests import CoreBaseTestCase
 
 
-class AssetIncidentReportModelTest(TestCase):
+class AssetIncidentReportModelTest(CoreBaseTestCase):
     """ Tests for the AssetIncidentReport Model """
 
     def setUp(self):
+        super(AssetIncidentReportModelTest, self).setUp()
         self.test_assetmodel = AssetModelNumber(model_number="12345")
         self.test_assetmodel.save()
 

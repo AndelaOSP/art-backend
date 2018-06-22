@@ -1,4 +1,3 @@
-from django.test import TestCase
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -8,14 +7,16 @@ from core.models import (Asset,
                          AssetModelNumber,
                          AssetCondition)
 
+from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
 
 
-class AssetConditionAPITest(TestCase):
+class AssetConditionAPITest(APIBaseTestCase):
     ''' Tests for the AssetCondition endpoint'''
 
     def setUp(self):
+        super(AssetConditionAPITest, self).setUp()
         self.user = User.objects.create(
             email='testuser@gmail.com', cohort=19,
             slack_handle='tester', password='qwerty12345'

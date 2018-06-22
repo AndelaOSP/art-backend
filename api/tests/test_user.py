@@ -1,14 +1,15 @@
 from unittest.mock import patch
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
+from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
 
 
-class UserTestCase(TestCase):
+class UserTestCase(APIBaseTestCase):
     def setUp(self):
+        super(UserTestCase, self).setUp()
         self.user = User.objects.create(
             email='test@site.com', cohort=20,
             slack_handle='@test_user', password='devpassword'
