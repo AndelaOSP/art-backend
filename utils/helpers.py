@@ -1,3 +1,10 @@
+import os
+import urllib3
+import urllib.parse
+
+urllib3.disable_warnings()
+http = urllib3.PoolManager()
+
 
 def is_valid_file(file_name):
     if file_name.endswith('.csv'):
@@ -43,28 +50,42 @@ def display_skipped(result):
             print('{0}\t \t{1} \t{2}'.format(value[1], key, value[0]))
 
 
-class DependencyChecker():
-    def __init__(self, columns):
-        self.columns = columns
+def is_valid_url(url):
+    """
+    checks if url is valid
+    :param url: url
+    :return: boolean
+    """
+    parsed_url = urllib.parse.urlparse(url)
 
-    @classmethod
-    def check_dependency(cls, column, columns):
-        instance = cls(columns)
-        return instance.get_dependency(column)
+    if parsed_url.scheme and parsed_url.netloc:
+        return True
 
-    @classmethod
-    def has_dep(cls, column, columns):
-        instance = cls(columns)
-        return instance.has_dep(column)
+    print('Please enter a valid url.')
+    return False
 
-    # def has_dep(self, column):
-    #     if self.columns[0] == column:
-    #         return False
-    #     return True
 
-    def get_dependency(self, column):
-        if column in self.columns:
-            colunm_index = self.columns.index(column)
-            if colunm_index > 0:
-                return self.columns[colunm_index - 1]
+def get_csv_from_url(url, filepath):
+    """
+    Get csv from URL
+    :param url: url that points to csv file
+    :param filepath: base path for csv files
+    :return: None or file object
+    """
+
+    _, filename = os.path.split(url)
+
+    try:
+        res = http.urlopen('GET', url, redirect=True)
+    except (urllib3.exceptions.HTTPError):
+        print('There was an error while processing your request')
         return None
+
+    if 'csv' in res.getheader('content-type'):
+        f = open(filepath + filename, 'wb')
+        f.write(res.data)
+        f.close()
+        return filename
+
+    print('The url does not point to a valid a csv file')
+    return None
