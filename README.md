@@ -30,6 +30,8 @@ This repository contains the API endpoints and models for the ART project implem
 
 > CLIENT_EMAIL
 
+> SLACK_TOKEN
+
 - To set up the pre-commit Git hooks with the standard styling conventions, follow the instructions on the Wiki [here](https://github.com/AndelaOSP/art-backend/wiki/Styling-Conventions).
 ### Dependencies
 - Install the project dependencies:
