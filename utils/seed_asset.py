@@ -1,6 +1,6 @@
 import sys
 import os
-
+import argparse
 import django
 
 project_dir = os.path.dirname(
@@ -22,6 +22,14 @@ django.setup()
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        prog="seed_asset",
+        description="""
+            The program for importing of assets
+        """
+    )
+    args = parser.parse_args()
+
     filename_or_url = input('Enter csv filename '
                             '(without .csv or url link to csv): ').strip()
     filepath = os.path.abspath(os.path.join(os.path.dirname(__file__))) + '/'  # noqa
