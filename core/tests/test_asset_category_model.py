@@ -1,8 +1,8 @@
 from django.db.models import ProtectedError
-from django.test import TestCase
 from ..models import AssetCategory, AssetSubCategory
 
 from core.tests import CoreBaseTestCase
+
 
 class AssetCategoryModelTest(CoreBaseTestCase):
     """ Tests for the Asset Category Model """

@@ -1,4 +1,3 @@
-from django.test import TestCase
 from ..models import User, UserFeedback
 from core.tests import CoreBaseTestCase
 

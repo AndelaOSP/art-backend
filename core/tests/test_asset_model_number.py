@@ -1,4 +1,3 @@
-from django.test import TestCase
 from django.db.models.deletion import ProtectedError
 
 from ..models import AssetModelNumber, AssetMake, AssetType, \

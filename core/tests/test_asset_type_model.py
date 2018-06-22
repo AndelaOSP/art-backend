@@ -1,5 +1,3 @@
-from django.test import TestCase
-
 from ..models import AssetType, AssetSubCategory, AssetCategory
 from core.tests import CoreBaseTestCase
 

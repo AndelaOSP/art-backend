@@ -1,4 +1,3 @@
-from django.test import TestCase
 from core.models import Asset, AssetModelNumber, User, AssetIncidentReport
 from core.tests import CoreBaseTestCase
 

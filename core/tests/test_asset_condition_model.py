@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from ..models import Asset, AssetCondition, AssetModelNumber
 
 from core.tests import CoreBaseTestCase

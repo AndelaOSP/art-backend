@@ -1,4 +1,3 @@
-from django.test import TestCase
 from ..models import SecurityUser
 from core.tests import CoreBaseTestCase
 

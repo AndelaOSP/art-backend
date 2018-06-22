@@ -1,4 +1,3 @@
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 from django.contrib.auth import get_user_model
