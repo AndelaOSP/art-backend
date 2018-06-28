@@ -1,6 +1,6 @@
 import sys
 import os
-
+import argparse
 import django
 
 project_dir = os.path.dirname(
@@ -22,7 +22,36 @@ django.setup()
 
 
 if __name__ == '__main__':
-    filename_or_url = input('Enter csv filename '
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        prog="seed_asset",
+        description="""
+        ------------------------------------------------------------------------
+        CSV file import script for Andela Resource Tracker (ART).
+        ------------------------------------------------------------------------
+        Running this program displays the following message expecting an input
+
+        "Enter csv filename (without .csv or url link to csv): "
+
+        Expected inputs:
+        - A csv file without extension. Eg. 'assets', not 'asset.csv'
+        - A URL pointing to a valid csv. Eg. 'http://link-to-csv.com/asset.csv'
+
+        Expected columns/fields in input csv file:
+
+        'Make', 'Type', 'Asset Code', 'Category', 'Sub-Category',
+        'Model Number', 'Serial No.'
+
+        without single quotation mark ''.
+
+        Note: This program only supports .csv files or file format, it does
+            not support other file formats.
+        """
+    )
+    args = parser.parse_args()
+    parser.print_help()
+
+    filename_or_url = input('\n\nEnter csv filename '
                             '(without .csv or url link to csv): ').strip()
     filepath = os.path.abspath(os.path.join(os.path.dirname(__file__))) + '/'  # noqa
     filename = ''
