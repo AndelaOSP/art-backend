@@ -2,6 +2,7 @@ import os
 import urllib3
 import urllib.parse
 import sys
+import csv
 
 urllib3.disable_warnings()
 http = urllib3.PoolManager()
@@ -41,8 +42,8 @@ def display_inserted(result, name=None):
 
 
 def display_skipped(result):
-    file_path = sys.path[-1]
-    record_skipped(result, file_path)
+    # file_path = sys.path[-1]
+    # record_skipped(result, file_path)
     print('----------------------------------------------------------------\n')
     print('There are {0}  skipped records \n'.format(len(result)))
     print('===============================================================\n')
@@ -99,31 +100,18 @@ def get_csv_from_url(url, filepath):
     return None
 
 
-def record_skipped(record, file_path):
+def write_record_skipped(record, file_path):
     """
     Get csv from URL
     :param record: record  that was skipped
     :param file_path: path to the output file
     :return: None
     """
-    filename = "/skipped.txt"
-    f = open(file_path + filename, 'a+')
-    f.write('======================Skipped records====================')
-    f.write('\n')
-    f.write('Description')
-    f.write('\t' * 3)
-    f.write('Error Message')
-    f.write('\t' * 2)
-    f.write('Line No.')
-    f.write('\n')
-    f.write('************************************************************')
-    f.write('\n')
-    for k, v in record.items():
-        f.write(k)
-        f.write('\t' * 3)
-        for i in range(len(v)):
-            f.write(str(v[i]))
-            f.write('\t')
-        f.write('\n')
-    f.write('\n' * 3)
-    f.close()
+    filename = "/skipped.csv"
+    fieldnames = ('Make', 'Type', 'Asset Code', 'Category', 'Sub-Category',
+                  'Model Number', 'Serial No.')
+    with open(file_path + filename, "a+") as csv_file:
+        print('\n')
+        for row in record:
+            dw = csv.DictWriter(csv_file, delimiter=',', fieldnames=fieldnames)
+            dw.writerow(row)

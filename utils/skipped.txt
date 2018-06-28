@@ -135,3 +135,140 @@ VLQ			asset_code VLQ already exists	33
 
 
 
+======================Skipped records====================
+Description			Error Message		Line No.
+************************************************************
+Accessories			Category Accessories already exists	92	
+Electronics			Category Electronics already exists	96	
+
+
+
+======================Skipped records====================
+Description			Error Message		Line No.
+************************************************************
+Computers			Sub Category Computers already exists	61	
+Audio Visual Equipment			Sub Category Audio Visual Equipment already exists	96	
+Electrical Accessories			Sub Category Electrical Accessories already exists	93	
+Interent and Communication Devices			Sub Category Interent and Communication Devices already exists	64	
+Computer accessories			Sub Category Computer accessories already exists	92	
+			Sub-Category has no value	68	
+Other			Sub Category Other already exists	81	
+
+
+
+======================Skipped records====================
+Description			Error Message		Line No.
+************************************************************
+Windows PC			asset_type Windows PC already exists	13	
+Webcam			asset_type Webcam already exists	16	
+USB Travel Charger			asset_type USB Travel Charger already exists	17	
+Macbook			asset_type Macbook already exists	28	
+Tablet			asset_type Tablet already exists	32	
+Phone			asset_type Phone already exists	80	
+Mouse			asset_type Mouse already exists	57	
+Monitors			asset_type Monitors already exists	61	
+MIFI			asset_type MIFI already exists	64	
+Magic Mouse			asset_type Magic Mouse already exists	65	
+Magic Keyboard			asset_type Magic Keyboard already exists	66	
+Macbook Charger			asset_type Macbook Charger already exists	67	
+Logitech Laser Pointer			asset_type Logitech Laser Pointer already exists	69	
+Keyboards			asset_type Keyboards already exists	71	
+Headsets			asset_type Headsets already exists	91	
+UPS			asset_type UPS already exists	92	
+Monitor			asset_type Monitor already exists	95	
+
+
+
+======================Skipped records====================
+Description			Error Message		Line No.
+************************************************************
+Compaq 			asset_make Compaq  already exists	2	
+Acer Chromebook 			asset_make Acer Chromebook  already exists	5	
+Lenovo			asset_make Lenovo already exists	6	
+Lenovo 			asset_make Lenovo  already exists	13	
+Asus 			asset_make Asus  already exists	12	
+Logitech			asset_make Logitech already exists	70	
+USB Travel Charger 			asset type USB Travel Charger  does not exist	17	
+Macbook Pro			asset_make Macbook Pro already exists	28	
+Tablet 			asset type Tablet  does not exist	32	
+Samsung			asset_make Samsung already exists	39	
+Tecno			asset_make Tecno already exists	34	
+Tecno C5			asset_make Tecno C5 already exists	40	
+Infinix			asset_make Infinix already exists	41	
+Nokia 			asset_make Nokia  already exists	42	
+HP			asset_make HP already exists	96	
+Airtel			asset_make Airtel already exists	64	
+Apple			asset_make Apple already exists	66	
+New Macbook Pro, 15 inch Charger			asset_make New Macbook Pro, 15 inch Charger already exists	67	
+Logitech wireless Keyboard			asset_make Logitech wireless Keyboard already exists	72	
+Phone 			asset type Phone  does not exist	81	
+Microsoft			asset_make Microsoft already exists	86	
+Sades Gaming Headsets 			asset_make Sades Gaming Headsets  already exists	92	
+Eaton UPS			asset_make Eaton UPS already exists	93	
+
+
+
+======================Skipped records====================
+Description			Error Message		Line No.
+************************************************************
+Compaq 			asset_model_no Compaq Presario CQ 57 (15") already exists	2	
+Acer Chromebook 			asset_model_no C710 Series already exists	5	
+Lenovo			asset_model_no Lenovo G50-80 already exists	6	
+Lenovo 			asset_model_no Lenovo E460-20ET-000DUE already exists	13	
+Asus 			asset_model_no Asus F450 Ci3-4010U already exists	12	
+Logitech			asset_model_no Logitech already exists	56	
+Macbook Pro			asset_model_no MF839 already exists	24	
+Amazon			asset make Amazon does not exist	28	
+Samsung			asset_model_no Galaxy Ace 4 already exists	35	
+Tecno			asset_model_no Tecno T340 already exists	30	
+Tecno C5			asset_model_no Camon C5 already exists	36	
+Infinix			asset_model_no Hotnote X551 already exists	37	
+Nokia 			asset_model_no Lumia 640 XL already exists	38	
+Logitech wireless Keyboard			asset_model_no Logitech Combo Pack already exists	58	
+iPhone			asset make iPhone does not exist	67	
+Microsoft			asset_model_no Microsoft Lifechat LX-6000 already exists	72	
+Sades Gaming Headsets 			asset_model_no Sades Gaming Headsets SA- 708GT already exists	78	
+Eaton UPS			asset_model_no EATON 5E 1500VA already exists	79	
+HP			asset_model_no HP 27es already exists	82	
+
+
+
+======================Skipped records====================
+Description			Error Message		Line No.
+************************************************************
+PNT/PDW/644			asset_code PNT/PDW/644 already exists	1	
+PNT/TRT/644			asset_code PNT/TRT/644 already exists	2	
+PNT/TRT/793			asset_code PNT/TRT/793 already exists	3	
+PNT/TRT/337			asset_code PNT/TRT/337 already exists	4	
+PNT/EWSI/81			asset_code PNT/EWSI/81 already exists	5	
+PNT/EWSI/17			asset_code PNT/EWSI/17 already exists	6	
+PNT/EWSI/95			asset_code PNT/EWSI/95 already exists	7	
+PNT/EWSI/35			asset_code PNT/EWSI/35 already exists	8	
+PNT/EWSI/27			asset_code PNT/EWSI/27 already exists	9	
+PNT/GCXF/32			asset_code PNT/GCXF/32 already exists	10	
+PNT/QSUR/793			asset_code PNT/QSUR/793 already exists	11	
+PNT/QSUR/337			asset_code PNT/QSUR/337 already exists	12	
+PNT/QSUR/737			asset_code PNT/QSUR/737 already exists	13	
+PNT/REDL/27			asset_code PNT/REDL/27 already exists	14	
+PNT/REDL/81			asset_code PNT/REDL/81 already exists	15	
+PNT/REDL/17			asset_code PNT/REDL/17 already exists	16	
+PNT/REDL/95			asset_code PNT/REDL/95 already exists	17	
+PNT/REDL/35			asset_code PNT/REDL/35 already exists	18	
+PNT/REDL/98			asset_code PNT/REDL/98 already exists	19	
+PNT/REDL/15			asset_code PNT/REDL/15 already exists	20	
+PNT/REDL/44			asset_code PNT/REDL/44 already exists	21	
+PNT/AW/27			asset_code PNT/AW/27 already exists	22	
+PNT/AW/81			asset_code PNT/AW/81 already exists	23	
+PNT/AW/17			asset_code PNT/AW/17 already exists	24	
+PNT/AW/95			asset_code PNT/AW/95 already exists	25	
+UAPIQI/KG/YTVNCK/T			serial_number UAPIQI/KG/YTVNCK/T already exists	26	
+PNT/AW/98			asset_code PNT/AW/98 already exists	27	
+PNT/AW/15			asset_code PNT/AW/15 already exists	28	
+PNT/AW/77			asset_code PNT/AW/77 already exists	29	
+PNT/AW/64			asset_code PNT/AW/64 already exists	30	
+PNT/AW/92			asset_code PNT/AW/92 already exists	31	
+PNT/AF/27			asset_code PNT/AF/27 already exists	32	
+VLQ			asset_code VLQ already exists	33	
+
+
+
