@@ -22,7 +22,7 @@ rows = set()
 out = []
 
 
-def post_asset_make(f, file_length): # noqa
+def post_asset_make(f, file_length):  # noqa
     """
     Bulk creates asset make
     :param f: open csv file
@@ -84,7 +84,7 @@ def post_asset_make(f, file_length): # noqa
     display_skipped(skipped)
 
 
-def post_asset(f, file_length): # noqa
+def post_asset(f, file_length):  # noqa
     """
     Bulk creates assets
     :param f: open csv file
@@ -369,4 +369,3 @@ def row_check(row):
         out.append(row)
         for k, v in row.items():
             rows.add(v)
-

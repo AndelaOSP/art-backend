@@ -102,7 +102,7 @@ def get_csv_from_url(url, filepath):
 
 def write_record_skipped(record, file_path):
     """
-    Get csv from URL
+    Write skipped record to a file
     :param record: record  that was skipped
     :param file_path: path to the output file
     :return: None
