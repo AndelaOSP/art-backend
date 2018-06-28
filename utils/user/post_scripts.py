@@ -17,26 +17,27 @@ from core.models.user import (
 )  # noqa
 
 
-def post_users(f, file_length):  # noqa
+def post_users(f, file_length, type):  # noqa
     """
     Bulk creates asset make
+    :param type: specifies type of import
     :param f: open csv file
-    :param file_length: length of csv data
+    :param file_length: length of data
     :return:
     """
-
-    f.seek(0)
-    data = csv.DictReader(f, delimiter=',')
     skipped = dict()
     inserted_records = []
     counter = 1
+    if type == 'csv':
+        f.seek(0)
+        data = csv.DictReader(f, delimiter=',')
+
+    else:
+        data = f
+
     with tqdm(total=file_length) as pbar:
         for row in data:
             email = row.get('email', '').strip()
-            if not email:
-                skipped[email] = [
-                    'User has no email address', counter]
-                continue
             if User.objects.filter(email=email).exists():
                 skipped[row['email']] = [
                     f"User {email} already exists", counter]
