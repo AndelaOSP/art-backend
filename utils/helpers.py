@@ -42,8 +42,6 @@ def display_inserted(result, name=None):
 
 
 def display_skipped(result):
-    # file_path = sys.path[-1]
-    # record_skipped(result, file_path)
     print('----------------------------------------------------------------\n')
     print('There are {0}  skipped records \n'.format(len(result)))
     print('===============================================================\n')
@@ -102,7 +100,7 @@ def get_csv_from_url(url, filepath):
 
 def write_record_skipped(record, file_path):
     """
-    Get csv from URL
+    Write skipped record to a file
     :param record: record  that was skipped
     :param file_path: path to the output file
     :return: None

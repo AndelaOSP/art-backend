@@ -48,4 +48,3 @@ if __name__ == '__main__':
         post_asset_make(f, file_length)
         post_asset_model_no(f, file_length)
         post_asset(f, file_length)
-
