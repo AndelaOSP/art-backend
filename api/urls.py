@@ -24,7 +24,14 @@ schema_view = get_schema_view(
     public=True,
 )
 
-router = SimpleRouter()
+
+class OptionalSlashRouter(SimpleRouter):
+    def __init__(self, trailing_slash='/?'):
+        self.trailing_slash = trailing_slash
+        super(SimpleRouter, self).__init__()
+
+
+router = OptionalSlashRouter()
 router.register('users', UserViewSet)
 router.register('assets', AssetViewSet, 'assets')
 router.register('allocations', AllocationsViewSet, 'allocations')
