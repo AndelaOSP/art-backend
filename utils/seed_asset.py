@@ -8,8 +8,8 @@ project_dir = os.path.dirname(
 sys.path.append(project_dir)
 
 from utils.helpers import (
-    is_valid_file, get_csv_from_url, is_valid_url, write_record_skipped
-    )  # noqa
+    is_valid_file, get_csv_from_url, is_valid_url
+)  # noqa
 
 from utils.asset.post_scripts import (
     post_asset_make, post_asset_category,
@@ -77,4 +77,3 @@ if __name__ == '__main__':
         post_asset_make(f, file_length)
         post_asset_model_no(f, file_length)
         post_asset(f, file_length)
-
