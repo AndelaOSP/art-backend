@@ -58,7 +58,7 @@ class AssetStatusAPITest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.normal_user.email}
         response = client.get(
-            '{}{}/'.format(self.asset_status_urls, self.asset_status.id),
+            '{}/{}/'.format(self.asset_status_urls, self.asset_status.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.asset_status.asset_id, response.data.values())
         self.assertEqual(response.status_code, 200)

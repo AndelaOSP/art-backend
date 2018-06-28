@@ -225,7 +225,7 @@ class AssetLogModelTest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.get(
-            "{}{}/".format(self.asset_logs_url, self.checkin.id),
+            "{}/{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['id'], self.checkin.id)
         self.assertEqual(response.status_code, 200)
@@ -235,7 +235,7 @@ class AssetLogModelTest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.delete(
-            "{}{}/".format(self.asset_logs_url, self.checkin.id),
+            "{}/{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "DELETE" not allowed.'
@@ -247,7 +247,7 @@ class AssetLogModelTest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.put(
-            "{}{}/".format(self.asset_logs_url, self.checkin.id),
+            "{}/{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "PUT" not allowed.'
@@ -259,7 +259,7 @@ class AssetLogModelTest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         response = client.patch(
-            "{}{}/".format(self.asset_logs_url, self.checkin.id),
+            "{}/{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'

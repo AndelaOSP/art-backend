@@ -65,7 +65,7 @@ class AssetCategoryAPITest(APIBaseTestCase):
     def test_can_get_single_sub_category(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
-            f"{self.asset_sub_category_url}{self.asset_sub_category.id}/",
+            f"{self.asset_sub_category_url}/{self.asset_sub_category.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
 
         self.assertIn("sub_category_name", response.data.keys())

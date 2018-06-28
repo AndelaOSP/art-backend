@@ -129,8 +129,8 @@ class AssetConditionAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(new_asset_condition.status_code, 201)
         response = client.get(
-            '{}{}/'.format(self.asset_condition_urls,
-                           new_asset_condition.data['id']),
+            '{}/{}/'.format(self.asset_condition_urls,
+                            new_asset_condition.data['id']),
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(response.data['id'], new_asset_condition.data['id'])
         self.assertEqual(response.status_code, 200)
