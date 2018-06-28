@@ -2,40 +2,53 @@
 #
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
+default: &default
+  docker:
+    # specify the version you desire here
+    # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
+    - image: circleci/python:3.6.4
+      environment:
+        PIPENV_VENV_IN_PROJECT: 'true'
+        DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
+    - image: circleci/postgres:9.4
+      environment:
+        POSTGRES_USER: root
+        POSTGRES_DB: circle_test
+        POSTGRES_PASSWORD: ""  
+  working_directory: ~/art-backend
+cmd_change_owner: &cmd_change_owner
+  run:
+    name: change owner 
+    command: |
+      sudo chown -R circleci:circleci /usr/local/bin
+      sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
+cmd_restore_cache: &cmd_restore_cache
+  restore_cache:
+    key: deps9-{{ .Branch }}-
+cmd_install_requirements: &cmd_install_requirements
+  run:
+    name: install application requirements
+    command: |
+      sudo pip install pipenv
+      pipenv install --skip-lock -r requirements.txt
+cmd_save_cache: &cmd_save_cache      
+  save_cache:
+    key: deps9-{{ .Branch }}-
+    paths:
+      - ".venv"
+      - "/usr/local/bin"
+      - "/usr/local/lib/python3.6/site-packages"
+
 version: 2
 jobs:
   build:
-    docker:
-      # specify the version you desire here
-      # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:3.6.4
-        environment:
-          PIPENV_VENV_IN_PROJECT: 'true'
-          DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
-      - image: circleci/postgres:9.4
-        environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: circle_test
-          POSTGRES_PASSWORD: ""
-
-    working_directory: ~/art-backend
-
+    <<: *default
     steps:
       - checkout
-      - run: sudo chown -R circleci:circleci /usr/local/bin
-      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
-      - restore_cache:
-          key: deps9-{{ .Branch }}-
-      - run:
-          command: |
-            sudo pip install pipenv
-            pipenv install --skip-lock -r requirements.txt
-      - save_cache:
-          key: deps9-{{ .Branch }}-
-          paths:
-            - ".venv"
-            - "/usr/local/bin"
-            - "/usr/local/lib/python3.6/site-packages"
+      - *cmd_change_owner
+      - *cmd_restore_cache
+      - *cmd_install_requirements
+      - *cmd_save_cache
       - run:
           name: make migrations
           command: |
@@ -49,13 +62,59 @@ jobs:
           name: pep8 checks on project
           command: |
             pipenv run "flake8 ."
-
+  tests:
+    <<: *default  
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
+      - *cmd_install_requirements
+      - *cmd_save_cache
       - run:
-         name: run tests
-         command: |
-           pipenv run "coverage run --source api manage.py test -v 2"
-
+          name: run tests
+          command: |
+            pipenv run "coverage run --source api manage.py test -v 2"
       - run:
           name: run coveralls
           command: |
             pipenv run "coveralls"
+  deploy_staging:
+    <<: *default
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 17.11.0-ce
+      - run:
+          name: deploying application to staging 
+          command: |
+            bash scripts/deploy.sh 
+  deploy_production:
+    <<: *default
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 17.11.0-ce
+      - run:
+          name: deploying application to production 
+          command: |
+            bash scripts/deploy.sh                       
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build
+      - tests:
+          requires:
+            - build   
+      - deploy_staging:  
+          requires:
+            - tests
+          filters:
+            branches:
+              only: develop 
+      - deploy_production:
+          requires:
+            - tests
+          filters:
+            branches:
+              only: master                     
