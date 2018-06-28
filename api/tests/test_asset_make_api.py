@@ -134,7 +134,7 @@ class AssetMakeAPICase(APIBaseTestCase):
     def test_assets_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.put(
-            '{}{}/'.format(self.asset_make_urls, self.asset_make.id),
+            '{}/{}/'.format(self.asset_make_urls, self.asset_make.id),
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PUT" not allowed.'
@@ -145,7 +145,7 @@ class AssetMakeAPICase(APIBaseTestCase):
     def test_can_get_single_asset_make(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
-            f'{self.asset_make_urls}{self.asset_make.id}/',
+            f'{self.asset_make_urls}/{self.asset_make.id}/',
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
 
         self.assertIn('make_label', response.data.keys())

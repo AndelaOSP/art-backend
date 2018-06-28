@@ -70,7 +70,7 @@ class AssetCategoryAPITest(APIBaseTestCase):
     def test_can_get_single_asset_type(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
-            f"{self.asset_type_url}{self.asset_type.id}/",
+            f"{self.asset_type_url}/{self.asset_type.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
 
         self.assertIn("asset_type", response.data.keys())

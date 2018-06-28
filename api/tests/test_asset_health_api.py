@@ -123,7 +123,7 @@ class AssetHealthTestCase(APIBaseTestCase):
                                                        mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.delete(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "DELETE" not allowed.'
