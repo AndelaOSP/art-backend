@@ -206,9 +206,7 @@ def post_asset_subcategory(f, file_length):  # noqa
             if not assets_category:
                 skipped[assets_category] = [
                     'Category has no value', counter]
-                if not row['Category'] in rows:
-                    out.append(row)
-                    rows.add(row['Category'])
+                row_check(row)
             elif not assets_subcategory:
                 skipped[assets_subcategory] = [
                     'Sub-Category has no value', counter]

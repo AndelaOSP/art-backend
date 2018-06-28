@@ -42,8 +42,6 @@ def display_inserted(result, name=None):
 
 
 def display_skipped(result):
-    # file_path = sys.path[-1]
-    # record_skipped(result, file_path)
     print('----------------------------------------------------------------\n')
     print('There are {0}  skipped records \n'.format(len(result)))
     print('===============================================================\n')
@@ -110,8 +108,9 @@ def write_record_skipped(record, file_path):
     filename = "/skipped.csv"
     fieldnames = ('Make', 'Type', 'Asset Code', 'Category', 'Sub-Category',
                   'Model Number', 'Serial No.')
-    with open(file_path + filename, "a+") as csv_file:
+    with open(file_path + filename, "w") as csv_file:
         print('\n')
+        dw = csv.DictWriter(csv_file, delimiter=',', fieldnames=fieldnames)
+        dw.writeheader()
         for row in record:
-            dw = csv.DictWriter(csv_file, delimiter=',', fieldnames=fieldnames)
             dw.writerow(row)
