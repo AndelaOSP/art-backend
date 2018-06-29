@@ -117,8 +117,9 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         response = client.get(
             f"{self.incident_report_url}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(self.incident_report.id, response.data[0].values())
-        self.assertEqual(len(response.data),
+        self.assertIn(self.incident_report.id,
+                      response.data['results'][0].values())
+        self.assertEqual(len(response.data['results']),
                          AssetIncidentReport.objects.count())
         self.assertEqual(response.status_code, 200)
 

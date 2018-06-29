@@ -140,6 +140,10 @@ JET_SIDE_MENU_COMPACT = True
 JET_DEFAULT_THEME = 'andela'
 
 REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': (
+        'rest_framework.pagination.PageNumberPagination',
+    ),
+    'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'api.authentication.FirebaseTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
