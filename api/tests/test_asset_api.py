@@ -94,7 +94,7 @@ class AssetTestCase(APIBaseTestCase):
     def test_authenticated_user_get_single_asset(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.other_user.email}
         response = client.get(
-            "{}{}/".format(self.asset_urls, self.asset.serial_number),
+            "{}/{}/".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.asset.asset_code, response.data.values())
         self.assertEqual(response.status_code, 200)
@@ -155,7 +155,7 @@ class AssetTestCase(APIBaseTestCase):
     def test_assets_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.put(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PUT" not allowed.'
@@ -165,7 +165,7 @@ class AssetTestCase(APIBaseTestCase):
     def test_assets_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.patch(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'
@@ -175,7 +175,7 @@ class AssetTestCase(APIBaseTestCase):
     def test_assets_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.delete(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "DELETE" not allowed.'
@@ -186,7 +186,7 @@ class AssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.user.email,
                       response.data['assigned_to'].values())
@@ -197,7 +197,7 @@ class AssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertNotIn('password', response.data['assigned_to'].keys())
         self.assertEqual(response.status_code, 200)
@@ -206,7 +206,7 @@ class AssetTestCase(APIBaseTestCase):
     def test_checkin_status_for_non_checked_asset(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'], None)
@@ -223,7 +223,7 @@ class AssetTestCase(APIBaseTestCase):
 
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'],
@@ -240,7 +240,7 @@ class AssetTestCase(APIBaseTestCase):
         )
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'],
@@ -251,7 +251,7 @@ class AssetTestCase(APIBaseTestCase):
     def test_asset_type_in_asset_api(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('asset_type', response.data.keys())
         self.assertEqual(response.data['asset_type'],
@@ -292,7 +292,7 @@ class AssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
-            '{}{}/'.format(self.asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('allocation_history', response.data.keys())
         self.assertEqual(response.status_code, 200)

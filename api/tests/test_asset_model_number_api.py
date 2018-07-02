@@ -80,7 +80,7 @@ class AssetModelNumberAPITest(APIBaseTestCase):
     def test_can_get_single_asset_model_number(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
-            f'{self.asset_model_no_url}{self.asset_model_no.id}/',
+            f'{self.asset_model_no_url}/{self.asset_model_no.id}/',
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
 
         self.assertIn('model_number', response.data.keys())
