@@ -33,20 +33,20 @@ class UserViewSet(ModelViewSet):
     http_method_names = ['get', 'post']
 
 
-class AssetViewSet(ModelViewSet):
+class ManageAssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
         user = self.request.user
-        is_admin = self.request.user.is_staff
         queryset = Asset.objects.all()
         query_params = self.request.query_params
 
-        if not is_admin:
+        if query_params.get('show_my_assets', None) is not None:
             queryset = Asset.objects.filter(assigned_to=user)
+            return queryset
 
         if query_params.get('email'):
             email = query_params['email']
@@ -63,8 +63,23 @@ class AssetViewSet(ModelViewSet):
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
 
-    def perform_create(self, serializer):
-        serializer.save()
+
+class AssetViewSet(ModelViewSet):
+    serializer_class = AssetSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    http_method_names = ['get']
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Asset.objects.filter(assigned_to=user)
+        return queryset
+
+    def get_object(self):
+        user = self.request.user
+        queryset = Asset.objects.filter(assigned_to=user)
+        obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
+        return obj
 
 
 class SecurityUserEmailsViewSet(ModelViewSet):
