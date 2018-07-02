@@ -61,6 +61,7 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name_plural = "All Users"
+        ordering = ['-id']
 
 
 class SecurityUser(User):
@@ -87,6 +88,7 @@ class APIUser(AbstractApplication):
 
     class Meta:
         verbose_name = "API User"
+        ordering = ['-id']
 
 
 class UserFeedback(models.Model):
@@ -107,3 +109,4 @@ class UserFeedback(models.Model):
 
     class Meta:
         verbose_name_plural = "User Feedback"
+        ordering = ['-id']

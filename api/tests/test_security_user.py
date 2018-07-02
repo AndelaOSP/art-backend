@@ -128,7 +128,8 @@ class SecurityUserTestCase(APIBaseTestCase):
             format='json',
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), SecurityUser.objects.count())
+        self.assertEqual(len(response.data['results']),
+                         SecurityUser.objects.count())
 
     @patch('api.authentication.auth.verify_id_token')
     def test_security_user_api_endpoint_cant_allow_put(

@@ -67,8 +67,9 @@ class AllocationTestCase(APIBaseTestCase):
         response = client.get(
             self.allocations_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_other_user))
-        self.assertEqual(response.data, [])
-        self.assertEqual(len(response.data), AllocationHistory.objects.count())
+        self.assertEqual(response.data['results'], [])
+        self.assertEqual(len(response.data['results']),
+                         AllocationHistory.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
