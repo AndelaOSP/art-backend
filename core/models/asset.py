@@ -45,6 +45,7 @@ class AssetCategory(models.Model):
 
     class Meta:
         verbose_name_plural = 'Asset Categories'
+        ordering = ['-id']
 
     def __str__(self):
         return self.category_name
@@ -60,6 +61,7 @@ class AssetSubCategory(models.Model):
 
     class Meta:
         verbose_name_plural = 'Asset SubCategories'
+        ordering = ['-id']
 
     def __str__(self):
         return self.sub_category_name
@@ -75,6 +77,7 @@ class AssetType(models.Model):
 
     class Meta:
         verbose_name = "Asset Type"
+        ordering = ['-id']
 
     def __str__(self):
         return self.asset_type
@@ -90,6 +93,7 @@ class AssetMake(models.Model):
 
     class Meta:
         verbose_name = "Asset Make"
+        ordering = ['-id']
 
     def __str__(self):
         return self.make_label
@@ -106,6 +110,7 @@ class AssetModelNumber(models.Model):
 
     class Meta:
         verbose_name = "Asset Model Number"
+        ordering = ['-id']
 
     def __str__(self):
         return self.model_number
@@ -148,6 +153,9 @@ class Asset(models.Model):
                                    self.serial_number,
                                    self.model_number)
 
+    class Meta:
+        ordering = ['-id']
+
 
 class AssetLog(models.Model):
     """Stores checkin/Checkout asset logs"""
@@ -174,6 +182,7 @@ class AssetLog(models.Model):
 
     class Meta:
         verbose_name = "Asset Log"
+        ordering = ['-id']
 
 
 class AssetStatus(models.Model):
@@ -191,6 +200,7 @@ class AssetStatus(models.Model):
 
     class Meta:
         verbose_name_plural = 'Asset Statuses'
+        ordering = ['-id']
 
     def save(self, *args, **kwargs):
         try:
@@ -223,6 +233,7 @@ class AllocationHistory(models.Model):
 
     class Meta:
         verbose_name_plural = "Allocation History"
+        ordering = ['-id']
 
     def clean(self):
         if self.asset.current_status != AVAILABLE:
@@ -253,6 +264,7 @@ class AssetCondition(models.Model):
 
     class Meta:
         verbose_name_plural = 'Asset Condition'
+        ordering = ['-id']
 
     def save(self, *args, **kwargs):
         super(AssetCondition, self).save(*args, **kwargs)
@@ -282,6 +294,9 @@ class AssetIncidentReport(models.Model):
 
     def __str__(self):
         return f"{self.incident_type}: {self.asset}"
+
+    class Meta:
+        ordering = ['-id']
 
 
 @receiver(post_save, sender=AssetStatus)
