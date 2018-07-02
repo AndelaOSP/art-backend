@@ -40,13 +40,8 @@ class ManageAssetViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
-        user = self.request.user
         queryset = Asset.objects.all()
         query_params = self.request.query_params
-
-        if query_params.get('show_my_assets', None) is not None:
-            queryset = Asset.objects.filter(assigned_to=user)
-            return queryset
 
         if query_params.get('email'):
             email = query_params['email']
