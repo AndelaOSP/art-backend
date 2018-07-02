@@ -11,6 +11,7 @@ MIDDLEWARE += [  # noqa ignore=F405
 ]
 
 ALLOWED_HOSTS = [
+    'api-staging-art.andela.com',
     '0.0.0.0',
     '127.0.0.1',
     'art-backend.herokuapp.com'
