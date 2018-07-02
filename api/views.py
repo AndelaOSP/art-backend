@@ -67,7 +67,17 @@ class AssetViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        query_params = self.request.query_params
         queryset = Asset.objects.filter(assigned_to=user)
+
+        if query_params.get('email'):
+            email = query_params['email']
+            try:
+                validate_email(email)
+            except ValidationError as error:
+                raise serializers.ValidationError(error.message)
+            queryset = Asset.objects.filter(assigned_to__email=email)
+
         return queryset
 
     def get_object(self):
