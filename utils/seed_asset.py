@@ -9,12 +9,12 @@ sys.path.append(project_dir)
 
 from utils.helpers import (
     is_valid_file, get_csv_from_url, is_valid_url
-    )  # noqa
+)  # noqa
 
 from utils.asset.post_scripts import (
     post_asset_make, post_asset_category,
     post_asset_model_no, post_asset, post_asset_types,
-    post_asset_subcategory
+    post_asset_subcategory,
 )  # noqa
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
