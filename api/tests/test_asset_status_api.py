@@ -67,7 +67,7 @@ class AssetStatusAPITest(APIBaseTestCase):
     def test_authenticated_user_post_asset_status(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.normal_user.email}
         data = {
-            "asset": self.test_asset.serial_number,
+            "asset": self.test_asset.id,
             "current_status": "Available"
         }
         response = client.post(
@@ -83,7 +83,7 @@ class AssetStatusAPITest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.normal_user.email}
         data = {
-            "asset": "Invalid",
+            "asset": 100000,
             "current_status": "Available"
         }
         response = client.post(
@@ -91,7 +91,7 @@ class AssetStatusAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
-            'asset': ['Object with serial_number=Invalid does not exist.']
+            'asset': ['Invalid pk "100000" - object does not exist.']
         })
 
         self.assertEqual(response.status_code, 400)
@@ -101,7 +101,7 @@ class AssetStatusAPITest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.normal_user.email}
         data = {
-            "asset": self.test_asset.serial_number,
+            "asset": self.test_asset.id,
             "current_status": "Invalid"
         }
         response = client.post(

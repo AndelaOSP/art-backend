@@ -72,7 +72,7 @@ class AssetSerializer(serializers.ModelSerializer):
         return obj.model_number.make_label.asset_type.asset_type
 
     def get_allocation_history(self, obj):
-        allocations = AllocationHistory.objects.filter(asset=obj.serial_number)
+        allocations = AllocationHistory.objects.filter(asset=obj.id)
         return [
             {
                 "id": allocation.id,

@@ -69,7 +69,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         )
         test_asset.save()
         data = {
-            'asset': test_asset.serial_number,
+            'asset': test_asset.id,
             'asset_condition': 'working perfectly'
         }
         response = client.post(
@@ -120,7 +120,7 @@ class AssetConditionAPITest(APIBaseTestCase):
             )
             test_asset.save()
             data = {
-                'asset': test_asset.serial_number,
+                'asset': test_asset.id,
                 'asset_condition': 'working perfectly'
             }
             new_asset_condition = client.post(

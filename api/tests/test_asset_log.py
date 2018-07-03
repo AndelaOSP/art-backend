@@ -160,7 +160,7 @@ class AssetLogModelTest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'asset': self.test_other_asset.serial_number,
+            'asset': self.test_other_asset.id,
             'log_type': 'Checkin'
         }
         response = client.post(
@@ -168,7 +168,7 @@ class AssetLogModelTest(APIBaseTestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['asset'],
-                         self.test_other_asset.serial_number)
+                         self.test_other_asset.id)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -176,7 +176,7 @@ class AssetLogModelTest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         data = {
-            'asset': self.test_other_asset.serial_number,
+            'asset': self.test_other_asset.id,
             'log_type': 'Checkout'
         }
         response = client.post(
@@ -184,7 +184,7 @@ class AssetLogModelTest(APIBaseTestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
         self.assertEqual(response.data['asset'],
-                         self.test_other_asset.serial_number)
+                         self.test_other_asset.id)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -193,7 +193,7 @@ class AssetLogModelTest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.checked_by.email}
         log_type = "Invalid"
         data = {
-            'asset': self.test_other_asset.serial_number,
+            'asset': self.test_other_asset.id,
             'log_type': log_type
         }
         response = client.post(
