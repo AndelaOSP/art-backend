@@ -77,7 +77,7 @@ class AllocationTestCase(APIBaseTestCase):
         """Test post new allocation"""
         self.assertEqual(AllocationHistory.objects.all().count(), 0)
         mock_verify_id_token.return_value = {'email': self.other_user.email}
-        data = {"asset": "SN001",
+        data = {"asset": self.asset.id,
                 "current_owner": self.user.id}
         response = client.post(self.allocations_urls, data,
                                HTTP_AUTHORIZATION="Token {}".
@@ -85,7 +85,7 @@ class AllocationTestCase(APIBaseTestCase):
                                )
         self.assertEqual(AllocationHistory.objects.all().count(), 1)
         self.assertEqual(response.data['asset'],
-                         self.asset.serial_number)
+                         self.asset.id)
         self.assertEqual(response.data['current_owner'],
                          self.user.id)
         self.assertEqual(response.status_code, 201)
@@ -96,7 +96,7 @@ class AllocationTestCase(APIBaseTestCase):
 
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {
-            'asset': self.asset.serial_number,
+            'asset': self.asset.id,
             'current_owner': self.user.id}
         token = f"Token {self.token_user}"
         response = client.post(

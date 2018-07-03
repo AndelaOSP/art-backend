@@ -160,7 +160,6 @@ class Asset(models.Model):
 class AssetLog(models.Model):
     """Stores checkin/Checkout asset logs"""
     asset = models.ForeignKey(Asset,
-                              to_field="serial_number",
                               null=False,
                               on_delete=models.PROTECT)
     checked_by = models.ForeignKey(SecurityUser,
@@ -188,7 +187,6 @@ class AssetLog(models.Model):
 class AssetStatus(models.Model):
     """Stores the previous and current status of models"""
     asset = models.ForeignKey(Asset,
-                              to_field="serial_number",
                               null=False,
                               on_delete=models.PROTECT)
 
@@ -215,7 +213,6 @@ class AssetStatus(models.Model):
 
 class AllocationHistory(models.Model):
     asset = models.ForeignKey(Asset,
-                              to_field="serial_number",
                               null=False,
                               on_delete=models.PROTECT)
     current_owner = models.ForeignKey('User',
@@ -252,7 +249,6 @@ class AllocationHistory(models.Model):
 
 class AssetCondition(models.Model):
     asset = models.ForeignKey(Asset,
-                              to_field="serial_number",
                               null=False,
                               on_delete=models.PROTECT)
 
@@ -272,7 +268,6 @@ class AssetCondition(models.Model):
 
 class AssetIncidentReport(models.Model):
     asset = models.ForeignKey(Asset,
-                              to_field='serial_number',
                               null=False,
                               on_delete=models.PROTECT)
     incident_type = models.CharField(max_length=50,

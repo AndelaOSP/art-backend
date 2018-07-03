@@ -53,7 +53,7 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {
-            "asset": self.test_asset.serial_number,
+            "asset": self.test_asset.id,
             "incident_type": "Loss",
             "incident_location": "CDB",
             "incident_description": "Lorem Ipsum",
@@ -66,7 +66,7 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             f"{self.incident_report_url}",
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(self.test_asset.serial_number, response.data.values())
+        self.assertIn(self.test_asset.id, response.data.values())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -74,7 +74,7 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {
-            "asset": self.test_asset.serial_number,
+            "asset": self.test_asset.id,
             "incident_type": "Invalid",
             "incident_location": "CDB",
             "incident_description": "Lorem Ipsum",
@@ -96,7 +96,7 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {
-            "asset": self.test_asset.serial_number,
+            "asset": self.test_asset.id,
             "incident_type": "Loss",
             "incident_location": "",
             "incident_description": "Lorem",
