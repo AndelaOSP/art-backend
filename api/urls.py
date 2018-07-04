@@ -11,7 +11,7 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     AllocationsViewSet, AssetCategoryViewSet, AssetSubCategoryViewSet, \
     AssetTypeViewSet, AssetModelNumberViewSet, AssetConditionViewSet, \
     AssetMakeViewSet, AssetIncidentReportViewSet, AssetHealthCountViewSet,\
-    SecurityUserViewSet
+    ManageAssetViewSet, SecurityUserViewSet
 
 
 schema_view = get_schema_view(
@@ -34,6 +34,7 @@ class OptionalSlashRouter(SimpleRouter):
 router = OptionalSlashRouter()
 router.register('users', UserViewSet)
 router.register('assets', AssetViewSet, 'assets')
+router.register('manage-assets', ManageAssetViewSet, 'manage-assets')
 router.register('allocations', AllocationsViewSet, 'allocations')
 router.register('security-user-emails',
                 SecurityUserEmailsViewSet, 'security-user-emails')
