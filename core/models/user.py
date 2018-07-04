@@ -12,11 +12,11 @@ class UserManager(BaseUserManager):
         """
         email = fields.pop('email')
         password = fields.get('password')
-        cohort = fields.get('cohort')
+        cohort = fields.get('cohort', None)
         slack_handle = fields.get('slack_handle')
         if not email:
             raise ValueError("Email address is required")
-        elif not cohort:
+        elif cohort is None or isinstance(cohort, str):
             raise ValueError("Cohort is required")
         elif not slack_handle:
             raise ValueError("Slack handle is required")
