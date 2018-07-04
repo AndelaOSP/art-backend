@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 
 from ..models import AssetModelNumber, AssetMake, AssetType, \
@@ -37,6 +38,15 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
         AssetModelNumber.objects.create(model_number="101505401",
                                         make_label=self.asset_make)
         self.assertEqual(AssetModelNumber.objects.count(), 2)
+
+    def test_cannot_add_existing_asset_make(self):
+        self.assertEqual(AssetMake.objects.count(), 1)
+        with self.assertRaises(ValidationError):
+            AssetModelNumber.objects.create(
+                model_number="101505400",
+                make_label=self.asset_make
+            )
+        self.assertEqual(AssetMake.objects.count(), 1)
 
     def test_can_edit_model_number(self):
         self.laptop_model_number.model_number = "101505400"
