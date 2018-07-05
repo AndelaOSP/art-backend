@@ -3,7 +3,15 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from core.models import Asset, AssetModelNumber, AssetStatus
+from core.models import (
+    Asset,
+    AssetModelNumber,
+    AssetStatus,
+    AssetMake,
+    AssetType,
+    AssetSubCategory,
+    AssetCategory,
+)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -15,7 +23,18 @@ class AssetStatusAPITest(APIBaseTestCase):
 
     def setUp(self):
         super(AssetStatusAPITest, self).setUp()
-        self.test_assetmodel1 = AssetModelNumber(model_number="IMN50987")
+        asset_category = AssetCategory.objects.create(
+            category_name="Computer")
+        asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Electronics", asset_category=asset_category)
+        asset_type = AssetType.objects.create(
+            asset_type="Accessory", asset_sub_category=asset_sub_category)
+        make_label = AssetMake.objects.create(
+            make_label="Sades", asset_type=asset_type)
+        self.assetmodel = AssetModelNumber(
+            model_number='IMN50987', make_label=make_label)
+        self.test_assetmodel1 = AssetModelNumber(
+            model_number="IMN50987", make_label=make_label)
         self.test_assetmodel1.save()
         self.token_user = 'testtoken'
 

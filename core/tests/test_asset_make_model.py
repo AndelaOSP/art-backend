@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 
 from ..models import AssetMake, AssetType, AssetSubCategory, AssetCategory
@@ -35,6 +36,15 @@ class AssetMakeTestCase(CoreBaseTestCase):
             asset_type=self.new_type
         )
         self.assertEqual(AssetMake.objects.count(), 2)
+
+    def test_cannot_add_existing_asset_make(self):
+        self.assertEqual(AssetMake.objects.count(), 1)
+        with self.assertRaises(ValidationError):
+            AssetMake.objects.create(
+                make_label="Sades",
+                asset_type=self.new_type
+            )
+        self.assertEqual(AssetMake.objects.count(), 1)
 
     def test_can_edit_asset_make(self):
         self.headset_make.make_label = "Sony"
