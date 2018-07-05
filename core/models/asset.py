@@ -141,10 +141,6 @@ class AssetModelNumber(models.Model):
                                    on_delete=models.PROTECT,
                                    verbose_name="Asset Make")
 
-    def clean(self):
-        if not self.make_label:
-            raise ValidationError('Make is required')
-
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)

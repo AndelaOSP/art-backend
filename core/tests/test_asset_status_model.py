@@ -2,7 +2,16 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from ..models import Asset, AssetModelNumber, AssetStatus, AllocationHistory
+from ..models import (
+    Asset,
+    AssetModelNumber,
+    AssetStatus,
+    AllocationHistory,
+    AssetMake,
+    AssetType,
+    AssetSubCategory,
+    AssetCategory
+)
 
 from core.tests import CoreBaseTestCase
 User = get_user_model()
@@ -14,8 +23,18 @@ class AssetStatusModelTest(CoreBaseTestCase):
 
     def setUp(self):
         super(AssetStatusModelTest, self).setUp()
-        self.test_assetmodel1 = AssetModelNumber(model_number="IMN50987")
-        self.test_assetmodel2 = AssetModelNumber(model_number="IMN50986")
+        asset_category = AssetCategory.objects.create(
+            category_name="Computer")
+        asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Electronics", asset_category=asset_category)
+        asset_type = AssetType.objects.create(
+            asset_type="Accessory", asset_sub_category=asset_sub_category)
+        make_label = AssetMake.objects.create(
+            make_label="Sades", asset_type=asset_type)
+        self.test_assetmodel1 = AssetModelNumber(
+            model_number="IMN50987", make_label=make_label)
+        self.test_assetmodel2 = AssetModelNumber(
+            model_number="IMN50986", make_label=make_label)
         self.test_assetmodel1.save()
         self.test_assetmodel2.save()
 
