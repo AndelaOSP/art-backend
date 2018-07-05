@@ -155,8 +155,10 @@ class AssetModelNumber(models.Model):
 
 class Asset(models.Model):
     """Stores all assets"""
-    asset_code = models.CharField(unique=True, max_length=50)
-    serial_number = models.CharField(unique=True, max_length=50)
+    asset_code = models.CharField(
+        unique=True, null=True, blank=True, max_length=50)
+    serial_number = models.CharField(
+        unique=True, null=True, blank=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
@@ -174,8 +176,9 @@ class Asset(models.Model):
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
-            raise ValidationError(('Please provide either the serial number,\
-                               asset code or both.'), code='required')
+            raise ValidationError((
+                'Please provide either the serial number, asset code or both.'
+            ), code='required')
 
     def save(self, *args, **kwargs):
         """
@@ -361,10 +364,10 @@ def check_asset_limit(sender, **kwargs):
 def save_initial_asset_status(sender, **kwargs):
     current_asset = kwargs.get('instance')
     existing_status = AssetStatus.objects.filter(asset=current_asset)
-    if not existing_status:
-        current_asset.current_status = AVAILABLE
+    if current_asset and not existing_status:
         AssetStatus.objects.create(asset=current_asset,
                                    current_status=AVAILABLE)
+        current_asset.current_status = AVAILABLE
         current_asset.save()
 
 
