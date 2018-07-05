@@ -1,7 +1,16 @@
 from unittest.mock import patch
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
-from core.models import Asset, AssetModelNumber, User, AssetIncidentReport
+from core.models import (
+    Asset,
+    AssetModelNumber,
+    AssetMake,
+    AssetType,
+    AssetSubCategory,
+    AssetCategory,
+    User,
+    AssetIncidentReport
+)
 
 from api.tests import APIBaseTestCase
 client = APIClient()
@@ -12,7 +21,18 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
 
     def setUp(self):
         super(AssetIncidentReportAPITest, self).setUp()
-        self.test_assetmodel = AssetModelNumber(model_number="12345")
+        asset_category = AssetCategory.objects.create(
+            category_name="Computer")
+        asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Electronics", asset_category=asset_category)
+        asset_type = AssetType.objects.create(
+            asset_type="Accessory", asset_sub_category=asset_sub_category)
+        make_label = AssetMake.objects.create(
+            make_label="Sades", asset_type=asset_type)
+        self.assetmodel = AssetModelNumber(
+            model_number='IMN50987', make_label=make_label)
+        self.test_assetmodel = AssetModelNumber(
+            model_number="IMN50987", make_label=make_label)
         self.test_assetmodel.save()
 
         self.user = User.objects.create_user(

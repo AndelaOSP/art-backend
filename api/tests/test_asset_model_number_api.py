@@ -54,7 +54,7 @@ class AssetModelNumberAPITest(APIBaseTestCase):
     def test_can_post_asset_model_number(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            'model_number': 'TEST-MODEL-NO',
+            'model_number': 'TEST-MODEL-NO-1',
             'make_label': self.asset_label.id
         }
         response = client.post(

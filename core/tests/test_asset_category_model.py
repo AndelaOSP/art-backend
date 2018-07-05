@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError
 from ..models import AssetCategory, AssetSubCategory
 
@@ -19,6 +20,13 @@ class AssetCategoryModelTest(CoreBaseTestCase):
 
         self.assertEqual(new_category_count, 2)
         self.assertIn(new_category.category_name, "Electronics")
+
+    def test_cannot_add_existing_category_name(self):
+        self.assertEqual(AssetCategory.objects.count(), 1)
+        with self.assertRaises(ValidationError):
+            AssetCategory.objects.create(
+                category_name="Accessories")
+        self.assertEqual(AssetCategory.objects.count(), 1)
 
     def test_can_edit_a_category(self):
         self.category.category_name = "Accessory"
