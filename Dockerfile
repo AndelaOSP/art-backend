@@ -1,8 +1,9 @@
-FROM python:3.4
+FROM python:3.6
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     postgresql-client \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
