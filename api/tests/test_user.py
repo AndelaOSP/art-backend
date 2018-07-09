@@ -181,7 +181,7 @@ class UserTestCase(APIBaseTestCase):
         response = client.get(
             self.users_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(len(response.data['results']), User.objects.count())
+        self.assertEqual(len(response.data), User.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')

@@ -88,8 +88,8 @@ class ManageAssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(
                     self.asset.asset_code,
-                    response.data['results'][0].values())
-        self.assertEqual(len(response.data['results']), Asset.objects.count())
+                    response.data[0].values())
+        self.assertEqual(len(response.data), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -126,7 +126,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         response = client.get(
             self.manage_asset_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(len(response.data['results']),  Asset.objects.count())
+        self.assertEqual(len(response.data),  Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -267,7 +267,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertTrue(len(response.data) > 0)
         self.assertIn(self.user.email,
-                      response.data['results'][0]['assigned_to']['email'])
+                      response.data[0]['assigned_to']['email'])
 
     @patch('api.authentication.auth.verify_id_token')
     def test_asset_filter_non_existing_email_return_empty(
@@ -278,7 +278,7 @@ class ManageAssetTestCase(APIBaseTestCase):
                                 self.manage_asset_urls,
                                 'userwithnoasset@site.com'),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertFalse(len(response.data['results']) > 0)
+        self.assertFalse(len(response.data) > 0)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_asset_filter_with_invalid_email_fails_with_validation_error(

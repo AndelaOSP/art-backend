@@ -72,9 +72,9 @@ class AssetModelNumberAPITest(APIBaseTestCase):
             self.asset_model_no_url,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
 
-        self.assertEqual(len(response.data['results']),
+        self.assertEqual(len(response.data),
                          AssetCategory.objects.count())
-        self.assertIn('model_number', response.data['results'][0].keys())
+        self.assertIn('model_number', response.data[0].keys())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')

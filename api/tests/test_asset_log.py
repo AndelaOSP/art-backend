@@ -138,8 +138,8 @@ class AssetLogModelTest(APIBaseTestCase):
         response = client.get(
             self.asset_logs_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
-        self.assertIn(self.checkout.id, response.data['results'][0].values())
-        self.assertEqual(len(response.data['results']),
+        self.assertIn(self.checkout.id, response.data[0].values())
+        self.assertEqual(len(response.data),
                          AssetLog.objects.count())
         self.assertEqual(response.status_code, 200)
 

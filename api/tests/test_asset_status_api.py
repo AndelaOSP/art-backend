@@ -49,8 +49,8 @@ class AssetStatusAPITest(APIBaseTestCase):
             self.asset_status_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.asset_status.asset_id,
-                      response.data['results'][0].values())
-        self.assertEqual(len(response.data['results']), Asset.objects.count())
+                      response.data[0].values())
+        self.assertEqual(len(response.data), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')

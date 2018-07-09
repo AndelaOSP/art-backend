@@ -62,9 +62,9 @@ class AssetMakeAPICase(APIBaseTestCase):
             self.asset_make_urls,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_other_user))
         data = response.data
-        self.assertEqual(len(data['results']), AssetMake.objects.count())
+        self.assertEqual(len(data), AssetMake.objects.count())
         self.assertIn(self.asset_make.make_label,
-                      list(data['results'][0].values()))
+                      list(data[0].values()))
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')

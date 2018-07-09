@@ -87,5 +87,5 @@ class UserFeedbackAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn(response.data['results'][0]["message"],
+        self.assertIn(response.data[0]["message"],
                       "This is some feedback")

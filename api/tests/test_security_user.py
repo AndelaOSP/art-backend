@@ -128,7 +128,7 @@ class SecurityUserTestCase(APIBaseTestCase):
             format='json',
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']),
+        self.assertEqual(len(response.data),
                          SecurityUser.objects.count())
 
     @patch('api.authentication.auth.verify_id_token')
