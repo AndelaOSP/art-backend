@@ -53,8 +53,9 @@ class AssetSerializer(serializers.ModelSerializer):
         fields = ('id', 'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'assigned_to', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
-                  'allocation_history'
+                  'allocation_history', 'specs'
                   )
+        depth = 1
 
     def get_checkin_status(self, obj):
         try:
