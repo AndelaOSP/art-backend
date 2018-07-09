@@ -474,27 +474,3 @@ def allocation_history_post_save(sender, **kwargs):
             current_status=ALLOCATED
         )
         asset_status.save()
-
-
-@receiver(pre_save, sender=AssetSpecs)
-def save_asset_specs(sender, instance, **kwargs):
-    valid_memory_size = [size[0] for size in MEMORY]
-    valid_processor_type = [processor[0] for processor in PROCESSOR_TYPE]
-    valid_processor_speed = [speed[0] for speed in PROCESSOR_SPEED]
-    valid_screen_size = [size[0] for size in SCREEN_SIZES]
-    valid_storage_size = [size[0] for size in STORAGE_SIZES]
-    valid_year_range = [yr[0] for yr in YEAR_CHOICES]
-
-    def choices_validator(value, choices):
-        if value and value not in choices:
-            raise ValidationError(
-                '"{}" is not one of the permitted values: {}'.format(
-                    value,
-                    choices))
-
-    choices_validator(instance.memory, valid_memory_size)
-    choices_validator(instance.year_of_manufacture, valid_year_range)
-    choices_validator(instance.processor_type, valid_processor_type)
-    choices_validator(instance.processor_speed, valid_processor_speed)
-    choices_validator(instance.screen_size, valid_screen_size)
-    choices_validator(instance.storage, valid_storage_size)

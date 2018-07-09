@@ -4,7 +4,7 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetCondition, AssetIncidentReport
+    AssetCondition, AssetIncidentReport, AssetSpecs
 )
 
 
@@ -265,3 +265,12 @@ class SecurityUserSerializer(serializers.ModelSerializer):
             'date_joined': {'read_only': True},
             'last_login': {'read_only': True}
         }
+
+
+class AssetSpecsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetSpecs
+        fields = (
+            'id', 'year_of_manufacture', 'processor_type', 'screen_size',
+            'processor_type', 'storage', 'memory'
+        )
