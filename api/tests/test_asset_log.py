@@ -4,8 +4,16 @@ from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from core.models import (AssetLog,
-                         AssetModelNumber, Asset, SecurityUser)
+from core.models import (
+    Asset,
+    AssetModelNumber,
+    AssetMake,
+    AssetType,
+    AssetSubCategory,
+    AssetCategory,
+    SecurityUser,
+    AssetLog
+)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -17,8 +25,19 @@ class AssetLogModelTest(APIBaseTestCase):
 
     def setUp(self):
         super(AssetLogModelTest, self).setUp()
-        self.test_assetmodel = AssetModelNumber(model_number="IMN50987")
-        self.test_assetmodel.save()
+        asset_category = AssetCategory.objects.create(
+            category_name="Computer")
+        asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Electronics", asset_category=asset_category)
+        asset_type = AssetType.objects.create(
+            asset_type="Accessory", asset_sub_category=asset_sub_category)
+        make_label = AssetMake.objects.create(
+            make_label="Sades", asset_type=asset_type)
+        self.assetmodel = AssetModelNumber(
+            model_number='IMN50987', make_label=make_label)
+        self.test_assetmodel1 = AssetModelNumber(
+            model_number="IMN50987", make_label=make_label)
+        self.test_assetmodel1.save()
 
         self.normal_user = User.objects.create(
             email='test@site.com', cohort=10,
@@ -28,7 +47,7 @@ class AssetLogModelTest(APIBaseTestCase):
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            model_number=self.test_assetmodel,
+            model_number=self.test_assetmodel1,
             assigned_to=self.normal_user
         )
         self.test_asset.save()
@@ -36,7 +55,7 @@ class AssetLogModelTest(APIBaseTestCase):
         self.test_other_asset = Asset(
             asset_code="IC00sf",
             serial_number="SN00134",
-            model_number=self.test_assetmodel,
+            model_number=self.test_assetmodel1,
             assigned_to=self.normal_user
         )
         self.test_other_asset.save()

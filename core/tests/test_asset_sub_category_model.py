@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from ..models import AssetSubCategory, AssetCategory
 from core.tests import CoreBaseTestCase
 
@@ -7,12 +8,10 @@ class AssetSubCategoryModelTest(CoreBaseTestCase):
 
     def setUp(self):
         super(AssetSubCategoryModelTest, self).setUp()
-        AssetCategory.objects.create(
+        self.category = AssetCategory.objects.create(
             category_name="Accessories"
         )
-        self.category = AssetCategory.objects.get(
-            category_name="Accessories"
-        )
+        self.category.save()
         AssetSubCategory.objects.create(
             sub_category_name="Computer Accessories",
             asset_category=self.category
@@ -26,6 +25,14 @@ class AssetSubCategoryModelTest(CoreBaseTestCase):
         AssetSubCategory.objects.create(sub_category_name="Gadgets",
                                         asset_category=self.category)
         self.assertEqual(AssetSubCategory.objects.count(), 2)
+
+    def test_cannot_add_existing_sub_category(self):
+        self.assertEqual(AssetSubCategory.objects.count(), 1)
+        with self.assertRaises(ValidationError):
+            AssetSubCategory.objects.create(
+                sub_category_name="Computer Accessories",
+                asset_category=self.category)
+        self.assertEqual(AssetSubCategory.objects.count(), 1)
 
     def test_can_edit_a_Sub_category(self):
         self.subcategory.sub_category_name = "Computer Gadgets"

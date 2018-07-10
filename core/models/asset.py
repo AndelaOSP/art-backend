@@ -39,9 +39,17 @@ slack = SlackIntegration()
 
 class AssetCategory(models.Model):
     """ Stores all asset categories """
-    category_name = models.CharField(max_length=40, null=False)
+    category_name = models.CharField(unique=True, max_length=40, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
+
+    def clean(self):
+        if not self.category_name:
+            raise ValidationError('Category is required')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Asset Categories'
@@ -53,11 +61,20 @@ class AssetCategory(models.Model):
 
 class AssetSubCategory(models.Model):
     """Stores all asset sub categories"""
-    sub_category_name = models.CharField(max_length=40, null=False)
+    sub_category_name = models.CharField(
+        unique=True, max_length=40, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
     asset_category = models.ForeignKey(AssetCategory,
                                        on_delete=models.PROTECT)
+
+    def clean(self):
+        if not self.asset_category:
+            raise ValidationError('Category is required')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Asset SubCategories'
@@ -69,11 +86,19 @@ class AssetSubCategory(models.Model):
 
 class AssetType(models.Model):
     """Stores all asset types"""
-    asset_type = models.CharField(max_length=50)
+    asset_type = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     asset_sub_category = models.ForeignKey(AssetSubCategory,
                                            on_delete=models.CASCADE)
+
+    def clean(self):
+        if not self.asset_sub_category:
+            raise ValidationError('Sub category is required')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Asset Type"
@@ -85,11 +110,19 @@ class AssetType(models.Model):
 
 class AssetMake(models.Model):
     """ stores all asset makes """
-    make_label = models.CharField(
-        max_length=40, null=False, verbose_name="Asset Make")
+    make_label = models.CharField(unique=True, max_length=40,
+                                  null=False, verbose_name="Asset Make")
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     asset_type = models.ForeignKey(AssetType, on_delete=models.PROTECT)
+
+    def clean(self):
+        if not self.asset_type:
+            raise ValidationError('Type is required')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Asset Make"
@@ -100,13 +133,17 @@ class AssetMake(models.Model):
 
 
 class AssetModelNumber(models.Model):
-    model_number = models.CharField(max_length=100, null=False)
+    model_number = models.CharField(unique=True, max_length=100, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     make_label = models.ForeignKey(AssetMake,
                                    null=True,
                                    on_delete=models.PROTECT,
                                    verbose_name="Asset Make")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Asset Model Number"
@@ -118,8 +155,10 @@ class AssetModelNumber(models.Model):
 
 class Asset(models.Model):
     """Stores all assets"""
-    asset_code = models.CharField(unique=True, max_length=50)
-    serial_number = models.CharField(unique=True, max_length=50)
+    asset_code = models.CharField(
+        unique=True, null=True, blank=True, max_length=50)
+    serial_number = models.CharField(
+        unique=True, null=True, blank=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
@@ -137,8 +176,9 @@ class Asset(models.Model):
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
-            raise ValidationError(('Please provide either the serial number,\
-                               asset code or both.'), code='required')
+            raise ValidationError((
+                'Please provide either the serial number, asset code or both.'
+            ), code='required')
 
     def save(self, *args, **kwargs):
         """
@@ -324,10 +364,10 @@ def check_asset_limit(sender, **kwargs):
 def save_initial_asset_status(sender, **kwargs):
     current_asset = kwargs.get('instance')
     existing_status = AssetStatus.objects.filter(asset=current_asset)
-    if not existing_status:
-        current_asset.current_status = AVAILABLE
+    if current_asset and not existing_status:
         AssetStatus.objects.create(asset=current_asset,
                                    current_status=AVAILABLE)
+        current_asset.current_status = AVAILABLE
         current_asset.save()
 
 

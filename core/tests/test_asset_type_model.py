@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from ..models import AssetType, AssetSubCategory, AssetCategory
 from core.tests import CoreBaseTestCase
 
@@ -29,6 +30,13 @@ class AssetTypeModelTest(CoreBaseTestCase):
                                   asset_sub_category=self.new_sub_category)
         new_assettype.save()
         self.assertEqual(self.all_assettypes.count(), 2)
+
+    def test_cannot_add_existing_asset_type(self):
+        self.assertEqual(AssetType.objects.count(), 1)
+        with self.assertRaises(ValidationError):
+            AssetType.objects.create(asset_type="Headset",
+                                     asset_sub_category=self.new_sub_category)
+        self.assertEqual(AssetType.objects.count(), 1)
 
     def test_edit_asset_type(self):
         """Test edit an asset type in model"""

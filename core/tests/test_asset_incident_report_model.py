@@ -1,5 +1,15 @@
-from core.models import Asset, AssetModelNumber, User, AssetIncidentReport
 from core.tests import CoreBaseTestCase
+
+from ..models import (
+    Asset,
+    AssetModelNumber,
+    AssetMake,
+    AssetType,
+    AssetSubCategory,
+    AssetCategory,
+    User,
+    AssetIncidentReport
+)
 
 
 class AssetIncidentReportModelTest(CoreBaseTestCase):
@@ -7,7 +17,16 @@ class AssetIncidentReportModelTest(CoreBaseTestCase):
 
     def setUp(self):
         super(AssetIncidentReportModelTest, self).setUp()
-        self.test_assetmodel = AssetModelNumber(model_number="12345")
+        asset_category = AssetCategory.objects.create(
+            category_name="Computer")
+        asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Electronics", asset_category=asset_category)
+        asset_type = AssetType.objects.create(
+            asset_type="Accessory", asset_sub_category=asset_sub_category)
+        make_label = AssetMake.objects.create(
+            make_label="Sades", asset_type=asset_type)
+        self.test_assetmodel = AssetModelNumber(
+            model_number="12345", make_label=make_label)
         self.test_assetmodel.save()
 
         self.user = User.objects.create(
