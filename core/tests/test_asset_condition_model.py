@@ -44,7 +44,8 @@ class AssetConditionModelTest(CoreBaseTestCase):
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            model_number=test_assetmodel
+            model_number=test_assetmodel,
+            purchase_date="2018-07-10"
         )
         self.test_asset.save()
 

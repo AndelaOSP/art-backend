@@ -41,6 +41,7 @@ class AllocationTestCase(APIBaseTestCase):
             asset_code="IC001",
             serial_number="SN001",
             model_number=assetmodel,
+            purchase_date="2018-07-10"
         )
         asset.save()
         self.asset = asset

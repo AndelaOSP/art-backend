@@ -55,12 +55,12 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
         self.assertEqual(AssetSpecs.objects.count(), 2)
 
     def test_create_new_asset_with_specs(self):
-        new_asset = Asset.objects.create(
-                                        asset_code="IC010",
-                                        serial_number="SN00450",
-                                        model_number=self.test_assetmodel,
-                                        assigned_to=self.user,
-                                        specs=self.asset_specs)
+        new_asset = Asset.objects.create(asset_code="IC010",
+                                         serial_number="SN00450",
+                                         model_number=self.test_assetmodel,
+                                         purchase_date="2018-07-10",
+                                         assigned_to=self.user,
+                                         specs=self.asset_specs)
         self.assertEqual(new_asset.serial_number, "SN00450")
         self.assertEqual(new_asset.specs.screen_size, 13)
 

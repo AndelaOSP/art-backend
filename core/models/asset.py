@@ -231,6 +231,7 @@ class Asset(models.Model):
     serial_number = models.CharField(
         unique=True, null=True, blank=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    purchase_date = models.DateField()
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
                                     blank=True,

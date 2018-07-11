@@ -45,6 +45,7 @@ class AssetConditionAPITest(APIBaseTestCase):
             serial_number='SN001',
             assigned_to=self.user,
             model_number=self.assetmodel,
+            purchase_date="2018-07-10",
         )
         self.test_asset.save()
         self.asset = Asset.objects.get(serial_number='SN001')
@@ -81,6 +82,7 @@ class AssetConditionAPITest(APIBaseTestCase):
             serial_number='SN002',
             assigned_to=self.user,
             model_number=self.assetmodel,
+            purchase_date="2018-07-10"
         )
         test_asset.save()
         data = {
@@ -132,6 +134,7 @@ class AssetConditionAPITest(APIBaseTestCase):
             serial_number='SN002',
             assigned_to=self.user,
             model_number=self.assetmodel,
+            purchase_date="2018-07-10",
         )
         test_asset.save()
         data = {
