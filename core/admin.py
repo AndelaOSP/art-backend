@@ -12,7 +12,8 @@ from .models.asset import (
     AssetCondition,
     AssetModelNumber,
     AllocationHistory,
-    AssetIncidentReport, )
+    AssetIncidentReport,
+    AssetSpecs)
 from .models.user import SecurityUser, UserFeedback
 
 User = get_user_model()
@@ -25,7 +26,8 @@ admin.site.register(
         AssetMake,
         AssetModelNumber,
         AssetLog,
-        AssetIncidentReport
+        AssetIncidentReport,
+        AssetSpecs
     ]
 )
 
