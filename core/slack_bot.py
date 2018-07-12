@@ -14,19 +14,20 @@ class SlackIntegration(object):
 
     def get_user_slack_id(self, user):
         """Get the slack user ID using the user email"""
-        if user:
-            user_email = user.email
-            response = self.slack_client.api_call("users.list")
-            users = response["members"]
-            for user in users:
-                try:
-                    slack_email = user.get('profile').get('email')
-                    if slack_email == user_email:
-                        return user.get('id')
-                except Exception:
-                    logging.info("User not found")
-        else:
+        if not user:
             return os.getenv('OPS_CHANNEL') or '#art-test'
+        user_email = user.email
+        response = self.slack_client.api_call("users.list")
+        users = response.get("members")
+        if users:
+            user_id = [
+                member.get('id') for member in users
+                if member.get('profile').get('email') == user_email
+            ]
+        try:
+            return user_id[0]
+        except Exception:
+            logging.info("User not found")
 
     def send_message(self, message, user=None):
         """Sends message to slack user or channel"""
