@@ -52,6 +52,7 @@ class AssetHealthTestCase(APIBaseTestCase):
             serial_number="SN001",
             assigned_to=self.user,
             model_number=self.assetmodel,
+            purchase_date="2018-07-10",
         )
         self.asset.save()
 

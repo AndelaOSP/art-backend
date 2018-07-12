@@ -47,7 +47,8 @@ class AssetStatusAPITest(APIBaseTestCase):
             asset_code="IC001",
             serial_number="SN001",
             model_number=self.test_assetmodel1,
-            assigned_to=self.normal_user
+            assigned_to=self.normal_user,
+            purchase_date="2018-07-10"
         )
         self.test_asset.save()
         self.asset = Asset.objects.get(asset_code="IC001")

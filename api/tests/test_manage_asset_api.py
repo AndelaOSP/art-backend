@@ -54,6 +54,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             serial_number="SN001",
             assigned_to=self.user,
             model_number=self.assetmodel,
+            purchase_date="2018-07-10"
         )
         self.asset.save()
 
@@ -86,9 +87,8 @@ class ManageAssetTestCase(APIBaseTestCase):
         response = client.get(
             self.manage_asset_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(
-                    self.asset.asset_code,
-                    response.data['results'][0].values())
+        self.assertIn(self.asset.asset_code,
+                      response.data['results'][0].values())
         self.assertEqual(len(response.data['results']), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
@@ -119,14 +119,12 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 403)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_authenticated_admin_view_all_assets(
-                                                    self,
-                                                    mock_verify_id_token):
+    def test_authenticated_admin_view_all_assets(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
             self.manage_asset_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(len(response.data['results']),  Asset.objects.count())
+        self.assertEqual(len(response.data['results']), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -136,6 +134,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             "asset_code": "IC002",
             "serial_number": "SN002",
             "model_number": self.assetmodel.model_number,
+            "purchase_date": "2018-07-10"
         }
         response = client.post(
             self.manage_asset_urls,
@@ -161,7 +160,8 @@ class ManageAssetTestCase(APIBaseTestCase):
         data = {
             "asset_code": "IC002",
             "serial_number": "SN002",
-            "model_number": self.assetmodel.id
+            "model_number": self.assetmodel.id,
+            "purchase_date": "2018-07-10"
         }
         response = client.post(
             self.manage_asset_urls,
@@ -274,9 +274,8 @@ class ManageAssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}?email={}'.format(
-                                self.manage_asset_urls,
-                                'userwithnoasset@site.com'),
+            '{}?email={}'.format(self.manage_asset_urls,
+                                 'userwithnoasset@site.com'),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertFalse(len(response.data['results']) > 0)
 

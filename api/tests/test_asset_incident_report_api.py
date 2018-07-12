@@ -44,7 +44,8 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             asset_code="qaz123",
             serial_number="123qaz",
             model_number=self.test_assetmodel,
-            assigned_to=self.user
+            assigned_to=self.user,
+            purchase_date="2018-07-10"
         )
         self.test_asset.save()
 
