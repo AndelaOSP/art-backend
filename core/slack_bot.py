@@ -28,16 +28,19 @@ class SlackIntegration(object):
             return user_id[0]
         except Exception:
             logging.info("User not found")
+            return None
 
     def send_message(self, message, user=None):
         """Sends message to slack user or channel"""
         if hasattr(self, 'slack_client'):
             slack_id = self.get_user_slack_id(user)
+            if not slack_id:
+                message = 'The message *"{}"* to {} not sent'.format(
+                    message, user.email)
             self.slack_client.api_call(
-                    "chat.postMessage",
-                    channel=slack_id,
-                    text=message,
-                    username='@art-bot',
-                    as_user=True,
-                    icon_emoji=':ninja:'
-                    )
+                "chat.postMessage",
+                channel=slack_id,
+                text=message,
+                username='@art-bot',
+                as_user=True,
+                icon_emoji=':ninja:')
