@@ -213,6 +213,9 @@ class AssetSpecs(models.Model):
 
     class Meta:
         verbose_name = "Asset Specification"
+        unique_together = ("storage", "memory",
+                           "screen_size", "processor_speed",
+                           "year_of_manufacture", "processor_type")
 
     def save(self, *args, **kwargs):
         self.full_clean()
