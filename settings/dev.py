@@ -19,7 +19,8 @@ CORS_ORIGIN_WHITELIST = (
 )
 
 CORS_ORIGIN_REGEX_WHITELIST = (
-    r'^(https?:\/\/)?(.+\.)?(andela\.com)|((localhost)|(127\.0\.0\.1):\d{4})',
+    r'^(https?:\/\/)?((localhost)|(127\.0\.0\.1)):\d{4}',
+    r'^(https?:\/\/)?(.+\.)?(andela\.com)',
 )
 
 INTERNAL_IPS = [
