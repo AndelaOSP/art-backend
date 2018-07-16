@@ -42,6 +42,9 @@ class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
     allocation_history = serializers.SerializerMethodField()
     assigned_to = UserSerializer(read_only=True)
+    asset_category = serializers.SerializerMethodField()
+    asset_sub_category = serializers.SerializerMethodField()
+    make_label = serializers.SerializerMethodField()
     asset_type = serializers.SerializerMethodField()
     model_number = serializers.SlugRelatedField(
         queryset=AssetModelNumber.objects.all(),
@@ -50,7 +53,8 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('id', 'asset_code', 'serial_number', 'model_number',
+        fields = ('id', 'asset_category', 'asset_sub_category', 'make_label',
+                  'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'assigned_to', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
@@ -68,6 +72,17 @@ class AssetSerializer(serializers.ModelSerializer):
                 return "checked_out"
         except AttributeError:
             return None
+
+    def get_asset_category(self, obj):
+        return obj.model_number.make_label.asset_type.\
+            asset_sub_category.asset_category.category_name
+
+    def get_asset_sub_category(self, obj):
+        return obj.model_number.make_label.asset_type.\
+            asset_sub_category.sub_category_name
+
+    def get_make_label(self, obj):
+        return obj.model_number.make_label.make_label
 
     def get_asset_type(self, obj):
         return obj.model_number.make_label.asset_type.asset_type
