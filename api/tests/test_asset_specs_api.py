@@ -132,3 +132,22 @@ class AssetSpecsAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         self.assertIn('storage', response.data.keys())
         self.assertEqual(data['memory'], response.data['memory'])
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_asset_specs_unique_validation(self, mock_verify_token):
+        mock_verify_token.return_value = {"email": self.admin.email}
+        data = {
+            "year_of_manufacture": 2017,
+            "processor_type": "Intel core i7",
+            "screen_size": 15,
+            "storage": 512,
+            "memory": 8
+        }
+        response = client.post(
+            f"{self.asset_specs_url}",
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data['non_field_errors'],
+            ['Similar asset specification already exist'])
