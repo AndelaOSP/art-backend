@@ -132,7 +132,7 @@ class AssetTestCase(APIBaseTestCase):
         response = client.get(
             '{}?email={}'.format(self.asset_urls, self.user.email),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertTrue(len(response.data['results']) > 0)
+        self.assertTrue(len(response.data) > 0)
         self.assertIn(self.user.email,
                       response.data['results'][0]['assigned_to']['email'])
 
