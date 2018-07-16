@@ -2,9 +2,11 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from datetime import datetime
 
 from .user import SecurityUser
 from core.slack_bot import SlackIntegration
+from core.validator import validate_date
 
 AVAILABLE = "Available"
 ALLOCATED = "Allocated"
@@ -33,6 +35,41 @@ INCIDENT_TYPES = (
     (LOSS, 'Loss'),
     (DAMAGE, 'Damage')
 )
+
+PROCESSOR_TYPE = (
+    ("Intel core i3", "Intel core i3"),
+    ("Intel core i5", "Intel core i5"),
+    ("Intel core i7", "Intel core i7"),
+)
+
+PROCESSOR_SPEED = (
+    (1.8, "1.8GHz"),
+    (2.3, "2.3GHz"),
+    (3.0, "3.0GHz"),
+    (3.4, "3.4GHz")
+)
+
+SCREEN_SIZES = (
+    (13, "13\""),
+    (15, "15\""),
+    (17, "17\"")
+)
+
+MEMORY = (
+    (4, "4GB"),
+    (8, "8GB"),
+    (16, "16GB"),
+    (32, "32GB")
+)
+
+STORAGE_SIZES = (
+    (128, "128GB"),
+    (256, "256GB"),
+    (512, "512GB")
+)
+YEAR_CHOICES = []
+for year in range(2013, (datetime.now().year + 1)):
+    YEAR_CHOICES.append((year, year))
 
 slack = SlackIntegration()
 
@@ -90,7 +127,7 @@ class AssetType(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     asset_sub_category = models.ForeignKey(AssetSubCategory,
-                                           on_delete=models.CASCADE)
+                                           on_delete=models.PROTECT)
 
     def clean(self):
         if not self.asset_sub_category:
@@ -153,6 +190,41 @@ class AssetModelNumber(models.Model):
         return self.model_number
 
 
+class AssetSpecs(models.Model):
+    year_of_manufacture = models.IntegerField(null=True,
+                                              blank=True,
+                                              choices=YEAR_CHOICES)
+    processor_type = models.CharField(max_length=300,
+                                      blank=True,
+                                      null=True,
+                                      choices=PROCESSOR_TYPE)
+    processor_speed = models.FloatField(null=True,
+                                        blank=True,
+                                        choices=PROCESSOR_SPEED)
+    screen_size = models.IntegerField(null=True,
+                                      blank=True,
+                                      choices=SCREEN_SIZES)
+    storage = models.IntegerField(null=True,
+                                  blank=True,
+                                  choices=STORAGE_SIZES)
+    memory = models.IntegerField(null=True,
+                                 blank=True,
+                                 choices=MEMORY)
+
+    class Meta:
+        verbose_name = "Asset Specification"
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.memory}GB RAM, " \
+               f"{self.storage}GB, " \
+               f"{self.processor_speed}GHz," \
+               f"{self.screen_size}\""
+
+
 class Asset(models.Model):
     """Stores all assets"""
     asset_code = models.CharField(
@@ -160,6 +232,7 @@ class Asset(models.Model):
     serial_number = models.CharField(
         unique=True, null=True, blank=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    purchase_date = models.DateField(validators=[validate_date])
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey('User',
                                     blank=True,
@@ -173,6 +246,10 @@ class Asset(models.Model):
     asset_condition = models.CharField(editable=False,
                                        max_length=50,
                                        default='Brand New')
+    specs = models.ForeignKey(AssetSpecs,
+                              blank=True,
+                              null=True,
+                              on_delete=models.PROTECT)
 
     def clean(self):
         if not self.asset_code and not self.serial_number:

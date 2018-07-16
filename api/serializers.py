@@ -4,7 +4,7 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetCondition, AssetIncidentReport
+    AssetCondition, AssetIncidentReport, AssetSpecs
 )
 
 
@@ -53,8 +53,9 @@ class AssetSerializer(serializers.ModelSerializer):
         fields = ('id', 'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'assigned_to', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
-                  'allocation_history'
+                  'allocation_history', 'specs', 'purchase_date',
                   )
+        depth = 1
 
     def get_checkin_status(self, obj):
         try:
@@ -264,3 +265,12 @@ class SecurityUserSerializer(serializers.ModelSerializer):
             'date_joined': {'read_only': True},
             'last_login': {'read_only': True}
         }
+
+
+class AssetSpecsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssetSpecs
+        fields = (
+            'id', 'year_of_manufacture', 'processor_type', 'screen_size',
+            'processor_type', 'storage', 'memory'
+        )

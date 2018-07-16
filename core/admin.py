@@ -12,7 +12,8 @@ from .models.asset import (
     AssetCondition,
     AssetModelNumber,
     AllocationHistory,
-    AssetIncidentReport, )
+    AssetIncidentReport,
+    AssetSpecs)
 from .models.user import SecurityUser, UserFeedback
 
 User = get_user_model()
@@ -25,7 +26,8 @@ admin.site.register(
         AssetMake,
         AssetModelNumber,
         AssetLog,
-        AssetIncidentReport
+        AssetIncidentReport,
+        AssetSpecs
     ]
 )
 
@@ -107,11 +109,12 @@ class UserAdmin(BaseUserAdmin):
 
 class AssetAdmin(admin.ModelAdmin):
     list_filter = (
-        'model_number', 'model_number__make_label__asset_type__asset_type'
+        'model_number', 'model_number__make_label__asset_type__asset_type',
+        'purchase_date',
     )
     list_display = (
         'asset_code', 'serial_number', 'model_number', 'created_at',
-        'assigned_to', 'current_status', 'asset_condition'
+        'assigned_to', 'current_status', 'asset_condition', 'purchase_date'
     )
 
 

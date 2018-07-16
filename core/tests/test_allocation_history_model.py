@@ -48,14 +48,16 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            model_number=test_assetmodel
+            model_number=test_assetmodel,
+            purchase_date="2018-07-10"
         )
         self.test_asset.save()
 
         self.test_asset_2 = Asset(
             asset_code='IC002',
             serial_number='SN002',
-            model_number=test_assetmodel
+            model_number=test_assetmodel,
+            purchase_date="2018-07-10",
         )
         self.test_asset_2.save()
 
