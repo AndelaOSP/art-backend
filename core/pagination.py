@@ -15,7 +15,7 @@ def _positive_int(integer_string, strict=False, cutoff=None):
 
 class PageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
-    page_size = 3
+    page_size = 20
     max_page_size = None
 
     def get_page_size(self, request):
