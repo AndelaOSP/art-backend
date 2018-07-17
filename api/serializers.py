@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
@@ -286,6 +285,23 @@ class AssetSpecsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetSpecs
         fields = (
-            'id', 'year_of_manufacture', 'processor_type', 'screen_size',
+            'id', 'year_of_manufacture', 'processor_speed', 'screen_size',
             'processor_type', 'storage', 'memory'
         )
+        extra_kwargs = {
+            'processor_speed': {'required': False},
+            'processor_type': {'required': False},
+            'screen_size': {'required': False},
+            'memory': {'required': False},
+            'storage': {'required': False},
+            'year_of_manufacture': {'required': False}
+        }
+        validators = []
+
+    def validate(self, fields):
+        not_unique = AssetSpecs.objects.filter(**fields).exists()
+        if not_unique:
+            raise serializers.ValidationError(
+                "Similar asset specification already exist"
+            )
+        return fields
