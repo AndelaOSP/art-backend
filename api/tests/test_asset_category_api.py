@@ -36,7 +36,7 @@ class AssetCategoryAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn("category_name", response.data.keys())
-        self.assertIn(data["category_name"], response.data.values())
+        self.assertIn(data["category_name"].title(), response.data.values())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
