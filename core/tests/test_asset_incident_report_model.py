@@ -50,7 +50,8 @@ class AssetIncidentReportModelTest(CoreBaseTestCase):
             injuries_sustained="Black eye",
             loss_of_property="Laptop",
             witnesses="Omosh wa mtura",
-            police_abstract_obtained="Yes"
+            police_abstract_obtained="Yes",
+            submitted_by=self.user
         )
         self.count_before = AssetIncidentReport.objects.count()
 
@@ -80,3 +81,6 @@ class AssetIncidentReportModelTest(CoreBaseTestCase):
         self.assertEqual(str(self.incident_report),
                          f"{self.incident_report.incident_type}: "
                          f"{self.incident_report.asset}")
+
+    def test_incident_report_contain_submitted_by(self):
+        self.assertEqual(self.incident_report.submitted_by, self.user)

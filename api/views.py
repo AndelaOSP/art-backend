@@ -192,6 +192,9 @@ class AssetIncidentReportViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
 
+    def perform_create(self, serializer):
+        serializer.save(submitted_by=self.request.user)
+
 
 class AssetHealthCountViewSet(ModelViewSet):
     serializer_class = AssetHealthSerializer
