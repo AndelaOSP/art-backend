@@ -274,6 +274,7 @@ def post_asset_subcategory(f, file_length): # noqa
                     row_check(row)
                 else:
                     try:
+
                         new_subcategory = AssetSubCategory.objects.create(
                             sub_category_name=assets_subcategory,
                             asset_category=category)
@@ -383,11 +384,11 @@ def post_asset_types(f, file_length): # noqa
                 skipped['subcat_{}'.format(counter)] = [(reason), counter]
                 row_check(row)
             else:
-                sub_category_name = AssetSubCategory.objects.get(
+                sub_category_name = AssetSubCategory.objects.filter(
                     sub_category_name=sub_category)
                 asset_type_status = AssetType.objects.filter(
-                    asset_type=asset_type).exists()
-                if not sub_category_name:
+                    asset_type=asset_type)
+                if not sub_category_name.exists():
                     reason = 'Sub Category {0} does not exist'.format(
                         sub_category)
                     row['Reasons'] = reason

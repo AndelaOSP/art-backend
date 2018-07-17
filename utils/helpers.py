@@ -106,7 +106,7 @@ def write_record_skipped(record, file_path):
     :return: None
     """
     filename = "/skipped.csv"
-    fieldnames = ('Count', 'Make', 'Type', 'Asset Code', 'Category',
+    fieldnames = ('count', 'Make', 'Type', 'Asset Code', 'Category',
                   'Sub-Category', 'Model Number', 'Serial No.', 'Reasons')
     with open(file_path + filename, "w") as csv_file:
         print('\n')
