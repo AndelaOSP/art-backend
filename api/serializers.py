@@ -239,11 +239,19 @@ class AssetMakeSerializer(serializers.ModelSerializer):
 
 
 class AssetIncidentReportSerializer(serializers.ModelSerializer):
+    submitted_by = serializers.SerializerMethodField()
+
     class Meta:
         model = AssetIncidentReport
         fields = ('id', 'asset', 'incident_type', 'incident_location',
                   'incident_description', 'injuries_sustained',
-                  'loss_of_property', 'witnesses', 'police_abstract_obtained')
+                  'loss_of_property', 'witnesses',
+                  'submitted_by', 'police_abstract_obtained')
+
+    def get_submitted_by(self, obj):
+        if obj.submitted_by:
+            return obj.submitted_by.email
+        return obj.submitted_by
 
 
 class AssetHealthSerializer(serializers.ModelSerializer):

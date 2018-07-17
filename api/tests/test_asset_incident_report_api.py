@@ -88,6 +88,8 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.test_asset.id, response.data.values())
+        self.assertIn("submitted_by", response.data.keys())
+        self.assertEqual(response.data['submitted_by'], self.user.email)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')

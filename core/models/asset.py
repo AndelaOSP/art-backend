@@ -406,6 +406,10 @@ class AssetIncidentReport(models.Model):
     police_abstract_obtained = models.CharField(max_length=255,
                                                 blank=False,
                                                 null=False)
+    submitted_by = models.ForeignKey('User',
+                                     blank=False,
+                                     null=True,
+                                     on_delete=models.PROTECT)
 
     def __str__(self):
         return f"{self.incident_type}: {self.asset}"
