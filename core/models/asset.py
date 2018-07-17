@@ -84,6 +84,8 @@ class AssetCategory(models.Model):
         if not self.category_name:
             raise ValidationError('Category is required')
 
+        self.category_name = self.category_name.title()
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -109,6 +111,8 @@ class AssetSubCategory(models.Model):
         if not self.asset_category:
             raise ValidationError('Category is required')
 
+        self.sub_category_name = self.sub_category_name.title()
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -132,6 +136,8 @@ class AssetType(models.Model):
     def clean(self):
         if not self.asset_sub_category:
             raise ValidationError('Sub category is required')
+
+        self.asset_type = self.asset_type.title()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -157,6 +163,8 @@ class AssetMake(models.Model):
         if not self.asset_type:
             raise ValidationError('Type is required')
 
+        self.make_label = self.make_label.title()
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -177,6 +185,9 @@ class AssetModelNumber(models.Model):
                                    null=True,
                                    on_delete=models.PROTECT,
                                    verbose_name="Asset Make")
+
+    def clean(self):
+        self.model_number = self.model_number.upper()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -259,6 +270,16 @@ class Asset(models.Model):
             raise ValidationError((
                 'Please provide either the serial number, asset code or both.'
             ), code='required')
+
+        if self.serial_number is None:
+            self.asset_code = self.asset_code.upper()
+
+        elif self.asset_code is None:
+            self.serial_number = self.serial_number.upper()
+
+        else:
+            self.asset_code = self.asset_code.upper()
+            self.serial_number = self.serial_number.upper()
 
     def save(self, *args, **kwargs):
         """

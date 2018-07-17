@@ -128,7 +128,7 @@ class AssetMakeAPICase(APIBaseTestCase):
         self.assertEqual(response.status_code, 201)
         response_data = response.data
         self.assertEqual(len(latest_asset_makes), initial_asset_makes + 1)
-        self.assertIn(self.second_asset_make['make_label'],
+        self.assertIn(self.second_asset_make['make_label'].title(),
                       response_data.values())
 
     @patch('api.authentication.auth.verify_id_token')
