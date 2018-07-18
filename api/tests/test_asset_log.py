@@ -188,8 +188,9 @@ class AssetLogModelTest(APIBaseTestCase):
             self.asset_logs_url,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
-        self.assertEqual(response.data['asset'],
-                         self.test_other_asset.id)
+        self.assertEqual(
+            response.data['asset'],
+            f"{self.test_other_asset.serial_number} - {self.test_other_asset.asset_code}")
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -204,8 +205,9 @@ class AssetLogModelTest(APIBaseTestCase):
             self.asset_logs_url,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
-        self.assertEqual(response.data['asset'],
-                         self.test_other_asset.id)
+        self.assertEqual(
+            response.data['asset'],
+            f"{self.test_other_asset.serial_number} - {self.test_other_asset.asset_code}")
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
