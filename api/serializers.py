@@ -124,6 +124,7 @@ class AssetLogSerializer(serializers.ModelSerializer):
         instance_data['asset'] = f"{serial_no} - {asset_code}"
         return instance_data
 
+
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFeedback
@@ -159,6 +160,7 @@ class AssetStatusSerializer(AssetSerializer):
         asset_code = asset.asset_code
         instance_data['asset'] = f"{serial_no} - {asset_code}"
         return instance_data
+
 
 class AllocationsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -264,6 +266,7 @@ class AssetConditionSerializer(serializers.ModelSerializer):
         instance_data['asset'] = f"{serial_no} - {asset_code}"
         return instance_data
 
+
 class AssetMakeSerializer(serializers.ModelSerializer):
     asset_type = serializers.SerializerMethodField()
 
@@ -292,6 +295,7 @@ class AssetMakeSerializer(serializers.ModelSerializer):
 
 class AssetIncidentReportSerializer(serializers.ModelSerializer):
     submitted_by = serializers.SerializerMethodField()
+
     class Meta:
         model = AssetIncidentReport
         fields = ('id', 'asset', 'incident_type', 'incident_location',
