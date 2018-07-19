@@ -115,6 +115,15 @@ class AssetLogSerializer(serializers.ModelSerializer):
             "created_at", "last_modified",
         )
 
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        asset = Asset.objects.get(id=instance.asset.id)
+        serial_no = asset.serial_number
+        asset_code = asset.asset_code
+        instance_data['checked_by'] = instance.checked_by.email
+        instance_data['asset'] = f"{serial_no} - {asset_code}"
+        return instance_data
+
 
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
@@ -144,12 +153,35 @@ class AssetStatusSerializer(AssetSerializer):
             for asset in asset_status if obj.created_at > asset.created_at
         ]
 
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        asset = Asset.objects.get(id=instance.asset.id)
+        serial_no = asset.serial_number
+        asset_code = asset.asset_code
+        instance_data['asset'] = f"{serial_no} - {asset_code}"
+        return instance_data
+
 
 class AllocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AllocationHistory
         fields = ("asset", "current_owner", "previous_owner", "created_at")
         read_only_fields = ("previous_owner",)
+
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        asset = Asset.objects.get(id=instance.asset.id)
+        serial_no = asset.serial_number
+        asset_code = asset.asset_code
+
+        if instance.previous_owner:
+            instance_data['previous_owner'] = instance.previous_owner.email
+
+        if instance.current_owner:
+            instance_data['current_owner'] = instance.current_owner.email
+
+        instance_data['asset'] = f"{serial_no} - {asset_code}"
+        return instance_data
 
 
 class AssetCategorySerializer(serializers.ModelSerializer):
@@ -164,6 +196,13 @@ class AssetSubCategorySerializer(serializers.ModelSerializer):
         fields = ("id", "sub_category_name", "asset_category",
                   "created_at", "last_modified")
 
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        instance_data['asset_category'] = AssetCategory.objects.get(
+            id=instance.asset_category.id
+            ).category_name
+        return instance_data
+
 
 class AssetTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -171,17 +210,25 @@ class AssetTypeSerializer(serializers.ModelSerializer):
         fields = ("id", "asset_type", "asset_sub_category",
                   "created_at", "last_modified")
 
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        instance_data['asset_sub_category'] = AssetSubCategory.objects.get(
+            id=instance.asset_sub_category.id
+        ).sub_category_name
+        return instance_data
+
 
 class AssetModelNumberSerializer(serializers.ModelSerializer):
-    make_label = serializers.SerializerMethodField()
-
     class Meta:
         model = AssetModelNumber
         fields = ('id', 'model_number', 'make_label',
                   'created_at', 'last_modified')
 
-    def get_make_label(self, obj):
-        return obj.make_label.make_label
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        instance_data['make_label'] = AssetMake.objects.get(
+            id=instance.make_label.id).make_label
+        return instance_data
 
     def to_internal_value(self, data):
         make_label = data.get('make_label')
@@ -210,6 +257,14 @@ class AssetConditionSerializer(serializers.ModelSerializer):
         model = AssetCondition
         fields = ("id", "asset", "asset_condition",
                   "created_at")
+
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        asset = Asset.objects.get(id=instance.asset.id)
+        serial_no = asset.serial_number
+        asset_code = asset.asset_code
+        instance_data['asset'] = f"{serial_no} - {asset_code}"
+        return instance_data
 
 
 class AssetMakeSerializer(serializers.ModelSerializer):
@@ -248,10 +303,18 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
                   'loss_of_property', 'witnesses',
                   'submitted_by', 'police_abstract_obtained')
 
-    def get_submitted_by(self, obj):
-        if obj.submitted_by:
-            return obj.submitted_by.email
-        return obj.submitted_by
+    def get_submitted_by(self, instance):
+        if instance.submitted_by:
+            return instance.submitted_by.email
+        return instance.submitted_by
+
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        asset = Asset.objects.get(id=instance.asset.id)
+        serial_no = asset.serial_number
+        asset_code = asset.asset_code
+        instance_data['asset'] = f"{serial_no} - {asset_code}"
+        return instance_data
 
 
 class AssetHealthSerializer(serializers.ModelSerializer):

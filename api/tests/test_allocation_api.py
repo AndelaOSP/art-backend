@@ -85,10 +85,11 @@ class AllocationTestCase(APIBaseTestCase):
                                format(self.token_user)
                                )
         self.assertEqual(AllocationHistory.objects.all().count(), 1)
-        self.assertEqual(response.data['asset'],
-                         self.asset.id)
+        self.assertEqual(
+            response.data['asset'],
+            f"{self.asset.serial_number} - {self.asset.asset_code}")
         self.assertEqual(response.data['current_owner'],
-                         self.user.id)
+                         self.user.email)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
