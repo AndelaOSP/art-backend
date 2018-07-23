@@ -131,6 +131,12 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
         fields = ("reported_by", "message", "report_type", "created_at")
         read_only_fields = ("reported_by",)
 
+    def to_representation(self, instance):
+        instance_data = super().to_representation(instance)
+        user = User.objects.get(id=instance.reported_by.id)
+        instance_data['reported_by'] = user.email
+        return instance_data
+
 
 class AssetStatusSerializer(AssetSerializer):
     status_history = serializers.SerializerMethodField()
@@ -158,7 +164,7 @@ class AssetStatusSerializer(AssetSerializer):
         asset = Asset.objects.get(id=instance.asset.id)
         serial_no = asset.serial_number
         asset_code = asset.asset_code
-        instance_data['asset'] = f"{serial_no} - {asset_code}"
+        instance_data['asset'] = f"{asset_code} - {serial_no}"
         return instance_data
 
 
@@ -199,8 +205,7 @@ class AssetSubCategorySerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
         instance_data['asset_category'] = AssetCategory.objects.get(
-            id=instance.asset_category.id
-            ).category_name
+            id=instance.asset_category.id).category_name
         return instance_data
 
 
