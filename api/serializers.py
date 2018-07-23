@@ -100,6 +100,18 @@ class AssetSerializer(serializers.ModelSerializer):
             for allocation in allocations
         ]
 
+    def to_internal_value(self, data):
+        internals = super().to_internal_value(data)
+        specs_serializer = AssetSpecsSerializer(data=data)
+        specs_serializer.is_valid()
+
+        if len(specs_serializer.data):
+            specs, _ = AssetSpecs.objects.get_or_create(
+                **specs_serializer.data
+            )
+            internals['specs'] = specs
+        return internals
+
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
     class Meta:

@@ -134,7 +134,10 @@ class ManageAssetTestCase(APIBaseTestCase):
             "asset_code": "IC002",
             "serial_number": "SN002",
             "model_number": self.assetmodel.model_number,
-            "purchase_date": "2018-07-10"
+            "purchase_date": "2018-07-10",
+            "processor_type": "Intel core i3",
+            "processor_speed": 2.3,
+            "screen_size": 15
         }
         response = client.post(
             self.manage_asset_urls,
@@ -147,6 +150,10 @@ class ManageAssetTestCase(APIBaseTestCase):
             data.get("serial_number"), res_data.get("serial_number"))
         self.assertEqual(
             data.get("model_number"), res_data.get("model_number"))
+        self.assertIsNotNone(res_data.get('specs', None))
+        self.assertEqual(
+            data['screen_size'],
+            res_data.get('specs').get('screen_size'))
         self.assertEqual(Asset.objects.count(), 2)
         self.assertEqual(response.status_code, 201)
 
