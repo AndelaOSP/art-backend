@@ -15,6 +15,7 @@ from .models.asset import (
     AssetIncidentReport,
     AssetSpecs)
 from .models.user import SecurityUser, UserFeedback
+from .models.officeblock import OfficeBlock
 
 User = get_user_model()
 
@@ -27,7 +28,7 @@ admin.site.register(
         AssetModelNumber,
         AssetLog,
         AssetIncidentReport,
-        AssetSpecs
+        AssetSpecs, OfficeBlock
     ]
 )
 
