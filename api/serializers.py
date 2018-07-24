@@ -3,7 +3,7 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetCondition, AssetIncidentReport, AssetSpecs
+    AssetCondition, AssetIncidentReport, AssetSpecs, OfficeBlock
 )
 
 
@@ -381,3 +381,9 @@ class AssetSpecsSerializer(serializers.ModelSerializer):
                 "Similar asset specification already exist"
             )
         return fields
+
+
+class OfficeBlockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfficeBlock
+        fields = ("name", "id", )
