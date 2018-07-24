@@ -277,7 +277,7 @@ def post_asset_subcategory(f, file_length): # noqa
 
                         new_subcategory = AssetSubCategory.objects.create(
                             sub_category_name=assets_subcategory,
-                            asset_category=category)
+                            asset_category=category[0])
                         new_subcategory.save()
                         inserted_records.append(
                             [new_subcategory, counter])
@@ -401,7 +401,7 @@ def post_asset_types(f, file_length): # noqa
                 else:
                     asset = AssetType()
                     asset.asset_type = asset_type
-                    asset.asset_sub_category = sub_category_name
+                    asset.asset_sub_category = sub_category_name[0]
                     try:
                         asset.save()
                         inserted_records.append([asset, counter])
