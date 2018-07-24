@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
@@ -99,6 +100,21 @@ class AssetSerializer(serializers.ModelSerializer):
             }
             for allocation in allocations
         ]
+
+    def to_internal_value(self, data):
+        internals = super(AssetSerializer, self).to_internal_value(data)
+        specs_serializer = AssetSpecsSerializer(data=data)
+        specs_serializer.is_valid()
+
+        if len(specs_serializer.data):
+            try:
+                specs, _ = AssetSpecs.objects.get_or_create(
+                    **specs_serializer.data
+                )
+            except ValidationError as err:
+                raise serializers.ValidationError(err.error_dict)
+            internals['specs'] = specs
+        return internals
 
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
