@@ -134,10 +134,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             "asset_code": "IC002",
             "serial_number": "SN002",
             "model_number": self.assetmodel.model_number,
-            "purchase_date": "2018-07-10",
-            "processor_type": "Intel core i3",
-            "processor_speed": 2.3,
-            "screen_size": 15
+            "purchase_date": "2018-07-10"
         }
         response = client.post(
             self.manage_asset_urls,
@@ -150,12 +147,56 @@ class ManageAssetTestCase(APIBaseTestCase):
             data.get("serial_number"), res_data.get("serial_number"))
         self.assertEqual(
             data.get("model_number"), res_data.get("model_number"))
+        self.assertEqual(Asset.objects.count(), 2)
+        self.assertEqual(response.status_code, 201)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_post_asset_with_specs(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "model_number": self.assetmodel.model_number,
+            "purchase_date": "2018-07-10",
+            "processor_type": "Intel core i3",
+            "processor_speed": 2.3,
+            "screen_size": 15
+        }
+        response = client.post(
+            self.manage_asset_urls,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        res_data = response.data
+        self.assertEqual(
+            data.get("serial_number"), res_data.get("serial_number"))
         self.assertIsNotNone(res_data.get('specs', None))
         self.assertEqual(
             data['screen_size'],
             res_data.get('specs').get('screen_size'))
-        self.assertEqual(Asset.objects.count(), 2)
         self.assertEqual(response.status_code, 201)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_cannot_post_asset_with_invalid_specs_fields(
+            self,
+            mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = {
+            "asset_code": "IC002",
+            "serial_number": "SN002",
+            "model_number": self.assetmodel.model_number,
+            "purchase_date": "2018-07-10",
+            "processor_type": "Intel core i3",
+            "processor_speed": 5.0,
+            "screen_size": 19
+        }
+
+        response = client.post(
+            self.manage_asset_urls,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("screen_size", response.data)
+        self.assertIn("processor_speed", response.data)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cannot_post_asset_with_invalid_model_number(

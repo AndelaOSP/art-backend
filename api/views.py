@@ -60,6 +60,13 @@ class ManageAssetViewSet(ModelViewSet):
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
 
+    def create(self, request, *args, **kwargs):
+        try:
+            response = super().create(request, *args, **kwargs)
+        except ValidationError as err:
+            raise serializers.ValidationError(err.error_dict)
+        return response
+
 
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
