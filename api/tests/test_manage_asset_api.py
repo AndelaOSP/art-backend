@@ -199,6 +199,25 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertIn("processor_speed", response.data)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_admin_cannot_post_asset_with_missing_fields(
+            self,
+            mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = {
+            "model_number": self.assetmodel.model_number,
+            "purchase_date": "2018-07-10"
+        }
+
+        response = client.post(
+            self.manage_asset_urls,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data['__all__'][0],
+            "['Please provide either the serial number, asset code or both.']")
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_cannot_post_asset_with_invalid_model_number(
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
