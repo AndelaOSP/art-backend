@@ -7,12 +7,12 @@ from drf_yasg import openapi
 
 
 from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
-    AssetLogViewSet, UserFeedbackViewSet, AssetStatusViewSet,\
+    AssetLogViewSet, UserFeedbackViewSet, AssetStatusViewSet, \
     AllocationsViewSet, AssetCategoryViewSet, AssetSubCategoryViewSet, \
     AssetTypeViewSet, AssetModelNumberViewSet, AssetConditionViewSet, \
-    AssetMakeViewSet, AssetIncidentReportViewSet, AssetHealthCountViewSet,\
-    ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet
-
+    AssetMakeViewSet, AssetIncidentReportViewSet, AssetHealthCountViewSet, \
+    ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet,\
+    OfficeBlockViewSet
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -57,6 +57,7 @@ router.register('asset-health', AssetHealthCountViewSet, 'asset-health')
 router.register('security-users', SecurityUserViewSet,
                 'security-users')
 router.register('asset-specs', AssetSpecsViewSet, 'asset-specs')
+router.register('office-blocks', OfficeBlockViewSet, 'office-blocks')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),

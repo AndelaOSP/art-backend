@@ -68,7 +68,7 @@ class AssetStatusAPITest(APIBaseTestCase):
         response = client.get(
             self.asset_status_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(self.asset_status.asset_id,
+        self.assertIn(f"{self.asset.asset_code} - {self.asset.serial_number}",
                       response.data['results'][0].values())
         self.assertEqual(len(response.data['results']), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
@@ -80,7 +80,9 @@ class AssetStatusAPITest(APIBaseTestCase):
         response = client.get(
             '{}/{}/'.format(self.asset_status_urls, self.asset_status.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(self.asset_status.asset_id, response.data.values())
+        self.assertIn(
+            f"{self.asset.asset_code} - {self.asset.serial_number}",
+            response.data.values())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -94,7 +96,9 @@ class AssetStatusAPITest(APIBaseTestCase):
             self.asset_status_urls,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(data['asset'], response.data.values())
+        self.assertIn(
+            f"{self.test_asset.asset_code} - {self.test_asset.serial_number}",
+            response.data.values())
 
         self.assertEqual(response.status_code, 201)
 

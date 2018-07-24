@@ -87,7 +87,9 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             f"{self.incident_report_url}",
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(self.test_asset.id, response.data.values())
+        self.assertIn(
+            f"{self.test_asset.serial_number} - {self.test_asset.asset_code}",
+            response.data.values())
         self.assertIn("submitted_by", response.data.keys())
         self.assertEqual(response.data['submitted_by'], self.user.email)
         self.assertEqual(response.status_code, 201)
