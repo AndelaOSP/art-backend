@@ -144,3 +144,10 @@ class AssetTypeModelTest(CoreBaseTestCase):
                           purchase_date="2018-07-10")
         new_asset.save()
         self.assertIsNone(new_asset.assigned_to)
+
+    def test_can_add_asset_without_purchase_date_field(self):
+        new_asset = Asset(asset_code="IC0050",
+                          serial_number="SN0055",
+                          model_number=self.test_assetmodel)
+        new_asset.save()
+        self.assertIsNone(new_asset.purchase_date)
