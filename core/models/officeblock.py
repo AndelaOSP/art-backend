@@ -34,3 +34,25 @@ class OfficeFloor(models.Model):
 
     def __str__(self):
         return "{}".format(self.number)
+class FloorSection(models.Model):
+    floor_number = models.CharField(max_length=100,
+                                    blank=False, null=False, unique=True)
+    office_block = models.ForeignKey(OfficeBlock, on_delete=models.PROTECT)
+
+    def clean(self):
+        if not self.floor_number:
+            raise ValidationError('Floor number is requred')
+
+    def save(self, *args, **kwargs):
+        try:
+            self.full_clean()
+        except Exception as e:
+            raise ValidationError(e)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = 'Floor section'
+        ordering = ['-id']
+
+    def __str__(self):
+        return self.floor_number

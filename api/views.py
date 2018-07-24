@@ -21,7 +21,7 @@ from .serializers import UserSerializer, \
     AssetModelNumberSerializer, AssetConditionSerializer, \
     AssetMakeSerializer, AssetIncidentReportSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
-    AssetSpecsSerializer, OfficeBlockSerializer, OfficeFloorSerializer
+    AssetSpecsSerializer, OfficeBlockSerializer, FloorSectionSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -292,6 +292,9 @@ class OfficeBlockViewSet(ModelViewSet):
 class OfficeFloorViewSet(ModelViewSet):
     serializer_class = OfficeFloorSerializer
     queryset = OfficeFloor.objects.all()
+class FloorSectionViewSet(ModelViewSet):
+    serializer_class = FloorSectionSerializer
+    queryset = FloorSection.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']

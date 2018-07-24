@@ -407,7 +407,11 @@ class OfficeBlockSerializer(serializers.ModelSerializer):
 
 
 class OfficeFloorSerializer(serializers.ModelSerializer):
-
+  
     class Meta:
         model = OfficeFloor
         fields = ("number", "block", "id")
+class FloorSectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FloorSection
+        fields = ("floor_number", "office_block",)

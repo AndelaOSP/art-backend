@@ -15,7 +15,7 @@ from .models.asset import (
     AssetIncidentReport,
     AssetSpecs)
 from .models.user import SecurityUser, UserFeedback
-from .models.officeblock import OfficeBlock, OfficeFloor
+from .models.officeblock import OfficeBlock, FloorSection
 
 User = get_user_model()
 
@@ -142,6 +142,8 @@ class AssetLogsAdmin(admin.ModelAdmin):
 
 class OfficeFloorAdmin(admin.ModelAdmin):
     list_display = ('number', 'block')
+class FloorSectionAdmin(admin.ModelAdmin):
+    list_display = ('floor_number', 'office_block')
 
 
 admin.site.register(Asset, AssetAdmin)
@@ -152,3 +154,4 @@ admin.site.register(UserFeedback, UserFeedbackAdmin)
 admin.site.register(AllocationHistory, AllocationHistoryAdmin)
 admin.site.register(AssetCondition, AssetConditionAdmin)
 admin.site.register(OfficeFloor, OfficeFloorAdmin)
+admin.site.register(FloorSection, FloorSectionAdmin)
