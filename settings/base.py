@@ -36,7 +36,12 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 SECRET_KEY = config('SECRET_KEY')
 
 DATABASES = {'default': dj_database_url.config()}
-
+# bugsnag integration
+BUGSNAG = {
+    'api_key': '35b4a65d19f9d33d7126ec08a93a7457',
+    'release_stage': os.getenv('DJANGO_MODE', 'dev').lower(),
+    'notify_release_stages': ['staging', 'production'],
+}
 # Application definition
 
 INSTALLED_APPS = [
@@ -59,6 +64,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'core.User'
 
 MIDDLEWARE = [
+    'bugsnag.django.middleware.BugsnagMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',

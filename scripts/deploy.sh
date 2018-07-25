@@ -6,7 +6,7 @@ DEPLOY_SCRIPT_PATH="${HOME}/deploy"
 curl -o $DEPLOY_SCRIPT_PATH https://raw.githubusercontent.com/AndelaOSP/bash-helper-modules/master/k8s/deploy
 
 source $DEPLOY_SCRIPT_PATH
-
+CURRENTIPS=""
 DOCKER_REGISTRY=gcr.io
 GCLOUD_SERVICE_KEY_NAME=gcloud-service-key.json
 ALLOWED_DEPLOY_ENVIRONMENTS=('staging', 'production')
@@ -19,10 +19,22 @@ require 'PROJECT_NAME' $PROJECT_NAME
 require 'GOOGLE_PROJECT_ID' $GOOGLE_PROJECT_ID
 require 'DOCKER_REGISTRY' $DOCKER_REGISTRY
 require 'GCLOUD_SERVICE_KEY' $GCLOUD_SERVICE_KEY
-# get_hosts(){
-#     CURRENTIPS="$(gcloud compute instances list --project bench-projects | grep  gke-bench-staging-default-pool | awk -v ORS=, '{if ($4) print $4}' | sed 's/,$//')"
-#      echo ${CURRENTIPS}
-# }
+getHosts(){ 
+    info "============> geting hosts "
+    if [["$CIRCLE_BRANCH" == "master"]]; then
+      CURRENTIPS="$(gcloud compute instances list --project bench-projects | grep  gke-bench-production-default-pool | awk -v ORS=, '{if ($4) print $4}' | sed 's/,$//')"
+    else
+      CURRENTIPS="$(gcloud compute instances list --project bench-projects | grep  gke-bench-staging-default-pool | awk -v ORS=, '{if ($4) print $4}' | sed 's/,$//')"
+    fi
+}
+
+buildAndTagDockerImages() {
+    require "IMAGE_NAME" $IMAGE_NAME
+    info "Building image with tag $IMAGE_NAME ....."
+    docker build  -t $IMAGE_NAME $@
+}
+
+# --build-arg HOST_IP=$CURRENTIPS
 BRANCH_NAME=$CIRCLE_BRANCH
 # set the deployment environment
 setEnvironment $BRANCH_NAME
@@ -40,8 +52,9 @@ main() {
     installGoogleCloudSdk
     authWithServiceAccount
     configureGoogleCloudSdk
+    getHosts
     loginToContainerRegistry _json_key
-    buildAndTagDockerImage .
+    buildAndTagDockerImages .
     publishDockerImage
     logoutContainerRegistry $DOCKER_REGISTRY
     deployToKubernetesCluster backend

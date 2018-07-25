@@ -1,6 +1,6 @@
 from .base import *  # noqa: F403,F401
 import os
-DEBUG = True
+DEBUG = False
 
 INSTALLED_APPS += [  # noqa ignore=F405
     'debug_toolbar',
@@ -12,7 +12,7 @@ MIDDLEWARE += [  # noqa ignore=F405
 
 
 ALLOWED_HOSTS = [os.environ.get('MY_HOST_IP'), 'api-staging-art.andela.com',
-                 '127.0.0.1']
+                 '127.0.0.1', 'art-api.andela.com']
 
 CORS_ORIGIN_WHITELIST = (
     'art-dashboard-staging.herokuapp.com'
