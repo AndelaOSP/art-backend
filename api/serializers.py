@@ -4,7 +4,8 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetCondition, AssetIncidentReport, AssetSpecs, OfficeBlock, OfficeFloor,
+    AssetCondition, AssetIncidentReport, AssetSpecs, OfficeBlock,
+    OfficeFloor, FloorSection
 )
 
 
@@ -407,11 +408,12 @@ class OfficeBlockSerializer(serializers.ModelSerializer):
 
 
 class OfficeFloorSerializer(serializers.ModelSerializer):
-  
     class Meta:
         model = OfficeFloor
         fields = ("number", "block", "id")
+
+
 class FloorSectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FloorSection
-        fields = ("floor_number", "office_block",)
+        fields = ('section_name', 'floor_number')
