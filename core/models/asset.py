@@ -7,6 +7,7 @@ from datetime import datetime
 from .user import SecurityUser
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
+from core.managers import CaseInsensitiveManager
 
 AVAILABLE = "Available"
 ALLOCATED = "Allocated"
@@ -80,6 +81,8 @@ class AssetCategory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
+    objects = CaseInsensitiveManager()
+
     def clean(self):
         if not self.category_name:
             raise ValidationError('Category is required')
@@ -104,8 +107,12 @@ class AssetSubCategory(models.Model):
         unique=True, max_length=40, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
-    asset_category = models.ForeignKey(AssetCategory,
-                                       on_delete=models.PROTECT)
+    asset_category = models.ForeignKey(
+        AssetCategory,
+        on_delete=models.PROTECT
+    )
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_category:
@@ -130,8 +137,12 @@ class AssetType(models.Model):
     asset_type = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    asset_sub_category = models.ForeignKey(AssetSubCategory,
-                                           on_delete=models.PROTECT)
+    asset_sub_category = models.ForeignKey(
+        AssetSubCategory,
+        on_delete=models.PROTECT
+    )
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_sub_category:
@@ -158,6 +169,8 @@ class AssetMake(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     asset_type = models.ForeignKey(AssetType, on_delete=models.PROTECT)
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_type:
