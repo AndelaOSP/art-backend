@@ -12,7 +12,7 @@ from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
     AssetIncidentReport, AssetSpecs
-from core.models.officeblock import OfficeBlock
+from core.models.officeblock import OfficeBlock, OfficeFloor
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
@@ -21,7 +21,7 @@ from .serializers import UserSerializer, \
     AssetModelNumberSerializer, AssetConditionSerializer, \
     AssetMakeSerializer, AssetIncidentReportSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
-    AssetSpecsSerializer, OfficeBlockSerializer
+    AssetSpecsSerializer, OfficeBlockSerializer, OfficeFloorSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -286,4 +286,12 @@ class OfficeBlockViewSet(ModelViewSet):
     serializer_class = OfficeBlockSerializer
     queryset = OfficeBlock.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
+    http_method_names = ['get', 'post']
+
+
+class OfficeFloorViewSet(ModelViewSet):
+    serializer_class = OfficeFloorSerializer
+    queryset = OfficeFloor.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']

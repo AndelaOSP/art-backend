@@ -21,3 +21,16 @@ class OfficeBlock(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class OfficeFloor(models.Model):
+    number = models.PositiveIntegerField(blank=False, null=False)
+    block = models.ForeignKey(OfficeBlock, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = (('block', 'number'),)
+        verbose_name = 'Office Floor'
+        ordering = ['-id']
+
+    def __str__(self):
+        return "{}".format(self.number)
