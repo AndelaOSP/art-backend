@@ -58,6 +58,7 @@ class AssetSerializer(serializers.ModelSerializer):
                   'checkin_status', 'assigned_to', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
+                  'notes',
                   )
         depth = 1
 
@@ -276,7 +277,7 @@ class AssetModelNumberSerializer(serializers.ModelSerializer):
 class AssetConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetCondition
-        fields = ("id", "asset", "asset_condition",
+        fields = ("id", "asset", "notes",
                   "created_at")
 
     def to_representation(self, instance):
