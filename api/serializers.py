@@ -188,8 +188,8 @@ class AssetStatusSerializer(AssetSerializer):
 class AllocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AllocationHistory
-        fields = ("asset", "current_owner", "previous_owner", "created_at")
-        read_only_fields = ("previous_owner",)
+        fields = ("asset", "current_owner", "department", "previous_owner", "created_at")
+        read_only_fields = ("previous_owner")
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)

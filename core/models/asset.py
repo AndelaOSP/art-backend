@@ -124,6 +124,19 @@ class AssetSubCategory(models.Model):
     def __str__(self):
         return self.sub_category_name
 
+class Department(models.Model):
+    """ Stores all departments """
+
+    department_name = models.CharField(unique=True, max_length=40)    
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return self.department_name
+
 
 class AssetType(models.Model):
     """Stores all asset types"""
@@ -368,6 +381,7 @@ class AllocationHistory(models.Model):
                                        null=True,
                                        on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    department = models.ForeignKey('Department', on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Allocation History"

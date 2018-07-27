@@ -13,7 +13,8 @@ from .models.asset import (
     AssetModelNumber,
     AllocationHistory,
     AssetIncidentReport,
-    AssetSpecs)
+    AssetSpecs,
+    Department,)
 from .models.user import SecurityUser, UserFeedback
 from .models.officeblock import OfficeBlock, OfficeFloor
 
@@ -129,7 +130,7 @@ class UserFeedbackAdmin(admin.ModelAdmin):
 
 
 class AllocationHistoryAdmin(admin.ModelAdmin):
-    list_display = ('asset', 'current_owner', 'previous_owner', 'created_at')
+    list_display = ('asset', 'current_owner', 'department', 'previous_owner', 'created_at')
 
 
 class AssetConditionAdmin(admin.ModelAdmin):
@@ -139,6 +140,8 @@ class AssetConditionAdmin(admin.ModelAdmin):
 class AssetLogsAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'asset', 'checked_by', 'log_type')
 
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('department_name', 'created_at', 'last_modified')
 
 class OfficeFloorAdmin(admin.ModelAdmin):
     list_display = ('number', 'block')
@@ -152,3 +155,4 @@ admin.site.register(UserFeedback, UserFeedbackAdmin)
 admin.site.register(AllocationHistory, AllocationHistoryAdmin)
 admin.site.register(AssetCondition, AssetConditionAdmin)
 admin.site.register(OfficeFloor, OfficeFloorAdmin)
+admin.site.register(Department, DepartmentAdmin)
