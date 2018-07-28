@@ -26,9 +26,9 @@ class TestPostScript(TestCase):
         sub_category_fields = {'sub_category_name': 'test subcategory'}
         parent = {'asset_category': parent_category}
         collection_bootstrap(
-            AssetSubCategory, parent=parent, **sub_category_fields)
+            'AssetSubCategory', parent=parent, **sub_category_fields)
         collection_bootstrap(
-            AssetSubCategory, parent=parent, **sub_category_fields)
+            'AssetSubCategory', parent=parent, **sub_category_fields)
 
         count_after = AssetSubCategory.objects.count()
 
@@ -41,12 +41,12 @@ class TestPostScript(TestCase):
             category_name='test category')
         sub_category_fields = {'sub_category_name': 'test subcategory'}
         parent = {'asset_category': parent_category}
-        collection_bootstrap(AssetSubCategory, parent, **sub_category_fields)
+        collection_bootstrap('AssetSubCategory', parent, **sub_category_fields)
 
         different_category = parent_category = AssetCategory.objects.create(
             category_name='different category')
         parent = {'asset_category': different_category}
-        collection_bootstrap(AssetSubCategory, parent, **sub_category_fields)
+        collection_bootstrap('AssetSubCategory', parent, **sub_category_fields)
 
         count_after = AssetSubCategory.objects.count()
 
@@ -55,8 +55,8 @@ class TestPostScript(TestCase):
     def test_bootstrap_creates_object_without_parent(self):
         count_before = AssetCategory.objects.count()
         category_fields = {'category_name': 'test category'}
-        collection_bootstrap(AssetCategory, **category_fields)
-        collection_bootstrap(AssetCategory, **category_fields)
+        collection_bootstrap('AssetCategory', **category_fields)
+        collection_bootstrap('AssetCategory', **category_fields)
 
         count_after = AssetCategory.objects.count()
 
@@ -65,6 +65,7 @@ class TestPostScript(TestCase):
     def test_create_categories_from_csv(self):
         with open(self.csv_file, 'r') as file:
             post_data(file)
+
         with open(self.skipped_records, 'r') as skipped:
             file_length = len(skipped.readlines()) - 1
             self.assertEqual(file_length, 18)
