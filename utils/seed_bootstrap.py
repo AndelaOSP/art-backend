@@ -1,21 +1,26 @@
-# AssetMake -> AssetModelNumber -> Asset
-# model_number, make_label
-def collection_bootstrap(collection, **fields):
-    object, _ = collection.objects.get_or_create(**fields)
-    # import ipdb; ipdb.set_trace()
-    return object
+from core.models.asset import Asset
 
-# 2 categories
-# 6 sub categories
-# 15 types
-# 20 makes
-# 22 model numbers
-# 81 assets
-#
-# 15 missed rows
 
-# asset_make = AssetMake.objects.get(make_label__iexact='makefromcsv')
-# fields = {'make_label': asset_make, 'model_number': 'numberfromcsv'}
-#
-# collection_bootstrap(AssetModelNumber, asset_make, fields)
-# collection_bootstrap(AssetMake, asset_type, fields)
+def collection_bootstrap(collection, parent=None, **fields):
+    missing_fields = [a for a, b in fields.items() if not b]
+
+    for field in missing_fields:
+        fields[field] = None
+
+    if missing_fields and collection is not Asset:
+        return 'Missing fields: {}'.format(missing_fields), False
+
+    if collection is Asset and len(missing_fields) > 1:
+        return 'Missing fields: {}'.format(missing_fields), False
+
+    try:
+        obj = collection.objects.get(**fields)
+        if collection is Asset:
+            return 'Asset already imported', False
+        return obj, True
+    except Exception:
+        if parent:
+            return collection.objects.create(**fields, **parent), True
+        else:
+            return collection.objects.create(**fields), True
+    return 'error creating {}'.format(collection), False

@@ -195,9 +195,9 @@ class AssetModelNumber(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     make_label = models.ForeignKey(AssetMake,
-                                   null=True,
                                    on_delete=models.PROTECT,
                                    verbose_name="Asset Make")
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         self.model_number = self.model_number.upper()
@@ -268,9 +268,8 @@ class Asset(models.Model):
                                     editable=False,
                                     null=True,
                                     on_delete=models.PROTECT)
-    model_number = models.ForeignKey(AssetModelNumber,
-                                     null=True,
-                                     on_delete=models.PROTECT)
+    model_number = models.ForeignKey(
+        AssetModelNumber, on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
     asset_condition = models.CharField(editable=False,
                                        max_length=50,
@@ -279,6 +278,8 @@ class Asset(models.Model):
                               blank=True,
                               null=True,
                               on_delete=models.PROTECT)
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
