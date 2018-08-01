@@ -36,13 +36,24 @@ class OfficeFloor(models.Model):
         return "{}".format(self.number)
 
 
-class FloorSection(models.Model):
-    section_name = models.CharField(max_length=100, unique=True)
-    floor_number = models.ForeignKey(OfficeFloor, on_delete=models.PROTECT)
+class OfficeFloorSection(models.Model):
+    name = models.CharField(max_length=100, blank=False, null=False)
+    floor = models.ForeignKey(OfficeFloor, on_delete=models.PROTECT)
+
+    def clean(self):
+        self.name = self.name.title()
+
+    def save(self, *args, **kwargs):
+        """
+        Validate office floor section name
+        """
+        self.full_clean()
+        super(OfficeFloorSection, self).save(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'Floor Sections'
+        unique_together = (('floor', 'name'),)
+        verbose_name = 'Floor Section'
         ordering = ['-id']
 
     def __str__(self):
-        return self.section_name
+        return self.name

@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from ..models import OfficeBlock, OfficeFloor
+from ..models import OfficeBlock, OfficeFloor, OfficeFloorSection
 
 from core.tests import CoreBaseTestCase
 
@@ -65,3 +65,54 @@ class OfficeBlockModelTest(CoreBaseTestCase):
             block=self.office_block)
         new_office_floor.save()
         self.assertEqual(self.floor_number_counts.count(), 2)
+
+
+class OfficeFloorSectionkModelTest(CoreBaseTestCase):
+    """Tests for the OfficeBlock Model"""
+
+    def setUp(self):
+        super(OfficeFloorSectionkModelTest, self).setUp()
+        self.admin = User.objects.create_superuser(
+            email='testuser@gmail.com', cohort=19,
+            slack_handle='tester', password='qwerty123'
+        )
+
+        self.office_block = OfficeBlock.objects.create(
+            name="Block A"
+        )
+
+        self.office_floor = OfficeFloor.objects.create(
+            number=5,
+            block=self.office_block
+        )
+
+        self.office_floor_section = OfficeFloorSection.objects.create(
+            name="Right Wing",
+            floor=self.office_floor
+        )
+
+        self.all_office_blocks = OfficeBlock.objects.all()
+        self.all_office_floors = OfficeFloor.objects.all()
+        self.all_office_floor_sections = OfficeFloorSection.objects.all()
+        self.token_user = 'testtoken'
+
+    def test_add_new_office_floor_section(self):
+        """Test add new Office Floor Section"""
+        self.assertEqual(self.all_office_floor_sections.count(), 1)
+        new_office_floor_section = OfficeFloorSection(
+            name="Left Wing",
+            floor=self.office_floor)
+        new_office_floor_section.save()
+        self.assertEqual(self.all_office_floor_sections.count(), 2)
+
+    def test_can_add_existing_office_floor_section(self):
+        """Test can add office Floor Section with different name"""
+        self.assertEqual(self.all_office_floor_sections.count(), 1)
+        new_office_floor_section = OfficeFloorSection.objects.create(
+            name="Left Wing",
+            floor=self.office_floor)
+        new_office_floor_section.save()
+        self.assertEqual(self.all_office_floor_sections.count(), 2)
+
+    def test_office_floor_section_model_string_representation(self):
+        self.assertEqual(str(self.office_floor_section), "Right Wing")
