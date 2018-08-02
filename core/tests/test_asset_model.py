@@ -151,3 +151,6 @@ class AssetTypeModelTest(CoreBaseTestCase):
                           model_number=self.test_assetmodel)
         new_asset.save()
         self.assertIsNone(new_asset.purchase_date)
+
+    def test_that_the_default_verification_status_on_asset_is_true(self):
+        self.assertTrue(self.test_asset.verified)
