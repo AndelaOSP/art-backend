@@ -16,8 +16,8 @@ from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetIncidentReport, AssetSpecs
 from core.models.officeblock import (
     OfficeBlock,
-    OfficeFloor,
-    OfficeFloorSection, OfficeWorkspace)
+    OfficeFloor, OfficeWorkspace, OfficeFloorSection)
+from core.models.department import Department
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
@@ -28,7 +28,7 @@ from .serializers import UserSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
     OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
-    OfficeWorkspaceSerializer
+    OfficeWorkspaceSerializer, DepartmentSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -215,7 +215,7 @@ class AssetIncidentReportViewSet(ModelViewSet):
 class AssetHealthCountViewSet(ModelViewSet):
     serializer_class = AssetHealthSerializer
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication, )
+    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', ]
     queryset = Asset.objects.all()
     data = None
@@ -299,17 +299,18 @@ class GroupViewSet(ModelViewSet):
     def perform_create(self, serializer):
         try:
             name = " ".join(serializer.validated_data.get(
-                    'name').title().split())
+                'name').title().split())
             serializer.save(name=name)
         except IntegrityError as error:
             raise serializers.ValidationError(
-                    {"message": "{} already exist".format(name)})
+                {"message": "{} already exist".format(name)})
 
 
 class OfficeBlockViewSet(ModelViewSet):
     serializer_class = OfficeBlockSerializer
     queryset = OfficeBlock.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
 
@@ -331,6 +332,20 @@ class OfficeFloorSectionViewSet(ModelViewSet):
 class OfficeWorkspaceViewSet(ModelViewSet):
     serializer_class = OfficeWorkspaceSerializer
     queryset = OfficeWorkspace.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+
+class DepartmentViewSet(ModelViewSet):
+    serializer_class = DepartmentSerializer
+    queryset = Department.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put', 'delete']
