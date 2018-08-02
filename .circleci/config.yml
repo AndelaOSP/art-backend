@@ -117,4 +117,4 @@ workflows:
             - tests
           filters:
             branches:
-              only: master                     
+              only: master
