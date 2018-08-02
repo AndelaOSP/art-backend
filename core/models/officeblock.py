@@ -41,18 +41,21 @@ class OfficeFloorSection(models.Model):
     floor = models.ForeignKey(OfficeFloor, on_delete=models.PROTECT)
 
     def clean(self):
-        self.name = self.name.title()
+        self.name = " ".join(self.name.title().split())
 
     def save(self, *args, **kwargs):
         """
         Validate office floor section name
         """
-        self.full_clean()
-        super(OfficeFloorSection, self).save(*args, **kwargs)
+        try:
+            self.full_clean()
+        except Exception as e:
+            raise ValidationError(e)
+        super().save(*args, **kwargs)
 
     class Meta:
         unique_together = (('floor', 'name'),)
-        verbose_name = 'Floor Section'
+        verbose_name = 'Office Floor Section'
         ordering = ['-id']
 
     def __str__(self):
