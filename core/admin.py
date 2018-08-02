@@ -15,7 +15,7 @@ from .models.asset import (
     AssetIncidentReport,
     AssetSpecs)
 from .models.user import SecurityUser, UserFeedback
-from .models.officeblock import OfficeBlock
+from .models.officeblock import OfficeBlock, OfficeFloorSection, OfficeFloor
 
 User = get_user_model()
 
@@ -115,7 +115,7 @@ class AssetAdmin(admin.ModelAdmin):
     )
     list_display = (
         'asset_code', 'serial_number', 'model_number', 'created_at',
-        'assigned_to', 'current_status', 'asset_condition', 'purchase_date'
+        'assigned_to', 'current_status', 'notes', 'purchase_date'
     )
 
 
@@ -133,11 +133,21 @@ class AllocationHistoryAdmin(admin.ModelAdmin):
 
 
 class AssetConditionAdmin(admin.ModelAdmin):
-    list_display = ('asset', 'asset_condition', 'created_at')
+    list_display = ('asset', 'notes', 'created_at')
 
 
 class AssetLogsAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'asset', 'checked_by', 'log_type')
+
+
+class OfficeFloorAdmin(admin.ModelAdmin):
+    list_filter = ('block',)
+    list_display = ('number', 'block')
+
+
+class OfficeFloorSectionAdmin(admin.ModelAdmin):
+    list_filter = ('floor', 'floor__block',)
+    list_display = ('name', 'floor')
 
 
 admin.site.register(Asset, AssetAdmin)
@@ -147,3 +157,5 @@ admin.site.register(AssetStatus, AssetStatusAdmin)
 admin.site.register(UserFeedback, UserFeedbackAdmin)
 admin.site.register(AllocationHistory, AllocationHistoryAdmin)
 admin.site.register(AssetCondition, AssetConditionAdmin)
+admin.site.register(OfficeFloor, OfficeFloorAdmin)
+admin.site.register(OfficeFloorSection, OfficeFloorSectionAdmin)

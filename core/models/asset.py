@@ -271,9 +271,7 @@ class Asset(models.Model):
     model_number = models.ForeignKey(
         AssetModelNumber, on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
-    asset_condition = models.CharField(editable=False,
-                                       max_length=50,
-                                       default='Brand New')
+    notes = models.TextField(editable=False, default=" ", )
     specs = models.ForeignKey(AssetSpecs,
                               blank=True,
                               null=True,
@@ -409,10 +407,9 @@ class AssetCondition(models.Model):
                               null=False,
                               on_delete=models.PROTECT)
 
-    asset_condition = models.CharField(max_length=50,
-                                       editable=True,
-                                       blank=True,
-                                       null=True)
+    notes = models.TextField(editable=True,
+                             blank=True,
+                             null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
@@ -493,13 +490,13 @@ def save_initial_asset_status(sender, **kwargs):
 
 
 @receiver(post_save, sender=AssetCondition)
-def save_asset_condition(sender, **kwargs):
+def save_notes(sender, **kwargs):
     new_condition = kwargs.get('instance')
     related_asset = new_condition.asset
-    if not new_condition.asset_condition == \
-            related_asset.asset_condition:
-        related_asset.asset_condition = \
-            new_condition.asset_condition
+    if not new_condition.notes == \
+            related_asset.notes:
+        related_asset.notes = \
+            new_condition.notes
         related_asset.save()
 
 

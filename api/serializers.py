@@ -1,9 +1,11 @@
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetCondition, AssetIncidentReport, AssetSpecs, OfficeBlock
+    AssetCondition, AssetIncidentReport, AssetSpecs, OfficeBlock,
+    OfficeFloor, OfficeFloorSection
 )
 
 
@@ -57,6 +59,7 @@ class AssetSerializer(serializers.ModelSerializer):
                   'checkin_status', 'assigned_to', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
+                  'notes',
                   )
         depth = 1
 
@@ -99,6 +102,21 @@ class AssetSerializer(serializers.ModelSerializer):
             }
             for allocation in allocations
         ]
+
+    def to_internal_value(self, data):
+        internals = super(AssetSerializer, self).to_internal_value(data)
+        specs_serializer = AssetSpecsSerializer(data=data)
+        specs_serializer.is_valid()
+
+        if len(specs_serializer.data):
+            try:
+                specs, _ = AssetSpecs.objects.get_or_create(
+                    **specs_serializer.data
+                )
+            except ValidationError as err:
+                raise serializers.ValidationError(err.error_dict)
+            internals['specs'] = specs
+        return internals
 
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
@@ -260,7 +278,7 @@ class AssetModelNumberSerializer(serializers.ModelSerializer):
 class AssetConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetCondition
-        fields = ("id", "asset", "asset_condition",
+        fields = ("id", "asset", "notes",
                   "created_at")
 
     def to_representation(self, instance):
@@ -387,3 +405,16 @@ class OfficeBlockSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfficeBlock
         fields = ("name", "id", )
+
+
+class OfficeFloorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfficeFloor
+        fields = ("number", "block", "id")
+
+
+class OfficeFloorSectionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OfficeFloorSection
+        fields = ("name", "floor", "id")

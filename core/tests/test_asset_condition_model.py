@@ -50,18 +50,18 @@ class AssetConditionModelTest(CoreBaseTestCase):
         self.test_asset.save()
 
         self.assetcondition = AssetCondition(
-            asset_condition='Brand New',
+            notes='Brand New',
             asset=self.test_asset
         )
         self.assetcondition.save()
 
     def test_create_asset_creates_default_assest_condition(self):
         self.assertEqual(AssetCondition.objects.count(), 1)
-        self.assertEqual(self.assetcondition.asset_condition,
+        self.assertEqual(self.assetcondition.notes,
                          'Brand New')
 
-    def test_edit_asset_condition(self):
-        self.assetcondition.asset_condition = 'Working'
+    def test_edit_notes(self):
+        self.assetcondition.notes = 'Working'
 
         self.assertEqual(AssetCondition.objects.count(), 1)
-        self.assertEqual(self.assetcondition.asset_condition, 'Working')
+        self.assertEqual(self.assetcondition.notes, 'Working')

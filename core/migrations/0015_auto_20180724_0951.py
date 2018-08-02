@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='asset',
             name='purchase_date',
-            field=models.DateField(blank=True, null=True, validators=[core.validator.validate_date]),
+            field=models.DateField(
+                blank=True,
+                null=True, validators=[core.validator.validate_date]),
         ),
     ]

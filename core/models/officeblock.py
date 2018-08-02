@@ -21,3 +21,42 @@ class OfficeBlock(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class OfficeFloor(models.Model):
+    number = models.PositiveIntegerField(blank=False, null=False)
+    block = models.ForeignKey(OfficeBlock, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = (('block', 'number'),)
+        verbose_name = 'Office Floor'
+        ordering = ['-id']
+
+    def __str__(self):
+        return "{}".format(self.number)
+
+
+class OfficeFloorSection(models.Model):
+    name = models.CharField(max_length=100, blank=False, null=False)
+    floor = models.ForeignKey(OfficeFloor, on_delete=models.PROTECT)
+
+    def clean(self):
+        self.name = " ".join(self.name.title().split())
+
+    def save(self, *args, **kwargs):
+        """
+        Validate office floor section name
+        """
+        try:
+            self.full_clean()
+        except Exception as e:
+            raise ValidationError(e)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = (('floor', 'name'),)
+        verbose_name = 'Office Floor Section'
+        ordering = ['-id']
+
+    def __str__(self):
+        return self.name

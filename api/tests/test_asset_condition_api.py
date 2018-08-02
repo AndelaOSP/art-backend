@@ -51,7 +51,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         self.asset = Asset.objects.get(serial_number='SN001')
         self.asset_condition = AssetCondition(
             asset=self.asset,
-            asset_condition='working')
+            notes='working')
         self.asset_condition.save()
         self.asset_conditon = AssetCondition.objects.get(asset=self.asset)
         self.asset_condition_urls = reverse('asset-condition-list')
@@ -67,7 +67,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         response = client.get(
             self.asset_condition_urls,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
-        self.assertIn(self.asset_condition.asset_condition,
+        self.assertIn(self.asset_condition.notes,
                       response.data['results'][0].values())
         self.assertEqual(len(response.data['results']),
                          Asset.objects.count())
@@ -87,13 +87,13 @@ class AssetConditionAPITest(APIBaseTestCase):
         test_asset.save()
         data = {
             'asset': test_asset.id,
-            'asset_condition': 'working perfectly'
+            'notes': 'working perfectly'
         }
         response = client.post(
             self.asset_condition_urls,
             data=data,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
-        self.assertIn(data['asset_condition'], response.data.values())
+        self.assertIn(data['notes'], response.data.values())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -108,7 +108,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         )
         data = {
             'asset': invalid_asset,
-            'asset_condition': 'working perfectly'
+            'notes': 'working perfectly'
         }
         response = client.post(
             self.asset_condition_urls,
@@ -139,7 +139,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         test_asset.save()
         data = {
             'asset': test_asset.id,
-            'asset_condition': 'working perfectly'
+            'notes': 'working perfectly'
         }
         new_asset_condition = client.post(
             self.asset_condition_urls,

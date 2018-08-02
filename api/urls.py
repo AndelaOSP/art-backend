@@ -12,7 +12,7 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     AssetTypeViewSet, AssetModelNumberViewSet, AssetConditionViewSet, \
     AssetMakeViewSet, AssetIncidentReportViewSet, AssetHealthCountViewSet, \
     ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet,\
-    OfficeBlockViewSet
+    OfficeBlockViewSet, OfficeFloorViewSet, OfficeFloorSectionViewSet
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -58,6 +58,8 @@ router.register('security-users', SecurityUserViewSet,
                 'security-users')
 router.register('asset-specs', AssetSpecsViewSet, 'asset-specs')
 router.register('office-blocks', OfficeBlockViewSet, 'office-blocks')
+router.register('office-floors', OfficeFloorViewSet, 'office-floors')
+router.register('office-sections', OfficeFloorSectionViewSet, 'floor-sections')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
