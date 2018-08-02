@@ -15,6 +15,7 @@ from .models.asset import (
     AllocationHistory,
     AssetIncidentReport,
     AssetSpecs)
+from .models.department import Department
 from .models.user import SecurityUser, UserFeedback
 from .models.officeblock import OfficeBlock, \
     OfficeFloor, OfficeFloorSection, OfficeWorkspace
@@ -170,3 +171,4 @@ admin.site.register(AssetCondition, AssetConditionAdmin)
 admin.site.register(OfficeFloor, OfficeFloorAdmin)
 admin.site.register(OfficeFloorSection, OfficeFloorSectionAdmin)
 admin.site.register(OfficeWorkspace, OfficeWorkspaceAdmin)
+admin.site.register(Department, DepartmentAdmin)

@@ -16,8 +16,8 @@ from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetIncidentReport, AssetSpecs
 from core.models.officeblock import (
     OfficeBlock,
-    OfficeFloor,
-    OfficeFloorSection, OfficeWorkspace)
+    OfficeFloor, OfficeWorkspace, OfficeFloorSection)
+from core.models.department import Department
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
@@ -28,7 +28,7 @@ from .serializers import UserSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
     OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
-    OfficeWorkspaceSerializer
+    OfficeWorkspaceSerializer, DepartmentSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -310,6 +310,7 @@ class OfficeBlockViewSet(ModelViewSet):
     serializer_class = OfficeBlockSerializer
     queryset = OfficeBlock.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
 
@@ -331,6 +332,12 @@ class OfficeFloorSectionViewSet(ModelViewSet):
 class OfficeWorkspaceViewSet(ModelViewSet):
     serializer_class = OfficeWorkspaceSerializer
     queryset = OfficeWorkspace.objects.all()
+    http_method_names = ['get', 'post']
+
+
+class DepartmentViewSet(ModelViewSet):
+    serializer_class = DepartmentSerializer
+    queryset = Department.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put', 'delete']
