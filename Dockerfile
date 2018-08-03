@@ -1,5 +1,18 @@
 FROM python:3.6
+LABEL MAINTAINER="Collins Macharia <collins.macharia@andela.com>"
+LABEL application="artbackend"
 
+
+ARG SECRET_KEY='secret key'
+ARG DJANGO_SETTINGS_MODULE='settings.prod'
+ARG HOST_IP
+
+# Prevent dpkg errors
+ENV TERM=xterm-256color  \
+    SECRET_KEY=${SECRET_KEY} \
+    DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+
+ENV HOST_IP=${HOST_IP}
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     postgresql-client \
@@ -12,4 +25,5 @@ RUN pip install -r requirements.txt
 COPY . .
 
 EXPOSE 8080
-ENTRYPOINT [ "python", "manage.py", "runserver", "0.0.0.0:8080" ]
+RUN python manage.py collectstatic --noinput
+ENTRYPOINT ["gunicorn", "art.wsgi"]
