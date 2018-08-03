@@ -21,7 +21,7 @@ require 'DOCKER_REGISTRY' $DOCKER_REGISTRY
 require 'GCLOUD_SERVICE_KEY' $GCLOUD_SERVICE_KEY
 getHosts(){ 
     echo "============> geting hosts "
-    if [ "$CIRCLE_BRANCH" == 'master' ]; then
+    if [ "$CIRCLE_BRANCH" == 'test-host-ips' ]; then
       CURRENTIPS="$(gcloud compute instances list --project bench-projects | grep  gke-bench-production-default-pool | awk -v ORS=, '{if ($4) print $4}' | sed 's/,$//')"
     else
       CURRENTIPS="$(gcloud compute instances list --project bench-projects | grep  gke-bench-staging-default-pool | awk -v ORS=, '{if ($4) print $4}' | sed 's/,$//')"
@@ -53,6 +53,10 @@ main() {
     authWithServiceAccount
     configureGoogleCloudSdk
     getHosts
+    echo $CIRCLE_BRANCH
+    echo "above"
+    echo $CURRENTIPS
+    echo "we're"
     loginToContainerRegistry _json_key
     buildAndTagDockerImages .
     publishDockerImage
