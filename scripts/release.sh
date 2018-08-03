@@ -46,15 +46,16 @@ git pull origin $(git_current_branch)
 echo "===> commit version number increment"
 git commit -am "Release version $versionLabel"
 
-# create tag for new version from -master
-tagMessage=$(git log --all --grep='(#' -i $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%h %s")
-git tag -a $versionLabel -m $tagMessage
-
 # merge the new version number back into develop
 echo "===> merge master to develop"
 git checkout $devBranch
 git reset --hard origin/$(git_current_branch)
 git pull origin $(git_current_branch)
+
+# create tag for new version from -master
+tagMessage=$(git log --all --grep='(#' -i $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%h %s")
+git tag -a $versionLabel -m $tagMessage
+
 git merge --no-ff $masterBranch
 
 # push including all tags
