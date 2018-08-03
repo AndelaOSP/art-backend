@@ -1,0 +1,27 @@
+version: "2"
+services:
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: art_user
+      POSTGRES_PASSWORD: art_password
+      POSTGRES_DB: art_backend
+  art-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/usr/src/app
+    environment:
+      SECRET_KEY: "QWErty#@!"
+      DATABASE_URL: "postgres://art_user:art_password@database/art_backend"
+      PRIVATE_KEY: "<enter-provided-private-key>"
+      PROJECT_ID: "<enter-project-id>"
+      CLIENT_EMAIL: "<enter-client-email>"
+      APP_ENV: "dev"
+    ports:
+      - "8080:8080"
+    entrypoint: ./docker-entrypoint.sh
+    depends_on:
+      - database

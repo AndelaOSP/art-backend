@@ -6,9 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
-art/db.sqlite3
+db.sqlite3
 .env
-
+.vs/
+.DS_Store/
+.DS_Store
 # Distribution / packaging
 .Python
 env/
@@ -103,3 +105,17 @@ ENV/
 
 # mypy
 .mypy_cache/
+.idea
+
+# static files
+staticfiles
+
+
+# Docker
+docker-compose.yml
+
+#vscode files
+.vscode
+
+#DS_Store
+*.DS_Store

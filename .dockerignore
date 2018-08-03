@@ -1,0 +1,13 @@
+Dockerfile
+docker-compose.yml
+docker-compose.yml.template
+install_art.sh
+Procfile
+README.md
+LICENSE
+
+.gitignore
+.git/*
+.covergagerc
+.flake8
+.vscode
