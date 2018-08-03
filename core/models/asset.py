@@ -260,10 +260,13 @@ class Asset(models.Model):
                                      on_delete=models.PROTECT)
     current_status = models.CharField(editable=False, max_length=50)
     notes = models.TextField(editable=False, default=" ", )
-    specs = models.ForeignKey(AssetSpecs,
-                              blank=True,
-                              null=True,
-                              on_delete=models.PROTECT)
+    specs = models.ForeignKey(
+        AssetSpecs,
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT
+    )
+    verified = models.BooleanField(default=True)
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
