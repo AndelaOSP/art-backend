@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from core.models import (
     User, Asset, SecurityUser, AssetLog,
@@ -399,6 +400,12 @@ class AssetSpecsSerializer(serializers.ModelSerializer):
                 "Similar asset specification already exist"
             )
         return fields
+
+
+class UserGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ("name",)
 
 
 class OfficeBlockSerializer(serializers.ModelSerializer):
