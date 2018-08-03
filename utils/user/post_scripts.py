@@ -42,9 +42,10 @@ def post_users(f, file_length, data_type):
                 skipped[row['email']] = [
                     f"User {email} already exists", counter]
                 continue
-            user_attr = ['first_name', 'last_name', 'created_at',
-                         'email', 'cohort', 'slack_handle',
-                         'picture', 'phone_number']
+            user_attr = [
+                'first_name', 'last_name', 'email',
+                'cohort', 'picture', 'phone_number'
+            ]
             user_data = dict()
             for attr in user_attr:
                 user_data[attr] = row.get(attr)
