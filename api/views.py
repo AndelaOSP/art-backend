@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.db.utils import IntegrityError
+from django.contrib.auth.models import Group
 from django.core.validators import validate_email, ValidationError
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
@@ -25,7 +27,7 @@ from .serializers import UserSerializer, \
     AssetMakeSerializer, AssetIncidentReportSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
-    OfficeFloorSectionSerializer, OfficeFloorSerializer
+    OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -284,6 +286,23 @@ class AssetSpecsViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put']
+
+
+class GroupViewSet(ModelViewSet):
+    serializer_class = UserGroupSerializer
+    queryset = Group.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    http_method_names = ['get', 'post']
+
+    def perform_create(self, serializer):
+        try:
+            name = " ".join(serializer.validated_data.get(
+                    'name').title().split())
+            serializer.save(name=name)
+        except IntegrityError as error:
+            raise serializers.ValidationError(
+                    {"message": "{} already exist".format(name)})
 
 
 class OfficeBlockViewSet(ModelViewSet):
