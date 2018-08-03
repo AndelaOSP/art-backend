@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import validate_email, ValidationError
 from rest_framework import serializers
@@ -295,8 +296,13 @@ class GroupViewSet(ModelViewSet):
     http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
-        name = " ".join(serializer.validated_data.get('name').title().split())
-        serializer.save(name=name)
+        try:
+            name = " ".join(serializer.validated_data.get(
+                    'name').title().split())
+            serializer.save(name=name)
+        except IntegrityError as error:
+            raise serializers.ValidationError(
+                    {"message": "{} already exist".format(name)})
 
 
 class OfficeBlockViewSet(ModelViewSet):
