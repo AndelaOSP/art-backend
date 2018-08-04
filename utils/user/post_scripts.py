@@ -17,7 +17,7 @@ from core.models.user import (
 )  # noqa
 
 
-def post_users(f, file_length, type):  # noqa
+def post_users(f, file_length, data_type):
     """
     Bulk creates asset make
     :param type: specifies type of import
@@ -28,7 +28,7 @@ def post_users(f, file_length, type):  # noqa
     skipped = dict()
     inserted_records = []
     counter = 1
-    if type == 'csv':
+    if data_type == 'csv':
         f.seek(0)
         data = csv.DictReader(f, delimiter=',')
 
@@ -42,15 +42,13 @@ def post_users(f, file_length, type):  # noqa
                 skipped[row['email']] = [
                     f"User {email} already exists", counter]
                 continue
-            user_attr = ['first_name', 'last_name', 'created_at',
-                         'email', 'cohort', 'slack_handle',
-                         'picture', 'phone_number']
+            user_attr = [
+                'first_name', 'last_name', 'email',
+                'cohort', 'picture', 'phone_number'
+            ]
             user_data = dict()
             for attr in user_attr:
-                if attr == 'created_at':
-                    user_data['date_joined'] = row[attr]
-                    continue
-                user_data[attr] = row[attr]
+                user_data[attr] = row.get(attr)
             new_user = User.objects.create(**user_data)
             inserted_records.append([new_user, counter])
             counter += 1
