@@ -11,7 +11,7 @@ MIDDLEWARE += [  # noqa ignore=F405
 ]
 
 
-ALLOWED_HOSTS += [   # noqa ignore=F405
+ALLOWED_HOSTS += [  # noqa ignore=F405
     'api-staging-art.andela.com', '127.0.0.1'
 ]
 

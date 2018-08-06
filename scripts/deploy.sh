@@ -6,6 +6,7 @@ DEPLOY_SCRIPT_PATH="${HOME}/deploy"
 curl -o $DEPLOY_SCRIPT_PATH https://raw.githubusercontent.com/AndelaOSP/bash-helper-modules/master/k8s/deploy
 
 source $DEPLOY_SCRIPT_PATH
+
 CURRENTIPS=""
 DOCKER_REGISTRY=gcr.io
 GCLOUD_SERVICE_KEY_NAME=gcloud-service-key.json
@@ -33,6 +34,10 @@ buildAndTagDockerImages() {
     info "Building image with tag $IMAGE_NAME ....."
     docker build --build-arg HOST_IP=$CURRENTIPS -t $IMAGE_NAME $@
 }
+patchEnvs() {
+echo  "=========> Patching  allowed hosts environment variables into the application "
+kubectl set env deployment/$DEPLOYMENT_NAME HOST_IP=$CURRENTIPS -n $NAMESPACE
+}
 
 
 BRANCH_NAME=$CIRCLE_BRANCH
@@ -56,6 +61,7 @@ main() {
     loginToContainerRegistry _json_key
     buildAndTagDockerImages .
     publishDockerImage
+    patchEnvs
     logoutContainerRegistry $DOCKER_REGISTRY
     deployToKubernetesCluster backend
 }
