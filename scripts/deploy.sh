@@ -33,7 +33,10 @@ buildAndTagDockerImages() {
     info "Building image with tag $IMAGE_NAME ....."
     docker build --build-arg HOST_IP=$CURRENTIPS -t $IMAGE_NAME $@
 }
-
+patchEnvs() {
+echo  "=========> Patching host Ip addresses as environment variables into the application"
+kubectl set env deployment/$DEPLOYMENT_NAME HOST_IP=$CURRENTIPS -n $NAMESPACE
+}
 
 BRANCH_NAME=$CIRCLE_BRANCH
 # set the deployment environment
@@ -56,6 +59,7 @@ main() {
     loginToContainerRegistry _json_key
     buildAndTagDockerImages .
     publishDockerImage
+    patchEnvs
     logoutContainerRegistry $DOCKER_REGISTRY
     deployToKubernetesCluster backend
 }
