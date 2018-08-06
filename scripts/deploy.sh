@@ -19,6 +19,7 @@ require 'PROJECT_NAME' $PROJECT_NAME
 require 'GOOGLE_PROJECT_ID' $GOOGLE_PROJECT_ID
 require 'DOCKER_REGISTRY' $DOCKER_REGISTRY
 require 'GCLOUD_SERVICE_KEY' $GCLOUD_SERVICE_KEY
+
 getHosts(){ 
     echo "============> geting hosts "
     if [ "$CIRCLE_BRANCH" == 'master' ]; then
@@ -33,9 +34,15 @@ buildAndTagDockerImages() {
     info "Building image with tag $IMAGE_NAME ....."
     docker build --build-arg HOST_IP=$CURRENTIPS -t $IMAGE_NAME $@
 }
+
 patchEnvs() {
 echo  "=========> Patching host Ip addresses as environment variables into the application"
 kubectl set env deployment/$DEPLOYMENT_NAME HOST_IP=$CURRENTIPS -n $NAMESPACE
+}
+
+patchMigrationsImage() {
+kubectl patch deployment $DEPLOYMENT_NAME -p '{"spec":{"template":{"spec":{"initContainers":[{"name":"run-migrations","image":"'${IMAGE_NAME}'"}]}}}}' --namespace $NAMESPACE
+
 }
 
 BRANCH_NAME=$CIRCLE_BRANCH
@@ -44,9 +51,7 @@ setEnvironment $BRANCH_NAME
 # ensure its an allowed deployment environment
 isAllowedDeployEnvironment $ENVIRONMENT
 # get K8s deployment name
-
 getDeploymentName DEPLOYMENT_NAME
-
 # Set image image tag and name
 IMAGE_TAG=$(getImageTag $(getCommitHash))
 IMAGE_NAME=$(getImageName)
@@ -60,6 +65,7 @@ main() {
     buildAndTagDockerImages .
     publishDockerImage
     patchEnvs
+    patchMigrationsImage
     logoutContainerRegistry $DOCKER_REGISTRY
     deployToKubernetesCluster backend
 }
