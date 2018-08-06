@@ -17,7 +17,7 @@ from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
 from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor,
-    OfficeFloorSection)
+    OfficeFloorSection, OfficeWorkspace)
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
@@ -27,7 +27,8 @@ from .serializers import UserSerializer, \
     AssetMakeSerializer, AssetIncidentReportSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
-    OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer
+    OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
+    OfficeWorkspaceSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -325,4 +326,17 @@ class OfficeFloorSectionViewSet(ModelViewSet):
     queryset = OfficeFloorSection.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post']
+
+
+class OfficeWorkspaceViewSet(ModelViewSet):
+    serializer_class = OfficeWorkspaceSerializer
+    queryset = OfficeWorkspace.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)

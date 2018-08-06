@@ -60,3 +60,29 @@ class OfficeFloorSection(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class OfficeWorkspace(models.Model):
+    name = models.CharField(max_length=50, blank=False)
+    section = models.ForeignKey(OfficeFloorSection,
+                                on_delete=models.PROTECT)
+
+    def clean(self):
+        self.name = " ".join(self.name.title().split())
+
+    def save(self, *args, **kwargs):
+        """
+        Validate office workspace name
+        """
+        try:
+            self.full_clean()
+        except Exception as e:
+            raise ValidationError(e)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Office Workspace'
+        unique_together = (("name", "section"),)
+
+    def __str__(self):
+        return self.name
