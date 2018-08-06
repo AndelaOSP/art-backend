@@ -106,7 +106,7 @@ workflows:
       - tests:
           requires:
             - build   
-      - deploy_staging:  
+      - deploy_staging:
           requires:
             - tests
           filters:
