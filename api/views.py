@@ -27,8 +27,8 @@ from .serializers import UserSerializer, \
     AssetMakeSerializer, AssetIncidentReportSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
-    OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
-    OfficeWorkspaceSerializer, DepartmentSerializer
+    OfficeFloorSectionSerializer, OfficeFloorSerializer, \
+    UserGroupSerializer, DepartmentSerializer, OfficeWorkspaceSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -148,8 +148,8 @@ class AssetStatusViewSet(ModelViewSet):
 class AllocationsViewSet(ModelViewSet):
     serializer_class = AllocationsSerializer
     queryset = AllocationHistory.objects.all()
-    permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # permission_classes = [IsAuthenticated, ]
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
@@ -215,7 +215,7 @@ class AssetIncidentReportViewSet(ModelViewSet):
 class AssetHealthCountViewSet(ModelViewSet):
     serializer_class = AssetHealthSerializer
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication, )
+    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', ]
     queryset = Asset.objects.all()
     data = None
@@ -298,12 +298,12 @@ class GroupViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         try:
-            name = " ".join(serializer.validated_data.get(
-                    'name').title().split())
+            name = " ".join(
+                serializer.validated_data.get('name').title().split())
             serializer.save(name=name)
         except IntegrityError as error:
-            raise serializers.ValidationError(
-                    {"message": "{} already exist".format(name)})
+            raise serializers.ValidationError({
+                "message": "{} already exist".format(name)})
 
 
 class OfficeBlockViewSet(ModelViewSet):

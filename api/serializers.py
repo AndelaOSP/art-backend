@@ -201,10 +201,18 @@ class AllocationsSerializer(serializers.ModelSerializer):
         asset_code = asset.asset_code
 
         if instance.previous_owner:
-            instance_data['previous_owner'] = instance.previous_owner.email
+            try:
+                instance_data['previous_owner'] = instance.previous_owner.email
+            except AttributeError:
+                # previous owner has no email
+                instance_data['previous_owner'] = instance.previous_owner.name
 
         if instance.current_owner:
-            instance_data['current_owner'] = instance.current_owner.email
+            try:
+                instance_data['current_owner'] = instance.current_owner.email
+            except AttributeError:
+                # current owner has no email
+                instance_data['current_owner'] = instance.current_owner.name
 
         instance_data['asset'] = f"{serial_no} - {asset_code}"
         return instance_data

@@ -1,5 +1,8 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db.models import ForeignKey, PositiveIntegerField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from datetime import datetime
@@ -250,11 +253,17 @@ class Asset(models.Model):
         validators=[validate_date],
         null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    assigned_to = models.ForeignKey('User',
-                                    blank=True,
-                                    editable=False,
-                                    null=True,
-                                    on_delete=models.PROTECT)
+    content_type = ForeignKey(ContentType,
+                              on_delete=models.CASCADE, blank=True, null=True)
+    object_id = PositiveIntegerField(blank=True, null=True)
+    assigned_to = GenericForeignKey('content_type', 'object_id')
+
+    #
+    # assigned_to = models.ForeignKey('User',
+    #                                 blank=True,
+    #                                 editable=False,
+    #                                 null=True,
+    #                                 on_delete=models.PROTECT)
     model_number = models.ForeignKey(AssetModelNumber,
                                      null=True,
                                      on_delete=models.PROTECT)
@@ -359,17 +368,19 @@ class AllocationHistory(models.Model):
     asset = models.ForeignKey(Asset,
                               null=False,
                               on_delete=models.PROTECT)
-    current_owner = models.ForeignKey('User',
-                                      related_name='current_owner_asset',
-                                      blank=True,
-                                      null=True,
-                                      on_delete=models.PROTECT)
-    previous_owner = models.ForeignKey('User',
-                                       related_name='previous_owner_asset',
-                                       editable=False,
-                                       blank=True,
-                                       null=True,
-                                       on_delete=models.PROTECT)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,
+                                     null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    current_owner = GenericForeignKey('content_type', 'object_id')
+
+    content = models.ForeignKey(ContentType, on_delete=models.CASCADE,
+                                null=True,
+                                blank=True, related_name="+")
+    object = models.PositiveIntegerField(null=True, blank=True)
+
+    previous_owner = GenericForeignKey('content', 'object')
+
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
@@ -482,8 +493,7 @@ def save_initial_asset_status(sender, **kwargs):
 def save_notes(sender, **kwargs):
     new_condition = kwargs.get('instance')
     related_asset = new_condition.asset
-    if not new_condition.notes == \
-            related_asset.notes:
+    if not new_condition.notes == related_asset.notes:
         related_asset.notes = \
             new_condition.notes
         related_asset.save()
@@ -500,6 +510,11 @@ def allocation_history_post_save(sender, **kwargs):
     if asset.assigned_to and asset.current_status == AVAILABLE:
         message = "The asset with serial number {} ".format(
             asset.serial_number) + "has been allocated to you."
+        try:
+            user.slack_handle
+        except AttributeError:
+            # Not a user. Just a department
+            user = None
         slack.send_message(message, user=user)
         asset_status = AssetStatus.objects.create(
             asset=asset,
