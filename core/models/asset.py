@@ -327,11 +327,13 @@ class AllocationHistory(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='previous'
+        editable=False,
+        related_name='previous',
     )
     previous_allocation_object_id = models.PositiveIntegerField(
         null=True,
-        blank=True
+        blank=True,
+        editable=False,
     )
     previous_allocation = GenericForeignKey(
         'previous_allocation_content_type',
@@ -472,14 +474,6 @@ def create_initial_asset_status(sender, **kwargs):
 
     if kwargs.get('created'):
         AssetStatus.objects.create(asset=asset)
-
-# @receiver(post_save, sender=AssetCondition)
-# def save_notes(sender, **kwargs):
-#     new_condition = kwargs.get("instance")
-#     related_asset = new_condition.asset
-#     if not new_condition.notes == related_asset.notes:
-#         related_asset.notes = new_condition.notes
-#         related_asset.save()
 
 
 @receiver(post_save, sender=AllocationHistory)
