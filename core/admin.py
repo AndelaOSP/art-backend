@@ -138,6 +138,7 @@ class AllocationHistoryAdmin(admin.ModelAdmin):
     list_display = (
         'asset',
         'current_allocation',
+        'previous_allocation',
         'created_at'
     )
 
