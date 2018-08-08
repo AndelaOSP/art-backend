@@ -490,23 +490,27 @@ def update_asset_status_when_allocation_changes(sender, **kwargs):
         last_status = AssetStatus.objects.filter(
             asset=allocation_history.asset
         ).latest('created_at')
-        new_status = AssetStatus.objects.create(
-            asset=allocation_history.asset,
-            current_status=ALLOCATED,
-            previous_status=last_status.current_status
-        )
+        if allocation_history.current_allocation:
+            new_status = AssetStatus.objects.create(
+                asset=allocation_history.asset,
+                current_status=ALLOCATED,
+                previous_status=last_status.current_status
+            )
     # import ipdb; ipdb.set_trace()
 
-# @receiver(post_save, sender=AssetStatus)
-# def update_asset_allocation_history_when_status_changes(sender, **kwargs):
-#     asset_status = kwargs.get('instance')
-#
-#     if kwargs.get('created'):
-#         last_allocation_record = AllocationHistory.objects.filter(
-#             asset=asset_status.asset,
-#         ).latest('created_at')
-#         if asset_status.current_status == AVAILABLE:
-#             AllocationHistory.objects.create(
-#                 asset=asset_status.asset,
-#                 previous_allocation=last_allocation_record.current_allocation
-#             )
+@receiver(post_save, sender=AssetStatus)
+def update_asset_allocation_history_when_status_changes(sender, **kwargs):
+    asset_status = kwargs.get('instance')
+
+    if kwargs.get('created'):
+        try:
+            last_allocation_record = AllocationHistory.objects.filter(
+                asset=asset_status.asset,
+            ).latest('created_at')
+            if asset_status.current_status == AVAILABLE:
+                AllocationHistory.objects.create(
+                    asset=asset_status.asset,
+                    previous_allocation=last_allocation_record.current_allocation
+                )
+        except Exception as e:
+            pass
