@@ -118,7 +118,8 @@ class AssetAdmin(admin.ModelAdmin):
     )
     list_display = (
         'asset_code', 'serial_number', 'model_number', 'created_at',
-        'notes', 'purchase_date', 'verified',
+        'purchase_date', 'verified',
+        # 'notes'
         # 'current_status',
         # 'allocations',
     )

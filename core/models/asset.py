@@ -265,8 +265,6 @@ class Asset(models.Model):
     model_number = models.ForeignKey(
         AssetModelNumber, null=True, on_delete=models.PROTECT
     )
-    # current_status = models.CharField(editable=False, max_length=50)
-    notes = models.TextField(editable=False, default=" ")
     specs = models.ForeignKey(
         AssetSpecs, blank=True, null=True, on_delete=models.PROTECT
     )
