@@ -54,8 +54,7 @@ INSTALLED_APPS = [
     'api',
     'oauth2_provider',
     'drf_yasg',
-    'corsheaders',
-    'silk'
+    'corsheaders'
 ]
 
 AUTH_USER_MODEL = 'core.User'
@@ -70,7 +69,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'silk.middleware.SilkyMiddleware'
 ]
 
 ROOT_URLCONF = 'art.urls'
@@ -211,16 +209,3 @@ SWAGGER_SETTINGS = {
 REDOC_SETTINGS = {
     'LAZY_RENDERING': True,
 }
-
-# django silk settings
-SILKY_AUTHENTICATION = True
-SILKY_AUTHORISATION = True
-
-
-def is_super_user(user):
-    return user.is_staff and user.is_superuser
-
-
-SILKY_PERMISSIONS = is_super_user
-
-JET_INDEX_DASHBOARD = 'core.dashboard.CustomIndexDashboard'
