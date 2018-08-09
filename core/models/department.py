@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from rest_framework import serializers
 
@@ -15,8 +16,8 @@ class Department(models.Model):
     def save(self, *args, **kwargs):
         try:
             self.full_clean()
-        except Exception as e:
-            raise serializers.ValidationError(e)
+        except ValidationError as error:
+            raise serializers.ValidationError(error)
         super().save(*args, **kwargs)
 
     class Meta:
