@@ -13,13 +13,15 @@ from core.models.department import Department
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
+    number_of_assets_assigned = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
             'slack_handle', 'picture', 'phone_number',
-            'last_modified', 'date_joined', 'last_login'
+            'number_of_assets_assigned', 'last_modified', 'date_joined',
+            'last_login'
         )
 
         extra_kwargs = {
@@ -34,6 +36,9 @@ class UserSerializer(serializers.ModelSerializer):
             obj.first_name,
             obj.last_name
         )
+
+    def get_number_of_assets_assigned(self, obj):
+        return obj.allocation_size()
 
     def create(self, validated_data):
         user = User(**validated_data)
