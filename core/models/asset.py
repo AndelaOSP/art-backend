@@ -490,6 +490,22 @@ def save_notes(sender, **kwargs):
 
 
 @receiver(post_save, sender=AllocationHistory)
+def update_asset_status_when_allocation_changes(sender, **kwargs):
+    allocation_history = kwargs.get('instance')
+
+    if kwargs.get('created'):
+        last_status = \
+            AssetStatus.objects.filter(
+                asset=allocation_history.asset).latest('created_at')
+        if allocation_history.current_owner:
+            AssetStatus.objects.create(
+                asset=allocation_history.asset,
+                current_status=ALLOCATED,
+                previous_status=last_status.current_status
+            )
+
+
+@receiver(post_save, sender=AllocationHistory)
 def allocation_history_post_save(sender, **kwargs):
     allocation_history = kwargs.get('instance')
     asset = allocation_history.asset
