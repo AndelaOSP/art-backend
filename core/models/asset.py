@@ -4,7 +4,8 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from datetime import datetime
 
-from .user import SecurityUser
+from .department import Department
+from .user import SecurityUser, User
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
 
@@ -315,6 +316,27 @@ class AssetAssignee(models.Model):
         else:
             return "No Assignee Here"
 
+    @property
+    def first_name(self):
+        if self.department:
+            return self.department.name
+        if self.user:
+            return self.user.first_name
+
+    @property
+    def last_name(self):
+        if self.department:
+            return self.department.name
+        if self.user:
+            return self.user.last_name
+
+    @property
+    def email(self):
+        if self.department:
+            return self.department.name
+        if self.user:
+            return self.user.email
+
 
 class AssetLog(models.Model):
     """Stores checkin/Checkout asset logs"""
@@ -527,11 +549,12 @@ def update_asset_allocation_history_when_status_changes(sender, **kwargs):
                     asset=asset_status.asset).latest('created_at')
         except Exception:
             return
-        if asset_status.current_status == AVAILABLE\
+        if asset_status.current_status == AVAILABLE \
                 and last_allocation_record:
             AllocationHistory.objects.create(
                 asset=asset_status.asset,
-                previous_owner=last_allocation_record.current_owner)
+                previous_owner=last_allocation_record.current_owner,
+                current_owner=None)
 
 
 @receiver(post_save, sender=AllocationHistory)
@@ -553,3 +576,16 @@ def allocation_history_post_save(sender, **kwargs):
             current_status=ALLOCATED
         )
         asset_status.save()
+
+
+@receiver(post_save, sender=User)
+def assetassignee_user(sender, instance, created, **kwargs):
+    if created or not hasattr(instance, 'assetassignee'):
+        AssetAssignee.objects.create(user=instance)
+    instance.assetassignee.save()
+
+
+@receiver(post_save, sender=Department)
+def assetassignee_department(sender, instance, created, **kwargs):
+    if created or not hasattr(instance, 'assetassignee'):
+        AssetAssignee.objects.create(department=instance)
