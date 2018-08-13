@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import validate_email, ValidationError
@@ -13,7 +14,7 @@ from api.authentication import FirebaseTokenAuthentication
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
-    AssetIncidentReport, AssetSpecs
+    AssetIncidentReport, AssetSpecs, AssetAssignee
 from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
@@ -58,7 +59,12 @@ class ManageAssetViewSet(ModelViewSet):
                 validate_email(email)
             except ValidationError as error:
                 raise serializers.ValidationError(error.message)
-            queryset = Asset.objects.filter(assigned_to__email=email)
+            try:
+                user_asset_assignee = User.objects.get(email=email)
+                queryset = \
+                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
+            except ObjectDoesNotExist:
+                queryset = Asset.objects.none()
 
         return queryset
 
@@ -84,7 +90,8 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         query_params = self.request.query_params
-        queryset = Asset.objects.filter(assigned_to=user)
+        asset_assignee = AssetAssignee.objects.filter(user=user).first()
+        queryset = Asset.objects.filter(assigned_to=asset_assignee)
 
         if query_params.get('email'):
             email = query_params['email']
@@ -92,13 +99,19 @@ class AssetViewSet(ModelViewSet):
                 validate_email(email)
             except ValidationError as error:
                 raise serializers.ValidationError(error.message)
-            queryset = Asset.objects.filter(assigned_to__email=email)
+            try:
+                user_asset_assignee = User.objects.get(email=email)
+                queryset = \
+                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
+            except ObjectDoesNotExist:
+                queryset = Asset.objects.none()
 
         return queryset
 
     def get_object(self):
         user = self.request.user
-        queryset = Asset.objects.filter(assigned_to=user)
+        asset_assignee = AssetAssignee.objects.filter(user=user).first()
+        queryset = Asset.objects.filter(assigned_to=asset_assignee)
         obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
         return obj
 
