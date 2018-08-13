@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from core.models import Asset, AssetModelNumber, SecurityUser, \
     AllocationHistory, AssetCategory, AssetSubCategory, AssetType, \
-    AssetMake
+    AssetMake, AssetAssignee
 from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
@@ -18,6 +18,7 @@ class AllocationTestCase(APIBaseTestCase):
             email='user@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
         self.token_user = 'testtoken'
         self.other_user = User.objects.create_user(
             email='user1@site.com', cohort=20,
@@ -79,7 +80,7 @@ class AllocationTestCase(APIBaseTestCase):
         self.assertEqual(AllocationHistory.objects.all().count(), 0)
         mock_verify_id_token.return_value = {'email': self.other_user.email}
         data = {"asset": self.asset.id,
-                "current_owner": self.user.id}
+                "current_owner": self.asset_assignee.id}
         response = client.post(self.allocations_urls, data,
                                HTTP_AUTHORIZATION="Token {}".
                                format(self.token_user)
@@ -99,7 +100,7 @@ class AllocationTestCase(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {
             'asset': self.asset.id,
-            'current_owner': self.user.id}
+            'current_owner': self.asset_assignee.id}
         token = f"Token {self.token_user}"
         response = client.post(
             self.allocations_urls, data,

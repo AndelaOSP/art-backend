@@ -57,13 +57,12 @@ class ManageAssetViewSet(ModelViewSet):
             email = query_params['email']
             try:
                 validate_email(email)
-            except ValidationError as error:
-                raise serializers.ValidationError(error.message)
-            try:
                 user_asset_assignee = User.objects.get(email=email)
                 queryset = \
                     Asset.objects.filter(assigned_to__user=user_asset_assignee)
-            except ObjectDoesNotExist:
+            except (ValidationError, ObjectDoesNotExist) as error:
+                if error.__class__.__name__ == 'ValidationError':
+                    raise serializers.ValidationError(error.message)
                 queryset = Asset.objects.none()
 
         return queryset
@@ -97,13 +96,12 @@ class AssetViewSet(ModelViewSet):
             email = query_params['email']
             try:
                 validate_email(email)
-            except ValidationError as error:
-                raise serializers.ValidationError(error.message)
-            try:
                 user_asset_assignee = User.objects.get(email=email)
                 queryset = \
                     Asset.objects.filter(assigned_to__user=user_asset_assignee)
-            except ObjectDoesNotExist:
+            except (ValidationError, ObjectDoesNotExist) as error:
+                if error.__class__.__name__ == 'ValidationError':
+                    raise serializers.ValidationError(error.message)
                 queryset = Asset.objects.none()
 
         return queryset
