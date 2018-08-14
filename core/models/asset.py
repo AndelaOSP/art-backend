@@ -314,7 +314,8 @@ class AssetAssignee(models.Model):
         if self.user:
             return str(self.user)
         else:
-            return "No Assignee Here"
+            raise ValidationError(
+                message="No Department or User for this AssetAssignee")
 
     @property
     def first_name(self):
@@ -589,3 +590,4 @@ def assetassignee_user(sender, instance, created, **kwargs):
 def assetassignee_department(sender, instance, created, **kwargs):
     if created or not hasattr(instance, 'assetassignee'):
         AssetAssignee.objects.create(department=instance)
+    instance.assetassignee.save()
