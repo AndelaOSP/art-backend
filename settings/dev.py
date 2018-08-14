@@ -16,7 +16,8 @@ ALLOWED_HOSTS += [   # noqa ignore=F405
 ]
 
 CORS_ORIGIN_WHITELIST = (
-    'art-dashboard-staging.herokuapp.com'
+    'art-dashboard-staging.herokuapp.com',
+    'http://localhost',
 )
 
 CORS_ORIGIN_REGEX_WHITELIST = (
