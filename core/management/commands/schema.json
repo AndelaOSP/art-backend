@@ -1,0 +1,82 @@
+{
+  "fields": [
+    {
+      "name": "category_name",
+      "description": "category_name field on AssetCategory model",
+      "type": "string"
+    },
+    {
+      "name": "sub_category_name",
+      "description": "sub_category_name field on AssetSubCategory model",
+      "type": "string"
+    },
+    {
+      "name": "asset_type",
+      "description": "asset_type field on AssetType model",
+      "type": "string"
+    },
+    {
+      "name": "make_label",
+      "description": "make_label field on AssetMake model",
+      "type": "string"
+    },
+    {
+      "name": "model_number",
+      "description": "model_number field on AssetModelNumber model",
+      "type": "string"
+    },
+    {
+      "name": "verified",
+      "description": "verified field on Asset model",
+      "type": "boolean",
+      "trueValues": [ "yes", "Yes", "YES"],
+      "falseValues": [ "no", "No", "NO"]
+    },
+    {
+      "name": "asset_code",
+      "description": "asset_code field on Asset model",
+      "type": "string"
+    },
+    {
+      "name": "serial_number",
+      "description": "serial_number field on Asset model",
+      "type": "string"
+    },
+    {
+      "name": "assigned_to",
+      "description": "assigned_to field on Asset model - requires Asset, email has to belong to User object",
+      "type": "string",
+      "format" "email"
+    },
+    {
+      "name": "current_status",
+      "description": "current_status field on AssetStatus model - requires Asset",
+      "type": "string"
+    },
+    {
+      "name": "notes",
+      "description": "notes field on AssetCondition model - requires Asset",
+      "type": "string"
+    },
+    {
+      "name": "memory",
+      "description": "memory field on AssetSpecs model",
+      "type": "integer"
+    },
+    {
+      "name": "storage",
+      "description": "storage field on AssetSpecs model",
+      "type": "integer"
+    },
+    {
+      "name": "processor_speed",
+      "description": "processor_speed field on AssetSpecs model",
+      "type": "string"
+    },
+    {
+      "name": "year_of_manufacture",
+      "description": "year_of_manufacture field on AssetSpecs model",
+      "type": "integer"
+    },
+  ]
+}
