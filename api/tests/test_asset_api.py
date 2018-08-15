@@ -11,7 +11,7 @@ from core.models import (Asset,
                          AssetMake,
                          AssetType,
                          AssetSubCategory,
-                         AssetCategory)
+                         AssetCategory, AssetAssignee)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -25,11 +25,14 @@ class AssetTestCase(APIBaseTestCase):
             email='user@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
         self.token_user = 'testtoken'
         self.other_user = User.objects.create_user(
             email='user1@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
         )
+        self.another_asset_assignee = \
+            AssetAssignee.objects.get(user=self.other_user)
         self.token_other_user = 'otherusertesttoken'
         self.asset_category = AssetCategory.objects.create(
             category_name="Accessories")
@@ -47,7 +50,7 @@ class AssetTestCase(APIBaseTestCase):
         self.asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
             purchase_date="2018-07-10"
         )
@@ -55,7 +58,7 @@ class AssetTestCase(APIBaseTestCase):
 
         allocation_history = AllocationHistory(
             asset=self.asset,
-            current_owner=self.user
+            current_owner=self.asset_assignee
         )
 
         allocation_history.save()

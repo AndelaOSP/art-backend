@@ -4,7 +4,8 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from datetime import datetime
 
-from .user import SecurityUser
+from .department import Department
+from .user import SecurityUser, User
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
 
@@ -250,7 +251,7 @@ class Asset(models.Model):
         validators=[validate_date],
         null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    assigned_to = models.ForeignKey('User',
+    assigned_to = models.ForeignKey('AssetAssignee',
                                     blank=True,
                                     editable=False,
                                     null=True,
@@ -299,6 +300,43 @@ class Asset(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+
+class AssetAssignee(models.Model):
+    department = models.OneToOneField('Department', null=True, blank=True,
+                                      on_delete=models.CASCADE)
+    user = models.OneToOneField('User', null=True, blank=True,
+                                on_delete=models.CASCADE)
+
+    def __str__(self):
+        if self.department:
+            return str(self.department)
+        if self.user:
+            return str(self.user)
+        else:
+            raise ValidationError(
+                message="No Department or User for this AssetAssignee")
+
+    @property
+    def first_name(self):
+        if self.department:
+            return self.department.name
+        if self.user:
+            return self.user.first_name
+
+    @property
+    def last_name(self):
+        if self.department:
+            return self.department.name
+        if self.user:
+            return self.user.last_name
+
+    @property
+    def email(self):
+        if self.department:
+            return self.department.name
+        if self.user:
+            return self.user.email
 
 
 class AssetLog(models.Model):
@@ -359,12 +397,12 @@ class AllocationHistory(models.Model):
     asset = models.ForeignKey(Asset,
                               null=False,
                               on_delete=models.PROTECT)
-    current_owner = models.ForeignKey('User',
+    current_owner = models.ForeignKey('AssetAssignee',
                                       related_name='current_owner_asset',
                                       blank=True,
                                       null=True,
                                       on_delete=models.PROTECT)
-    previous_owner = models.ForeignKey('User',
+    previous_owner = models.ForeignKey('AssetAssignee',
                                        related_name='previous_owner_asset',
                                        editable=False,
                                        blank=True,
@@ -445,11 +483,8 @@ class AssetIncidentReport(models.Model):
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
     asset_status.asset.current_status = asset_status.current_status
-    if asset_status.current_status == AVAILABLE and AllocationHistory. \
-            objects.count() > 0:
+    if asset_status.current_status == AVAILABLE:
         asset_status.asset.assigned_to = None
-        AllocationHistory.objects.create(asset=asset_status.asset,
-                                         current_owner=None)
     asset_status.asset.save()
 
 
@@ -482,27 +517,77 @@ def save_initial_asset_status(sender, **kwargs):
 def save_notes(sender, **kwargs):
     new_condition = kwargs.get('instance')
     related_asset = new_condition.asset
-    if not new_condition.notes == \
-            related_asset.notes:
+    if not new_condition.notes == related_asset.notes:
         related_asset.notes = \
             new_condition.notes
         related_asset.save()
 
 
 @receiver(post_save, sender=AllocationHistory)
+def update_asset_status_when_allocation_changes(sender, **kwargs):
+    allocation_history = kwargs.get('instance')
+
+    if kwargs.get('created'):
+        last_status = \
+            AssetStatus.objects.filter(
+                asset=allocation_history.asset).latest('created_at')
+        if allocation_history.current_owner:
+            AssetStatus.objects.create(
+                asset=allocation_history.asset,
+                current_status=ALLOCATED,
+                previous_status=last_status.current_status
+            )
+
+
+@receiver(post_save, sender=AssetStatus)
+def update_asset_allocation_history_when_status_changes(sender, **kwargs):
+    asset_status = kwargs.get('instance')
+
+    if kwargs.get('created'):
+        try:
+            last_allocation_record = \
+                AllocationHistory.objects.filter(
+                    asset=asset_status.asset).latest('created_at')
+        except Exception:
+            return
+        if asset_status.current_status == AVAILABLE \
+                and last_allocation_record:
+            AllocationHistory.objects.create(
+                asset=asset_status.asset,
+                previous_owner=last_allocation_record.current_owner,
+                current_owner=None)
+
+
+@receiver(post_save, sender=AllocationHistory)
 def allocation_history_post_save(sender, **kwargs):
     allocation_history = kwargs.get('instance')
     asset = allocation_history.asset
-    user = allocation_history.current_owner
-    asset.assigned_to = user
+    owner = allocation_history.current_owner
+    asset.assigned_to = owner
     asset.save()
 
     if asset.assigned_to and asset.current_status == AVAILABLE:
         message = "The asset with serial number {} ".format(
             asset.serial_number) + "has been allocated to you."
-        slack.send_message(message, user=user)
+        # send slack message only to user
+        if hasattr(owner.user, 'email'):
+            slack.send_message(message, user=owner.user)
         asset_status = AssetStatus.objects.create(
             asset=asset,
             current_status=ALLOCATED
         )
         asset_status.save()
+
+
+@receiver(post_save, sender=User)
+def assetassignee_user(sender, instance, created, **kwargs):
+    if created or not hasattr(instance, 'assetassignee'):
+        AssetAssignee.objects.create(user=instance)
+    instance.assetassignee.save()
+
+
+@receiver(post_save, sender=Department)
+def assetassignee_department(sender, instance, created, **kwargs):
+    if created or not hasattr(instance, 'assetassignee'):
+        AssetAssignee.objects.create(department=instance)
+    instance.assetassignee.save()

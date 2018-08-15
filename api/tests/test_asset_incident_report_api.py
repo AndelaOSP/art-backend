@@ -9,8 +9,8 @@ from core.models import (
     AssetSubCategory,
     AssetCategory,
     User,
-    AssetIncidentReport
-)
+    AssetIncidentReport,
+    AssetAssignee)
 
 from api.tests import APIBaseTestCase
 client = APIClient()
@@ -39,12 +39,13 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             email='user@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
         self.token_user = 'token'
         self.test_asset = Asset(
             asset_code="qaz123",
             serial_number="123qaz",
             model_number=self.test_assetmodel,
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10"
         )
         self.test_asset.save()

@@ -9,8 +9,8 @@ from ..models import (
     AssetMake,
     AssetType,
     AssetSubCategory,
-    AssetCategory
-)
+    AssetCategory,
+    AssetAssignee)
 
 from core.tests import CoreBaseTestCase
 User = get_user_model()
@@ -25,6 +25,7 @@ class AssetTypeModelTest(CoreBaseTestCase):
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
         asset_category = AssetCategory.objects.create(
             category_name="Computer")
         asset_sub_category = AssetSubCategory.objects.create(
@@ -41,7 +42,7 @@ class AssetTypeModelTest(CoreBaseTestCase):
             asset_code="IC001",
             serial_number="SN001",
             model_number=self.test_assetmodel,
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10"
         )
         self.test_asset.save()
@@ -55,7 +56,7 @@ class AssetTypeModelTest(CoreBaseTestCase):
         new_asset = Asset(asset_code="IC002",
                           serial_number="SN0045",
                           model_number=self.test_assetmodel,
-                          assigned_to=self.user,
+                          assigned_to=self.asset_assignee,
                           purchase_date="2018-07-10")
         new_asset.save()
         self.assertEqual(self.all_assets.count(), 2)
