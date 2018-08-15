@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from datetime import datetime
 
 from .department import Department
+from .officeblock import OfficeWorkspace
 from .user import SecurityUser, User
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
@@ -305,22 +306,25 @@ class Asset(models.Model):
 class AssetAssignee(models.Model):
     department = models.OneToOneField('Department', null=True, blank=True,
                                       on_delete=models.CASCADE)
+    workspace = models.OneToOneField('OfficeWorkspace', null=True, blank=True,
+                                      on_delete=models.CASCADE)
     user = models.OneToOneField('User', null=True, blank=True,
                                 on_delete=models.CASCADE)
 
     def __str__(self):
-        if self.department:
-            return str(self.department)
-        if self.user:
-            return str(self.user)
+        assignee = self.workspace or self.department or self.user
+        if assignee:
+            return str(assignee)
         else:
             raise ValidationError(
-                message="No Department or User for this AssetAssignee")
+                message="No Department, Workspace or User for this AssetAssignee")
 
     @property
     def first_name(self):
         if self.department:
             return self.department.name
+        if self.workspace:
+            return self.workspace.name
         if self.user:
             return self.user.first_name
 
@@ -328,6 +332,8 @@ class AssetAssignee(models.Model):
     def last_name(self):
         if self.department:
             return self.department.name
+        if self.workspace:
+            return self.workspace.name
         if self.user:
             return self.user.last_name
 
@@ -335,6 +341,8 @@ class AssetAssignee(models.Model):
     def email(self):
         if self.department:
             return self.department.name
+        if self.workspace:
+            return self.workspace.name
         if self.user:
             return self.user.email
 
@@ -590,4 +598,11 @@ def assetassignee_user(sender, instance, created, **kwargs):
 def assetassignee_department(sender, instance, created, **kwargs):
     if created or not hasattr(instance, 'assetassignee'):
         AssetAssignee.objects.create(department=instance)
+    instance.assetassignee.save()
+
+
+@receiver(post_save, sender=OfficeWorkspace)
+def assetassignee_workspace(sender, instance, created, **kwargs):
+    if created or not hasattr(instance, 'assetassignee'):
+        AssetAssignee.objects.create(workspace=instance)
     instance.assetassignee.save()
