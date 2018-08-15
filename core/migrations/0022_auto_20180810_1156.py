@@ -9,10 +9,9 @@ import django.db.models.deletion
 User = get_user_model()
 
 def populate_asset_assignee(apps, schema_editor):
-    AssetAssignee = apps.get_model('core', 'AssetAssignee')
     for user in User.objects.all():
-        AssetAssignee.objects.create(user=user)
- 
+        user.save()
+
 
 class Migration(migrations.Migration):
 
