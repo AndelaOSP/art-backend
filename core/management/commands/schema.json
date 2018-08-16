@@ -43,7 +43,7 @@
     },
     {
       "name": "current_status",
-      "description": "current_status field on AssetStatus model - requires Asset",
+      "description": "current_status field on Asset model",
       "type": "string"
     },
     {
