@@ -337,7 +337,7 @@ class AssetAssignee(models.Model):
         if self.department:
             return self.department.name
         if self.workspace:
-            return self.workspace.name
+            return self.workspace.section
         if self.user:
             return self.user.last_name
 
