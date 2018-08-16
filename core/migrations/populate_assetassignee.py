@@ -12,6 +12,16 @@ def populate_asset_assignee(apps, schema_editor):
     for user in User.objects.all():
         user.save()
 
+    Department = apps.get_model('core', 'Department')
+
+    for department in Department.objects.all():
+        department.save()
+
+    OfficeWorkspace = apps.get_model('core', 'OfficeWorkspace')
+
+    for workspace in OfficeWorkspace.objects.all():
+        workspace.save()
+
 
 class Migration(migrations.Migration):
 
@@ -34,6 +44,10 @@ class Migration(migrations.Migration):
                     blank=True, null=True,
                     on_delete=django.db.models.deletion.CASCADE,
                     to=settings.AUTH_USER_MODEL)),
+                ('workspace', models.OneToOneField(
+                    blank=True, null=True,
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to='core.OfficeWorkspace')),
             ],
         ),
         migrations.RunPython(populate_asset_assignee),
