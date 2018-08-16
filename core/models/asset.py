@@ -306,8 +306,11 @@ class Asset(models.Model):
 class AssetAssignee(models.Model):
     department = models.OneToOneField('Department', null=True, blank=True,
                                       on_delete=models.CASCADE)
-    workspace = models.OneToOneField('OfficeWorkspace', null=True, blank=True,
-                                      on_delete=models.CASCADE)
+    workspace = models.OneToOneField(
+        'OfficeWorkspace',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE)
     user = models.OneToOneField('User', null=True, blank=True,
                                 on_delete=models.CASCADE)
 
@@ -317,7 +320,8 @@ class AssetAssignee(models.Model):
             return str(assignee)
         else:
             raise ValidationError(
-                message="No Department, Workspace or User for this AssetAssignee")
+                message="No Department, Workspace or"
+                        " User for this AssetAssignee")
 
     @property
     def first_name(self):

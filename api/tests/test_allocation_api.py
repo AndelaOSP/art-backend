@@ -5,7 +5,8 @@ from rest_framework.test import APIClient
 
 from core.models import Asset, AssetModelNumber, SecurityUser, \
     AllocationHistory, AssetCategory, AssetSubCategory, AssetType, \
-    AssetMake, AssetAssignee, Department
+    AssetMake, AssetAssignee, Department, OfficeWorkspace,\
+    OfficeBlock, OfficeFloor, OfficeFloorSection
 from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
@@ -53,6 +54,15 @@ class AllocationTestCase(APIBaseTestCase):
             last_name="TestLast",
             phone_number="254720900900",
             badge_number="AE23"
+        )
+        self.office_block = OfficeBlock.objects.create(name="Epic Tower")
+        self.office_floor = OfficeFloor.objects.create(
+            number=7,
+            block=self.office_block
+        )
+        self.floor_section = OfficeFloorSection.objects.create(
+            name='The Big Apple',
+            floor=self.office_floor
         )
         self.allocations_urls = reverse('allocations-list')
 
@@ -113,6 +123,32 @@ class AllocationTestCase(APIBaseTestCase):
             f"{self.asset.serial_number} - {self.asset.asset_code}")
         self.assertEqual(response.data['current_owner'],
                          department.name)
+        self.assertEqual(response.status_code, 201)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_post_allocation_of_asset_to_a_workspace(
+            self,
+            mock_verify_id_token):
+        """Test allocating an asset to a department"""
+        self.assertEqual(AllocationHistory.objects.all().count(), 0)
+        mock_verify_id_token.return_value = {'email': self.other_user.email}
+        workspace = OfficeWorkspace.objects.create(
+            name="4E",
+            section=self.floor_section
+        )
+        asset_assignee = AssetAssignee.objects.get(workspace=workspace)
+        data = {"asset": self.asset.id,
+                "current_owner": asset_assignee.id}
+        response = client.post(self.allocations_urls, data,
+                               HTTP_AUTHORIZATION="Token {}".
+                               format(self.token_user)
+                               )
+        self.assertEqual(AllocationHistory.objects.all().count(), 1)
+        self.assertEqual(
+            response.data['asset'],
+            f"{self.asset.serial_number} - {self.asset.asset_code}")
+        self.assertEqual(response.data['current_owner'],
+                         workspace.name)
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
