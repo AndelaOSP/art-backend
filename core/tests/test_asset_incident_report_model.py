@@ -8,8 +8,8 @@ from ..models import (
     AssetSubCategory,
     AssetCategory,
     User,
-    AssetIncidentReport
-)
+    AssetIncidentReport,
+    AssetAssignee)
 
 
 class AssetIncidentReportModelTest(CoreBaseTestCase):
@@ -33,11 +33,12 @@ class AssetIncidentReportModelTest(CoreBaseTestCase):
             email='andela@gmail.com', cohort=0,
             slack_handle='ndel', password='wakanda1'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
         self.test_asset = Asset(
             asset_code="qaz123",
             serial_number="123qaz",
             model_number=self.test_assetmodel,
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10"
         )
         self.test_asset.save()

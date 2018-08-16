@@ -8,8 +8,8 @@ from ..models import (
     AssetSubCategory,
     AssetType,
     AssetMake,
-    AssetModelNumber
-)
+    AssetModelNumber,
+    AssetAssignee)
 from core.tests import CoreBaseTestCase
 User = get_user_model()
 
@@ -21,6 +21,7 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
 
         asset_category = AssetCategory.objects.create(
             category_name="Computer")
@@ -59,7 +60,7 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
                                          serial_number="SN00450",
                                          model_number=self.test_assetmodel,
                                          purchase_date="2018-07-10",
-                                         assigned_to=self.user,
+                                         assigned_to=self.asset_assignee,
                                          specs=self.asset_specs)
         self.assertEqual(new_asset.serial_number, "SN00450")
         self.assertEqual(new_asset.specs.screen_size, 13)

@@ -10,8 +10,8 @@ from core.models import (
     AssetType,
     AssetSubCategory,
     AssetCategory,
-    AssetCondition
-)
+    AssetCondition,
+    AssetAssignee)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -27,6 +27,7 @@ class AssetConditionAPITest(APIBaseTestCase):
             email='testuser@gmail.com', cohort=19,
             slack_handle='tester', password='qwerty12345'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
         asset_category = AssetCategory.objects.create(
             category_name="Computer")
         asset_sub_category = AssetSubCategory.objects.create(
@@ -43,7 +44,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         self.test_asset = Asset(
             asset_code='IC001',
             serial_number='SN001',
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
             purchase_date="2018-07-10",
         )
@@ -80,7 +81,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         test_asset = Asset(
             asset_code='IC002',
             serial_number='SN002',
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
             purchase_date="2018-07-10"
         )
@@ -103,7 +104,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         invalid_asset = Asset(
             asset_code='IC0024',
             serial_number='SN0014',
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
         )
         data = {
@@ -132,7 +133,7 @@ class AssetConditionAPITest(APIBaseTestCase):
         test_asset = Asset(
             asset_code='IC002',
             serial_number='SN002',
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
             purchase_date="2018-07-10",
         )
