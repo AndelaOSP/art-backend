@@ -317,6 +317,7 @@ class Asset(models.Model):
 
     class Meta:
         ordering = ['-id']
+        unique_together = ("asset_code", "serial_number",)
 
 
 class AssetAssignee(models.Model):
@@ -401,7 +402,8 @@ class AssetStatus(models.Model):
                               on_delete=models.PROTECT)
 
     current_status = models.CharField(max_length=50,
-                                      choices=ASSET_STATUSES)
+                                      choices=ASSET_STATUSES,
+                                      default=ASSET_STATUSES[0][0])
     previous_status = models.CharField(max_length=50, choices=ASSET_STATUSES,
                                        null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
