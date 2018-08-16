@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 from django.core.management.base import BaseCommand
 
-from ._helper import load_data_from_local_csv_file, serialize_data
+from ._helper import load_data_from_local_csv_file
 
 
 class Command(BaseCommand):
@@ -12,5 +12,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         filepath = options['csv_file']
-        output = serialize_data(load_data_from_local_csv_file(filepath))
-        print(output.getvalue())
+        
+        import ipdb; ipdb.set_trace()
