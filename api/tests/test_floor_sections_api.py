@@ -41,7 +41,7 @@ class OfficeFloorSectionAPITest(APIBaseTestCase):
     def test_can_post_floor_section(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin.email}
         data = {
-            "floor": self.floor,
+            "floor": self.floor.id,
             "name": "Gbagada"
         }
         response = client.post(
