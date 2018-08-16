@@ -207,10 +207,8 @@ class AllocationsSerializer(serializers.ModelSerializer):
 
         if instance.previous_owner:
             instance_data['previous_owner'] = instance.previous_owner.email
-
         if instance.current_owner:
             instance_data['current_owner'] = instance.current_owner.email
-
         instance_data['asset'] = f"{serial_no} - {asset_code}"
         return instance_data
 

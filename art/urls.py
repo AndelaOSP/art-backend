@@ -30,7 +30,8 @@ urlpatterns = [
     path('', TemplateView.as_view(
         template_name='api/api-index.html'),
         name='api-home'
-    )
+    ),
+    path('performance/', include('silk.urls', namespace='silk'))
 ]
 
 if settings.DEBUG:
