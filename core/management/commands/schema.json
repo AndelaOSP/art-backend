@@ -26,13 +26,6 @@
       "type": "string"
     },
     {
-      "name": "verified",
-      "description": "verified field on Asset model",
-      "type": "boolean",
-      "trueValues": [ "yes", "Yes", "YES"],
-      "falseValues": [ "no", "No", "NO"]
-    },
-    {
       "name": "asset_code",
       "description": "asset_code field on Asset model",
       "type": "string"
@@ -46,7 +39,7 @@
       "name": "assigned_to",
       "description": "assigned_to field on Asset model - requires Asset, email has to belong to User object",
       "type": "string",
-      "format" "email"
+      "format": "email"
     },
     {
       "name": "current_status",
@@ -54,14 +47,16 @@
       "type": "string"
     },
     {
-      "name": "notes",
-      "description": "notes field on AssetCondition model - requires Asset",
-      "type": "string"
-    },
-    {
       "name": "memory",
       "description": "memory field on AssetSpecs model",
       "type": "integer"
+    },
+    {
+      "name": "verified",
+      "description": "verified field on Asset model",
+      "type": "boolean",
+      "trueValues": ["yes", "Yes", "YES"],
+      "falseValues": ["no", "No", "NO"]
     },
     {
       "name": "storage",
@@ -78,5 +73,10 @@
       "description": "year_of_manufacture field on AssetSpecs model",
       "type": "integer"
     },
+    {
+      "name": "notes",
+      "description": "notes field on AssetCondition model - requires Asset",
+      "type": "string"
+    }
   ]
 }
