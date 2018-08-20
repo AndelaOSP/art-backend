@@ -87,11 +87,21 @@ class UserAdmin(BaseUserAdmin):
     )
 
     fieldsets = (
-        ('Account', {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': (
-            'first_name', 'last_name',
-            'cohort', 'slack_handle',
-            'phone_number', 'picture',)}),
+        ('Account', {
+            'fields': ('email', 'password')
+        }),
+        ('Personal info', {
+            'fields': (
+                'first_name',
+                'last_name',
+                'cohort',
+                'slack_handle',
+                'phone_number',
+                'picture',
+                'is_staff',
+                'is_superuser',
+            )
+        }),
     )
 
     add_fieldsets = (
