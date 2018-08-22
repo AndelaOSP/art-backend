@@ -10,8 +10,8 @@ from ..models import (
     AssetMake,
     AssetType,
     AssetSubCategory,
-    AssetCategory
-)
+    AssetCategory,
+    AssetAssignee)
 
 from core.tests import CoreBaseTestCase
 User = get_user_model()
@@ -42,12 +42,13 @@ class AssetStatusModelTest(CoreBaseTestCase):
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.normal_user)
 
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
             model_number=self.test_assetmodel1,
-            assigned_to=self.normal_user,
+            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10",
         )
         self.test_asset.save()
@@ -62,7 +63,7 @@ class AssetStatusModelTest(CoreBaseTestCase):
             asset_code="IC002",
             serial_number="SN002",
             model_number=self.test_assetmodel2,
-            assigned_to=self.normal_user,
+            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10",
         )
         test_asset2.save()
@@ -115,18 +116,17 @@ class AssetStatusModelTest(CoreBaseTestCase):
 
         allocation_history = AllocationHistory(
             asset=self.test_asset,
-            current_owner=self.normal_user
+            current_owner=self.asset_assignee
         )
 
         asset_status = AssetStatus(
             asset=self.test_asset,
-            current_status="Allocated")
+            current_status="Available")
 
         allocation_history.save()
-        asset_status.save()
+
         test_owner = str(self.test_asset.assigned_to)
 
-        asset_status.current_status = "Available"
         asset_status.save()
 
         new_history = AllocationHistory.objects.filter(

@@ -12,8 +12,8 @@ from core.models import (
     AssetSubCategory,
     AssetCategory,
     SecurityUser,
-    AssetLog
-)
+    AssetLog,
+    AssetAssignee)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -43,12 +43,12 @@ class AssetLogModelTest(APIBaseTestCase):
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
-
+        self.asset_assignee = AssetAssignee.objects.get(user=self.normal_user)
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
             model_number=self.test_assetmodel1,
-            assigned_to=self.normal_user,
+            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10",
         )
         self.test_asset.save()
@@ -57,7 +57,7 @@ class AssetLogModelTest(APIBaseTestCase):
             asset_code="IC00sf",
             serial_number="SN00134",
             model_number=self.test_assetmodel1,
-            assigned_to=self.normal_user,
+            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10",
         )
         self.test_other_asset.save()

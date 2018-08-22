@@ -10,8 +10,8 @@ from ..models import (
     AssetMake,
     AssetType,
     AssetSubCategory,
-    AssetCategory
-)
+    AssetCategory,
+    AssetAssignee)
 
 from core.tests import CoreBaseTestCase
 User = get_user_model()
@@ -27,10 +27,13 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
         self.user2 = User.objects.create(
             email='test15@site.com', cohort=15,
             slack_handle='@test_user', password='devpassword'
         )
+        self.asset_assignee2 = AssetAssignee.objects.get(user=self.user)
+
         asset_category = AssetCategory.objects.create(
             category_name="Computer")
         asset_sub_category = AssetSubCategory.objects.create(
@@ -63,7 +66,7 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
 
         self.allocation_history = AllocationHistory(
             asset=self.test_asset,
-            current_owner=self.user
+            current_owner=self.asset_assignee
         )
 
         self.allocation_history.save()
@@ -75,12 +78,13 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
             email='test21@site.com', cohort=21,
             slack_handle='@test_user', password='devpassword'
         )
+        current_asset_assignee = AssetAssignee.objects.get(user=user3)
 
         self.assertEqual(AllocationHistory.objects.count(), 1)
         new_history = AllocationHistory(
             asset=self.test_asset_2,
-            current_owner=user3,
-            previous_owner=self.user
+            current_owner=current_asset_assignee,
+            previous_owner=self.asset_assignee
         )
         new_history.save()
         self.assertEqual(AllocationHistory.objects.count(), 2)
@@ -90,8 +94,10 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
             email='test23@site.com', cohort=23,
             slack_handle='@test_user', password='devpassword'
         )
+        new_asset_assignee = AssetAssignee.objects.get(user=new_user)
+
         self.allocation_history.asset.current_status = 'Available'
-        self.allocation_history.current_owner = new_user
+        self.allocation_history.current_owner = new_asset_assignee
         self.allocation_history.save()
 
         self.assertEquals(
@@ -104,10 +110,11 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
             email='test23@site.com', cohort=23,
             slack_handle='@test_user', password='devpassword'
         )
+        new_asset_assignee = AssetAssignee.objects.get(user=new_user)
 
         new_history = AllocationHistory(
             asset=self.test_asset_2,
-            current_owner=new_user,
+            current_owner=new_asset_assignee,
         )
 
         new_history.save()
@@ -126,7 +133,7 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
 
         new_history = AllocationHistory(
             asset=self.test_asset,
-            current_owner=self.user2
+            current_owner=self.asset_assignee2
         )
 
         with self.assertRaises(ValidationError):
