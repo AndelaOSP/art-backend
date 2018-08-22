@@ -20,10 +20,8 @@ from core.models.asset import (
     AssetSpecs,
     AssetCondition
 )
-from core.managers import CaseInsensitiveQuerySet
 
 User = get_user_model()
-
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -36,6 +34,20 @@ SCHEMA_PATH = os.path.join(
     BASE_PATH,
     'schema.json'
 )
+
+SKIPPED_ASSETS_FILE = os.path.join(
+    BASE_PATH,
+    'skipped.csv'
+)
+
+
+def write_exception_to_console(error_message):
+    print(error_message)
+
+
+def write_exception_to_file(error_message, row_data):
+    with open(SKIPPED_ASSETS_FILE, 'w') as out_file:
+        out_file.write(f"{error_message} {row_data}")
 
 
 def load_data_from_local_csv(csv_file=DATA_FILE):
@@ -50,9 +62,9 @@ def load_data_from_local_csv(csv_file=DATA_FILE):
         # for error in exception.errors:
         #     print(error)
         pass
-    except exceptions.CastError as exception:
-        pass
-        # import ipdb; ipdb.set_trace()
+    except exceptions.CastError as cast_exception:
+                    if cast_exception.errors:
+                        write_exception_to_console(cast_exception)
 
 
 def save_to_models(validated_data):
@@ -97,7 +109,7 @@ def save_to_models(validated_data):
             asset.serial_number = validated_data.get('serial_number')
             asset.model_number = asset_model_number
             asset.verified = validated_data.get('verified') or True
-        except MultipleObjectsReturned :
+        except MultipleObjectsReturned:
             return
         except ObjectDoesNotExist:
             asset = Asset(
@@ -108,7 +120,7 @@ def save_to_models(validated_data):
     # asset.verified = validated_data.get('verified') or True
 
     try:
-        user_email = email=validated_data.get('assigned_to')
+        user_email = email = validated_data.get('assigned_to')
         if user_email:
             User.objects.create(email=user_email)
     except IntegrityError:
@@ -132,18 +144,26 @@ def save_to_models(validated_data):
             current_status=specified_status
         )
 
+
 class Command(BaseCommand):
     help = 'Bulk create Assets from local or remote csv file'
 
-    def add_arguments(self, parser):
-        parser.add_argument('csv_file')
+    # def add_arguments(self, parser):
+    #     parser.add_argument('csv_file')
 
     def handle(self, *args, **options):
-        filepath = options['csv_file']
-        validated_data_generator = load_data_from_local_csv(filepath)
+        # filepath = options['csv_file']
+        validated_data_generator = load_data_from_local_csv()
 
         with tqdm(iterable=validated_data_generator) as progress:
             for row_id, row_data in enumerate(validated_data_generator):
-                progress.write(f'processing row number {row_id}')
-                save_to_models(row_data)
-                progress.update()
+                try:
+                    progress.write(f'processing row number {row_id}')
+                    # import ipdb; ipdb.set_trace()
+                    save_to_models(row_data)
+                    progress.update()
+                except exceptions.CastError as cast_exception:
+                    if cast_exception.errors:
+                        for error in cast_exception.errors:
+                            # import ipdb; ipdb.set_trace()
+                            write_exception_to_file(error, row_data)

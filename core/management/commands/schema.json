@@ -73,9 +73,8 @@
       "name": "verified",
       "description": "verified field on Asset model",
       "type": "boolean",
-      "trueValues": ["yes", "Yes", "YES"],
-      "falseValues": ["no", "No", "NO"],
-      "missingValues": ["True"]
+      "trueValues": ["true", "True", "TRUE"],
+      "falseValues": ["false", "False", "FALSE"]
     },
     {
       "name": "storage",
@@ -97,5 +96,6 @@
       "description": "notes field on AssetCondition model - requires Asset",
       "type": "string"
     }
-  ]
+  ],
+  "missingValues": [""]
 }
