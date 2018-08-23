@@ -10,7 +10,7 @@ from rest_framework import status
 from itertools import chain
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
-from api.authentication import FirebaseTokenAuthentication
+# from api.authentication import FirebaseTokenAuthentication
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
@@ -39,14 +39,14 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated, IsAdminUser)
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
 class ManageAssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
@@ -83,7 +83,7 @@ class ManageAssetViewSet(ModelViewSet):
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get']
 
     def get_queryset(self):
@@ -130,7 +130,7 @@ class AssetLogViewSet(ModelViewSet):
     serializer_class = AssetLogSerializer
     queryset = AssetLog.objects.all()
     permission_classes = [IsSecurityUser]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
@@ -141,7 +141,7 @@ class UserFeedbackViewSet(ModelViewSet):
     serializer_class = UserFeedbackSerializer
     queryset = UserFeedback.objects.all()
     permission_classes = [IsAuthenticated]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
@@ -152,7 +152,7 @@ class AssetStatusViewSet(ModelViewSet):
     serializer_class = AssetStatusSerializer
     queryset = AssetStatus.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    # authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
 
 
@@ -160,7 +160,7 @@ class AllocationsViewSet(ModelViewSet):
     serializer_class = AllocationsSerializer
     queryset = AllocationHistory.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
@@ -168,7 +168,7 @@ class AssetCategoryViewSet(ModelViewSet):
     serializer_class = AssetCategorySerializer
     queryset = AssetCategory.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
@@ -176,7 +176,7 @@ class AssetSubCategoryViewSet(ModelViewSet):
     serializer_class = AssetSubCategorySerializer
     queryset = AssetSubCategory.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
@@ -184,7 +184,7 @@ class AssetTypeViewSet(ModelViewSet):
     serializer_class = AssetTypeSerializer
     queryset = AssetType.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
@@ -192,7 +192,7 @@ class AssetModelNumberViewSet(ModelViewSet):
     serializer_class = AssetModelNumberSerializer
     queryset = AssetModelNumber.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    # authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
 
 
@@ -200,7 +200,7 @@ class AssetMakeViewSet(ModelViewSet):
     serializer_class = AssetMakeSerializer
     queryset = AssetMake.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    # authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
 
 
@@ -208,7 +208,7 @@ class AssetConditionViewSet(ModelViewSet):
     serializer_class = AssetConditionSerializer
     queryset = AssetCondition.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
@@ -216,7 +216,7 @@ class AssetIncidentReportViewSet(ModelViewSet):
     serializer_class = AssetIncidentReportSerializer
     queryset = AssetIncidentReport.objects.all()
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    # authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
@@ -226,7 +226,7 @@ class AssetIncidentReportViewSet(ModelViewSet):
 class AssetHealthCountViewSet(ModelViewSet):
     serializer_class = AssetHealthSerializer
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', ]
     queryset = Asset.objects.all()
     data = None
@@ -288,7 +288,7 @@ class SecurityUserViewSet(ModelViewSet):
     serializer_class = SecurityUserSerializer
     queryset = SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    # authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
 
 
@@ -296,7 +296,7 @@ class AssetSpecsViewSet(ModelViewSet):
     serializer_class = AssetSpecsSerializer
     queryset = AssetSpecs.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication]
+    # authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put']
 
 
@@ -304,7 +304,7 @@ class GroupViewSet(ModelViewSet):
     serializer_class = UserGroupSerializer
     queryset = Group.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
@@ -321,7 +321,7 @@ class OfficeBlockViewSet(ModelViewSet):
     serializer_class = OfficeBlockSerializer
     queryset = OfficeBlock.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication]
+    # authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
 
@@ -329,7 +329,7 @@ class OfficeFloorViewSet(ModelViewSet):
     serializer_class = OfficeFloorSerializer
     queryset = OfficeFloor.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication]
+    # authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
 
@@ -337,14 +337,14 @@ class OfficeFloorSectionViewSet(ModelViewSet):
     serializer_class = OfficeFloorSectionSerializer
     queryset = OfficeFloorSection.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication]
+    # authentication_classes = [FirebaseTokenAuthentication]
 
 
 class OfficeWorkspaceViewSet(ModelViewSet):
     serializer_class = OfficeWorkspaceSerializer
     queryset = OfficeWorkspace.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication]
+    # authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def destroy(self, request, *args, **kwargs):
@@ -358,7 +358,7 @@ class DepartmentViewSet(ModelViewSet):
     serializer_class = DepartmentSerializer
     queryset = Department.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication]
+    # authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def destroy(self, request, *args, **kwargs):

@@ -26,7 +26,11 @@ def load_to_db(collection, parent=None, **fields):
         return obj, True
     except Exception:
         if parent:
-            return collection.objects.create(**fields, **parent), True
+            try:
+                return collection.objects.create(**fields, **parent), True
+            except Exception:
+                # import ipdb; ipdb.set_trace()
+                pass
         else:
             return collection.objects.create(**fields), True
     return 'error creating {}'.format(collection), False

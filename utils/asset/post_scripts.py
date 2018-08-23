@@ -18,7 +18,9 @@ skipped_rows = []
 def write_skipped_records(records):
     filename = "/skipped.csv"
     fieldnames = ('Row', 'Make', 'Type', 'Asset Code', 'Category',
-                  'Sub-Category', 'Model Number', 'Serial No.', 'Error')
+                  'Sub-Category', 'Model Number', 'Serial No.', 'Error',
+                   'Status', 'Processor Type', 'YOM', 'Storage', 'Verified',
+                   'Notes', 'Memory', 'Assigned To')
     with open(file_path + filename, "w") as csv_file:
         print("Writing {} skipped rows to {}".format(len(records), filename))
         dw = csv.DictWriter(csv_file, delimiter=',', fieldnames=fieldnames)
@@ -84,13 +86,62 @@ def post_data(file):
 
             assetcode_value = row.get('Asset Code').strip() or None
             serialnumber_value = row.get('Serial No.').strip() or None
+            asset_verified_value = row.get('Verified').strip() or True
+
+
+            assigned_to_email_value = row.get('Assigned To').strip() or None
+            if assigned_to_email_value:
+                asset_user = create_object(
+                    'User',
+                    email=assigned_to_email_value
+                )
 
             asset_fields = {
                 'asset_code': assetcode_value,
-                'serial_number': serialnumber_value
+                'serial_number': serialnumber_value,
+                'verified': asset_verified_value,
             }
-            asset_model_no = create_object(
-                'Asset', parent={'model_number': asset_model_no},
-                **row_data, **asset_fields)
+            asset = create_object(
+                'Asset',
+                parent={
+                    'model_number': asset_model_no,
+                    'assigned_to': asset_user.assetassignee,
+                },
+                **row_data,
+                **asset_fields
+            )
+
+            asset_status_value = row.get('Status').strip() or None
+            if asset_status_value:
+                asset_status = create_object(
+                    'AssetStatus',
+                    parent={'asset': asset},
+                    current_status=asset_status_value
+                )
+
+            # asset_condition_notes_value = row.get('Notes').strip() or None
+            # if asset_condition_notes_value:
+            #     import ipdb; ipdb.set_trace()
+            #     asset_condition = create_object(
+            #         'AssetCondition',
+            #         parent={'asset': asset},
+            #         notes=asset_condition_notes_value
+            #     )
+
+            spec_memory_value = row.get('Memory').strip() or None
+            spec_storage_value = row.get('Storage').strip() or None
+            spec_processor_type_value = row.get('Processor Type').strip() or None
+            spec_year_of_manufacture_value = row.get('YOM').strip() or None
+
+            spec_data = spec_memory_value and spec_storage_value and spec_processor_type_value and spec_year_of_manufacture_value
+
+            if spec_data:
+                asset_spec = create_object(
+                    'AssetSpecs',
+                    memory=spec_memory_value,
+                    storage=spec_storage_value,
+                    processor_type=spec_processor_type_value,
+                    year_of_manufacture=spec_year_of_manufacture_value
+                )
 
     write_skipped_records(skipped_rows)
