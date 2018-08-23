@@ -25,12 +25,11 @@ def load_to_db(collection, parent=None, **fields):
             return ['Asset already imported'], False
         return obj, True
     except Exception:
-        if parent:
-            try:
+        try:
+            if parent:
                 return collection.objects.create(**fields, **parent), True
-            except Exception:
-                # import ipdb; ipdb.set_trace()
-                pass
-        else:
-            return collection.objects.create(**fields), True
+            else:
+                return collection.objects.create(**fields), True
+        except Exception as e:
+            return [str(e)], False
     return 'error creating {}'.format(collection), False
