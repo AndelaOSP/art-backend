@@ -1,0 +1,101 @@
+{
+  "fields": [
+    {
+      "name": "category_name",
+      "description": "category_name field on AssetCategory model",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "sub_category_name",
+      "description": "sub_category_name field on AssetSubCategory model",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "asset_type",
+      "description": "asset_type field on AssetType model",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "make_label",
+      "description": "make_label field on AssetMake model",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "model_number",
+      "description": "model_number field on AssetModelNumber model",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "asset_code",
+      "description": "asset_code field on Asset model",
+      "type": "string"
+    },
+    {
+      "name": "serial_number",
+      "description": "serial_number field on Asset model",
+      "type": "string",
+      "constraints": {
+        "unique": true
+      }
+    },
+    {
+      "name": "assigned_to",
+      "description": "assigned_to field on Asset model - requires Asset, email has to belong to User object",
+      "type": "string",
+      "format": "email"
+    },
+    {
+      "name": "current_status",
+      "description": "current_status field on AssetStatus model - requires Asset",
+      "type": "string"
+    },
+    {
+      "name": "memory",
+      "description": "memory field on AssetSpecs model",
+      "type": "integer"
+    },
+    {
+      "name": "verified",
+      "description": "verified field on Asset model",
+      "type": "boolean",
+      "trueValues": ["true", "True", "TRUE"],
+      "falseValues": ["false", "False", "FALSE"]
+    },
+    {
+      "name": "storage",
+      "description": "storage field on AssetSpecs model",
+      "type": "integer"
+    },
+    {
+      "name": "processor_type",
+      "description": "processor_type field on AssetSpecs model",
+      "type": "string"
+    },
+    {
+      "name": "year_of_manufacture",
+      "description": "year_of_manufacture field on AssetSpecs model",
+      "type": "integer"
+    },
+    {
+      "name": "notes",
+      "description": "notes field on AssetCondition model - requires Asset",
+      "type": "string"
+    }
+  ],
+  "missingValues": [""]
+}
