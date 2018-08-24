@@ -5,8 +5,8 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetAssignee, AssetCondition, AssetIncidentReport, AssetSpecs, OfficeBlock,
-    OfficeFloor, OfficeFloorSection, OfficeWorkspace
+    AssetAssignee, AssetCondition, AssetIncidentReport, AssetSpecs,
+    OfficeBlock, OfficeFloor, OfficeFloorSection, OfficeWorkspace
 )
 from core.models.department import Department
 

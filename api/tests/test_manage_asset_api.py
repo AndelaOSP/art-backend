@@ -94,6 +94,16 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_allocated_asset_count(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        response = client.get(
+            self.manage_asset_urls,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(
+            response.data["results"][0]
+            ["assigned_to"]["allocated_asset_count"], 1)
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_non_admin_cannot_view_all_assets(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(

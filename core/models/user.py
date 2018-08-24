@@ -63,9 +63,6 @@ class User(AbstractUser):
         verbose_name_plural = "All Users"
         ordering = ['-id']
 
-    def allocation_size(self):
-        return len(self.current_owner_asset.all())
-
 
 class SecurityUser(User):
     badge_number = models.CharField(max_length=30, unique=True)
