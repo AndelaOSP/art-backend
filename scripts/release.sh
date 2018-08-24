@@ -39,12 +39,12 @@ git fetch --tags
 
 echo "===> pull latest master"
 git checkout $devBranch
-git reset --hard origin/$(git_current_branch)
-git pull origin $(git_current_branch)
+git reset --hard origin/$devBranch
+git pull
 
 # create tag for new version from -master
 tagMessage=$(git log --all --grep='(#' -i $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%h %s")
 git tag -a $versionLabel -m $tagMessage
-
+echo $tagMessage
 # push including all tags
 # git push origin --tags
