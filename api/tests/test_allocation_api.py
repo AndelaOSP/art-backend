@@ -166,7 +166,7 @@ class AllocationTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 201)
         response = client.get(
-            f"{reverse('assets-list')}/{self.asset.serial_number}/",
+            f"{reverse('assets-list')}/{self.asset.uuid}/",
             HTTP_AUTHORIZATION=token)
         self.assertEquals(response.data['current_status'], 'Allocated')
         self.assertEquals(

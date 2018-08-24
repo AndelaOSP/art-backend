@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
@@ -243,6 +244,7 @@ class AssetSpecs(models.Model):
 
 class Asset(models.Model):
     """Stores all assets"""
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     asset_code = models.CharField(
         unique=True, null=True, blank=True, max_length=50)
     serial_number = models.CharField(

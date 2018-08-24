@@ -69,7 +69,7 @@ class ManageAssetViewSet(ModelViewSet):
 
     def get_object(self):
         queryset = Asset.objects.all()
-        obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
+        obj = get_object_or_404(queryset, uuid=self.kwargs['pk'])
         return obj
 
     def create(self, request, *args, **kwargs):
@@ -110,7 +110,7 @@ class AssetViewSet(ModelViewSet):
         user = self.request.user
         asset_assignee = AssetAssignee.objects.filter(user=user).first()
         queryset = Asset.objects.filter(assigned_to=asset_assignee)
-        obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
+        obj = get_object_or_404(queryset, uuid=self.kwargs['pk'])
         return obj
 
 
