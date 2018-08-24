@@ -30,20 +30,8 @@ versionLabel=v$part1.$part2.$part3
 
 echo "New version: $versionLabel"
 
-echo "===> establish branch and tag name variables"
-devBranch=develop
-
-echo "===> fetch latest origin"
-git fetch origin
-git fetch --tags
-
-echo "===> pull latest master"
-git checkout $devBranch
-git reset --hard origin/$devBranch
-git pull
-
 # create tag for new version from -master
-tagMessage=$(git log --all --grep='(#' -i $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%h %s")
+tagMessage=$(git log -1 --pretty=%B)
 git tag -a $versionLabel -m $tagMessage
 echo $tagMessage
 # push including all tags

@@ -101,6 +101,9 @@ jobs:
   release_notes:
     <<: *default
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - ${FINGERPRINT}
       - checkout
       - run:
           name: release notes
