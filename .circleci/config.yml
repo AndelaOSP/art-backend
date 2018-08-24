@@ -129,4 +129,6 @@ workflows:
           filters:
             branches:
               only: master
-      - release_notes
+      - release_notes:
+          requires:
+            - deploy_production
