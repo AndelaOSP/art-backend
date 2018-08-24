@@ -127,7 +127,7 @@ class AssetAdmin(admin.ModelAdmin):
         'purchase_date', 'verified',
     )
     list_display = (
-        'asset_code', 'serial_number', 'model_number', 'created_at',
+        'uuid', 'asset_code', 'serial_number', 'model_number', 'created_at',
         'assigned_to', 'current_status', 'notes', 'purchase_date', 'verified',
     )
 

@@ -254,7 +254,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_assets_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.patch(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'
@@ -265,7 +265,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.user.email,
                       response.data['assigned_to'].values())
@@ -276,7 +276,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertNotIn('password', response.data['assigned_to'].keys())
         self.assertEqual(response.status_code, 200)
@@ -285,7 +285,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_checkin_status_for_non_checked_asset(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'], None)
@@ -302,7 +302,7 @@ class ManageAssetTestCase(APIBaseTestCase):
 
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'],
@@ -319,7 +319,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         )
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'],
@@ -330,7 +330,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_asset_type_in_asset_api(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('asset_type', response.data.keys())
         self.assertEqual(response.data['asset_type'],
@@ -372,7 +372,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('allocation_history', response.data.keys())
         self.assertEqual(response.status_code, 200)
