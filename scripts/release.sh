@@ -32,22 +32,12 @@ echo "New version: $versionLabel"
 
 echo "===> establish branch and tag name variables"
 devBranch=develop
-masterBranch=master
 
 echo "===> fetch latest origin"
 git fetch origin
 git fetch --tags
 
 echo "===> pull latest master"
-git checkout $masterBranch
-git reset --hard origin/$(git_current_branch)
-git pull origin $(git_current_branch)
-
-echo "===> commit version number increment"
-git commit -am "Release version $versionLabel"
-
-# merge the new version number back into develop
-echo "===> merge master to develop"
 git checkout $devBranch
 git reset --hard origin/$(git_current_branch)
 git pull origin $(git_current_branch)
@@ -56,7 +46,5 @@ git pull origin $(git_current_branch)
 tagMessage=$(git log --all --grep='(#' -i $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%h %s")
 git tag -a $versionLabel -m $tagMessage
 
-git merge --no-ff $masterBranch
-
 # push including all tags
-git push origin --tags
+# git push origin --tags

@@ -97,7 +97,19 @@ jobs:
       - run:
           name: deploying application to production 
           command: |
-            bash scripts/deploy.sh                       
+            bash scripts/deploy.sh
+  release_notes:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
+      - *cmd_install_requirements
+      - *cmd_save_cache
+      - run:
+          name: release notes
+          command: |
+            bash scripts/release.sh
 workflows:
   version: 2
   build_test_deploy:
@@ -118,3 +130,4 @@ workflows:
           filters:
             branches:
               only: master
+      - release_notes
