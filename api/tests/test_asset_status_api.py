@@ -147,8 +147,7 @@ class AssetStatusAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
-            'asset': ['This field is required.'],
-            'current_status': ['This field is required.']
+            'asset': ['This field is required.']
         })
 
         self.assertEqual(response.status_code, 400)

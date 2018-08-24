@@ -10,6 +10,7 @@ from .officeblock import OfficeWorkspace
 from .user import SecurityUser, User
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
+from core.managers import CaseInsensitiveManager
 
 AVAILABLE = "Available"
 ALLOCATED = "Allocated"
@@ -83,6 +84,8 @@ class AssetCategory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
+    objects = CaseInsensitiveManager()
+
     def clean(self):
         if not self.category_name:
             raise ValidationError('Category is required')
@@ -107,8 +110,12 @@ class AssetSubCategory(models.Model):
         unique=True, max_length=40, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
-    asset_category = models.ForeignKey(AssetCategory,
-                                       on_delete=models.PROTECT)
+    asset_category = models.ForeignKey(
+        AssetCategory,
+        on_delete=models.PROTECT
+    )
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_category:
@@ -133,8 +140,12 @@ class AssetType(models.Model):
     asset_type = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    asset_sub_category = models.ForeignKey(AssetSubCategory,
-                                           on_delete=models.PROTECT)
+    asset_sub_category = models.ForeignKey(
+        AssetSubCategory,
+        on_delete=models.PROTECT
+    )
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_sub_category:
@@ -162,6 +173,8 @@ class AssetMake(models.Model):
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     asset_type = models.ForeignKey(AssetType, on_delete=models.PROTECT)
 
+    objects = CaseInsensitiveManager()
+
     def clean(self):
         if not self.asset_type:
             raise ValidationError('Type is required')
@@ -188,6 +201,7 @@ class AssetModelNumber(models.Model):
                                    null=True,
                                    on_delete=models.PROTECT,
                                    verbose_name="Asset Make")
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         self.model_number = self.model_number.upper()
@@ -272,6 +286,8 @@ class Asset(models.Model):
     )
     verified = models.BooleanField(default=True)
 
+    objects = CaseInsensitiveManager()
+
     def clean(self):
         if not self.asset_code and not self.serial_number:
             raise ValidationError((
@@ -303,6 +319,7 @@ class Asset(models.Model):
 
     class Meta:
         ordering = ['-id']
+        unique_together = ("asset_code", "serial_number",)
 
 
 class AssetAssignee(models.Model):
@@ -387,7 +404,8 @@ class AssetStatus(models.Model):
                               on_delete=models.PROTECT)
 
     current_status = models.CharField(max_length=50,
-                                      choices=ASSET_STATUSES)
+                                      choices=ASSET_STATUSES,
+                                      default=ASSET_STATUSES[0][0])
     previous_status = models.CharField(max_length=50, choices=ASSET_STATUSES,
                                        null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
