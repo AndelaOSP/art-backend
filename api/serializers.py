@@ -5,21 +5,23 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetCondition, AssetIncidentReport, AssetSpecs, OfficeBlock,
-    OfficeFloor, OfficeFloorSection, OfficeWorkspace
+    AssetAssignee, AssetCondition, AssetIncidentReport, AssetSpecs,
+    OfficeBlock, OfficeFloor, OfficeFloorSection, OfficeWorkspace
 )
 from core.models.department import Department
 
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
+    allocated_asset_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
             'slack_handle', 'picture', 'phone_number',
-            'last_modified', 'date_joined', 'last_login'
+            'allocated_asset_count', 'last_modified', 'date_joined',
+            'last_login'
         )
 
         extra_kwargs = {
@@ -34,6 +36,25 @@ class UserSerializer(serializers.ModelSerializer):
             obj.first_name,
             obj.last_name
         )
+
+    def get_allocated_asset_count(self, obj):
+        """Return the number of assets allocated to a user.
+
+        obj is an instance of the User when /api/v1/users is loaded and
+        an instance of the AssetAssignee when /api/v1/manage-assets is loaded
+
+        """
+        try:
+            return obj.assetassignee.current_owner_asset.count()
+        except AttributeError:
+            if isinstance(obj, User):
+                # In the unlikely event that a User has no corresponding
+                # AssetAssignee instance create it by calling save()
+                obj.save()
+            elif isinstance(obj, AssetAssignee):
+                return obj.current_owner_asset.count()
+            else:
+                return 0
 
     def create(self, validated_data):
         user = User(**validated_data)
