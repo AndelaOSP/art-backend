@@ -32,7 +32,8 @@ echo "New version: $versionLabel"
 
 # create tag for new version from -master
 tagMessage=$(git log -1 --pretty=%B)
-git tag -a $versionLabel -m $tagMessage
+git tag -a $versionLabel -m "$tagMessage"
 echo $tagMessage
+
 # push including all tags
-# git push origin --tags
+git push origin $versionLabel
