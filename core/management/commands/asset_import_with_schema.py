@@ -1,8 +1,6 @@
 # -*- coding: UTF-8 -*-
-import csv
 import os
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
@@ -40,12 +38,13 @@ SKIPPED_ASSETS_FILE = os.path.join(
     'skipped.csv'
 )
 
+
 def write_skipped_assets(error, data=None):
     with open(SKIPPED_ASSETS_FILE, 'w') as output_file:
         output_file.write(f'{error} - {data}')
 
 
-def load_data_from_local_csv(csv_file=ASSET_DATA_FILE):
+def load_data_from_local_csv(csv_file=ASSET_DATA_FILE):  # noqa: C901
     table = Table(csv_file, schema=SCHEMA_FILE)
 
     try:
@@ -65,8 +64,7 @@ def load_data_from_local_csv(csv_file=ASSET_DATA_FILE):
             # TODO: stream data from generator
 
 
-
-def save_to_models(validated_data):
+def save_to_models(validated_data):  # noqa: C901
     asset_category, _ = AssetCategory.objects.get_or_create(
         category_name=validated_data.get('category_name')
     )
@@ -109,7 +107,6 @@ def save_to_models(validated_data):
             serial_number=specified_serial_number,
             model_number=asset_model_number
         )
-        # asset = asset_code_filter.first() if asset_code_filter.count() < asset_serial_number_filter.count() else asset_serial_number_filter.first()
 
     asset.verified = not bool(validated_data.get('verified'))
     asset.save()
