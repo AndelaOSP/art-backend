@@ -231,9 +231,7 @@ class Command(BaseCommand):
                         **row_data,
                         **asset_fields,
                     )
-                    do_it = False
-                    if asset and do_it:
-                        # Add optional fields. Errors will not be recorded if these fields are missing
+                    if asset:
                         row_data["required_for_import"] = False
 
                         asset_verified_value = read_csv_row_value("Verified", row)
@@ -301,3 +299,9 @@ class Command(BaseCommand):
                             asset.save()
 
         write_skipped_records(SKIPPED_ROWS)
+        self.stdout.write(
+            self.style.SUCCESS("""
+                Asset import completed successfully.
+                Assets that have not been imported have been written to skipped.csv
+            """)
+        )

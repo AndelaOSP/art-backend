@@ -227,7 +227,6 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.data['asset_code'], ['This field is required.'])
         self.assertEqual(response.data['serial_number'], ['This field is required.'])
 
-
     @patch('api.authentication.auth.verify_id_token')
     def test_cannot_post_asset_with_invalid_model_number(
             self, mock_verify_id_token):
