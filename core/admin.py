@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin\
+    import UserAdmin as BaseUserAdmin
 from .forms import UserRegistrationForm
 from .models.asset import (
     AssetCategory, AssetType,
@@ -14,8 +15,10 @@ from .models.asset import (
     AllocationHistory,
     AssetIncidentReport,
     AssetSpecs)
+from .models.department import Department
 from .models.user import SecurityUser, UserFeedback
-from .models.officeblock import OfficeBlock, OfficeFloorSection, OfficeFloor
+from .models.officeblock import OfficeBlock, \
+    OfficeFloor, OfficeFloorSection, OfficeWorkspace
 
 User = get_user_model()
 
@@ -28,7 +31,7 @@ admin.site.register(
         AssetModelNumber,
         AssetLog,
         AssetIncidentReport,
-        AssetSpecs, OfficeBlock
+        AssetSpecs, OfficeBlock,
     ]
 )
 
@@ -124,7 +127,7 @@ class AssetAdmin(admin.ModelAdmin):
         'purchase_date', 'verified',
     )
     list_display = (
-        'asset_code', 'serial_number', 'model_number', 'created_at',
+        'uuid', 'asset_code', 'serial_number', 'model_number', 'created_at',
         'assigned_to', 'current_status', 'notes', 'purchase_date', 'verified',
     )
 
@@ -160,6 +163,14 @@ class OfficeFloorSectionAdmin(admin.ModelAdmin):
     list_display = ('name', 'floor')
 
 
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_at', 'last_modified')
+
+
+class OfficeWorkspaceAdmin(admin.ModelAdmin):
+    list_display = ('section', 'name')
+
+
 admin.site.register(Asset, AssetAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(SecurityUser, SecurityUserAdmin)
@@ -169,3 +180,5 @@ admin.site.register(AllocationHistory, AllocationHistoryAdmin)
 admin.site.register(AssetCondition, AssetConditionAdmin)
 admin.site.register(OfficeFloor, OfficeFloorAdmin)
 admin.site.register(OfficeFloorSection, OfficeFloorSectionAdmin)
+admin.site.register(OfficeWorkspace, OfficeWorkspaceAdmin)
+admin.site.register(Department, DepartmentAdmin)

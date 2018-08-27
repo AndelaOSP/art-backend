@@ -5,20 +5,23 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetCondition, AssetIncidentReport, AssetSpecs, OfficeBlock,
-    OfficeFloor, OfficeFloorSection
+    AssetAssignee, AssetCondition, AssetIncidentReport, AssetSpecs,
+    OfficeBlock, OfficeFloor, OfficeFloorSection, OfficeWorkspace
 )
+from core.models.department import Department
 
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
+    allocated_asset_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
             'slack_handle', 'picture', 'phone_number',
-            'last_modified', 'date_joined', 'last_login'
+            'allocated_asset_count', 'last_modified', 'date_joined',
+            'last_login'
         )
 
         extra_kwargs = {
@@ -33,6 +36,25 @@ class UserSerializer(serializers.ModelSerializer):
             obj.first_name,
             obj.last_name
         )
+
+    def get_allocated_asset_count(self, obj):
+        """Return the number of assets allocated to a user.
+
+        obj is an instance of the User when /api/v1/users is loaded and
+        an instance of the AssetAssignee when /api/v1/manage-assets is loaded
+
+        """
+        try:
+            return obj.assetassignee.current_owner_asset.count()
+        except AttributeError:
+            if isinstance(obj, User):
+                # In the unlikely event that a User has no corresponding
+                # AssetAssignee instance create it by calling save()
+                obj.save()
+            elif isinstance(obj, AssetAssignee):
+                return obj.current_owner_asset.count()
+            else:
+                return 0
 
     def create(self, validated_data):
         user = User(**validated_data)
@@ -55,7 +77,7 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('id', 'asset_category', 'asset_sub_category', 'make_label',
+        fields = ('uuid', 'asset_category', 'asset_sub_category', 'make_label',
                   'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'assigned_to', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
@@ -63,6 +85,7 @@ class AssetSerializer(serializers.ModelSerializer):
                   'notes',
                   )
         depth = 1
+        read_only_fields = ("uuid",)
 
     def get_checkin_status(self, obj):
         try:
@@ -77,11 +100,11 @@ class AssetSerializer(serializers.ModelSerializer):
             return None
 
     def get_asset_category(self, obj):
-        return obj.model_number.make_label.asset_type.\
+        return obj.model_number.make_label.asset_type. \
             asset_sub_category.asset_category.category_name
 
     def get_asset_sub_category(self, obj):
-        return obj.model_number.make_label.asset_type.\
+        return obj.model_number.make_label.asset_type. \
             asset_sub_category.sub_category_name
 
     def get_make_label(self, obj):
@@ -201,10 +224,8 @@ class AllocationsSerializer(serializers.ModelSerializer):
 
         if instance.previous_owner:
             instance_data['previous_owner'] = instance.previous_owner.email
-
         if instance.current_owner:
             instance_data['current_owner'] = instance.current_owner.email
-
         instance_data['asset'] = f"{serial_no} - {asset_code}"
         return instance_data
 
@@ -411,7 +432,7 @@ class UserGroupSerializer(serializers.ModelSerializer):
 class OfficeBlockSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfficeBlock
-        fields = ("name", "id", )
+        fields = ("name", "id",)
 
 
 class OfficeFloorSerializer(serializers.ModelSerializer):
@@ -425,3 +446,25 @@ class OfficeFloorSectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfficeFloorSection
         fields = ("name", "floor", "id")
+
+
+class OfficeWorkspaceSerializer(serializers.ModelSerializer):
+    floor = serializers.SerializerMethodField()
+    block = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OfficeWorkspace
+        fields = ("id", "name", "section", "floor", "block")
+
+    def get_floor(self, obj):
+        return obj.section.floor.number
+
+    def get_block(self, obj):
+        return obj.section.floor.block.name
+
+
+class DepartmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Department
+        fields = ("name", "id", )

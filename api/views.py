@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import validate_email, ValidationError
@@ -13,11 +14,11 @@ from api.authentication import FirebaseTokenAuthentication
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
-    AssetIncidentReport, AssetSpecs
+    AssetIncidentReport, AssetSpecs, AssetAssignee
 from core.models.officeblock import (
     OfficeBlock,
-    OfficeFloor,
-    OfficeFloorSection)
+    OfficeFloor, OfficeWorkspace, OfficeFloorSection)
+from core.models.department import Department
 from .serializers import UserSerializer, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
@@ -27,7 +28,8 @@ from .serializers import UserSerializer, \
     AssetMakeSerializer, AssetIncidentReportSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
-    OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer
+    OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
+    OfficeWorkspaceSerializer, DepartmentSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -55,15 +57,19 @@ class ManageAssetViewSet(ModelViewSet):
             email = query_params['email']
             try:
                 validate_email(email)
-            except ValidationError as error:
-                raise serializers.ValidationError(error.message)
-            queryset = Asset.objects.filter(assigned_to__email=email)
+                user_asset_assignee = User.objects.get(email=email)
+                queryset = \
+                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
+            except (ValidationError, ObjectDoesNotExist) as error:
+                if error.__class__.__name__ == 'ValidationError':
+                    raise serializers.ValidationError(error.message)
+                queryset = Asset.objects.none()
 
         return queryset
 
     def get_object(self):
         queryset = Asset.objects.all()
-        obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
+        obj = get_object_or_404(queryset, uuid=self.kwargs['pk'])
         return obj
 
     def create(self, request, *args, **kwargs):
@@ -83,22 +89,28 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         query_params = self.request.query_params
-        queryset = Asset.objects.filter(assigned_to=user)
+        asset_assignee = AssetAssignee.objects.filter(user=user).first()
+        queryset = Asset.objects.filter(assigned_to=asset_assignee)
 
         if query_params.get('email'):
             email = query_params['email']
             try:
                 validate_email(email)
-            except ValidationError as error:
-                raise serializers.ValidationError(error.message)
-            queryset = Asset.objects.filter(assigned_to__email=email)
+                user_asset_assignee = User.objects.get(email=email)
+                queryset = \
+                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
+            except (ValidationError, ObjectDoesNotExist) as error:
+                if error.__class__.__name__ == 'ValidationError':
+                    raise serializers.ValidationError(error.message)
+                queryset = Asset.objects.none()
 
         return queryset
 
     def get_object(self):
         user = self.request.user
-        queryset = Asset.objects.filter(assigned_to=user)
-        obj = get_object_or_404(queryset, serial_number=self.kwargs['pk'])
+        asset_assignee = AssetAssignee.objects.filter(user=user).first()
+        queryset = Asset.objects.filter(assigned_to=asset_assignee)
+        obj = get_object_or_404(queryset, uuid=self.kwargs['pk'])
         return obj
 
 
@@ -214,7 +226,7 @@ class AssetIncidentReportViewSet(ModelViewSet):
 class AssetHealthCountViewSet(ModelViewSet):
     serializer_class = AssetHealthSerializer
     permission_classes = [IsAuthenticated, ]
-    authentication_classes = (FirebaseTokenAuthentication, )
+    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', ]
     queryset = Asset.objects.all()
     data = None
@@ -298,17 +310,18 @@ class GroupViewSet(ModelViewSet):
     def perform_create(self, serializer):
         try:
             name = " ".join(serializer.validated_data.get(
-                    'name').title().split())
+                'name').title().split())
             serializer.save(name=name)
         except IntegrityError as error:
             raise serializers.ValidationError(
-                    {"message": "{} already exist".format(name)})
+                {"message": "{} already exist".format(name)})
 
 
 class OfficeBlockViewSet(ModelViewSet):
     serializer_class = OfficeBlockSerializer
     queryset = OfficeBlock.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
 
@@ -325,4 +338,31 @@ class OfficeFloorSectionViewSet(ModelViewSet):
     queryset = OfficeFloorSection.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post']
+
+
+class OfficeWorkspaceViewSet(ModelViewSet):
+    serializer_class = OfficeWorkspaceSerializer
+    queryset = OfficeWorkspace.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+
+class DepartmentViewSet(ModelViewSet):
+    serializer_class = DepartmentSerializer
+    queryset = Department.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)

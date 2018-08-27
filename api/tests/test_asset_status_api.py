@@ -11,7 +11,7 @@ from core.models import (
     AssetType,
     AssetSubCategory,
     AssetCategory,
-)
+    AssetAssignee)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -42,12 +42,12 @@ class AssetStatusAPITest(APIBaseTestCase):
             email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
-
+        self.asset_assignee = AssetAssignee.objects.get(user=self.normal_user)
         self.test_asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
             model_number=self.test_assetmodel1,
-            assigned_to=self.normal_user,
+            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10"
         )
         self.test_asset.save()
@@ -147,8 +147,7 @@ class AssetStatusAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
-            'asset': ['This field is required.'],
-            'current_status': ['This field is required.']
+            'asset': ['This field is required.']
         })
 
         self.assertEqual(response.status_code, 400)

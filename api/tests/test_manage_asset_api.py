@@ -11,7 +11,7 @@ from core.models import (Asset,
                          AssetMake,
                          AssetType,
                          AssetSubCategory,
-                         AssetCategory)
+                         AssetCategory, AssetAssignee)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -30,6 +30,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             email='user@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
         )
+        self.asset_assignee = AssetAssignee.objects.get(user=self.user)
         self.token_user = 'testtoken'
         self.other_user = User.objects.create_user(
             email='user1@site.com', cohort=20,
@@ -52,7 +53,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.asset = Asset(
             asset_code="IC001",
             serial_number="SN001",
-            assigned_to=self.user,
+            assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
             purchase_date="2018-07-10"
         )
@@ -60,7 +61,7 @@ class ManageAssetTestCase(APIBaseTestCase):
 
         allocation_history = AllocationHistory(
             asset=self.asset,
-            current_owner=self.user
+            current_owner=self.asset_assignee
         )
 
         allocation_history.save()
@@ -91,6 +92,16 @@ class ManageAssetTestCase(APIBaseTestCase):
                       response.data['results'][0].values())
         self.assertEqual(len(response.data['results']), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_allocated_asset_count(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        response = client.get(
+            self.manage_asset_urls,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(
+            response.data["results"][0]
+            ["assigned_to"]["allocated_asset_count"], 1)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_non_admin_cannot_view_all_assets(self, mock_verify_id_token):
@@ -213,9 +224,8 @@ class ManageAssetTestCase(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.data['__all__'][0],
-            "['Please provide either the serial number, asset code or both.']")
+        self.assertEqual(response.data['asset_code'], ['This field is required.'])
+        self.assertEqual(response.data['serial_number'], ['This field is required.'])
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cannot_post_asset_with_invalid_model_number(
@@ -243,7 +253,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_assets_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.patch(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'Method "PATCH" not allowed.'
@@ -254,7 +264,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.user.email,
                       response.data['assigned_to'].values())
@@ -265,7 +275,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertNotIn('password', response.data['assigned_to'].keys())
         self.assertEqual(response.status_code, 200)
@@ -274,7 +284,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_checkin_status_for_non_checked_asset(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'], None)
@@ -291,7 +301,7 @@ class ManageAssetTestCase(APIBaseTestCase):
 
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'],
@@ -308,7 +318,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         )
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
         self.assertEqual(response.data['checkin_status'],
@@ -319,7 +329,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_asset_type_in_asset_api(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('asset_type', response.data.keys())
         self.assertEqual(response.data['asset_type'],
@@ -361,7 +371,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.serial_number),
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('allocation_history', response.data.keys())
         self.assertEqual(response.status_code, 200)

@@ -1,12 +1,16 @@
+import uuid
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from datetime import datetime
 
-from .user import SecurityUser
+from .department import Department
+from .officeblock import OfficeWorkspace
+from .user import SecurityUser, User
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
+from core.managers import CaseInsensitiveManager
 
 AVAILABLE = "Available"
 ALLOCATED = "Allocated"
@@ -80,6 +84,8 @@ class AssetCategory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
+    objects = CaseInsensitiveManager()
+
     def clean(self):
         if not self.category_name:
             raise ValidationError('Category is required')
@@ -104,8 +110,12 @@ class AssetSubCategory(models.Model):
         unique=True, max_length=40, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
-    asset_category = models.ForeignKey(AssetCategory,
-                                       on_delete=models.PROTECT)
+    asset_category = models.ForeignKey(
+        AssetCategory,
+        on_delete=models.PROTECT
+    )
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_category:
@@ -130,8 +140,12 @@ class AssetType(models.Model):
     asset_type = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    asset_sub_category = models.ForeignKey(AssetSubCategory,
-                                           on_delete=models.PROTECT)
+    asset_sub_category = models.ForeignKey(
+        AssetSubCategory,
+        on_delete=models.PROTECT
+    )
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_sub_category:
@@ -159,6 +173,8 @@ class AssetMake(models.Model):
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     asset_type = models.ForeignKey(AssetType, on_delete=models.PROTECT)
 
+    objects = CaseInsensitiveManager()
+
     def clean(self):
         if not self.asset_type:
             raise ValidationError('Type is required')
@@ -185,6 +201,7 @@ class AssetModelNumber(models.Model):
                                    null=True,
                                    on_delete=models.PROTECT,
                                    verbose_name="Asset Make")
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         self.model_number = self.model_number.upper()
@@ -241,6 +258,7 @@ class AssetSpecs(models.Model):
 
 class Asset(models.Model):
     """Stores all assets"""
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     asset_code = models.CharField(
         unique=True, null=True, blank=True, max_length=50)
     serial_number = models.CharField(
@@ -250,7 +268,7 @@ class Asset(models.Model):
         validators=[validate_date],
         null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    assigned_to = models.ForeignKey('User',
+    assigned_to = models.ForeignKey('AssetAssignee',
                                     blank=True,
                                     editable=False,
                                     null=True,
@@ -267,6 +285,8 @@ class Asset(models.Model):
         on_delete=models.PROTECT
     )
     verified = models.BooleanField(default=True)
+
+    objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
@@ -299,6 +319,55 @@ class Asset(models.Model):
 
     class Meta:
         ordering = ['-id']
+        unique_together = ("asset_code", "serial_number",)
+
+
+class AssetAssignee(models.Model):
+    department = models.OneToOneField('Department', null=True, blank=True,
+                                      on_delete=models.CASCADE)
+    workspace = models.OneToOneField(
+        'OfficeWorkspace',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE)
+    user = models.OneToOneField('User', null=True, blank=True,
+                                on_delete=models.CASCADE)
+
+    def __str__(self):
+        assignee = self.workspace or self.department or self.user
+        if assignee:
+            return str(assignee)
+        else:
+            raise ValidationError(
+                message="No Department, Workspace or"
+                        " User for this AssetAssignee")
+
+    @property
+    def first_name(self):
+        if self.department:
+            return self.department.name
+        if self.workspace:
+            return self.workspace.name
+        if self.user:
+            return self.user.first_name
+
+    @property
+    def last_name(self):
+        if self.department:
+            return self.department.name
+        if self.workspace:
+            return self.workspace.section
+        if self.user:
+            return self.user.last_name
+
+    @property
+    def email(self):
+        if self.department:
+            return self.department.name
+        if self.workspace:
+            return self.workspace.name
+        if self.user:
+            return self.user.email
 
 
 class AssetLog(models.Model):
@@ -335,7 +404,8 @@ class AssetStatus(models.Model):
                               on_delete=models.PROTECT)
 
     current_status = models.CharField(max_length=50,
-                                      choices=ASSET_STATUSES)
+                                      choices=ASSET_STATUSES,
+                                      default=ASSET_STATUSES[0][0])
     previous_status = models.CharField(max_length=50, choices=ASSET_STATUSES,
                                        null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -359,12 +429,12 @@ class AllocationHistory(models.Model):
     asset = models.ForeignKey(Asset,
                               null=False,
                               on_delete=models.PROTECT)
-    current_owner = models.ForeignKey('User',
+    current_owner = models.ForeignKey('AssetAssignee',
                                       related_name='current_owner_asset',
                                       blank=True,
                                       null=True,
                                       on_delete=models.PROTECT)
-    previous_owner = models.ForeignKey('User',
+    previous_owner = models.ForeignKey('AssetAssignee',
                                        related_name='previous_owner_asset',
                                        editable=False,
                                        blank=True,
@@ -445,11 +515,8 @@ class AssetIncidentReport(models.Model):
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
     asset_status.asset.current_status = asset_status.current_status
-    if asset_status.current_status == AVAILABLE and AllocationHistory. \
-            objects.count() > 0:
+    if asset_status.current_status == AVAILABLE:
         asset_status.asset.assigned_to = None
-        AllocationHistory.objects.create(asset=asset_status.asset,
-                                         current_owner=None)
     asset_status.asset.save()
 
 
@@ -482,27 +549,84 @@ def save_initial_asset_status(sender, **kwargs):
 def save_notes(sender, **kwargs):
     new_condition = kwargs.get('instance')
     related_asset = new_condition.asset
-    if not new_condition.notes == \
-            related_asset.notes:
+    if not new_condition.notes == related_asset.notes:
         related_asset.notes = \
             new_condition.notes
         related_asset.save()
 
 
 @receiver(post_save, sender=AllocationHistory)
+def update_asset_status_when_allocation_changes(sender, **kwargs):
+    allocation_history = kwargs.get('instance')
+
+    if kwargs.get('created'):
+        last_status = \
+            AssetStatus.objects.filter(
+                asset=allocation_history.asset).latest('created_at')
+        if allocation_history.current_owner:
+            AssetStatus.objects.create(
+                asset=allocation_history.asset,
+                current_status=ALLOCATED,
+                previous_status=last_status.current_status
+            )
+
+
+@receiver(post_save, sender=AssetStatus)
+def update_asset_allocation_history_when_status_changes(sender, **kwargs):
+    asset_status = kwargs.get('instance')
+
+    if kwargs.get('created'):
+        try:
+            last_allocation_record = \
+                AllocationHistory.objects.filter(
+                    asset=asset_status.asset).latest('created_at')
+        except Exception:
+            return
+        if asset_status.current_status == AVAILABLE \
+                and last_allocation_record:
+            AllocationHistory.objects.create(
+                asset=asset_status.asset,
+                previous_owner=last_allocation_record.current_owner,
+                current_owner=None)
+
+
+@receiver(post_save, sender=AllocationHistory)
 def allocation_history_post_save(sender, **kwargs):
     allocation_history = kwargs.get('instance')
     asset = allocation_history.asset
-    user = allocation_history.current_owner
-    asset.assigned_to = user
+    owner = allocation_history.current_owner
+    asset.assigned_to = owner
     asset.save()
 
     if asset.assigned_to and asset.current_status == AVAILABLE:
         message = "The asset with serial number {} ".format(
             asset.serial_number) + "has been allocated to you."
-        slack.send_message(message, user=user)
+        # send slack message only to user
+        if hasattr(owner.user, 'email'):
+            slack.send_message(message, user=owner.user)
         asset_status = AssetStatus.objects.create(
             asset=asset,
             current_status=ALLOCATED
         )
         asset_status.save()
+
+
+@receiver(post_save, sender=User)
+def assetassignee_user(sender, instance, created, **kwargs):
+    if created or not hasattr(instance, 'assetassignee'):
+        AssetAssignee.objects.create(user=instance)
+    instance.assetassignee.save()
+
+
+@receiver(post_save, sender=Department)
+def assetassignee_department(sender, instance, created, **kwargs):
+    if created or not hasattr(instance, 'assetassignee'):
+        AssetAssignee.objects.create(department=instance)
+    instance.assetassignee.save()
+
+
+@receiver(post_save, sender=OfficeWorkspace)
+def assetassignee_workspace(sender, instance, created, **kwargs):
+    if created or not hasattr(instance, 'assetassignee'):
+        AssetAssignee.objects.create(workspace=instance)
+    instance.assetassignee.save()
