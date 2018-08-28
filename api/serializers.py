@@ -77,7 +77,7 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('uuid', 'asset_category', 'asset_sub_category', 'make_label',
+        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category', 'make_label',
                   'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'assigned_to', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
