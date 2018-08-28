@@ -1,17 +1,18 @@
+from itertools import chain
+
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
-from django.core.validators import validate_email, ValidationError
+from django.core.validators import ValidationError
 from rest_framework import serializers
-from django_filters import rest_framework as filters
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from itertools import chain
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
+from django_filters import rest_framework as filters
 from api.authentication import FirebaseTokenAuthentication
+from api.filters import AssetFilter
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
@@ -46,27 +47,12 @@ class UserViewSet(ModelViewSet):
 
 class ManageAssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
+    queryset = Asset.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post', 'put', 'delete']
-
-    def get_queryset(self):
-        queryset = Asset.objects.all()
-        query_params = self.request.query_params
-
-        if query_params.get('email'):
-            email = query_params['email']
-            try:
-                validate_email(email)
-                user_asset_assignee = User.objects.get(email=email)
-                queryset = \
-                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
-            except (ValidationError, ObjectDoesNotExist) as error:
-                if error.__class__.__name__ == 'ValidationError':
-                    raise serializers.ValidationError(error.message)
-                queryset = Asset.objects.none()
-
-        return queryset
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = AssetFilter
 
     def get_object(self):
         queryset = Asset.objects.all()
@@ -81,54 +67,11 @@ class ManageAssetViewSet(ModelViewSet):
         return response
 
 
-class AssetFilter(filters.FilterSet):
-    email = filters.CharFilter(method='filter_email')
-    model_number = filters.CharFilter(method='filter_model_number')
-    asset_type = filters.CharFilter(method='filter_asset_type')
-
-    def filter_email(self, queryset, name, value):
-        _filters = {
-            'model_number': self.filter_model_number,
-            'asset_type': self.filter_asset_type
-        }
-        try:
-            """
-                Since the incoming queryset can be for the logged in user,\
-                creating a queryset for this email ensures subsequent queries\
-                are performed against this user.
-            """
-            query_params = self.request.query_params
-
-            validate_email(value)
-            user_asset_assignee = User.objects.get(email=value)
-            queryset = Asset.objects.filter(assigned_to__user=user_asset_assignee)
-            for query, value in query_params.items():
-                if query == 'email':
-                    pass
-                else:
-                    queryset = _filters[query](queryset, name, value)
-        except (ValidationError, ObjectDoesNotExist):
-            queryset = Asset.objects.none()
-        return queryset
-
-    def filter_model_number(self, queryset, name, value):
-        return queryset.filter(model_number__model_number__iexact=value)
-
-    def filter_asset_type(self, queryset, name, value):
-        return queryset.filter(model_number__make_label__asset_type__asset_type__iexact=value)
-
-    class Meta:
-        model = Asset
-        fields = ['asset_type', 'model_number', 'email']
-
-
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get']
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = AssetFilter
 
     def get_queryset(self):
         user = self.request.user
