@@ -16,12 +16,6 @@ class AssetFilter(filters.FilterSet):
         lookup_expr='iexact',
         method='filter_with_multiple_query_values')
 
-    def filter_model_number(self, queryset, name, value):
-        return queryset.filter(model_number__model_number__iexact=value)
-
-    def filter_asset_type(self, queryset, name, value):
-        return queryset.filter(model_number__make_label__asset_type__asset_type__iexact=value)
-
     def filter_with_multiple_query_values(self, queryset, name, value):
         lookup = '__'.join([name, 'in'])
         return queryset.filter(**{lookup: value.split(',')})
