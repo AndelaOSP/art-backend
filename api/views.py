@@ -1,16 +1,18 @@
+from itertools import chain
+
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
-from django.core.validators import validate_email, ValidationError
+from django.core.validators import ValidationError
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from itertools import chain
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
+from django_filters import rest_framework as filters
 from api.authentication import FirebaseTokenAuthentication
+from api.filters import AssetFilter
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
@@ -45,27 +47,12 @@ class UserViewSet(ModelViewSet):
 
 class ManageAssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
+    queryset = Asset.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post', 'put', 'delete']
-
-    def get_queryset(self):
-        queryset = Asset.objects.all()
-        query_params = self.request.query_params
-
-        if query_params.get('email'):
-            email = query_params['email']
-            try:
-                validate_email(email)
-                user_asset_assignee = User.objects.get(email=email)
-                queryset = \
-                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
-            except (ValidationError, ObjectDoesNotExist) as error:
-                if error.__class__.__name__ == 'ValidationError':
-                    raise serializers.ValidationError(error.message)
-                queryset = Asset.objects.none()
-
-        return queryset
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = AssetFilter
 
     def get_object(self):
         queryset = Asset.objects.all()
@@ -88,21 +75,8 @@ class AssetViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        query_params = self.request.query_params
         asset_assignee = AssetAssignee.objects.filter(user=user).first()
         queryset = Asset.objects.filter(assigned_to=asset_assignee)
-
-        if query_params.get('email'):
-            email = query_params['email']
-            try:
-                validate_email(email)
-                user_asset_assignee = User.objects.get(email=email)
-                queryset = \
-                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
-            except (ValidationError, ObjectDoesNotExist) as error:
-                if error.__class__.__name__ == 'ValidationError':
-                    raise serializers.ValidationError(error.message)
-                queryset = Asset.objects.none()
 
         return queryset
 

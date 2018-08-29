@@ -342,7 +342,6 @@ class ManageAssetTestCase(APIBaseTestCase):
         response = client.get(
             '{}?email={}'.format(self.manage_asset_urls, self.user.email),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertTrue(len(response.data) > 0)
         self.assertIn(self.user.email,
                       response.data['results'][0]['assigned_to']['email'])
 
@@ -357,14 +356,38 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertFalse(len(response.data['results']) > 0)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_asset_filter_with_invalid_email_fails_with_validation_error(
-            self, mock_verify_id_token):
+    def test_asset_filter_by_asset_type(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         response = client.get(
-            '{}?email={}'.format(self.manage_asset_urls, 'notavalidemail'),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data[0], 'Enter a valid email address.')
+            '{}?asset_type={}'.format(self.manage_asset_urls, 'Asset Type'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertIn(self.asset_type.asset_type,
+                      response.data['results'][0]['asset_type'])
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_asset_filter_by_invalid_asset_type_return_no_assets(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        response = client.get(
+            '{}?asset_type={}'.format(self.manage_asset_urls, 'InvalidAssetType'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['count'], 0)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_asset_filter_by_model_number(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        response = client.get(
+            '{}?model_number={}'.format(self.manage_asset_urls, 'IMN50987'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertIn(self.assetmodel.model_number,
+                      response.data['results'][0]['model_number'])
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_asset_filter_by_invalid_model_number_return_no_assets(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        response = client.get(
+            '{}?model_number={}'.format(self.manage_asset_urls, 'InvalidModelNumber'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['count'], 0)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_assets_have_allocation_history(
