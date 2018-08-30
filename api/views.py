@@ -42,7 +42,7 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated, IsAdminUser)
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
 
@@ -71,7 +71,7 @@ class ManageAssetViewSet(ModelViewSet):
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get']
 
     def get_queryset(self):

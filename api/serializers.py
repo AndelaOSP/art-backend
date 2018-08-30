@@ -14,6 +14,7 @@ from core.models.department import Department
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     allocated_asset_count = serializers.SerializerMethodField()
+    assets_allocated = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -21,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
             'slack_handle', 'picture', 'phone_number',
             'allocated_asset_count', 'last_modified', 'date_joined',
-            'last_login'
+            'last_login', 'assets_allocated'
         )
 
         extra_kwargs = {
@@ -56,6 +57,15 @@ class UserSerializer(serializers.ModelSerializer):
             else:
                 return 0
 
+    def get_assets_allocated(self, obj):
+        assets = Asset.objects.filter(assigned_to__user=obj)
+        my_assets = []
+        for asset in assets:
+            my_assets.append(asset)
+
+        serialized_assets = AssetSerializer(my_assets, many=True)
+        return serialized_assets.data
+
     def create(self, validated_data):
         user = User(**validated_data)
         user.save()
@@ -65,7 +75,7 @@ class UserSerializer(serializers.ModelSerializer):
 class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
     allocation_history = serializers.SerializerMethodField()
-    assigned_to = UserSerializer(read_only=True)
+    #assigned_to = UserSerializer(read_only=True)
     asset_category = serializers.SerializerMethodField()
     asset_sub_category = serializers.SerializerMethodField()
     make_label = serializers.SerializerMethodField()
@@ -77,9 +87,9 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category',
-                  'make_label', 'asset_code', 'serial_number', 'model_number',
-                  'checkin_status', 'assigned_to', 'created_at',
+        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category', 'make_label',
+                  'asset_code', 'serial_number', 'model_number',
+                  'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
                   'notes',
