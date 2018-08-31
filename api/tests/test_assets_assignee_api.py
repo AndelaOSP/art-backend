@@ -4,7 +4,7 @@ from rest_framework.reverse import reverse
 
 from core.models import (
     User, AssetAssignee, Department, OfficeBlock,
-    OfficeFloor, OfficeFloorSection, AssetCategory,
+    OfficeFloor, OfficeFloorSection, AssetCategory, OfficeWorkspace,
     AssetSubCategory, AssetType, AssetMake, AssetModelNumber, Asset,
     AllocationHistory,
 )
@@ -34,6 +34,10 @@ class AssetAssigneeAPITest(APIBaseTestCase):
             name='Safari',
             floor=self.office_floor
         )
+        self.office_workspace = OfficeWorkspace.objects.create(
+            name="Yaba",
+            section=self.office_section
+        )
 
         self.asset_category = AssetCategory.objects.create(
             category_name="Accessories")
@@ -50,6 +54,8 @@ class AssetAssigneeAPITest(APIBaseTestCase):
             model_number="IMN50987", make_label=self.make_label)
         self.assetmodel_2 = AssetModelNumber.objects.create(
             model_number="IMN509889", make_label=self.make_label)
+        self.assetmodel_3 = AssetModelNumber.objects.create(
+            model_number="IMN509887868", make_label=self.make_label)
 
         self.asset = Asset.objects.create(
             asset_code="IC001",
@@ -67,6 +73,14 @@ class AssetAssigneeAPITest(APIBaseTestCase):
             model_number=self.assetmodel_2
         )
 
+        self.asset_3 = Asset.objects.create(
+            asset_code="IC003",
+            serial_number="SN003",
+            purchase_date="2018-07-14",
+            current_status="Available",
+            model_number=self.assetmodel_3
+        )
+
         self.allocation_user = AllocationHistory.objects.create(
             asset=self.asset,
             current_owner=self.user.assetassignee
@@ -75,6 +89,11 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         self.allocation_department = AllocationHistory.objects.create(
             asset=self.asset_2,
             current_owner=self.department.assetassignee
+        )
+
+        self.allocation_workspace = AllocationHistory.objects.create(
+            asset=self.asset_3,
+            current_owner=self.office_workspace.assetassignee
         )
 
         self.asset_assignee_url = reverse('asset-assignee-list')
