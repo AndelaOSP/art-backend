@@ -77,7 +77,7 @@ class AssetAssigneeAPITest(APIBaseTestCase):
             current_owner=self.department.assetassignee
         )
 
-        self.asset_assignee_url = reverse('assets-assignee-list')
+        self.asset_assignee_url = reverse('asset-assignee-list')
         self.token_user = 'testtoken'
 
     def test_non_authenticated_user_get_assets_assignee(self):

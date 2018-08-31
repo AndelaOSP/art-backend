@@ -66,7 +66,7 @@ router.register('office-sections', OfficeFloorSectionViewSet, 'floor-sections')
 router.register('office-workspaces', OfficeWorkspaceViewSet,
                 'office-workspaces')
 router.register('departments', DepartmentViewSet, 'departments')
-router.register('assets-assignee', AssetAssigneeViewSet, 'assets-assignee')
+router.register('asset-assignee', AssetAssigneeViewSet, 'asset-assignee')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),

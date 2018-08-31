@@ -148,26 +148,17 @@ class AssetAssigneeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AssetAssignee
-        fields = ("assignee",)
+        fields = ("id", "assignee",)
 
     def get_assignee(self, obj):
         if obj.user:
-            return {
-                "id": obj.user.id,
-                "email": obj.user.email
-            }
+            return obj.user.email
 
         elif obj.department:
-            return {
-                "id": obj.department.id,
-                "department": obj.department.name
-            }
+            return obj.department.name
 
         elif obj.workspace:
-            return {
-                "id": obj.workspace.id,
-                "workspace": obj.workspace.name
-            }
+            return obj.workspace.name
 
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
