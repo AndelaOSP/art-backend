@@ -31,7 +31,8 @@ from .serializers import UserSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
     OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
-    OfficeWorkspaceSerializer, DepartmentSerializer
+    OfficeWorkspaceSerializer, DepartmentSerializer, \
+    AssetAssigneeSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -86,6 +87,14 @@ class AssetViewSet(ModelViewSet):
         queryset = Asset.objects.filter(assigned_to=asset_assignee)
         obj = get_object_or_404(queryset, uuid=self.kwargs['pk'])
         return obj
+
+
+class AssetAssigneeViewSet(ModelViewSet):
+    serializer_class = AssetAssigneeSerializer
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    queryset = AssetAssignee.objects.all()
+    http_method_names = ['get']
 
 
 class SecurityUserEmailsViewSet(ModelViewSet):

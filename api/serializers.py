@@ -77,8 +77,8 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category', 'make_label',
-                  'asset_code', 'serial_number', 'model_number',
+        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category',
+                  'make_label', 'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'assigned_to', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
@@ -141,6 +141,24 @@ class AssetSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(err.error_dict)
             internals['specs'] = specs
         return internals
+
+
+class AssetAssigneeSerializer(serializers.ModelSerializer):
+    assignee = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AssetAssignee
+        fields = ("id", "assignee",)
+
+    def get_assignee(self, obj):
+        if obj.user:
+            return obj.user.email
+
+        elif obj.department:
+            return obj.department.name
+
+        elif obj.workspace:
+            return obj.workspace.name
 
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
