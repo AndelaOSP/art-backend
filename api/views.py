@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
 from api.authentication import FirebaseTokenAuthentication
-from api.filters import AssetFilter
+from api.filters import AssetFilter, UserFilter
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
@@ -44,6 +44,8 @@ class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsAdminUser)
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = UserFilter
 
 
 class ManageAssetViewSet(ModelViewSet):

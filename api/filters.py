@@ -1,6 +1,7 @@
+from django.db.models import Count
 from django_filters import rest_framework as filters
 
-from core.models import Asset
+from core.models import Asset, User, AssetAssignee
 
 
 class AssetFilter(filters.FilterSet):
@@ -23,3 +24,29 @@ class AssetFilter(filters.FilterSet):
     class Meta:
         model = Asset
         fields = ['asset_type', 'model_number', 'email']
+
+
+class UserFilter(filters.FilterSet):
+    cohort = filters.CharFilter(
+        field_name='cohort',
+        lookup_expr='iexact',)
+
+    email = filters.CharFilter(
+        field_name='email',
+        lookup_expr='icontains',)
+
+    asset_count = filters.CharFilter(
+        field_name='allocated_asset_count',
+        lookup_expr='iexact',
+        method='filter_with_multiple_query_values',)
+
+    def filter_with_multiple_query_values(self, queryset, name, value):
+        users = [
+            user.id
+            for user in queryset
+            if user.assetassignee.current_owner_asset.count() == int(value)]
+        return User.objects.filter(id__in=users)
+
+    class Meta:
+        model = User
+        fields = ['cohort', 'email', 'asset_count']
