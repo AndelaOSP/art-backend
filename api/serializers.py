@@ -63,17 +63,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializerWithAssets(UserSerializer):
-    assets_allocated = serializers.SerializerMethodField()
+    allocated_assets = serializers.SerializerMethodField()
 
-    def get_assets_allocated(self, obj):
+    def get_allocated_assets(self, obj):
         assets = Asset.objects.filter(assigned_to__user=obj)
-        my_assets = [asset for asset in assets]
-
-        serialized_assets = AssetSerializer(my_assets, many=True)
+        serialized_assets = AssetSerializer(assets, many=True)
         return serialized_assets.data
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ('assets_allocated',)
+        fields = UserSerializer.Meta.fields + ('allocated_assets',)
 
 
 class AssetSerializer(serializers.ModelSerializer):

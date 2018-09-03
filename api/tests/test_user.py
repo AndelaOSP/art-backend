@@ -335,7 +335,9 @@ class UserTestCase(APIBaseTestCase):
             '{}{}/'.format(self.users_url, self.user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
-        count = len(response.data['assets_allocated'])
+        count = len(response.data['allocated_assets'])
+        self.assertEqual(count, 0)
+
         AllocationHistory.objects.create(
             asset=asset,
             current_owner=self.user.assetassignee
@@ -344,6 +346,6 @@ class UserTestCase(APIBaseTestCase):
             '{}{}/'.format(self.users_url, self.user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
-        self.assertEqual(len(response.data['assets_allocated']), count + 1)
-        self.assertEqual(response.data['assets_allocated'][0].get('model_number'), 'IMN50987')
-        self.assertEqual(response.data['assets_allocated'][0].get('serial_number'), 'SN001')
+        self.assertEqual(len(response.data['allocated_assets']), count + 1)
+        self.assertEqual(response.data['allocated_assets'][0].get('model_number'), 'IMN50987')
+        self.assertEqual(response.data['allocated_assets'][0].get('serial_number'), 'SN001')
