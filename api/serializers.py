@@ -62,6 +62,18 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserSerializerWithAssets(UserSerializer):
+    allocated_assets = serializers.SerializerMethodField()
+
+    def get_allocated_assets(self, obj):
+        assets = Asset.objects.filter(assigned_to__user=obj)
+        serialized_assets = AssetSerializer(assets, many=True)
+        return serialized_assets.data
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ('allocated_assets',)
+
+
 class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
     allocation_history = serializers.SerializerMethodField()
@@ -77,12 +89,12 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category',
-                  'make_label', 'asset_code', 'serial_number', 'model_number',
-                  'checkin_status', 'assigned_to', 'created_at',
+        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category', 'make_label',
+                  'asset_code', 'serial_number', 'model_number',
+                  'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
-                  'notes',
+                  'notes', 'assigned_to',
                   )
         depth = 1
         read_only_fields = ("uuid",)
@@ -460,7 +472,6 @@ class OfficeFloorSerializer(serializers.ModelSerializer):
 
 
 class OfficeFloorSectionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = OfficeFloorSection
         fields = ("name", "floor", "id")
@@ -482,7 +493,6 @@ class OfficeWorkspaceSerializer(serializers.ModelSerializer):
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Department
-        fields = ("name", "id", )
+        fields = ("name", "id",)

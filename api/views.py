@@ -21,7 +21,7 @@ from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
 from core.models.department import Department
-from .serializers import UserSerializer, \
+from .serializers import UserSerializerWithAssets, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
     AssetStatusSerializer, AllocationsSerializer, AssetCategorySerializer, \
@@ -39,7 +39,7 @@ User = get_user_model()
 
 
 class UserViewSet(ModelViewSet):
-    serializer_class = UserSerializer
+    serializer_class = UserSerializerWithAssets
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated, IsAdminUser)
     authentication_classes = (FirebaseTokenAuthentication,)
