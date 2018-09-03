@@ -14,7 +14,6 @@ from core.models.department import Department
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     allocated_asset_count = serializers.SerializerMethodField()
-    assets_allocated = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -22,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
             'slack_handle', 'picture', 'phone_number',
             'allocated_asset_count', 'last_modified', 'date_joined',
-            'last_login', 'assets_allocated'
+            'last_login'
         )
 
         extra_kwargs = {
@@ -57,25 +56,30 @@ class UserSerializer(serializers.ModelSerializer):
             else:
                 return 0
 
-    def get_assets_allocated(self, obj):
-        assets = Asset.objects.filter(assigned_to__user=obj)
-        my_assets = []
-        for asset in assets:
-            my_assets.append(asset)
-
-        serialized_assets = AssetSerializer(my_assets, many=True)
-        return serialized_assets.data
-
     def create(self, validated_data):
         user = User(**validated_data)
         user.save()
         return user
 
 
+class UserSerializerWithAssets(UserSerializer):
+    assets_allocated = serializers.SerializerMethodField()
+
+    def get_assets_allocated(self, obj):
+        assets = Asset.objects.filter(assigned_to__user=obj)
+        my_assets = [asset for asset in assets]
+
+        serialized_assets = AssetSerializer(my_assets, many=True)
+        return serialized_assets.data
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ('assets_allocated',)
+
+
 class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
     allocation_history = serializers.SerializerMethodField()
-    #assigned_to = UserSerializer(read_only=True)
+    assigned_to = UserSerializer(read_only=True)
     asset_category = serializers.SerializerMethodField()
     asset_sub_category = serializers.SerializerMethodField()
     make_label = serializers.SerializerMethodField()
@@ -92,7 +96,7 @@ class AssetSerializer(serializers.ModelSerializer):
                   'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
-                  'notes',
+                  'notes', 'assigned_to',
                   )
         depth = 1
         read_only_fields = ("uuid",)
@@ -470,7 +474,6 @@ class OfficeFloorSerializer(serializers.ModelSerializer):
 
 
 class OfficeFloorSectionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = OfficeFloorSection
         fields = ("name", "floor", "id")
@@ -492,7 +495,6 @@ class OfficeWorkspaceSerializer(serializers.ModelSerializer):
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Department
-        fields = ("name", "id", )
+        fields = ("name", "id",)
