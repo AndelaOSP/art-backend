@@ -304,3 +304,46 @@ class UserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         self.assertEqual(response.data['allocated_asset_count'], count + 1)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_allocated_assets_are_returned(self, mock_verify_token):
+        """Test all assets allocated to a user are returned """
+        asset_category = AssetCategory.objects.create(
+            category_name="Accessories")
+        asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Sub Category name",
+            asset_category=asset_category)
+        asset_type = AssetType.objects.create(
+            asset_type="Asset Type",
+            asset_sub_category=asset_sub_category)
+        make_label = AssetMake.objects.create(
+            make_label="Asset Make", asset_type=asset_type)
+        assetmodel = AssetModelNumber(
+            model_number="IMN50987", make_label=make_label)
+        assetmodel.save()
+
+        asset = Asset.objects.create(
+            asset_code="IC001",
+            serial_number="SN001",
+            purchase_date="2018-07-10",
+            current_status="Available",
+            assigned_to=self.user.assetassignee,
+            model_number=assetmodel
+        )
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}{}/'.format(self.users_url, self.user.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+        )
+        count = len(response.data['assets_allocated'])
+        AllocationHistory.objects.create(
+            asset=asset,
+            current_owner=self.user.assetassignee
+        )
+        response = client.get(
+            '{}{}/'.format(self.users_url, self.user.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+        )
+        self.assertEqual(len(response.data['assets_allocated']), count + 1)
+        self.assertEqual(response.data['assets_allocated'][0].get('model_number'), 'IMN50987')
+        self.assertEqual(response.data['assets_allocated'][0].get('serial_number'), 'SN001')
