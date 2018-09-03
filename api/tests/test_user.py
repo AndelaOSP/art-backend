@@ -51,8 +51,7 @@ class UserTestCase(APIBaseTestCase):
 
         self.token_admin = 'admintesttoken'
         self.users_url = "/api/v1/users/"
-        self.asset_count_0 = 0
-        self.asset_count_1 = 1
+        self.asset_count = 1
 
     def test_can_add_user(self):
         users_count_before = User.objects.count()
@@ -375,10 +374,14 @@ class UserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         self.assertEqual(len(response.data['allocated_assets']), count + 1)
-        self.assertEqual(response.data['allocated_assets'][0].get('model_number'), 'IMN50987')
-        self.assertEqual(response.data['allocated_assets'][0].get('serial_number'), 'SN001')
+        self.assertEqual(
+            response.data['allocated_assets'][0].get('model_number'),
+            'IMN50987')
+        self.assertEqual(
+            response.data['allocated_assets'][0].get('serial_number'),
+            'SN001')
 
-    @patch('api.authentication.auth.verify_id_token')  
+    @patch('api.authentication.auth.verify_id_token')
     def test_admin_user_filter_users_by_cohort(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
@@ -424,20 +427,9 @@ class UserTestCase(APIBaseTestCase):
     def test_admin_filter_users_by_asset_count(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
-            '{}?asset_count={}'.format(self.users_url, self.asset_count_0),
+            '{}?asset_count={}'.format(self.users_url, self.asset_count),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         self.assertEqual(response.data['results'][0]['allocated_asset_count'],
-                         self.asset_count_0)
-        self.assertEqual(response.data['count'], 1)
-        self.assertEqual(response.status_code, 200)
-
-    @patch('api.authentication.auth.verify_id_token')
-    def test_admin_filter_users_by_asset_count(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
-        response = client.get(
-            '{}?asset_count={}'.format(self.users_url, self.asset_count_1),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data['results'][0]['allocated_asset_count'],
-                         self.asset_count_1)
+                         self.asset_count)
         self.assertEqual(response.data['count'], 1)
         self.assertEqual(response.status_code, 200)

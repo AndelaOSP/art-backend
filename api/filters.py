@@ -1,7 +1,6 @@
-from django.db.models import Count
 from django_filters import rest_framework as filters
 
-from core.models import Asset, User, AssetAssignee
+from core.models import Asset, User
 
 
 class AssetFilter(filters.FilterSet):
