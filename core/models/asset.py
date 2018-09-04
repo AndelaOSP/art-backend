@@ -245,9 +245,9 @@ class AssetSpecs(models.Model):
                            "screen_size", "processor_speed",
                            "year_of_manufacture", "processor_type")
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.full_clean()
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.memory}GB RAM, " \
@@ -345,32 +345,32 @@ class AssetAssignee(models.Model):
     class Meta:
         ordering = ['-id']
 
-    @property
-    def first_name(self):
-        if self.department:
-            return self.department.name
-        if self.workspace:
-            return self.workspace.name
-        if self.user:
-            return self.user.first_name
+    # @property
+    # def first_name(self):
+    #     if self.department:
+    #         return self.department.name
+    #     if self.workspace:
+    #         return self.workspace.name
+    #     if self.user:
+    #         return self.user.first_name
 
-    @property
-    def last_name(self):
-        if self.department:
-            return self.department.name
-        if self.workspace:
-            return self.workspace.section
-        if self.user:
-            return self.user.last_name
+    # @property
+    # def last_name(self):
+    #     if self.department:
+    #         return self.department.name
+    #     if self.workspace:
+    #         return self.workspace.section
+    #     if self.user:
+    #         return self.user.last_name
 
-    @property
-    def email(self):
-        if self.department:
-            return self.department.name
-        if self.workspace:
-            return self.workspace.name
-        if self.user:
-            return self.user.email
+    # @property
+    # def email(self):
+    #     if self.department:
+    #         return self.department.name
+    #     if self.workspace:
+    #         return self.workspace.name
+    #     if self.user:
+    #         return self.user.email
 
 
 class AssetLog(models.Model):
@@ -395,6 +395,9 @@ class AssetLog(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f'{self.log_type} {self.asset}'
+
     class Meta:
         verbose_name = "Asset Log"
         ordering = ['-id']
@@ -417,6 +420,7 @@ class AssetStatus(models.Model):
         verbose_name_plural = 'Asset Statuses'
         ordering = ['-id']
 
+    # TODO: <collin.mutembei@andela.com> Look into efficient way to set previous status
     def save(self, *args, **kwargs):
         try:
             latest_record = AssetStatus.objects.filter(asset=self.asset). \
@@ -426,6 +430,9 @@ class AssetStatus(models.Model):
             self.previous_status = None
         self.full_clean()
         super(AssetStatus, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.asset}: is {self.current_status}, was {self.previous_status}'
 
 
 class AllocationHistory(models.Model):
@@ -453,6 +460,7 @@ class AllocationHistory(models.Model):
         if self.asset.current_status != AVAILABLE:
             raise ValidationError("You can only allocate available assets")
 
+    # TODO: <collin.mutembei@andela.com> Look into efficient way to set previous owner
     def save(self, *args, **kwargs):
         self.full_clean()
         try:
@@ -462,6 +470,9 @@ class AllocationHistory(models.Model):
         except Exception:
             self.previous_owner = None
         super(AllocationHistory, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.asset}: is {self.current_status}, was {self.previous_status}'
 
 
 class AssetCondition(models.Model):
@@ -478,8 +489,11 @@ class AssetCondition(models.Model):
         verbose_name_plural = 'Asset Condition'
         ordering = ['-id']
 
-    def save(self, *args, **kwargs):
-        super(AssetCondition, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     super(AssetCondition, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.asset} {self.notes[:10]}...'
 
 
 class AssetIncidentReport(models.Model):
@@ -513,7 +527,9 @@ class AssetIncidentReport(models.Model):
     class Meta:
         ordering = ['-id']
 
+# TODO: <collin.mutembei@andela.com> Move all signals to signals.py module
 
+# TODO: <collin.mutembei@andela.com> Look into referencing the most recent status of an asset from the AssetStatus model
 @receiver(post_save, sender=AssetStatus)
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
@@ -523,6 +539,8 @@ def set_current_asset_status(sender, **kwargs):
     asset_status.asset.save()
 
 
+# TODO: <collin.mutembei@andela.com> Look into sending the notification when the assets have reached the minimum limit in a way
+#  that does not lead to duplicates
 @receiver(post_save, sender=AssetStatus)
 def check_asset_limit(sender, **kwargs):
     """Check the assets have not exceeded the limit"""
@@ -536,7 +554,7 @@ def check_asset_limit(sender, **kwargs):
             model_number) + " is {}".format(available_assets)
         slack.send_message(message)
 
-
+# TODO: <collin.mutembei@andela.com> initial status should be set by a default value on the AssetStatus model
 @receiver(post_save, sender=Asset)
 def save_initial_asset_status(sender, **kwargs):
     current_asset = kwargs.get('instance')
@@ -547,7 +565,7 @@ def save_initial_asset_status(sender, **kwargs):
         current_asset.current_status = AVAILABLE
         current_asset.save()
 
-
+# TODO: <collin.mutembei@andela.com> Look into setting/updating notes on the AssetCondition model and referencing them from there
 @receiver(post_save, sender=AssetCondition)
 def save_notes(sender, **kwargs):
     new_condition = kwargs.get('instance')
@@ -584,6 +602,7 @@ def update_asset_allocation_history_when_status_changes(sender, **kwargs):
                 AllocationHistory.objects.filter(
                     asset=asset_status.asset).latest('created_at')
         except Exception:
+            # TODO: <collin.mutembei@andela.com> ?
             return
         if asset_status.current_status == AVAILABLE \
                 and last_allocation_record:
@@ -593,6 +612,7 @@ def update_asset_allocation_history_when_status_changes(sender, **kwargs):
                 current_owner=None)
 
 
+# TODO: <collin.mutembei@andela.com> Look into referencing the assigned_to from the AllocationHistory model
 @receiver(post_save, sender=AllocationHistory)
 def allocation_history_post_save(sender, **kwargs):
     allocation_history = kwargs.get('instance')
@@ -614,6 +634,7 @@ def allocation_history_post_save(sender, **kwargs):
         asset_status.save()
 
 
+# TODO: <collin.mutembei@andela.com> Look into merging the next three post_save signals. DRY
 @receiver(post_save, sender=User)
 def assetassignee_user(sender, instance, created, **kwargs):
     if created or not hasattr(instance, 'assetassignee'):

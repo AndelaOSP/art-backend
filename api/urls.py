@@ -79,7 +79,8 @@ urlpatterns = [
         template_name='api/api-index.html',
         extra_context={'api_version': 'V1'}),
         name='api-version-index'
-    )
+    ),
+    path('profile', include('silk.urls', namespace='silk'))
 ]
 
 urlpatterns += router.urls
