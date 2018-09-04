@@ -444,4 +444,5 @@ class UserTestCase(APIBaseTestCase):
         self.assertEqual(response.data['results'][0]['allocated_asset_count'],
                          self.asset_count)
         self.assertEqual(response.data['count'], 1)
+        self.assertTrue(isinstance(allocation_user, AllocationHistory))
         self.assertEqual(response.status_code, 200)
