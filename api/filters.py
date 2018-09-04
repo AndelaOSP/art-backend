@@ -32,24 +32,21 @@ class UserFilter(filters.FilterSet):
 
     email = filters.CharFilter(
         field_name='email',
-        lookup_expr='istartswith',
-        method='filter_by_email_or_allocated_asset_count',)
+        lookup_expr='istartswith',)
 
     asset_count = filters.CharFilter(
         field_name='allocated_asset_count',
+        label='Asset count',
         lookup_expr='iexact',
-        method='filter_by_email_or_allocated_asset_count',)
+        method='filter_by_allocated_asset_count',)
 
-    def filter_by_email_or_allocated_asset_count(self, queryset, name, value):
-        if name == 'email':
-            return queryset.filter(email__istartswith=value)
-        else:
-            users = [
-                user.id
-                for user in queryset
-                if user.assetassignee.current_owner_asset.count() == int(value)
-            ]
-            return User.objects.filter(id__in=users)
+    def filter_by_allocated_asset_count(self, queryset, name, value):
+        users = [
+            user.id
+            for user in queryset
+            if user.assetassignee.current_owner_asset.count() == int(value)
+        ]
+        return User.objects.filter(id__in=users)
 
     class Meta:
         model = User
