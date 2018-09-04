@@ -23,8 +23,31 @@ class UserTestCase(APIBaseTestCase):
             email='admin@site.com', cohort=20,
             slack_handle='@admin', password='devpassword'
         )
+        self.asset_category = AssetCategory.objects.create(
+            category_name="Accessoriesssss")
+
+        self.asset_sub_category = AssetSubCategory.objects.create(
+            sub_category_name="Sub Category nameseses",
+            asset_category=self.asset_category)
+        self.asset_type = AssetType.objects.create(
+            asset_type="Asset Types",
+            asset_sub_category=self.asset_sub_category)
+        self.make_label = AssetMake.objects.create(
+            make_label="Asset Makes", asset_type=self.asset_type)
+        self.assetmodel = AssetModelNumber.objects.create(
+            model_number="IMN50987345", make_label=self.make_label)
+
+        self.asset = Asset.objects.create(
+            asset_code="IC001455",
+            serial_number="SN00123455",
+            purchase_date="2018-07-10",
+            current_status="Available",
+            model_number=self.assetmodel
+        )
+
         self.token_admin = 'admintesttoken'
         self.users_url = "/api/v1/users/"
+        self.asset_count = 1
 
     def test_can_add_user(self):
         users_count_before = User.objects.count()
@@ -347,5 +370,79 @@ class UserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         self.assertEqual(len(response.data['allocated_assets']), count + 1)
-        self.assertEqual(response.data['allocated_assets'][0].get('model_number'), 'IMN50987')
-        self.assertEqual(response.data['allocated_assets'][0].get('serial_number'), 'SN001')
+        self.assertEqual(
+            response.data['allocated_assets'][0].get('model_number'),
+            'IMN50987')
+        self.assertEqual(
+            response.data['allocated_assets'][0].get('serial_number'),
+            'SN001')
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_filter_users_by_cohort(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?cohort={}'.format(self.users_url, self.user.cohort),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['results'][0]['cohort'],
+                         self.user.cohort)
+        self.assertEqual(response.data['count'], 2)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_filter_users_by_email(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?email={}'.format(self.users_url, self.user.email),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['results'][0]['email'],
+                         self.user.email)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_filter_users_by_email_first_letter(self,
+                                                           mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?email={}'.format(self.users_url, self.user.email[0:1].upper()),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['results'][0]['email'],
+                         self.user.email)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_filter_users_by_invalid_email(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?email={}'.format(self.users_url, 'sola@gmail.com'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['count'], 0)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_filter_users_with_given_alphabet(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?email={}'.format(self.users_url, self.user.email[0:3]),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['results'][0]['email'][0:3],
+                         self.user.email[0:3])
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_filter_users_by_asset_count(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        allocation_user = AllocationHistory.objects.create(
+            asset=self.asset,
+            current_owner=self.user.assetassignee
+        )
+        response = client.get(
+            '{}?asset_count={}'.format(self.users_url, self.asset_count),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['results'][0]['allocated_asset_count'],
+                         self.asset_count)
+        self.assertEqual(response.data['count'], 1)
+        self.assertTrue(isinstance(allocation_user, AllocationHistory))
+        self.assertEqual(response.status_code, 200)
