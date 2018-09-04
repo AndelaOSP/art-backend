@@ -44,10 +44,6 @@ class UserTestCase(APIBaseTestCase):
             current_status="Available",
             model_number=self.assetmodel
         )
-        self.allocation_user = AllocationHistory.objects.create(
-            asset=self.asset,
-            current_owner=self.user.assetassignee
-        )
 
         self.token_admin = 'admintesttoken'
         self.users_url = "/api/v1/users/"
@@ -363,7 +359,7 @@ class UserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         count = len(response.data['allocated_assets'])
-        self.assertEqual(count, 1)
+        self.assertEqual(count, 0)
 
         AllocationHistory.objects.create(
             asset=asset,
@@ -404,6 +400,18 @@ class UserTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_filter_users_by_email_first_letter(self,
+                                                           mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?email={}'.format(self.users_url, self.user.email[0:1].upper()),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['results'][0]['email'],
+                         self.user.email)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_admin_filter_users_by_invalid_email(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
@@ -426,6 +434,10 @@ class UserTestCase(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_filter_users_by_asset_count(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
+        allocation_user = AllocationHistory.objects.create(
+            asset=self.asset,
+            current_owner=self.user.assetassignee
+        )
         response = client.get(
             '{}?asset_count={}'.format(self.users_url, self.asset_count),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
