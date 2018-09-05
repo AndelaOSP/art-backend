@@ -34,6 +34,11 @@ class AssetTestCase(APIBaseTestCase):
         self.another_asset_assignee = \
             AssetAssignee.objects.get(user=self.other_user)
         self.token_other_user = 'otherusertesttoken'
+        self.admin_user = User.objects.create_superuser(
+            email='admin@site.com', cohort=20,
+            slack_handle='@admin', password='devpassword'
+        )
+        self.token_admin = 'admintesttoken'
         self.asset_category = AssetCategory.objects.create(
             category_name="Accessories")
         self.asset_sub_category = AssetSubCategory.objects.create(
@@ -135,9 +140,47 @@ class AssetTestCase(APIBaseTestCase):
         response = client.get(
             '{}?email={}'.format(self.asset_urls, self.user.email),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertTrue(len(response.data) > 0)
         self.assertIn(self.user.email,
                       response.data['results'][0]['assigned_to']['email'])
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_non_admin_cannot_filter_asset_by_asset_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        url = reverse('manage-assets-list')
+        response = client.get(
+            '{}?current_status={}'.format(url, 'Allocated'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(response.data, {
+            'detail': 'You do not have permission to perform this action.'
+        })
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_filter_asset_by_asset_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        url = reverse('manage-assets-list')
+        response = client.get(
+            '{}?current_status={}'.format(url, 'Allocated'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+
+        self.assertEqual(response.data['count'], 1)
+
+        response = client.get(
+            '{}?current_status={}'.format(url, 'Available'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['count'], 0)
+
+        new_asset = Asset(
+            asset_code="IC002",
+            serial_number="SN002",
+            model_number=self.assetmodel,
+            purchase_date="2018-07-10"
+        )
+        new_asset.save()
+
+        response = client.get(
+            '{}?current_status={}'.format(url, 'Available'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(response.data['count'], 1)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_assets_detail_api_endpoint_contain_assigned_to_details(
