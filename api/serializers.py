@@ -200,8 +200,8 @@ class AssetLogSerializer(serializers.ModelSerializer):
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFeedback
-        fields = ("reported_by", "message", "report_type", "created_at")
-        read_only_fields = ("reported_by",)
+        fields = ("reported_by", "message", "report_type", "created_at", "resolved")
+        read_only_fields = ("reported_by", "resolved")
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
