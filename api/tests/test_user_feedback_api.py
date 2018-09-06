@@ -89,3 +89,19 @@ class UserFeedbackAPITest(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(response.data['results'][0]["message"],
                       "This is some feedback")
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_feature_request_not_resolved(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.user.email}
+        data = {
+            "message": "This is a bug",
+            "report_type": "bug"
+        }
+        response = client.post(
+            self.feedback_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+
+        self.assertIn("created_at", response.data)
+        self.assertFalse(response.data["resolved"])
+        self.assertEqual(response.status_code, 201)

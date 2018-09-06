@@ -95,17 +95,20 @@ class UserFeedback(models.Model):
     """ Stores user feedback data """
     FEEDBACK = "feedback"
     BUG = "bug"
+    FEATURE_REQUEST = "feature request"
     option = (
         (FEEDBACK, "feedback"),
         (BUG, "bug"),
+        (FEATURE_REQUEST, "feature request"),
     )
     reported_by = models.ForeignKey(User, on_delete=models.PROTECT)
-    message = models.CharField(max_length=200, null=False)
-    report_type = models.CharField(max_length=10,
+    message = models.TextField(null=False)
+    report_type = models.CharField(max_length=20,
                                    blank=False,
                                    choices=option,
                                    null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    resolved = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = "User Feedback"
