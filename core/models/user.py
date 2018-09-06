@@ -95,7 +95,7 @@ class UserFeedback(models.Model):
     """ Stores user feedback data """
     FEEDBACK = "feedback"
     BUG = "bug"
-    FEATURE_REQUEST = "feature request"
+    FEATURE_REQUEST = "feature_request"
     option = (
         (FEEDBACK, "feedback"),
         (BUG, "bug"),
