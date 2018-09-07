@@ -25,10 +25,9 @@ getHosts(){
     if [ "$CIRCLE_BRANCH" == 'master' ]; then
       CURRENTIPS="$(gcloud compute instances list --project bench-projects | grep  gke-bench-production | awk -v ORS=, '{if ($4) print $4}' | sed 's/,$//')"
     else
-      CURRENTIPS="$(gcloud compute instances list --project bench-projects | grep  gke-bench-staging | awk -v ORS=, '{if ($4) print $4}' | sed 's/,$//')"
+      CURRENTIPS="$(gcloud compute instances list --project bench-projects | grep  gke-bench-staging-staging | awk -v ORS=, '{if ($8) print $8}' | sed 's/,$//')"
     fi
 }
-
 buildAndTagDockerImages() {
     require "IMAGE_NAME" $IMAGE_NAME
     info "Building image with tag $IMAGE_NAME ....."
