@@ -342,6 +342,9 @@ class AssetAssignee(models.Model):
                 message="No Department, Workspace or"
                         " User for this AssetAssignee")
 
+    class Meta:
+        ordering = ['-id']
+
     @property
     def first_name(self):
         if self.department:

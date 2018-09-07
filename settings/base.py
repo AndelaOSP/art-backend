@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'api',
     'oauth2_provider',
     'drf_yasg',
-    'corsheaders'
+    'corsheaders',
+    'django_filters',
 ]
 
 AUTH_USER_MODEL = 'core.User'

@@ -1,16 +1,18 @@
+from itertools import chain
+
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
-from django.core.validators import validate_email, ValidationError
+from django.core.validators import ValidationError
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from itertools import chain
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
+from django_filters import rest_framework as filters
 from api.authentication import FirebaseTokenAuthentication
+from api.filters import AssetFilter, UserFilter
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
@@ -19,7 +21,7 @@ from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
 from core.models.department import Department
-from .serializers import UserSerializer, \
+from .serializers import UserSerializerWithAssets, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
     AssetStatusSerializer, AllocationsSerializer, AssetCategorySerializer, \
@@ -29,43 +31,31 @@ from .serializers import UserSerializer, \
     AssetHealthSerializer, SecurityUserSerializer, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
     OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
-    OfficeWorkspaceSerializer, DepartmentSerializer
+    OfficeWorkspaceSerializer, DepartmentSerializer, \
+    AssetAssigneeSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
 
 
 class UserViewSet(ModelViewSet):
-    serializer_class = UserSerializer
+    serializer_class = UserSerializerWithAssets
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated, IsAdminUser)
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = UserFilter
 
 
 class ManageAssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
+    queryset = Asset.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post', 'put', 'delete']
-
-    def get_queryset(self):
-        queryset = Asset.objects.all()
-        query_params = self.request.query_params
-
-        if query_params.get('email'):
-            email = query_params['email']
-            try:
-                validate_email(email)
-                user_asset_assignee = User.objects.get(email=email)
-                queryset = \
-                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
-            except (ValidationError, ObjectDoesNotExist) as error:
-                if error.__class__.__name__ == 'ValidationError':
-                    raise serializers.ValidationError(error.message)
-                queryset = Asset.objects.none()
-
-        return queryset
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = AssetFilter
 
     def get_object(self):
         queryset = Asset.objects.all()
@@ -88,21 +78,8 @@ class AssetViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        query_params = self.request.query_params
         asset_assignee = AssetAssignee.objects.filter(user=user).first()
         queryset = Asset.objects.filter(assigned_to=asset_assignee)
-
-        if query_params.get('email'):
-            email = query_params['email']
-            try:
-                validate_email(email)
-                user_asset_assignee = User.objects.get(email=email)
-                queryset = \
-                    Asset.objects.filter(assigned_to__user=user_asset_assignee)
-            except (ValidationError, ObjectDoesNotExist) as error:
-                if error.__class__.__name__ == 'ValidationError':
-                    raise serializers.ValidationError(error.message)
-                queryset = Asset.objects.none()
 
         return queryset
 
@@ -112,6 +89,14 @@ class AssetViewSet(ModelViewSet):
         queryset = Asset.objects.filter(assigned_to=asset_assignee)
         obj = get_object_or_404(queryset, uuid=self.kwargs['pk'])
         return obj
+
+
+class AssetAssigneeViewSet(ModelViewSet):
+    serializer_class = AssetAssigneeSerializer
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = (FirebaseTokenAuthentication,)
+    queryset = AssetAssignee.objects.all()
+    http_method_names = ['get']
 
 
 class SecurityUserEmailsViewSet(ModelViewSet):
