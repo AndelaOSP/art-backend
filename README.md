@@ -20,17 +20,19 @@ This repository contains the API endpoints and models for the ART project implem
 ### Set up environment variables
 - To set up environment variables, define the following in your virtual environment postactivate file or `.env` file:
 
-> DATABASE_URL
+> DATABASE_URL -  Configuration to connect to project's database in [this](https://github.com/kennethreitz/dj-database-url#url-schema) format. Example; postgres://postgres@127.0.0.1:5432/art
 
-> SECRET_KEY
+> SECRET_KEY - String of random characters used to provide cryptographic signing for [Django](https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY) project. Example; '1z5266&fgkvvdia5cnss50=t38dxr5894a3*-*m3wmv+7v@fh@'
 
-> PROJECT_ID
+> PROJECT_ID - Project's identifier on firebase.
 
-> PRIVATE_KEY
+> PRIVATE_KEY - Project's private key for firebase project.
 
-> CLIENT_EMAIL
+> CLIENT_EMAIL - Project's email for firebase project.
 
-> SLACK_TOKEN
+> SLACK_TOKEN - String of characters to authenticate/authorize slack app to post in the Andela slack organisation.
+
+> ASSET_LIMIT - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack.
 
 - To set up the pre-commit Git hooks with the standard styling conventions, follow the instructions on the Wiki [here](https://github.com/AndelaOSP/art-backend/wiki/Styling-Conventions).
 ### Dependencies
