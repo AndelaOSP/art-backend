@@ -1,3 +1,4 @@
+import os
 import uuid
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -531,7 +532,7 @@ def check_asset_limit(sender, **kwargs):
     available_assets = Asset.objects.filter(
         current_status='Available', model_number=model_number
     ).count()
-    if available_assets <= 10:
+    if available_assets <= int(os.environ.get('ASSET_LIMIT')):
         message = "Warning!! The number of available {} ".format(
             model_number) + " is {}".format(available_assets)
         slack.send_message(message)
