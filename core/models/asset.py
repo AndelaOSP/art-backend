@@ -608,8 +608,8 @@ def allocation_history_post_save(sender, **kwargs):
             slack.send_message(_message, user=send_to.user)
 
     if asset.assigned_to and asset.current_status == ALLOCATED:
-        message = "The asset with serial number {} ".format(
-            asset.serial_number) + "has been allocated to you."
+        message = "The asset with serial number {} and asset code {} ".format(
+            asset.serial_number, asset.asset_code) + "has been allocated to you."
         send_slack_message(message, owner)
         asset_status = AssetStatus.objects.create(
             asset=asset,
@@ -617,8 +617,8 @@ def allocation_history_post_save(sender, **kwargs):
         )
         asset_status.save()
     elif (not asset.assigned_to and allocation_history.previous_owner):
-        message = "The asset with serial number {} ".format(
-            asset.serial_number) + "has been de-allocated from you."
+        message = "The asset with serial number {} and asset code {} ".format(
+            asset.serial_number, asset.asset_code) + "has been de-allocated from you."
 
         previous_owner = allocation_history.previous_owner
         send_slack_message(message, previous_owner)
