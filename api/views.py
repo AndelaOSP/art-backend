@@ -11,6 +11,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
+from rest_framework.filters import OrderingFilter
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import AssetFilter, UserFilter
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
@@ -154,6 +155,8 @@ class AssetCategoryViewSet(ModelViewSet):
     queryset = AssetCategory.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filter_backends = (OrderingFilter,)
+    ordering = ('category_name',)
     http_method_names = ['get', 'post']
 
 
@@ -162,6 +165,8 @@ class AssetSubCategoryViewSet(ModelViewSet):
     queryset = AssetSubCategory.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filter_backends = (OrderingFilter,)
+    ordering = ('sub_category_name',)
     http_method_names = ['get', 'post']
 
 
@@ -170,6 +175,8 @@ class AssetTypeViewSet(ModelViewSet):
     queryset = AssetType.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filter_backends = (OrderingFilter,)
+    ordering = ('asset_type',)
     http_method_names = ['get', 'post']
 
 
@@ -178,6 +185,8 @@ class AssetModelNumberViewSet(ModelViewSet):
     queryset = AssetModelNumber.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
+    filter_backends = (OrderingFilter,)
+    ordering = ('model_number',)
     http_method_names = ['get', 'post']
 
 
@@ -186,6 +195,8 @@ class AssetMakeViewSet(ModelViewSet):
     queryset = AssetMake.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
+    filter_backends = (OrderingFilter,)
+    ordering = ('make_label',)
     http_method_names = ['get', 'post']
 
 
