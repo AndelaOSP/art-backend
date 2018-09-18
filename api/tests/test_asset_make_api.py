@@ -10,6 +10,7 @@ from core.models import (
     AssetCategory)
 
 from api.tests import APIBaseTestCase
+
 User = get_user_model()
 client = APIClient()
 
@@ -195,3 +196,20 @@ class AssetMakeAPICase(APIBaseTestCase):
             'detail': 'Method "DELETE" not allowed.'
         })
         self.assertEqual(response.status_code, 405)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_asset_make_api_endpoint_orders_asset_make_by_make(self,
+                                                               mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        AssetMake.objects.create(
+            make_label='Sades', asset_type=self.asset_type)
+        AssetMake.objects.create(
+            make_label='Lenovo Charger', asset_type=self.asset_type)
+
+        response = client.get(
+            self.asset_make_urls,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        # I am always sure that Sades will be the last in the response
+        #  since the Makes are ordered.
+        self.assertEqual(3, len(response.data.get('results')))
+        self.assertEqual(response.data.get('results')[2].get('make_label'), "Sades")
