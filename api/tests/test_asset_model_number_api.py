@@ -6,6 +6,7 @@ from core.models import User, AssetCategory, AssetSubCategory, \
     AssetType, AssetMake, AssetModelNumber
 
 from api.tests import APIBaseTestCase
+
 client = APIClient()
 
 
@@ -180,3 +181,24 @@ class AssetModelNumberAPITest(APIBaseTestCase):
         self.assertEquals(response.data, {
             'make_label': ['This field is required.']})
         self.assertEqual(response.status_code, 400)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_asset_model_number_api_orders_asset_models_by_model_number(self,
+                                                                        mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        AssetModelNumber.objects.create(
+            model_number='BCD6G4D6 1F',
+            make_label=self.asset_label
+        )
+        AssetModelNumber.objects.create(
+            model_number='XD6GRD6 Q3',
+            make_label=self.asset_label
+        )
+
+        response = client.get(
+            self.asset_model_no_url,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        # I am always sure that 'XD6GRD6 Q3' will be the last in the response
+        #  since the model numbers are ordered.
+        self.assertEqual(3, len(response.data.get('results')))
+        self.assertEqual(response.data.get('results')[2].get('model_number'), "XD6GRD6 Q3")

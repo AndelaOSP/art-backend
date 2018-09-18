@@ -6,6 +6,7 @@ from core.models import User, AssetCategory, AssetSubCategory, \
     AssetType
 
 from api.tests import APIBaseTestCase
+
 client = APIClient()
 
 
@@ -120,3 +121,28 @@ class AssetCategoryAPITest(APIBaseTestCase):
             'detail': 'Method "DELETE" not allowed.'
         })
         self.assertEqual(response.status_code, 405)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_asset_type_api_orders_asset_types_by_type(self,
+                                                       mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        AssetType.objects.create(
+            asset_type="HP",
+            asset_sub_category=self.asset_sub_category
+        )
+        AssetType.objects.create(
+            asset_type="Samsung",
+            asset_sub_category=self.asset_sub_category
+        )
+        AssetType.objects.create(
+            asset_type="Lenovo",
+            asset_sub_category=self.asset_sub_category
+        )
+
+        response = client.get(
+            self.asset_type_url,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        # I am always sure that 'Samsung' will be the last in the response
+        #  since the asset types are ordered.
+        self.assertEqual(4, len(response.data.get('results')))
+        self.assertEqual(response.data.get('results')[3].get('asset_type'), "Samsung")

@@ -5,6 +5,7 @@ from rest_framework.reverse import reverse
 from core.models import User, AssetCategory
 
 from api.tests import APIBaseTestCase
+
 client = APIClient()
 
 
@@ -104,3 +105,21 @@ class AssetCategoryAPITest(APIBaseTestCase):
             'detail': 'Method "DELETE" not allowed.'
         })
         self.assertEqual(response.status_code, 405)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_categories_api_endpoint_orders_categories_by_category_name_by_default(self,
+                                                                                   mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        AssetCategory.objects.create(
+            category_name="Electronics"
+        )
+        AssetCategory.objects.create(
+            category_name="Computer Accessories"
+        )
+        response = client.get(
+            self.category_url,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        # I am always sure that Electronics will be the last in the response
+        #  since the categories are ordered.
+        self.assertEqual(3, len(response.data.get('results')))
+        self.assertEqual(response.data.get('results')[2].get('category_name'), "Electronics")
