@@ -6,9 +6,11 @@ from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
 from rest_framework.filters import OrderingFilter
@@ -362,3 +364,31 @@ class DepartmentViewSet(ModelViewSet):
         self.perform_destroy(instance)
         data = {"detail": "Deleted Successfully"}
         return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+
+class AssetsImportViewSet(APIView):
+    parser_classes = (MultiPartParser,)
+
+    def post(self, request):
+        file_obj = request.data['file']
+        model_number = AssetModelNumber(
+            model_number=request.data['model_number'])
+
+        # asset_specs = request.data['asset_specs']
+
+        assets = []
+
+        for pos, line in enumerate(file_obj):
+            if pos == 0:
+                # First line so Ignore it
+                continue
+            asset_fields = line.decode('UTF-8').rstrip().split(',')
+
+            asset_code = asset_fields[0]
+            serial_number = asset_fields[1]
+            notes = asset_fields[2]
+
+            assets.append(Asset(model_number=model_number, asset_code=asset_code, serial_number=serial_number,
+                                notes=notes))
+        Asset.objects.bulk_create(assets)
+        return Response(status=204)
