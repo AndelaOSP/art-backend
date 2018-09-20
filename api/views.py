@@ -1,3 +1,5 @@
+import csv
+import codecs
 from itertools import chain
 
 from django.contrib.auth import get_user_model
@@ -369,8 +371,10 @@ class DepartmentViewSet(ModelViewSet):
 class AssetsImportViewSet(APIView):
     parser_classes = (MultiPartParser,)
 
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def post(self, request):
-        file_obj = request.data['file']
+        file_obj = request.data.get('file')
         model_number = AssetModelNumber(
             model_number=request.data['model_number'])
 
@@ -394,17 +398,16 @@ class AssetsImportViewSet(APIView):
 
         assets = []
 
-        for pos, line in enumerate(file_obj):
-            if pos == 0:
-                # First line so Ignore it
-                continue
-            asset_fields = line.decode('UTF-8').rstrip().split(',')
+        file_obj = codecs.iterdecode(file_obj, 'utf-8')
+        csv_reader = csv.DictReader(file_obj)
 
-            asset_code = asset_fields[0]
-            serial_number = asset_fields[1]
-            notes = asset_fields[2]
+        for pos, row in enumerate(csv_reader):
+            asset_code = row.get('Asset Code')
+            serial_number = row.get('Serial No')
+            notes = row.get('Notes')
 
             assets.append(Asset(model_number=model_number, asset_code=asset_code, serial_number=serial_number,
-                                notes=notes, asset_specs=asset_specs))
+                                notes=notes, specs=asset_specs[0]))
         Asset.objects.bulk_create(assets)
+
         return Response(status=204)
