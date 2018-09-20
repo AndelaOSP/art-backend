@@ -80,7 +80,7 @@ urlpatterns = [
         extra_context={'api_version': 'V1'}),
         name='api-version-index'
     ),
-    path('upload/', AssetsImportViewSet.as_view())
+    path('upload/', AssetsImportViewSet.as_view(), name='import-assets')
 ]
 
 urlpatterns += router.urls
