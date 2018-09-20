@@ -374,7 +374,23 @@ class AssetsImportViewSet(APIView):
         model_number = AssetModelNumber(
             model_number=request.data['model_number'])
 
-        # asset_specs = request.data['asset_specs']
+        kwargs = {}
+
+        year_of_manufacture = request.data.get('year_of_manufacture')
+        processor_speed = request.data.get('processor_speed')
+        screen_size = request.data.get('screen_size')
+        processor_type = request.data.get('processor_type')
+        storage = request.data.get('storage')
+        memory = request.data.get('memory')
+
+        kwargs.update({'year_of_manufacture': year_of_manufacture,
+                       'processor_speed': processor_speed,
+                       'screen_size': screen_size,
+                       'processor_type': processor_type,
+                       'storage': storage,
+                       'memory': memory})
+
+        asset_specs = AssetSpecs.objects.get_or_create(**kwargs)
 
         assets = []
 
@@ -389,6 +405,6 @@ class AssetsImportViewSet(APIView):
             notes = asset_fields[2]
 
             assets.append(Asset(model_number=model_number, asset_code=asset_code, serial_number=serial_number,
-                                notes=notes))
+                                notes=notes, asset_specs=asset_specs))
         Asset.objects.bulk_create(assets)
         return Response(status=204)
