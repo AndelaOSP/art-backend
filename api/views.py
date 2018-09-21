@@ -375,6 +375,9 @@ class AssetsImportViewSet(APIView):
 
     def post(self, request):
         file_obj = request.data.get('file')
+        if not file_obj:
+            # file_obj is none so return error
+            return Response({"error": "Csv file to import from not provided"}, status=400)
         model_number = AssetModelNumber(
             model_number=request.data['model_number'])
 
@@ -396,7 +399,12 @@ class AssetsImportViewSet(APIView):
 
         asset_specs = AssetSpecs.objects.get_or_create(**kwargs)
 
+        all_assets_codes = [x for x in Asset.objects.values_list("asset_code", flat=True) if x is not None]
+        all_assets_serial_number = [x for x in Asset.objects.values_list("serial_number", flat=True) if x is not None]
+
         assets = []
+
+        skipped_assets = []
 
         file_obj = codecs.iterdecode(file_obj, 'utf-8')
         csv_reader = csv.DictReader(file_obj)
@@ -406,8 +414,31 @@ class AssetsImportViewSet(APIView):
             serial_number = row.get('Serial No')
             notes = row.get('Notes')
 
+            if (asset_code in all_assets_codes) or (serial_number in all_assets_serial_number):
+                # Skip this asset since its in the DB already
+                skipped_assets.append(pos+1)
+                continue
+            if asset_code is '' and serial_number is '':
+                # Skip this asset since no asset_code or serial_number is supplied
+                skipped_assets.append(pos+1)
+                continue
+
             assets.append(Asset(model_number=model_number, asset_code=asset_code, serial_number=serial_number,
                                 notes=notes, specs=asset_specs[0]))
-        Asset.objects.bulk_create(assets)
+            '''
+                Since this asset_code/serial_number is not already in the db, 
+                it won't be in the all_assets_codes/all_assets_serial_number lists and therefore an error would be\
+                raised if we tried adding another asset latter in the file with the same asset_code/serial_number.
+            '''
+            if asset_code:
+                all_assets_codes.append(asset_code)
+            if serial_number:
+                all_assets_serial_number.append(serial_number)
 
-        return Response(status=204)
+        Asset.objects.bulk_create(assets)
+        data = {}
+        if len(skipped_assets) > 0:
+            data.update({"skipped_lines": skipped_assets})
+        data.update({"saved_assets": len(assets)})
+
+        return Response(data=data, status=200)

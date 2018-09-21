@@ -57,4 +57,4 @@ class AssetsUploadTestCase(APIBaseTestCase):
                 HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
 
         self.assertEqual(4, Asset.objects.count())
-        self.assertEqual(204, response.status_code)
+        self.assertEqual(200, response.status_code)
