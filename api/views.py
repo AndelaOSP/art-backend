@@ -416,18 +416,18 @@ class AssetsImportViewSet(APIView):
 
             if (asset_code in all_assets_codes) or (serial_number in all_assets_serial_number):
                 # Skip this asset since its in the DB already
-                skipped_assets.append(pos+1)
+                skipped_assets.append(pos + 1)
                 continue
             if asset_code is '' and serial_number is '':
                 # Skip this asset since no asset_code or serial_number is supplied
-                skipped_assets.append(pos+1)
+                skipped_assets.append(pos + 1)
                 continue
 
             assets.append(Asset(model_number=model_number, asset_code=asset_code, serial_number=serial_number,
                                 notes=notes, specs=asset_specs[0]))
             '''
-                Since this asset_code/serial_number is not already in the db, 
-                it won't be in the all_assets_codes/all_assets_serial_number lists and therefore an error would be\
+                Since this asset_code/serial_number is not already in the db, it won't be in the all_assets_codes\
+                all_assets_serial_number lists and therefore an error would be
                 raised if we tried adding another asset latter in the file with the same asset_code/serial_number.
             '''
             if asset_code:
