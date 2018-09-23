@@ -370,16 +370,15 @@ class DepartmentViewSet(ModelViewSet):
 
 class AssetsImportViewSet(APIView):
     parser_classes = (MultiPartParser,)
-
     permission_classes = [IsAuthenticated, IsAdminUser]
 
-    def post(self, request):
+    def post(self, request):  # noqa
         file_obj = request.data.get('file')
         if not file_obj:
             # file_obj is none so return error
             return Response({"error": "Csv file to import from not provided"}, status=400)
         model_number = AssetModelNumber(
-            model_number=request.data['model_number'])
+            model_number=request.data.get('model_number'))
 
         kwargs = {}
 
