@@ -11,10 +11,10 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     AllocationsViewSet, AssetCategoryViewSet, AssetSubCategoryViewSet, \
     AssetTypeViewSet, AssetModelNumberViewSet, AssetConditionViewSet, \
     AssetMakeViewSet, AssetIncidentReportViewSet, AssetHealthCountViewSet, \
-    ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet,\
+    ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet, \
     OfficeBlockViewSet, OfficeFloorViewSet, OfficeFloorSectionViewSet, \
     GroupViewSet, OfficeWorkspaceViewSet, DepartmentViewSet, \
-    AssetAssigneeViewSet
+    AssetAssigneeViewSet, AssetsImportViewSet
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -79,7 +79,8 @@ urlpatterns = [
         template_name='api/api-index.html',
         extra_context={'api_version': 'V1'}),
         name='api-version-index'
-    )
+    ),
+    path('upload/', AssetsImportViewSet.as_view(), name='import-assets')
 ]
 
 urlpatterns += router.urls

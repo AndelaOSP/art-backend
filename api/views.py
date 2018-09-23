@@ -1,3 +1,5 @@
+import csv
+import codecs
 from itertools import chain
 
 from django.contrib.auth import get_user_model
@@ -6,9 +8,11 @@ from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
 from rest_framework.filters import OrderingFilter
@@ -362,3 +366,78 @@ class DepartmentViewSet(ModelViewSet):
         self.perform_destroy(instance)
         data = {"detail": "Deleted Successfully"}
         return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+
+class AssetsImportViewSet(APIView):
+    parser_classes = (MultiPartParser,)
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request):  # noqa
+        file_obj = request.data.get('file')
+        if not file_obj:
+            # file_obj is none so return error
+            return Response({"error": "Csv file to import from not provided"}, status=400)
+        model_number = AssetModelNumber(
+            model_number=request.data.get('model_number'))
+
+        kwargs = {}
+
+        year_of_manufacture = request.data.get('year_of_manufacture')
+        processor_speed = request.data.get('processor_speed')
+        screen_size = request.data.get('screen_size')
+        processor_type = request.data.get('processor_type')
+        storage = request.data.get('storage')
+        memory = request.data.get('memory')
+
+        kwargs.update({'year_of_manufacture': year_of_manufacture,
+                       'processor_speed': processor_speed,
+                       'screen_size': screen_size,
+                       'processor_type': processor_type,
+                       'storage': storage,
+                       'memory': memory})
+
+        asset_specs = AssetSpecs.objects.get_or_create(**kwargs)
+
+        all_assets_codes = [x for x in Asset.objects.values_list("asset_code", flat=True) if x is not None]
+        all_assets_serial_number = [x for x in Asset.objects.values_list("serial_number", flat=True) if x is not None]
+
+        assets = []
+
+        skipped_assets = []
+
+        file_obj = codecs.iterdecode(file_obj, 'utf-8')
+        csv_reader = csv.DictReader(file_obj)
+
+        for pos, row in enumerate(csv_reader):
+            asset_code = row.get('Asset Code')
+            serial_number = row.get('Serial No')
+            notes = row.get('Notes')
+
+            if (asset_code in all_assets_codes) or (serial_number in all_assets_serial_number):
+                # Skip this asset since its in the DB already
+                skipped_assets.append(pos + 1)
+                continue
+            if asset_code is '' and serial_number is '':
+                # Skip this asset since no asset_code or serial_number is supplied
+                skipped_assets.append(pos + 1)
+                continue
+
+            assets.append(Asset(model_number=model_number, asset_code=asset_code, serial_number=serial_number,
+                                notes=notes, specs=asset_specs[0]))
+            '''
+                Since this asset_code/serial_number is not already in the db, it won't be in the all_assets_codes\
+                all_assets_serial_number lists and therefore an error would be
+                raised if we tried adding another asset latter in the file with the same asset_code/serial_number.
+            '''
+            if asset_code:
+                all_assets_codes.append(asset_code)
+            if serial_number:
+                all_assets_serial_number.append(serial_number)
+
+        Asset.objects.bulk_create(assets)
+        data = {}
+        if len(skipped_assets) > 0:
+            data.update({"skipped_lines": skipped_assets})
+        data.update({"saved_assets": len(assets)})
+
+        return Response(data=data, status=200)
