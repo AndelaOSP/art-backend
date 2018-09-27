@@ -1,3 +1,4 @@
+import os
 from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 from django.conf.urls import include
@@ -71,10 +72,6 @@ router.register('asset-assignee', AssetAssigneeViewSet, 'asset-assignee')
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    path('docs/', schema_view.with_ui(
-        'redoc', cache_timeout=None), name='schema-redoc'),
-    path('docs/live/', schema_view.with_ui(
-        'swagger', cache_timeout=None), name='schema-swagger'),
     path('', TemplateView.as_view(
         template_name='api/api-index.html',
         extra_context={'api_version': 'V1'}),
@@ -82,5 +79,10 @@ urlpatterns = [
     ),
     path('upload/', AssetsImportViewSet.as_view(), name='import-assets')
 ]
+if os.getenv('APP_ENV'):
+    urlpatterns.extend([
+        path('docs/', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
+        path('docs/live/', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger')
+    ])
 
 urlpatterns += router.urls
