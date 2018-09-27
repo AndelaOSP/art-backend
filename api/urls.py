@@ -80,9 +80,9 @@ urlpatterns = [
     path('upload/', AssetsImportViewSet.as_view(), name='import-assets')
 ]
 if os.getenv('APP_ENV'):
-    urlpatterns.extend(
-        [path('docs/', schema_view.with_ui(
-            'redoc', cache_timeout=None), name='schema-redoc'), path('docs/live/', schema_view.with_ui(
-                'swagger', cache_timeout=None), name='schema-swagger')])
+    urlpatterns.extend([
+        path('docs/', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
+        path('docs/live/', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger')
+    ])
 
 urlpatterns += router.urls
