@@ -21,7 +21,7 @@ from api.filters import AssetFilter, UserFilter
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
-    AssetIncidentReport, AssetSpecs, AssetAssignee
+    AssetIncidentReport, AssetSpecs, AssetAssignee, AndelaCentre
 from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
@@ -37,7 +37,7 @@ from .serializers import UserSerializerWithAssets, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
     OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
     OfficeWorkspaceSerializer, DepartmentSerializer, \
-    AssetAssigneeSerializer
+    AssetAssigneeSerializer, AndelaCentreSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -441,3 +441,17 @@ class AssetsImportViewSet(APIView):
         data.update({"saved_assets": len(assets)})
 
         return Response(data=data, status=200)
+
+
+class AndelaCentreViewset(ModelViewSet):
+    serializer_class = AndelaCentreSerializer
+    queryset = AndelaCentre.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)
