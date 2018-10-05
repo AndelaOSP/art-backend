@@ -73,11 +73,11 @@ jobs:
       - run:
           name: run tests
           command: |
-            pipenv run "coverage run --source api manage.py test -v 2"
+            pipenv run python -m coverage run --source api manage.py test -v 2
       - run:
           name: run coveralls
           command: |
-            pipenv run "coveralls"
+            pipenv run coveralls
   deploy_staging:
     <<: *default
     steps:

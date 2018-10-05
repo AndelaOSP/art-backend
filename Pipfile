@@ -20,9 +20,11 @@ firebase-admin = "*"
 django-dotenv = "*"
 whitenoise = "==3.3.1"
 tqdm = "*"
-"flake8" = "*"
 
 [dev-packages]
+coverage = "*"
+coveralls = "*"
+"flake8" = "*"
 
 [requires]
 python_version = "3.6.4"
