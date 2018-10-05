@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+python-decouple = "*"
+dj-database-url = "*"
+django-jet = "*"
+djangorestframework = "*"
+django-oauth-toolkit = "==1.0.0"
+drf-yasg = "*"
+django-cors-headers = "*"
+django-filter = "*"
+django-debug-toolbar = "*"
+"psycopg2" = "*"
+slackclient = "*"
+firebase-admin = "*"
+django-dotenv = "*"
+whitenoise = "==3.3.1"
+tqdm = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"

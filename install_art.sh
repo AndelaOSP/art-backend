@@ -10,17 +10,11 @@ install_system_dependencies()
 
     fi
 
-    if ! which virtualenv; then
-    
-    pip3 install virtualenv
+    if ! which pipenv; then
+
+    brew install pipenv
 
     fi
-
-    virtualenv --python=python3 env
-
-    
-    
-    source env/bin/activate
 
 }
 
@@ -43,6 +37,14 @@ create_postgres_instance()
     psql --command "GRANT ALL PRIVILEGES ON DATABASE "art_postgres" to art_postgres;" -U postgres
 }
 
+install_art_requirements()
+{
+    pipenv install
+
+    pipenv run shell
+}
+
+
 source_environmentalvariables()
 {
     echo "Setup the environmental variable manually"
@@ -56,24 +58,19 @@ run_database_migrations()
     python manage.py migrate
 }
 
-install_art_requirements()
-{
-    pip3 install -r requirements.txt
-}
-
 
 start_the_application()
 {
-    python3 manage.py migrate
+    python manage.py migrate
     python manage.py createsuperuser --email 'waldo@gmail.com' --slack_handle '@waldo' --cohort '99'
 
 
     # Enter your email
-    # Enter the Slack handle  
+    # Enter the Slack handle
     # Enter the Cohort number
     # Enter a password
 
-    python3 manage.py runserver
+    python manage.py runserver
 }
 
 main()
@@ -82,11 +79,11 @@ main()
 
     create_postgres_instance
 
+    install_art_requirements
+
     source_environmentalvariables
 
     run_database_migrations
-    
-    install_art_requirements
 
     start_the_application
 
