@@ -41,7 +41,7 @@ install_art_requirements()
 {
     pipenv install
 
-    pipenv run shell
+    pipenv shell
 }
 
 

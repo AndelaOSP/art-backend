@@ -14,11 +14,11 @@ default: &default
       environment:
         POSTGRES_USER: root
         POSTGRES_DB: circle_test
-        POSTGRES_PASSWORD: ""  
+        POSTGRES_PASSWORD: ""
   working_directory: ~/art-backend
 cmd_change_owner: &cmd_change_owner
   run:
-    name: change owner 
+    name: change owner
     command: |
       sudo chown -R circleci:circleci /usr/local/bin
       sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
@@ -30,8 +30,8 @@ cmd_install_requirements: &cmd_install_requirements
     name: install application requirements
     command: |
       sudo pip install pipenv
-      pipenv install --skip-lock -r requirements.txt
-cmd_save_cache: &cmd_save_cache      
+      pipenv install
+cmd_save_cache: &cmd_save_cache
   save_cache:
     key: deps9-{{ .Branch }}-
     paths:
@@ -63,7 +63,7 @@ jobs:
           command: |
             pipenv run "flake8 ."
   tests:
-    <<: *default  
+    <<: *default
     steps:
       - checkout
       - *cmd_change_owner
@@ -85,9 +85,9 @@ jobs:
       - setup_remote_docker:
           version: 17.11.0-ce
       - run:
-          name: deploying application to staging 
+          name: deploying application to staging
           command: |
-            bash scripts/deploy.sh 
+            bash scripts/deploy.sh
   deploy_production:
     <<: *default
     steps:
@@ -95,7 +95,7 @@ jobs:
       - setup_remote_docker:
           version: 17.11.0-ce
       - run:
-          name: deploying application to production 
+          name: deploying application to production
           command: |
             bash scripts/deploy.sh
   release_notes:
@@ -116,13 +116,13 @@ workflows:
       - build
       - tests:
           requires:
-            - build   
+            - build
       - deploy_staging:
           requires:
             - tests
           filters:
             branches:
-              only: develop 
+              only: develop
       - deploy_production:
           requires:
             - tests
