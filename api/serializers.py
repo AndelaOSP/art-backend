@@ -94,10 +94,10 @@ class AssetSerializer(serializers.ModelSerializer):
                   'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
-                  'notes', 'assigned_to',
+                  'notes', 'assigned_to', 'asset_location'
                   )
         depth = 1
-        read_only_fields = ("uuid",)
+        read_only_fields = ("uuid", "asset_location")
 
     def get_checkin_status(self, obj):
         try:
