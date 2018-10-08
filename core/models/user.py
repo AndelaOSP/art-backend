@@ -54,6 +54,7 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     password = models.CharField(max_length=128, blank=True, null=True)
+    location = models.ForeignKey('AndelaCentre', blank=True, null=True, on_delete=models.PROTECT)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cohort', 'slack_handle']
