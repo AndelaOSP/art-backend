@@ -209,6 +209,15 @@ class AssetIncidentReportViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(submitted_by=self.request.user)
 
+
+class AssetSlackIncidentReportViewSet(ModelViewSet):
+    serializer_class = AssetIncidentReportSerializer
+    queryset = AssetIncidentReport.objects.all()
+    http_method_names = ['post']
+
+    def perform_create(self, serializer):
+        serializer.save(submitted_by=self.request.user)
+
     def create(self, request, *args, **kwargs):
         if (
             self.request.data.get('command', None) is None) and \
@@ -219,8 +228,7 @@ class AssetIncidentReportViewSet(ModelViewSet):
                 raise serializers.ValidationError(err.error_dict)
             return response
         else:
-            bot = slack.send_incidence_report(
-                self.request.data, Asset.objects.all())
+            bot = slack.send_incidence_report(self.request.data, Asset, AssetIncidentReport, User)
             if bot:
                 return Response(status=status.HTTP_200_OK)
 
