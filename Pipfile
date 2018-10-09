@@ -20,6 +20,7 @@ firebase-admin = "*"
 django-dotenv = "*"
 whitenoise = "==3.3.1"
 tqdm = "*"
+coverage = "*"
 
 [dev-packages]
 coverage = "*"
