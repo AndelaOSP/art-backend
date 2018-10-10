@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
-            'slack_handle', 'picture', 'phone_number',
+            'slack_handle', 'location', 'picture', 'phone_number',
             'allocated_asset_count', 'last_modified', 'date_joined',
             'last_login'
         )

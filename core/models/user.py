@@ -50,6 +50,7 @@ class User(AbstractUser):
     cohort = models.IntegerField(blank=True, null=True)
     slack_handle = models.CharField(max_length=50,
                                     blank=True, null=True)
+    location = models.CharField(max_length=15, default='Kenya')
     picture = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
