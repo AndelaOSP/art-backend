@@ -5,6 +5,8 @@ from rest_framework.exceptions import ValidationError
 class OfficeBlock(models.Model):
     name = models.CharField(max_length=50,
                             blank=False, null=False, unique=True)
+    location = models.ForeignKey(
+        'AndelaCentre', on_delete=models.PROTECT, null=True, editable=True)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -18,6 +20,7 @@ class OfficeBlock(models.Model):
 
     class Meta:
         verbose_name = "Office Block"
+        unique_together = (('name', 'location'),)
 
     def __str__(self):
         return self.name
