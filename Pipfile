@@ -1,0 +1,32 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+python-decouple = "*"
+dj-database-url = "*"
+django-jet = "*"
+djangorestframework = "==3.7.7"
+django-oauth-toolkit = "==1.0.0"
+drf-yasg = "*"
+django-cors-headers = "*"
+django-filter = "*"
+django-debug-toolbar = "*"
+"psycopg2" = "*"
+slackclient = "*"
+firebase-admin = "*"
+django-dotenv = "*"
+whitenoise = "==3.3.1"
+tqdm = "*"
+coverage = "*"
+coveralls = "*"
+
+[dev-packages]
+coverage = "*"
+coveralls = "*"
+"flake8" = "*"
+
+[requires]
+python_version = "3.6.4"

@@ -8,8 +8,6 @@ This repository contains the API endpoints and models for the ART project implem
 ## Setup
 
 ### Getting Started
-- Create the project virtual environment:
-> $ mkvirtualenv python -p python3  art-backend
 
 - Clone the repository:
 > $ git clone https://github.com/AndelaOSP/art-backend.git
@@ -18,11 +16,12 @@ This repository contains the API endpoints and models for the ART project implem
 > $ cd art-backend
 
 ### Set up environment variables
-- To set up environment variables, define the following in your virtual environment postactivate file or `.env` file:
+- To set up environment variables, define the following in a `.env` file:
 
 > DATABASE_URL -  Configuration to connect to project's database in [this](https://github.com/kennethreitz/dj-database-url#url-schema) format. Example; postgres://postgres@127.0.0.1:5432/art
 
 > SECRET_KEY - String of random characters used to provide cryptographic signing for [Django](https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY) project. Example; '1z5266&fgkvvdia5cnss50=t38dxr5894a3*-*m3wmv+7v@fh@'
+
 
 > PROJECT_ID - Project's identifier on firebase.
 
@@ -35,22 +34,31 @@ This repository contains the API endpoints and models for the ART project implem
 > ASSET_LIMIT - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack.
 
 - To set up the pre-commit Git hooks with the standard styling conventions, follow the instructions on the Wiki [here](https://github.com/AndelaOSP/art-backend/wiki/Styling-Conventions).
+
+### Access app on local dev environment
+- There are 3 ways to do this:
+
+1. Bash script
+  ```.install_art.sh```
+2. Docker setup found [here](https://github.com/AndelaOSP/art-backend/#local-development-docker-setup)
+3. Manual setup
+
+For the manual setup:
+
 ### Dependencies
 - Install the project dependencies:
-> $ pip install -r requirements.txt
-
-### Testing
-- To run tests:
-> $ python manage.py test
+> $ pipenv install
+> $ pipenv shell
 
 ### Set up Database
 - Create a database:
 > $ createdb db_name
-
-- Run migrations:
+- Run migrations
 > $ python manage.py migrate
 
 ### Running the app
+- To run tests:
+> $ python manage.py test
 - Run the app:
 > $ python manage.py runserver
 
