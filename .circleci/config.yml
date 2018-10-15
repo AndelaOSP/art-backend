@@ -30,7 +30,7 @@ cmd_install_requirements: &cmd_install_requirements
     name: install application requirements
     command: |
       sudo pip install pipenv
-      pipenv install
+      pipenv install -v -d
 cmd_save_cache: &cmd_save_cache
   save_cache:
     key: deps9-{{ .Branch }}-
@@ -61,7 +61,7 @@ jobs:
       - run:
           name: pep8 checks on project
           command: |
-            pipenv run "flake8 ."
+            pipenv run flake8 .
   tests:
     <<: *default
     steps:
