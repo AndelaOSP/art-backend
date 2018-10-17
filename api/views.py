@@ -1,17 +1,22 @@
 import csv
 import codecs
+import os
+import re
 from itertools import chain
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
+from django.http import FileResponse
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
@@ -381,9 +386,40 @@ class AssetsImportViewSet(APIView):
 
         file_obj = codecs.iterdecode(file_obj, 'utf-8')
         csv_reader = csv.DictReader(file_obj, delimiter=",")
-        save_asset(csv_reader)
+        skipped_file_name = self.request.user.email
+        file_name = re.search(r'\w+', skipped_file_name).group()
+        response = {}
 
-        return Response(data={"saved": "Assets Saved"}, status=200)
+        error = False
+
+        if not save_asset(csv_reader, file_name):
+
+            path = request.build_absolute_uri(reverse('skipped'))
+
+            response['fail'] = "Some assets were skipped." \
+                               " Download the skipped assets file from"
+            response['file'] = "{}".format(path)
+
+            error = True
+
+        response['success'] = "Asset import completed successfully "
+        if error:
+            response['success'] += "Assets that have not been imported have been written to a file."
+        return Response(data=response, status=200)
+
+
+class SkippedAssets(APIView):
+    def get(self, request):
+        filename = os.path.join(settings.BASE_DIR,
+                                "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group()))
+
+        # send file
+
+        file = open(filename, 'rb')
+        response = FileResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="SkippedAssets.csv"'
+
+        return response
 
 
 class AndelaCentreViewset(ModelViewSet):
