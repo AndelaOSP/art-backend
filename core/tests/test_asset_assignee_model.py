@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 
 from core.models import AssetAssignee, Department, OfficeFloorSection, \
-    OfficeFloor, OfficeBlock, OfficeWorkspace
+    OfficeFloor, OfficeBlock, OfficeWorkspace, AndelaCentre
 from core.tests import CoreBaseTestCase
 
 from django.contrib.auth import get_user_model
@@ -19,7 +19,14 @@ class AssetAssigneeModelTest(CoreBaseTestCase):
             slack_handle='@test_user', password='devpassword'
         )
         self.department = Department.objects.create(name="Finance")
-        self.office_block = OfficeBlock.objects.create(name='Andela Tower')
+        self.centre = AndelaCentre.objects.create(
+            centre_name="Dojo",
+            country="Kenya"
+        )
+        self.office_block = OfficeBlock.objects.create(
+            name='Andela Tower',
+            location=self.centre
+        )
         self.office_floor = OfficeFloor.objects.create(
             block=self.office_block,
             number=14
