@@ -3,7 +3,7 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from ..models import OfficeBlock, OfficeFloor, OfficeFloorSection, \
-    OfficeWorkspace
+    OfficeWorkspace, AndelaCentre
 
 from core.tests import CoreBaseTestCase
 
@@ -20,8 +20,12 @@ class OfficeBlockModelTest(CoreBaseTestCase):
             slack_handle='tester', password='qwerty123'
         )
 
+        self.centre = AndelaCentre.objects.create(
+            centre_name="Dojo", country="Kenya")
+
         self.office_block = OfficeBlock.objects.create(
-            name="Block A"
+            name="Block A",
+            location=self.centre
         )
 
         self.office_floor = OfficeFloor.objects.create(
@@ -48,8 +52,13 @@ class OfficeBlockModelTest(CoreBaseTestCase):
     def test_add_new_office_block(self):
         """Test add new office block"""
         self.assertEqual(self.all_office_blocks.count(), 1)
-        new_office_block = OfficeBlock(name="Block B")
+        new_office_block = OfficeBlock(name="Block B", location=self.centre)
         new_office_block.save()
+        self.assertEqual(self.all_office_blocks.count(), 2)
+
+        """Test add similar named block in diff centers."""
+        other_center = AndelaCentre(centre_name="Towers", country="Uganda")
+        other_center.save()
         self.assertEqual(self.all_office_blocks.count(), 2)
 
     def test_add_new_office_floor(self):
@@ -85,7 +94,8 @@ class OfficeBlockModelTest(CoreBaseTestCase):
         with transaction.atomic():
             with self.assertRaises(ValidationError):
                 new_office_block = OfficeBlock.objects.create(
-                    name="Block A"
+                    name="Block A",
+                    location=self.centre
                 )
                 new_office_block.save()
         self.assertEqual(self.all_office_blocks.count(), 1)
