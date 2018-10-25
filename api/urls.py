@@ -15,7 +15,7 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet, \
     OfficeBlockViewSet, OfficeFloorViewSet, OfficeFloorSectionViewSet, \
     GroupViewSet, OfficeWorkspaceViewSet, DepartmentViewSet, \
-    AssetAssigneeViewSet, AssetsImportViewSet, AndelaCentreViewset
+    AssetAssigneeViewSet, AssetsImportViewSet, AndelaCentreViewset, SkippedAssets
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -78,7 +78,8 @@ urlpatterns = [
         extra_context={'api_version': 'V1'}),
         name='api-version-index'
     ),
-    path('upload/', AssetsImportViewSet.as_view(), name='import-assets')
+    path('upload/', AssetsImportViewSet.as_view(), name='import-assets'),
+    path('skipped/', SkippedAssets.as_view(), name='skipped')
 ]
 if os.getenv('APP_ENV'):
     urlpatterns.extend([
