@@ -14,12 +14,13 @@ from core.models.department import Department
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     allocated_asset_count = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
-            'slack_handle', 'location', 'picture', 'phone_number',
+            'slack_handle', 'picture', 'phone_number', 'location',
             'allocated_asset_count', 'last_modified', 'date_joined',
             'last_login'
         )
@@ -36,6 +37,14 @@ class UserSerializer(serializers.ModelSerializer):
             obj.first_name,
             obj.last_name
         )
+
+    def get_location(self, obj):
+        if isinstance(obj, User) and obj.location:
+            return obj.location.centre_name
+        elif isinstance(obj, AssetAssignee) and obj.user.location:
+            return obj.user.location.centre_name
+        else:
+            return 'No location'
 
     def get_allocated_asset_count(self, obj):
         """Return the number of assets allocated to a user.
