@@ -120,6 +120,9 @@ workflows:
       - deploy_staging:
           requires:
             - tests
+          filters:
+            branches:
+              only: develop
       - deploy_production:
           requires:
             - tests
