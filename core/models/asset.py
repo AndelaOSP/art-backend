@@ -24,6 +24,17 @@ ASSET_STATUSES = (
     (LOST, "Lost"),
     (DAMAGED, "Damaged")
 )
+KENYA = "Kenya"
+NIGERIA = "Nigeria"
+RWANDA = "Rwanda"
+UGANDA = "Uganda"
+
+COUNTRIES = (
+    (KENYA, "Kenya"),
+    (NIGERIA, "Nigeria"),
+    (RWANDA, "Rwanda"),
+    (UGANDA, "Uganda"),
+)
 
 CHECKIN = "Checkin"
 CHECKOUT = "Checkout"
@@ -517,7 +528,9 @@ class AssetIncidentReport(models.Model):
 
 class AndelaCentre(models.Model):
     centre_name = models.CharField(max_length=25, unique=True, null=False, blank=False)
-    country = models.CharField(max_length=25, null=False, blank=False)
+    country = models.CharField(
+        max_length=25, null=False, blank=False, choices=COUNTRIES
+    )
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 

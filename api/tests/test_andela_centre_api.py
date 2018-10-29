@@ -3,7 +3,7 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
-from core.models import User, AndelaCentre
+from core.models import User, AndelaCentre, KENYA, NIGERIA
 
 from api.tests import APIBaseTestCase
 
@@ -20,7 +20,7 @@ class AndelaCentreAPITest(APIBaseTestCase):
             slack_handle='tester', password='qwerty123'
         )
 
-        self.country = AndelaCentre.objects.create(country="Nairobi")
+        self.country = AndelaCentre.objects.create(country=KENYA)
         self.centre = AndelaCentre.objects.create(centre_name="The dojo", country=self.country)
         self.centre_url = reverse('andela-centres-list')
         self.token_user = 'testToken'
@@ -36,7 +36,7 @@ class AndelaCentreAPITest(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin.email}
         data = {
             "centre_name": "ET",
-            "country": "Nigeria"
+            "country": NIGERIA
         }
         response = client.post(
             self.centre_url,
@@ -50,7 +50,7 @@ class AndelaCentreAPITest(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin.email}
         data = {
             "centre_name": "The dojo",
-            "country": "Nairobi"
+            "country": KENYA
         }
         response = client.post(
             self.centre_url,
@@ -84,7 +84,7 @@ class AndelaCentreAPITest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         data = {
             "centre_name": "New York",
-            "country": "USA"
+            "country": NIGERIA
         }
 
         res = client.post(
