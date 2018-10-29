@@ -40,9 +40,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_location(self, obj):
         if isinstance(obj, User) and obj.location:
-            return obj.location.country
+            return obj.location.centre_name
         elif isinstance(obj, AssetAssignee) and obj.user.location:
-            return obj.user.location.country
+            return obj.user.location.centre_name
         else:
             return 'No location'
 
