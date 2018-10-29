@@ -117,12 +117,12 @@ workflows:
       - tests:
           requires:
             - build
-      - deploy_staging:
-          requires:
-            - tests
-          filters:
-            branches:
-              only: develop
+      - deploy_staging
+          # requires:
+          #   - tests
+          # filters:
+          #   branches:
+          #     only: develop
       - deploy_production:
           requires:
             - tests
