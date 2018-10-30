@@ -5,7 +5,7 @@ from django.conf.urls import include
 from django.urls import path
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-
+from django.conf import settings
 
 from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     AssetLogViewSet, UserFeedbackViewSet, AssetStatusViewSet, \
@@ -81,7 +81,7 @@ urlpatterns = [
     path('upload/', AssetsImportViewSet.as_view(), name='import-assets'),
     path('skipped/', SkippedAssets.as_view(), name='skipped')
 ]
-if os.getenv('APP_ENV'):
+if settings.DEBUG:
     urlpatterns.extend([
         path('docs/', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
         path('docs/live/', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger')
