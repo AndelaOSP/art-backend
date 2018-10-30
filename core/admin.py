@@ -14,7 +14,8 @@ from .models.asset import (
     AssetModelNumber,
     AllocationHistory,
     AssetIncidentReport,
-    AssetSpecs)
+    AssetSpecs,
+    AndelaCentre)
 from .models.department import Department
 from .models.user import SecurityUser, UserFeedback
 from .models.officeblock import OfficeBlock, \
@@ -32,6 +33,7 @@ admin.site.register(
         AssetLog,
         AssetIncidentReport,
         AssetSpecs, OfficeBlock,
+        AndelaCentre
     ]
 )
 

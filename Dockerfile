@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.6.4
 LABEL MAINTAINER="Collins Macharia <collins.macharia@andela.com>"
 LABEL application="artbackend"
 
@@ -20,9 +20,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
 COPY . .
+RUN pip install pipenv
+RUN pipenv lock -r > requirements.txt
+RUN pip install -r requirements.txt
 
 EXPOSE 8080
 RUN python manage.py collectstatic --noinput

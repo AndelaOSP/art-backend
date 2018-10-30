@@ -2,7 +2,8 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
-from core.models import OfficeBlock, OfficeFloorSection, OfficeFloor, User
+from core.models import OfficeBlock, OfficeFloorSection, OfficeFloor, \
+    User, AndelaCentre
 
 from api.tests import APIBaseTestCase
 
@@ -18,8 +19,13 @@ class OfficeFloorSectionAPITest(APIBaseTestCase):
             email='testuser@gmail.com', cohort=19,
             slack_handle='tester', password='qwerty123'
         )
+        self.centre = AndelaCentre.objects.create(
+            centre_name="Dojo",
+            country="Kenya"
+        )
         self.building = OfficeBlock.objects.create(
-            name="Block A"
+            name="Block A",
+            location=self.centre
         )
         self.floor = OfficeFloor.objects.create(
             number=1,

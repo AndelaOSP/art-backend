@@ -24,6 +24,17 @@ ASSET_STATUSES = (
     (LOST, "Lost"),
     (DAMAGED, "Damaged")
 )
+KENYA = "Kenya"
+NIGERIA = "Nigeria"
+RWANDA = "Rwanda"
+UGANDA = "Uganda"
+
+COUNTRIES = (
+    (KENYA, "Kenya"),
+    (NIGERIA, "Nigeria"),
+    (RWANDA, "Rwanda"),
+    (UGANDA, "Uganda"),
+)
 
 CHECKIN = "Checkin"
 CHECKOUT = "Checkout"
@@ -515,6 +526,23 @@ class AssetIncidentReport(models.Model):
         ordering = ['-id']
 
 
+class AndelaCentre(models.Model):
+    centre_name = models.CharField(max_length=25, unique=True, null=False, blank=False)
+    country = models.CharField(
+        max_length=25, null=False, blank=False, choices=COUNTRIES
+    )
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, editable=False)
+
+    objects = CaseInsensitiveManager()
+
+    class Meta:
+        verbose_name_plural = 'Andela Centres'
+
+    def __str__(self):
+        return self.centre_name
+
+
 @receiver(post_save, sender=AssetStatus)
 def set_current_asset_status(sender, **kwargs):
     asset_status = kwargs.get('instance')
@@ -532,7 +560,7 @@ def check_asset_limit(sender, **kwargs):
     available_assets = Asset.objects.filter(
         current_status='Available', model_number=model_number
     ).count()
-    if available_assets <= int(os.environ.get('ASSET_LIMIT')):
+    if available_assets <= int(os.environ.get('ASSET_LIMIT', 0)):
         message = "Warning!! The number of available {} ".format(
             model_number) + " is {}".format(available_assets)
         slack.send_message(message)

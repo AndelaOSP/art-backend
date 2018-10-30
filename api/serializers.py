@@ -6,7 +6,7 @@ from core.models import (
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
     AssetAssignee, AssetCondition, AssetIncidentReport, AssetSpecs,
-    OfficeBlock, OfficeFloor, OfficeFloorSection, OfficeWorkspace
+    OfficeBlock, OfficeFloor, OfficeFloorSection, OfficeWorkspace, AndelaCentre
 )
 from core.models.department import Department
 
@@ -89,7 +89,8 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category', 'make_label',
+        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category',
+                  'make_label',
                   'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
@@ -200,7 +201,8 @@ class AssetLogSerializer(serializers.ModelSerializer):
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFeedback
-        fields = ("reported_by", "message", "report_type", "created_at", "resolved")
+        fields = ("reported_by", "message", "report_type", "created_at",
+                  "resolved")
         read_only_fields = ("reported_by", "resolved")
 
     def to_representation(self, instance):
@@ -462,7 +464,7 @@ class UserGroupSerializer(serializers.ModelSerializer):
 class OfficeBlockSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfficeBlock
-        fields = ("name", "id",)
+        fields = ("name", "id", "location",)
 
 
 class OfficeFloorSerializer(serializers.ModelSerializer):
@@ -496,3 +498,10 @@ class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
         fields = ("name", "id",)
+
+
+class AndelaCentreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AndelaCentre
+        fields = ("id", "centre_name", "country", "created_at",
+                  "last_modified")
