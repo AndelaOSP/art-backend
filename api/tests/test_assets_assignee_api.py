@@ -6,7 +6,7 @@ from core.models import (
     User, AssetAssignee, Department, OfficeBlock,
     OfficeFloor, OfficeFloorSection, AssetCategory, OfficeWorkspace,
     AssetSubCategory, AssetType, AssetMake, AssetModelNumber, Asset,
-    AllocationHistory,
+    AllocationHistory, AndelaCentre,
 )
 
 from api.tests import APIBaseTestCase
@@ -24,7 +24,14 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         )
 
         self.department = Department.objects.create(name="Finance")
-        self.office_block = OfficeBlock.objects.create(name='Andela Tower')
+        self.centre = AndelaCentre.objects.create(
+            centre_name="Dojo",
+            country="Kenya"
+        )
+        self.office_block = OfficeBlock.objects.create(
+            name='Andela Tower',
+            location=self.centre
+        )
         self.office_floor = OfficeFloor.objects.create(
             block=self.office_block,
             number=14

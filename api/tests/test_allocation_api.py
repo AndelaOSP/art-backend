@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 from core.models import Asset, AssetModelNumber, SecurityUser, \
     AllocationHistory, AssetCategory, AssetSubCategory, AssetType, \
     AssetMake, AssetAssignee, Department, OfficeWorkspace,\
-    OfficeBlock, OfficeFloor, OfficeFloorSection
+    OfficeBlock, OfficeFloor, OfficeFloorSection, AndelaCentre
 from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
@@ -55,7 +55,10 @@ class AllocationTestCase(APIBaseTestCase):
             phone_number="254720900900",
             badge_number="AE23"
         )
-        self.office_block = OfficeBlock.objects.create(name="Epic Tower")
+        self.centre = AndelaCentre.objects.create(
+            centre_name="Dojo", country="Kenya")
+        self.office_block = OfficeBlock.objects.create(
+            name="Epic Tower", location=self.centre)
         self.office_floor = OfficeFloor.objects.create(
             number=7,
             block=self.office_block

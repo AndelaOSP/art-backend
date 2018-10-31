@@ -1,22 +1,33 @@
+import csv
+import codecs
+import os
+import re
 from itertools import chain
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
+from django.http import FileResponse
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.reverse import reverse
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
+from rest_framework.filters import OrderingFilter
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import AssetFilter, UserFilter
+from core.assets_saver_helper import save_asset
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
-    AssetIncidentReport, AssetSpecs, AssetAssignee
+    AssetIncidentReport, AssetSpecs, AssetAssignee, AndelaCentre
 from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
@@ -33,7 +44,7 @@ from .serializers import UserSerializerWithAssets, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
     OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
     OfficeWorkspaceSerializer, DepartmentSerializer, \
-    AssetAssigneeSerializer
+    AssetAssigneeSerializer, AndelaCentreSerializer
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -156,6 +167,8 @@ class AssetCategoryViewSet(ModelViewSet):
     queryset = AssetCategory.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filter_backends = (OrderingFilter,)
+    ordering = ('category_name',)
     http_method_names = ['get', 'post']
 
 
@@ -164,6 +177,8 @@ class AssetSubCategoryViewSet(ModelViewSet):
     queryset = AssetSubCategory.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filter_backends = (OrderingFilter,)
+    ordering = ('sub_category_name',)
     http_method_names = ['get', 'post']
 
 
@@ -172,6 +187,8 @@ class AssetTypeViewSet(ModelViewSet):
     queryset = AssetType.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filter_backends = (OrderingFilter,)
+    ordering = ('asset_type',)
     http_method_names = ['get', 'post']
 
 
@@ -180,6 +197,8 @@ class AssetModelNumberViewSet(ModelViewSet):
     queryset = AssetModelNumber.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
+    filter_backends = (OrderingFilter,)
+    ordering = ('model_number',)
     http_method_names = ['get', 'post']
 
 
@@ -188,6 +207,8 @@ class AssetMakeViewSet(ModelViewSet):
     queryset = AssetMake.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
+    filter_backends = (OrderingFilter,)
+    ordering = ('make_label',)
     http_method_names = ['get', 'post']
 
 
@@ -367,6 +388,68 @@ class OfficeWorkspaceViewSet(ModelViewSet):
 class DepartmentViewSet(ModelViewSet):
     serializer_class = DepartmentSerializer
     queryset = Department.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+
+class AssetsImportViewSet(APIView):
+    parser_classes = (MultiPartParser,)
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request):  # noqa
+        file_obj = request.data.get('file')
+        if not file_obj:
+            # file_obj is none so return error
+            return Response({"error": "Csv file to import from not provided"}, status=400)
+
+        file_obj = codecs.iterdecode(file_obj, 'utf-8')
+        csv_reader = csv.DictReader(file_obj, delimiter=",")
+        skipped_file_name = self.request.user.email
+        file_name = re.search(r'\w+', skipped_file_name).group()
+        response = {}
+
+        error = False
+
+        if not save_asset(csv_reader, file_name):
+
+            path = request.build_absolute_uri(reverse('skipped'))
+
+            response['fail'] = "Some assets were skipped." \
+                               " Download the skipped assets file from"
+            response['file'] = "{}".format(path)
+
+            error = True
+
+        response['success'] = "Asset import completed successfully "
+        if error:
+            response['success'] += "Assets that have not been imported have been written to a file."
+        return Response(data=response, status=200)
+
+
+class SkippedAssets(APIView):
+    def get(self, request):
+        filename = os.path.join(settings.BASE_DIR,
+                                "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group()))
+
+        # send file
+
+        file = open(filename, 'rb')
+        response = FileResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="SkippedAssets.csv"'
+
+        return response
+
+
+class AndelaCentreViewset(ModelViewSet):
+    serializer_class = AndelaCentreSerializer
+    queryset = AndelaCentre.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put', 'delete']
