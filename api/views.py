@@ -318,7 +318,7 @@ class GroupViewSet(ModelViewSet):
             name = " ".join(serializer.validated_data.get(
                 'name').title().split())
             serializer.save(name=name)
-        except IntegrityError as error:
+        except IntegrityError:
             raise serializers.ValidationError(
                 {"message": "{} already exist".format(name)})
 
