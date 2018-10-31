@@ -68,11 +68,10 @@ class SlackIntegration(object):
 
     def send_incidence_report(self, incidence_report, Asset, AssetIncidentReport, User):
         """Sends incidence report from slack using a slash command"""
-    
+
         if incidence_report.get('payload') is None:
             channel_id = incidence_report.get('channel_id')
             user_id = incidence_report.get('user_id')
-            user_email = self.get_user_slack_email(user_id)
             self.slack_client.api_call(
                 "chat.postEphemeral",
                 username='Art-incidence-report',
@@ -190,16 +189,16 @@ class SlackIntegration(object):
 
         if payload['type'] == 'dialog_submission':
             report = AssetIncidentReport()
-            report.asset=Asset.objects.get(id=int(payload['submission']['asset']))
-            report.incident_type=payload['submission']['incident_type']
-            report.incident_location=payload['submission']['incident_location']
-            report.incident_description=payload['submission']['incident_description']
-            report.police_abstract_obtained=payload['submission']['police_abstract_obtained']
-            report.submitted_by=User.objects.get(email=self.user_email)
+            report.asset = Asset.objects.get(id=int(payload['submission']['asset']))
+            report.incident_type = payload['submission']['incident_type']
+            report.incident_location = payload['submission']['incident_location']
+            report.incident_description = payload['submission']['incident_description']
+            report.police_abstract_obtained = payload['submission']['police_abstract_obtained']
+            report.submitted_by = User.objects.get(email=self.user_email)
             report.save()
             if report:
                 smile = ":simple_smile::simple_smile::simple_smile:"
-                call = self.slack_client.api_call(
+                self.slack_client.api_call(
                     "chat.postEphemeral",
                     username='Art-incidence-report',
                     channel=payload['channel']['id'],
