@@ -66,6 +66,7 @@ class SlackIntegration(object):
             logging.info("User not found")
             return None
 
+    # flake8: noqa
     def send_incidence_report(self, incidence_report, Asset, AssetIncidentReport, User):
         """Sends incidence report from slack using a slash command"""
 
