@@ -32,6 +32,7 @@ from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
 from core.models.department import Department
+from core.slack_bot import SlackIntegration
 from .serializers import UserSerializerWithAssets, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
@@ -47,6 +48,7 @@ from .serializers import UserSerializerWithAssets, \
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
+slack = SlackIntegration()
 
 
 class UserViewSet(ModelViewSet):
@@ -230,6 +232,29 @@ class AssetIncidentReportViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(submitted_by=self.request.user)
+
+
+class AssetSlackIncidentReportViewSet(ModelViewSet):
+    serializer_class = AssetIncidentReportSerializer
+    queryset = AssetIncidentReport.objects.all()
+    http_method_names = ['post']
+
+    def perform_create(self, serializer):
+        serializer.save(submitted_by=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        if (
+            self.request.data.get('command', None) is None) and \
+                (self.request.data.get('payload', None) is None):
+            try:
+                response = super().create(request, *args, **kwargs)
+            except ValidationError as err:
+                raise serializers.ValidationError(err.error_dict)
+            return response
+        else:
+            bot = slack.send_incidence_report(self.request.data, Asset, AssetIncidentReport, User)
+            if bot:
+                return Response(status=status.HTTP_200_OK)
 
 
 class AssetHealthCountViewSet(ModelViewSet):
