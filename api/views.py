@@ -80,6 +80,9 @@ class ManageAssetViewSet(ModelViewSet):
             raise serializers.ValidationError(err.error_dict)
         return response
 
+    def perform_create(self, serializer):
+        serializer.save(asset_location=self.request.user.location)
+
 
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer

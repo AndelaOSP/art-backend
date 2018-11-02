@@ -276,6 +276,8 @@ class Asset(models.Model):
     serial_number = models.CharField(
         unique=True, null=True, blank=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    asset_location = models.ForeignKey('AndelaCentre', blank=True, editable=True, null=True,
+                                       on_delete=models.PROTECT)
     purchase_date = models.DateField(
         validators=[validate_date],
         null=True, blank=True)
