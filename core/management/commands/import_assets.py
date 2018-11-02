@@ -44,7 +44,7 @@ def record_errors(row, row_count, object_error):
     SKIPPED_ROWS.append(row)
 
 
-def write_skipped_records(records):
+def write_skipped_records(records, filename=None):
     fieldnames = (
         "Row",
         "Category",
@@ -64,11 +64,15 @@ def write_skipped_records(records):
         "Notes",
         "Error",
     )
+    if filename:
+        global SKIPPED_ASSETS_FILE
+        SKIPPED_ASSETS_FILE = os.path.join(settings.BASE_DIR, "SkippedAssets/{}.csv".format(filename))
     with open(SKIPPED_ASSETS_FILE, "w") as skipped_file:
         writer = csv.DictWriter(skipped_file, delimiter=",", fieldnames=fieldnames)
         writer.writeheader()
         for row in records:
             row["Error"] = set(row["Error"])
+            del(row[""])
             writer.writerow(row)
 
 

@@ -9,7 +9,7 @@ import django.db.models.deletion
 User = get_user_model()
 
 def populate_asset_assignee(apps, schema_editor):
-    for user in User.objects.all():
+    for user in User.objects.defer('location'):
         user.save()
 
     Department = apps.get_model('core', 'Department')

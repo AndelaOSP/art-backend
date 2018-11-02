@@ -2,7 +2,7 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
-from core.models import OfficeBlock, User
+from core.models import OfficeBlock, User, AndelaCentre
 
 from api.tests import APIBaseTestCase
 
@@ -18,9 +18,14 @@ class OfficeBlockAPITest(APIBaseTestCase):
             email='testuser@gmail.com', cohort=19,
             slack_handle='tester', password='qwerty123'
         )
-
+        self.centre = AndelaCentre.objects.create(
+            centre_name="Dojo",
+            country="Kenya"
+        )
+        self.centre.save()
         self.building = OfficeBlock.objects.create(
-            name="Block A"
+            name="Block A",
+            location=self.centre
         )
         self.office_block_url = reverse('office-blocks-list')
         self.token_user = 'testtoken'
@@ -36,6 +41,7 @@ class OfficeBlockAPITest(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin.email}
         data = {
             "name": "Block B",
+            "location": self.centre.id
         }
         response = client.post(
             self.office_block_url,
@@ -49,12 +55,12 @@ class OfficeBlockAPITest(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin.email}
         data = {
             "name": "Block A",
+            "location": self.centre.id
         }
         response = client.post(
             self.office_block_url,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn("name", response.data.keys())
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')

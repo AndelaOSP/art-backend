@@ -14,12 +14,13 @@ from core.models.department import Department
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     allocated_asset_count = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
-            'slack_handle', 'picture', 'phone_number',
+            'slack_handle', 'picture', 'phone_number', 'location',
             'allocated_asset_count', 'last_modified', 'date_joined',
             'last_login'
         )
@@ -36,6 +37,14 @@ class UserSerializer(serializers.ModelSerializer):
             obj.first_name,
             obj.last_name
         )
+
+    def get_location(self, obj):
+        if isinstance(obj, User) and obj.location:
+            return obj.location.centre_name
+        elif isinstance(obj, AssetAssignee) and obj.user.location:
+            return obj.user.location.centre_name
+        else:
+            return 'No location'
 
     def get_allocated_asset_count(self, obj):
         """Return the number of assets allocated to a user.
@@ -89,7 +98,8 @@ class AssetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category', 'make_label',
+        fields = ('id', 'uuid', 'asset_category', 'asset_sub_category',
+                  'make_label',
                   'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
@@ -200,7 +210,8 @@ class AssetLogSerializer(serializers.ModelSerializer):
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFeedback
-        fields = ("reported_by", "message", "report_type", "created_at", "resolved")
+        fields = ("reported_by", "message", "report_type", "created_at",
+                  "resolved")
         read_only_fields = ("reported_by", "resolved")
 
     def to_representation(self, instance):
@@ -462,7 +473,7 @@ class UserGroupSerializer(serializers.ModelSerializer):
 class OfficeBlockSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfficeBlock
-        fields = ("name", "id",)
+        fields = ("name", "id", "location",)
 
 
 class OfficeFloorSerializer(serializers.ModelSerializer):
@@ -501,4 +512,5 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class AndelaCentreSerializer(serializers.ModelSerializer):
     class Meta:
         model = AndelaCentre
-        fields = ("id", "centre_name", "country", "created_at", "last_modified")
+        fields = ("id", "centre_name", "country", "created_at",
+                  "last_modified")

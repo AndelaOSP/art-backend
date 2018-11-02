@@ -1,23 +1,29 @@
 import csv
 import codecs
+import os
+import re
 from itertools import chain
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
+from django.http import FileResponse
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
 from rest_framework.filters import OrderingFilter
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import AssetFilter, UserFilter
+from core.assets_saver_helper import save_asset
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
@@ -315,7 +321,7 @@ class GroupViewSet(ModelViewSet):
             name = " ".join(serializer.validated_data.get(
                 'name').title().split())
             serializer.save(name=name)
-        except IntegrityError as error:
+        except IntegrityError:
             raise serializers.ValidationError(
                 {"message": "{} already exist".format(name)})
 
@@ -380,70 +386,43 @@ class AssetsImportViewSet(APIView):
         if not file_obj:
             # file_obj is none so return error
             return Response({"error": "Csv file to import from not provided"}, status=400)
-        model_number = AssetModelNumber(
-            model_number=request.data.get('model_number'))
-
-        kwargs = {}
-
-        year_of_manufacture = request.data.get('year_of_manufacture')
-        processor_speed = request.data.get('processor_speed')
-        screen_size = request.data.get('screen_size')
-        processor_type = request.data.get('processor_type')
-        storage = request.data.get('storage')
-        memory = request.data.get('memory')
-
-        kwargs.update({'year_of_manufacture': year_of_manufacture,
-                       'processor_speed': processor_speed,
-                       'screen_size': screen_size,
-                       'processor_type': processor_type,
-                       'storage': storage,
-                       'memory': memory})
-
-        asset_specs = AssetSpecs.objects.get_or_create(**kwargs)
-
-        all_assets_codes = [x for x in Asset.objects.values_list("asset_code", flat=True) if x is not None]
-        all_assets_serial_number = [x for x in Asset.objects.values_list("serial_number", flat=True) if x is not None]
-
-        assets = []
-
-        skipped_assets = []
 
         file_obj = codecs.iterdecode(file_obj, 'utf-8')
-        csv_reader = csv.DictReader(file_obj)
+        csv_reader = csv.DictReader(file_obj, delimiter=",")
+        skipped_file_name = self.request.user.email
+        file_name = re.search(r'\w+', skipped_file_name).group()
+        response = {}
 
-        for pos, row in enumerate(csv_reader):
-            asset_code = row.get('Asset Code')
-            serial_number = row.get('Serial No')
-            notes = row.get('Notes')
+        error = False
 
-            if (asset_code in all_assets_codes) or (serial_number in all_assets_serial_number):
-                # Skip this asset since its in the DB already
-                skipped_assets.append(pos + 1)
-                continue
-            if asset_code is '' and serial_number is '':
-                # Skip this asset since no asset_code or serial_number is supplied
-                skipped_assets.append(pos + 1)
-                continue
+        if not save_asset(csv_reader, file_name):
 
-            assets.append(Asset(model_number=model_number, asset_code=asset_code, serial_number=serial_number,
-                                notes=notes, specs=asset_specs[0]))
-            '''
-                Since this asset_code/serial_number is not already in the db, it won't be in the all_assets_codes\
-                all_assets_serial_number lists and therefore an error would be
-                raised if we tried adding another asset latter in the file with the same asset_code/serial_number.
-            '''
-            if asset_code:
-                all_assets_codes.append(asset_code)
-            if serial_number:
-                all_assets_serial_number.append(serial_number)
+            path = request.build_absolute_uri(reverse('skipped'))
 
-        Asset.objects.bulk_create(assets)
-        data = {}
-        if len(skipped_assets) > 0:
-            data.update({"skipped_lines": skipped_assets})
-        data.update({"saved_assets": len(assets)})
+            response['fail'] = "Some assets were skipped." \
+                               " Download the skipped assets file from"
+            response['file'] = "{}".format(path)
 
-        return Response(data=data, status=200)
+            error = True
+
+        response['success'] = "Asset import completed successfully "
+        if error:
+            response['success'] += "Assets that have not been imported have been written to a file."
+        return Response(data=response, status=200)
+
+
+class SkippedAssets(APIView):
+    def get(self, request):
+        filename = os.path.join(settings.BASE_DIR,
+                                "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group()))
+
+        # send file
+
+        file = open(filename, 'rb')
+        response = FileResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="SkippedAssets.csv"'
+
+        return response
 
 
 class AndelaCentreViewset(ModelViewSet):

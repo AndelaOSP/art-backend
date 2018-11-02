@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
 from core.models import OfficeWorkspace, User, \
-    OfficeFloor, OfficeBlock, OfficeFloorSection
+    OfficeFloor, OfficeBlock, OfficeFloorSection, AndelaCentre
 
 from api.tests import APIBaseTestCase
 
@@ -19,9 +19,13 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
             email='testuser@gmail.com', cohort=19,
             slack_handle='tester', password='qwerty123'
         )
-
+        self.centre = AndelaCentre.objects.create(
+            centre_name="Dojo",
+            country="Kenya"
+        )
         self.building = OfficeBlock.objects.create(
-            name="Block A"
+            name="Block A",
+            location=self.centre
         )
         self.floor_number = OfficeFloor.objects.create(
             number=5,
