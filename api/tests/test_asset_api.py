@@ -105,6 +105,24 @@ class AssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_user_get_single_asset_via_asset_code(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn(self.asset.asset_code, response.data['results'][0]['asset_code'])
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_user_get_single_asset_via_serial_number(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn(self.asset.serial_number, response.data['results'][0]['serial_number'])
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_assets_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.put(
