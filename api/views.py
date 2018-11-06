@@ -441,8 +441,8 @@ class AssetsImportViewSet(APIView):
 
         response['success'] = "Asset import completed successfully "
         if error:
-            response['success'] +=
-            "Assets that have not been imported have been written to a file."
+            response['success'] += "Assets that have not been imported" \
+                "have been written to a file."
         return Response(data=response, status=200)
 
 
@@ -457,9 +457,8 @@ class SkippedAssets(APIView):
 
         file = open(filename, 'rb')
         response = FileResponse(file, content_type='text/csv')
-        response['Content-Disposition'] =
-        'attachment; filename="SkippedAssets.csv"'
-
+        response['Content-Disposition'] = 'attachment;' \
+            'filename="SkippedAssets.csv"'
         return response
 
 
