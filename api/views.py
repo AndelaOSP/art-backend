@@ -323,7 +323,17 @@ class SecurityUserViewSet(ModelViewSet):
     queryset = SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication, ]
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super(SecurityUserViewSet, self).update(request, *args, **kwargs)
 
 
 class AssetSpecsViewSet(ModelViewSet):
