@@ -95,14 +95,18 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         asset_assignee = AssetAssignee.objects.filter(user=user).first()
-        queryset = Asset.objects.filter(assigned_to=asset_assignee)
+        queryset = Asset.objects.filter(
+            assigned_to=asset_assignee,
+            asset_location=user.location)
 
         return queryset
 
     def get_object(self):
         user = self.request.user
+        user_location = self.request.user.location
         asset_assignee = AssetAssignee.objects.filter(user=user).first()
-        queryset = Asset.objects.filter(assigned_to=asset_assignee)
+        queryset = Asset.objects.filter(
+            assigned_to=asset_assignee, asset_location=user_location)
         obj = get_object_or_404(queryset, uuid=self.kwargs['pk'])
         return obj
 
@@ -252,7 +256,8 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
                 raise serializers.ValidationError(err.error_dict)
             return response
         else:
-            bot = slack.send_incidence_report(self.request.data, Asset, AssetIncidentReport, User)
+            bot = slack.send_incidence_report(
+                self.request.data, Asset, AssetIncidentReport, User)
             if bot:
                 return Response(status=status.HTTP_200_OK)
 
@@ -353,10 +358,13 @@ class GroupViewSet(ModelViewSet):
 
 class OfficeBlockViewSet(ModelViewSet):
     serializer_class = OfficeBlockSerializer
-    queryset = OfficeBlock.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
+
+    def get_queryset(self):
+        user_location = self.request.user.location
+        return OfficeBlock.objects.filter(location=user_location)
 
 
 class OfficeFloorViewSet(ModelViewSet):
@@ -410,7 +418,8 @@ class AssetsImportViewSet(APIView):
         file_obj = request.data.get('file')
         if not file_obj:
             # file_obj is none so return error
-            return Response({"error": "Csv file to import from not provided"}, status=400)
+            return Response(
+                {"error": "Csv file to import from not provided"}, status=400)
 
         file_obj = codecs.iterdecode(file_obj, 'utf-8')
         csv_reader = csv.DictReader(file_obj, delimiter=",")
@@ -432,20 +441,24 @@ class AssetsImportViewSet(APIView):
 
         response['success'] = "Asset import completed successfully "
         if error:
-            response['success'] += "Assets that have not been imported have been written to a file."
+            response['success'] +=
+            "Assets that have not been imported have been written to a file."
         return Response(data=response, status=200)
 
 
 class SkippedAssets(APIView):
     def get(self, request):
         filename = os.path.join(settings.BASE_DIR,
-                                "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group()))
+                                "SkippedAssets/{}.csv".
+                                format(re.search(r'\w+',
+                                       request.user.email).group()))
 
         # send file
 
         file = open(filename, 'rb')
         response = FileResponse(file, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="SkippedAssets.csv"'
+        response['Content-Disposition'] =
+        'attachment; filename="SkippedAssets.csv"'
 
         return response
 
