@@ -24,6 +24,7 @@ coveralls = "*"
 "psycopg2-binary" = "*"
 gunicorn = "*"
 gevent = "*"
+"flake8" = "*"
 
 [dev-packages]
 coverage = "*"

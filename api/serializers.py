@@ -92,7 +92,7 @@ class AssetSerializer(serializers.ModelSerializer):
     make_label = serializers.SerializerMethodField()
     asset_type = serializers.SerializerMethodField()
     asset_location = serializers.SlugRelatedField(many=False,
-                     slug_field='centre_name',
+                     slug_field='centre_name', required=False,
                      queryset=AndelaCentre.objects.all())
 
     model_number = serializers.SlugRelatedField(

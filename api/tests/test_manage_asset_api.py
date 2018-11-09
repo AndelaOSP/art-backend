@@ -11,7 +11,8 @@ from core.models import (Asset,
                          AssetMake,
                          AssetType,
                          AssetSubCategory,
-                         AssetCategory, AssetAssignee)
+                         AssetCategory, AssetAssignee,
+                         AndelaCentre)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -398,3 +399,58 @@ class ManageAssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('allocation_history', response.data.keys())
         self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_update_assets_location(
+            self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "asset_location": "Nairobi",
+            "model_number": self.assetmodel.model_number}
+        AndelaCentre.objects.create(
+            centre_name = "Nairobi",
+            country = "Kenya")
+        res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        
+        self.assertEqual(res.data.get('asset_location'), None)
+
+        client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+
+        response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+
+        self.assertEqual(response.data.get('asset_location'), "Nairobi")
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_cannot_update_assets_to_no_existing_location(
+        self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "asset_location": "Mombasa",
+            "model_number": self.assetmodel.model_number}
+        AndelaCentre.objects.create(
+            centre_name = "Nairobi",
+            country = "Kenya")
+        res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        
+        self.assertEqual(res.data.get('asset_location'), None)
+
+        res = client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(res.status_code, 400)
+
+        response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(response.data.get('asset_location'), None)
+
+        
+    
