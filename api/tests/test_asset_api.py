@@ -76,6 +76,7 @@ class AssetTestCase(APIBaseTestCase):
             phone_number="254720900900",
             badge_number="AE23"
         )
+        self.token_checked_by = "securityusertoken"
         self.asset_urls = reverse('assets-list')
 
     def test_non_authenticated_user_view_assets(self):
@@ -96,6 +97,17 @@ class AssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_securityuser_view_assets(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        response = client.get(
+            self.asset_urls,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
+        self.assertIn(self.asset.asset_code,
+                      response.data['results'][0].values())
+        self.assertEqual(len(response.data['results']), Asset.objects.count())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_user_get_single_asset(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
@@ -103,6 +115,42 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn(self.asset.asset_code, response.data.values())
         self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_user_get_single_asset_via_asset_code(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn(self.asset.asset_code, response.data['results'][0]['asset_code'])
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_securityuser_get_single_asset_via_asset_code(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        response = client.get(
+            "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.asset.asset_code, response.data['results'][0]['asset_code'])
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_user_get_single_asset_via_serial_number(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.user.email}
+        response = client.get(
+            "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn(self.asset.serial_number, response.data['results'][0]['serial_number'])
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_securityuser_get_single_asset_via_serial_number(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        response = client.get(
+            "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.asset.serial_number, response.data['results'][0]['serial_number'])
 
     @patch('api.authentication.auth.verify_id_token')
     def test_assets_api_endpoint_cant_allow_put(self, mock_verify_id_token):

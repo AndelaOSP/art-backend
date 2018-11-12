@@ -95,8 +95,15 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         asset_assignee = AssetAssignee.objects.filter(user=user).first()
-        queryset = Asset.objects.filter(assigned_to=asset_assignee)
-
+        query_filter = {"assigned_to": asset_assignee}
+        # filter through the query_parameters for serial_number and asset_code
+        for field in self.request.query_params:
+            if field == 'serial_number' or field == 'asset_code':
+                query_filter[field] = self.request.query_params.get(field)
+        # take off the asset_assignee when a security user is querying
+        if hasattr(self.request.user, "securityuser"):
+            del query_filter["assigned_to"]
+        queryset = Asset.objects.filter(**query_filter)
         return queryset
 
     def get_object(self):
