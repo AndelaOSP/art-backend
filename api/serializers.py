@@ -91,14 +91,15 @@ class AssetSerializer(serializers.ModelSerializer):
     asset_sub_category = serializers.SerializerMethodField()
     make_label = serializers.SerializerMethodField()
     asset_type = serializers.SerializerMethodField()
-    asset_location = serializers.SlugRelatedField(many=False,
-                     slug_field='centre_name', required=False,
-                     queryset=AndelaCentre.objects.all())
+    asset_location = serializers.SlugRelatedField(
+        many=False,
+        slug_field='centre_name', required=False,
+        queryset=AndelaCentre.objects.all())
 
     model_number = serializers.SlugRelatedField(
         queryset=AssetModelNumber.objects.all(),
-        slug_field="model_number"
-    )
+        slug_field="model_number")
+
     class Meta:
         model = Asset
         fields = ('id', 'uuid', 'asset_category', 'asset_sub_category',
@@ -517,3 +518,4 @@ class AndelaCentreSerializer(serializers.ModelSerializer):
         model = AndelaCentre
         fields = ("id", "centre_name", "country", "created_at",
                   "last_modified")
+

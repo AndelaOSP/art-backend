@@ -394,9 +394,8 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_assets_have_allocation_history(
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
-        response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                              HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('allocation_history', response.data.keys())
         self.assertEqual(response.status_code, 200)
 
@@ -410,25 +409,22 @@ class ManageAssetTestCase(APIBaseTestCase):
             "asset_location": "Nairobi",
             "model_number": self.assetmodel.model_number}
         AndelaCentre.objects.create(
-            centre_name = "Nairobi",
-            country = "Kenya")
+            centre_name="Nairobi",
+            country="Kenya")
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        
+                         HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(res.data.get('asset_location'), None)
-
         client.put(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),data=data,
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-
         response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+                              HTTP_AUTHORIZATION="Token {}".format(self.token_user))
 
         self.assertEqual(response.data.get('asset_location'), "Nairobi")
 
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_cannot_update_assets_to_no_existing_location(
-        self, mock_verify_id_token):
+            self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
         data = {
             "asset_code": "IC003",
@@ -436,21 +432,16 @@ class ManageAssetTestCase(APIBaseTestCase):
             "asset_location": "Mombasa",
             "model_number": self.assetmodel.model_number}
         AndelaCentre.objects.create(
-            centre_name = "Nairobi",
-            country = "Kenya")
+            centre_name="Nairobi",
+            country="Kenya")
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        
+                         HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(res.data.get('asset_location'), None)
-
         res = client.put(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),data=data,
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(res.status_code, 400)
-
         response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+                              HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data.get('asset_location'), None)
 
-        
-    
