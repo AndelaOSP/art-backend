@@ -518,4 +518,3 @@ class AndelaCentreSerializer(serializers.ModelSerializer):
         model = AndelaCentre
         fields = ("id", "centre_name", "country", "created_at",
                   "last_modified")
-

@@ -444,4 +444,3 @@ class ManageAssetTestCase(APIBaseTestCase):
         response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                               HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data.get('asset_location'), None)
-
