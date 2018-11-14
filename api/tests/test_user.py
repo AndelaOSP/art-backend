@@ -212,16 +212,6 @@ class UserTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_user_not_found_from_api_endpoint(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': 'unavailable@email.com'}
-        response = client.get(
-            self.users_url,
-            HTTP_AUTHORIZATION="Token {}".format('sometoken'))
-        self.assertEqual(response.data, {
-            'detail': 'Unable to authenticate.'
-        })
-
-    @patch('api.authentication.auth.verify_id_token')
     def test_inactive_user_from_api_endpoint(self, mock_verify_token):
         self.admin_user.is_active = False
         self.admin_user.save()
