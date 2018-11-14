@@ -369,25 +369,36 @@ class OfficeBlockViewSet(ModelViewSet):
 
 class OfficeFloorViewSet(ModelViewSet):
     serializer_class = OfficeFloorSerializer
-    queryset = OfficeFloor.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
+    def get_queryset(self):
+        user_location = self.request.user.location
+        return OfficeFloor.objects.filter(block__location=user_location)
+
 
 class OfficeFloorSectionViewSet(ModelViewSet):
     serializer_class = OfficeFloorSectionSerializer
-    queryset = OfficeFloorSection.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
+
+    def get_queryset(self):
+        user_location = self.request.user.location
+        return OfficeFloorSection.objects.filter(
+            floor__block__location=user_location)
 
 
 class OfficeWorkspaceViewSet(ModelViewSet):
     serializer_class = OfficeWorkspaceSerializer
-    queryset = OfficeWorkspace.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put', 'delete']
+
+    def get_queryset(self):
+        user_location = self.request.user.location
+        return OfficeWorkspace.objects.filter(
+            section__floor__block__location=user_location)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

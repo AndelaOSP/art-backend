@@ -15,22 +15,46 @@ class OfficeFloorAPITest(APIBaseTestCase):
 
     def setUp(self):
         super(OfficeFloorAPITest, self).setUp()
-        self.admin = User.objects.create_superuser(
-            email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty123'
-        )
         self.centre = AndelaCentre.objects.create(
             centre_name="Dojo",
             country="Kenya"
         )
+        self.centre2 = AndelaCentre.objects.create(
+            centre_name="Epic Towers",
+            country="Nigeria"
+        )
+        self.admin = User.objects.create_superuser(
+            email='testuser@gmail.com', cohort=19,
+            slack_handle='tester', password='qwerty123',
+            location=self.centre
+        )
+
+        self.admin2 = User.objects.create_superuser(
+            email='testuser2@gmail.com', cohort=19,
+            slack_handle='tester2', password='qwerty123',
+            location=self.centre2
+        )
+
         self.building = OfficeBlock.objects.create(
             name="Block A",
             location=self.centre
         )
+
+        self.building2 = OfficeBlock.objects.create(
+            name="Block B",
+            location=self.centre2
+        )
+
         self.floor_number = OfficeFloor.objects.create(
             number=5,
             block=self.building
         )
+
+        self.floor_number = OfficeFloor.objects.create(
+            number=2,
+            block=self.building2
+        )
+
         self.floor_number_url = reverse('office-floors-list')
         self.token_user = 'testtoken'
 
@@ -39,6 +63,15 @@ class OfficeFloorAPITest(APIBaseTestCase):
         self.assertEqual(response.data, {
             'detail': 'Authentication credentials were not provided.'
         })
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_view_office_in_location(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin.email}
+        response = client.get(
+            self.floor_number_url,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['count'], 1)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_post_floor_number(self, mock_verify_token):
