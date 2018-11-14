@@ -91,10 +91,14 @@ class AssetSerializer(serializers.ModelSerializer):
     asset_sub_category = serializers.SerializerMethodField()
     make_label = serializers.SerializerMethodField()
     asset_type = serializers.SerializerMethodField()
+    asset_location = serializers.SlugRelatedField(
+        many=False,
+        slug_field='centre_name', required=False,
+        queryset=AndelaCentre.objects.all())
+
     model_number = serializers.SlugRelatedField(
         queryset=AssetModelNumber.objects.all(),
-        slug_field="model_number"
-    )
+        slug_field="model_number")
 
     class Meta:
         model = Asset
@@ -107,7 +111,7 @@ class AssetSerializer(serializers.ModelSerializer):
                   'notes', 'assigned_to', 'asset_location'
                   )
         depth = 1
-        read_only_fields = ("uuid", "asset_location")
+        read_only_fields = ("uuid",)
 
     def get_checkin_status(self, obj):
         try:
