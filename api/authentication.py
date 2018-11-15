@@ -1,13 +1,18 @@
+import logging
+
 from decouple import config
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from firebase_admin import auth, credentials, initialize_app
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import exceptions
-from firebase_admin import auth, credentials, initialize_app
 
 ADMIN_USER = 'admin'
 SUPERUSER = 'superuser'
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 private_key = config('PRIVATE_KEY').replace('\\n', '\n')
 payload = {
@@ -30,15 +35,24 @@ class FirebaseTokenAuthentication(TokenAuthentication):
             raise exceptions.AuthenticationFailed('Unable to authenticate.')
         else:
             email = token.get('email')
-            uid = token.get('uid')
             user = User.objects.get(email=email)
-            if uid:
-                attrs = {
-                    ADMIN_USER: user.is_staff,
-                    SUPERUSER: user.is_superuser,
-                }
-                auth.set_custom_user_claims(uid, attrs)
 
         if not user.is_active:
             raise exceptions.AuthenticationFailed('User inactive or deleted.')
         return (user, token)
+
+
+@receiver(post_save, sender=User)
+def set_firebase_custom_claims(sender, instance, created, **kwargs):
+    try:
+        user = auth.get_user_by_email(instance.email)
+    except Exception:
+        logger.warning('No user record found for the provided email. Creating one')
+        user = auth.create_user(email=instance.email)
+    else:
+        if user.uid:
+            attrs = {
+                ADMIN_USER: instance.is_staff,
+                SUPERUSER: instance.is_superuser,
+            }
+            auth.set_custom_user_claims(user.uid, attrs)

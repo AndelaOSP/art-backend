@@ -159,8 +159,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} \
-            {process:d} {thread:d} {message}',
+            'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         },
         'simple': {
@@ -175,21 +174,16 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'mail_admins': {
-            'level': 'WARNING',
+            'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
             'formatter': 'verbose'
         }
     },
     'loggers': {
-        'django': {
-            'handlers': ['console'],
+        '': {
+            'handlers': ['console', 'mail_admins'],
             'propagate': True,
         },
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'WARNING',
-            'propagate': False,
-        }
     }
 }
 
