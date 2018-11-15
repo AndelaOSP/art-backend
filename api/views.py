@@ -430,7 +430,6 @@ class OfficeWorkspaceViewSet(ModelViewSet):
             section__floor__block__location=user_location)
 
     def get_object(self):
-        user_location = self.request.user.location
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, id=self.kwargs['pk'])
         return obj
