@@ -70,7 +70,7 @@ class OfficeFloorAPITest(APIBaseTestCase):
         response = client.get(
             self.floor_number_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['count'], 1)
 
     @patch('api.authentication.auth.verify_id_token')
