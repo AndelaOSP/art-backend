@@ -16,14 +16,8 @@ class UserManager(BaseUserManager):
         """
         email = fields.pop('email')
         password = fields.get('password')
-        cohort = fields.get('cohort', None)
-        slack_handle = fields.get('slack_handle')
         if not email:
             raise ValueError("Email address is required")
-        elif cohort is None or isinstance(cohort, str):
-            raise ValueError("Cohort is required")
-        elif not slack_handle:
-            raise ValueError("Slack handle is required")
         email = self.normalize_email(email)
         user = self.model(email=email, **fields)
         user.set_password(password)
