@@ -26,7 +26,7 @@ user = get_user_model()
 
 vlst = list(response.json().values())
 
-for value in vlst[0]:
+for value in vlst[0]: # NOQA
 
     values = dict()
     values.update({'email': value.get('email')})
