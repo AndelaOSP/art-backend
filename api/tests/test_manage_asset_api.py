@@ -444,3 +444,43 @@ class ManageAssetTestCase(APIBaseTestCase):
         response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                               HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data.get('asset_location'), None)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_non_superuser_can_not_update_an_asset_location(self, mock_verify_id_token):
+        user = User.objects.create_user(
+            email='adminuser@site.com', cohort=20,
+            slack_handle='@adminu', password='devpassword', is_staff=True, is_superuser=False
+        )
+        mock_verify_id_token.return_value = {'email': user.email}
+        data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "asset_location": "Nairobi",
+            "model_number": self.assetmodel.model_number}
+        AndelaCentre.objects.create(
+            centre_name="Nairobi",
+            country="Kenya")
+        res = client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(res.status_code, 403)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_a_superuser_can_update_an_asset_location(self, mock_verify_id_token):
+        admin = User.objects.create_user(
+            email='adminadmin@site.com', cohort=20,
+            slack_handle='@adminsuper', password='devpassword', is_staff=True, is_superuser=True
+        )
+        mock_verify_id_token.return_value = {'email': admin.email}
+        data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "asset_location": "Nairobi",
+            "model_number": self.assetmodel.model_number}
+        AndelaCentre.objects.create(
+            centre_name="Nairobi",
+            country="Kenya")
+        res = client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(res.status_code, 200)

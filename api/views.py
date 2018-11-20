@@ -11,6 +11,7 @@ from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
 from django.http import FileResponse
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
@@ -84,6 +85,14 @@ class ManageAssetViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(asset_location=self.request.user.location)
+
+    def perform_update(self, serializer):
+        if serializer.validated_data.get('asset_location'):
+            # check if it is a super user performing this
+            if not self.request.user.is_superuser:
+                raise PermissionDenied(
+                    "Only a super user can update an asset location")
+        serializer.save()
 
 
 class AssetViewSet(ModelViewSet):
