@@ -14,12 +14,13 @@ from core.models.department import Department
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     allocated_asset_count = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
             'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
-            'slack_handle', 'picture', 'phone_number',
+            'slack_handle', 'picture', 'phone_number', 'location',
             'allocated_asset_count', 'last_modified', 'date_joined',
             'last_login'
         )
@@ -36,6 +37,14 @@ class UserSerializer(serializers.ModelSerializer):
             obj.first_name,
             obj.last_name
         )
+
+    def get_location(self, obj):
+        if isinstance(obj, User) and obj.location:
+            return obj.location.centre_name
+        elif isinstance(obj, AssetAssignee) and obj.user.location:
+            return obj.user.location.centre_name
+        else:
+            return 'No location'
 
     def get_allocated_asset_count(self, obj):
         """Return the number of assets allocated to a user.
@@ -82,10 +91,14 @@ class AssetSerializer(serializers.ModelSerializer):
     asset_sub_category = serializers.SerializerMethodField()
     make_label = serializers.SerializerMethodField()
     asset_type = serializers.SerializerMethodField()
+    asset_location = serializers.SlugRelatedField(
+        many=False,
+        slug_field='centre_name', required=False,
+        queryset=AndelaCentre.objects.all())
+
     model_number = serializers.SlugRelatedField(
         queryset=AssetModelNumber.objects.all(),
-        slug_field="model_number"
-    )
+        slug_field="model_number")
 
     class Meta:
         model = Asset
@@ -95,7 +108,7 @@ class AssetSerializer(serializers.ModelSerializer):
                   'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
-                  'notes', 'assigned_to',
+                  'notes', 'assigned_to', 'asset_location'
                   )
         depth = 1
         read_only_fields = ("uuid",)

@@ -11,6 +11,7 @@ from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
 from django.http import FileResponse
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
@@ -32,6 +33,7 @@ from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
 from core.models.department import Department
+from core.slack_bot import SlackIntegration
 from .serializers import UserSerializerWithAssets, \
     AssetSerializer, SecurityUserEmailsSerializer, \
     AssetLogSerializer, UserFeedbackSerializer, \
@@ -47,6 +49,7 @@ from .serializers import UserSerializerWithAssets, \
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
+slack = SlackIntegration()
 
 
 class UserViewSet(ModelViewSet):
@@ -80,6 +83,17 @@ class ManageAssetViewSet(ModelViewSet):
             raise serializers.ValidationError(err.error_dict)
         return response
 
+    def perform_create(self, serializer):
+        serializer.save(asset_location=self.request.user.location)
+
+    def perform_update(self, serializer):
+        if serializer.validated_data.get('asset_location'):
+            # check if it is a super user performing this
+            if not self.request.user.is_superuser:
+                raise PermissionDenied(
+                    "Only a super user can update an asset location")
+        serializer.save()
+
 
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
@@ -90,8 +104,15 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         asset_assignee = AssetAssignee.objects.filter(user=user).first()
-        queryset = Asset.objects.filter(assigned_to=asset_assignee)
-
+        query_filter = {"assigned_to": asset_assignee}
+        # filter through the query_parameters for serial_number and asset_code
+        for field in self.request.query_params:
+            if field == 'serial_number' or field == 'asset_code':
+                query_filter[field] = self.request.query_params.get(field)
+        # take off the asset_assignee when a security user is querying
+        if hasattr(self.request.user, "securityuser"):
+            del query_filter["assigned_to"]
+        queryset = Asset.objects.filter(**query_filter)
         return queryset
 
     def get_object(self):
@@ -229,6 +250,29 @@ class AssetIncidentReportViewSet(ModelViewSet):
         serializer.save(submitted_by=self.request.user)
 
 
+class AssetSlackIncidentReportViewSet(ModelViewSet):
+    serializer_class = AssetIncidentReportSerializer
+    queryset = AssetIncidentReport.objects.all()
+    http_method_names = ['post']
+
+    def perform_create(self, serializer):
+        serializer.save(submitted_by=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        if (
+            self.request.data.get('command', None) is None) and \
+                (self.request.data.get('payload', None) is None):
+            try:
+                response = super().create(request, *args, **kwargs)
+            except ValidationError as err:
+                raise serializers.ValidationError(err.error_dict)
+            return response
+        else:
+            bot = slack.send_incidence_report(self.request.data, Asset, AssetIncidentReport, User)
+            if bot:
+                return Response(status=status.HTTP_200_OK)
+
+
 class AssetHealthCountViewSet(ModelViewSet):
     serializer_class = AssetHealthSerializer
     permission_classes = [IsAuthenticated, ]
@@ -295,7 +339,17 @@ class SecurityUserViewSet(ModelViewSet):
     queryset = SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication, ]
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super(SecurityUserViewSet, self).update(request, *args, **kwargs)
 
 
 class AssetSpecsViewSet(ModelViewSet):

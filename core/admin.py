@@ -82,7 +82,7 @@ class SecurityUserAdmin(BaseUserAdmin):
 class UserAdmin(BaseUserAdmin):
     add_form = UserRegistrationForm
     list_display = (
-        'email', 'cohort', 'slack_handle'
+        'email', 'cohort', 'slack_handle', 'location'
     )
     list_filter = (
         'cohort',
@@ -130,7 +130,7 @@ class AssetAdmin(admin.ModelAdmin):
     )
     list_display = (
         'uuid', 'asset_code', 'serial_number', 'model_number', 'created_at',
-        'assigned_to', 'current_status', 'notes', 'purchase_date', 'verified',
+        'assigned_to', 'current_status', 'notes', 'purchase_date', 'verified', 'asset_location',
     )
 
 

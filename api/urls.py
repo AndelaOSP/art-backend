@@ -14,7 +14,8 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet, \
     OfficeBlockViewSet, OfficeFloorViewSet, OfficeFloorSectionViewSet, \
     GroupViewSet, OfficeWorkspaceViewSet, DepartmentViewSet, \
-    AssetAssigneeViewSet, AssetsImportViewSet, AndelaCentreViewset, SkippedAssets
+    AssetAssigneeViewSet, AssetsImportViewSet, AndelaCentreViewset, \
+    SkippedAssets, AssetSlackIncidentReportViewSet
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -55,6 +56,8 @@ router.register('asset-condition', AssetConditionViewSet,
 router.register('asset-makes', AssetMakeViewSet, 'asset-makes')
 router.register('incidence-reports', AssetIncidentReportViewSet,
                 'incidence-reports')
+router.register('slack-incidence-reports', AssetSlackIncidentReportViewSet,
+                'slack-incidence-reports')
 router.register('asset-health', AssetHealthCountViewSet, 'asset-health')
 router.register('security-users', SecurityUserViewSet,
                 'security-users')
