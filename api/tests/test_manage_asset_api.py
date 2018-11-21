@@ -76,6 +76,10 @@ class ManageAssetTestCase(APIBaseTestCase):
             badge_number="AE23"
         )
         self.manage_asset_urls = reverse('manage-assets-list')
+        self.data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "model_number": self.assetmodel.model_number}
 
     def test_non_authenticated_admin_view_assets(self):
         response = client.get(self.manage_asset_urls)
@@ -472,15 +476,28 @@ class ManageAssetTestCase(APIBaseTestCase):
             slack_handle='@adminsuper', password='devpassword', is_staff=True, is_superuser=True
         )
         mock_verify_id_token.return_value = {'email': admin.email}
-        data = {
-            "asset_code": "IC003",
-            "serial_number": "SN003",
-            "asset_location": "Nairobi",
-            "model_number": self.assetmodel.model_number}
+
         AndelaCentre.objects.create(
             centre_name="Nairobi",
             country="Kenya")
+        data = self.data
+        data['asset_location'] = "Nairobi"
+
         res = client.put(
             '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(res.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_update_asset_verification_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = self.data
+        data['verified'] = False
+        res = client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(res.status_code, 200)
+        response = self.client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+
+        self.assertFalse(response.data.get('verified'))
