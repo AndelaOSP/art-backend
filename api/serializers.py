@@ -108,7 +108,7 @@ class AssetSerializer(serializers.ModelSerializer):
                   'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
-                  'notes', 'assigned_to', 'asset_location'
+                  'notes', 'assigned_to', 'asset_location', 'verified'
                   )
         depth = 1
         read_only_fields = ("uuid",)
