@@ -15,13 +15,14 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
 
     def setUp(self):
         super(OfficeWorkspaceAPITest, self).setUp()
-        self.admin = User.objects.create_superuser(
-            email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty123'
-        )
         self.centre = AndelaCentre.objects.create(
             centre_name="Dojo",
             country="Kenya"
+        )
+        self.admin = User.objects.create_superuser(
+            email='testuser@gmail.com', cohort=19,
+            slack_handle='tester', password='qwerty123',
+            location=self.centre
         )
         self.building = OfficeBlock.objects.create(
             name="Block A",
