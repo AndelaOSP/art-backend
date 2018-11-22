@@ -2,7 +2,6 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
-from core.models import User
 from django.contrib.auth.models import Group
 
 from api.tests import APIBaseTestCase
@@ -13,12 +12,6 @@ class UserGroupTestCase(APIBaseTestCase):
     """ Tests fro the UserGroup endpoint """
 
     def setUp(self):
-        super(UserGroupTestCase, self).setUp()
-        self.admin = User.objects.create_superuser(
-            email='adminuser@gmail.com', cohort=1,
-            slack_handle='admintester', password='admin1234'
-        )
-
         self.user_group = Group.objects.create(
             name='admin'
         )
@@ -28,7 +21,7 @@ class UserGroupTestCase(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_post_user_group(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
             "name": "super admin"
         }
@@ -41,7 +34,7 @@ class UserGroupTestCase(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_get_all_user_groups(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             self.user_group_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -52,9 +45,8 @@ class UserGroupTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_user_groups_api_endpoint_cant_allow_put(self,
-                                                     mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+    def test_user_groups_api_endpoint_cant_allow_put(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
         response = client.put(
             self.user_group_url,
@@ -66,9 +58,8 @@ class UserGroupTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_user_groups_api_endpoint_cant_allow_patch(self,
-                                                       mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+    def test_user_groups_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
         response = client.patch(
             self.user_group_url,
@@ -80,9 +71,8 @@ class UserGroupTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_user_groups_api_endpoint_cant_allow_delete(self,
-                                                        mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+    def test_user_groups_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
         response = client.delete(
             self.user_group_url,

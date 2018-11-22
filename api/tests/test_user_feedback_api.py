@@ -1,9 +1,5 @@
 from unittest.mock import patch
 from rest_framework.test import APIClient
-from rest_framework.reverse import reverse
-
-
-from core.models import User
 
 from api.tests import APIBaseTestCase
 client = APIClient()
@@ -11,17 +7,6 @@ client = APIClient()
 
 class UserFeedbackAPITest(APIBaseTestCase):
     """ Tests for the UserFeedback endpoint"""
-
-    def setUp(self):
-        super(UserFeedbackAPITest, self).setUp()
-        self.user = User.objects.create(
-            email='test4@site.com', cohort=20,
-            slack_handle='@test_user4', password='devpassword'
-        )
-
-        self.feedback_url = reverse('user-feedback-list')
-        self.token_user = 'testtoken'
-
     @patch('api.authentication.auth.verify_id_token')
     def test_can_post_feedback(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}

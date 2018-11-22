@@ -3,7 +3,7 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
-from core.models import User, AndelaCentre, KENYA, NIGERIA
+from core.models import AndelaCentre, NIGERIA
 
 from api.tests import APIBaseTestCase
 
@@ -12,19 +12,6 @@ client = APIClient()
 
 class AndelaCentreAPITest(APIBaseTestCase):
     """ Tests for the Andela Centre endpoint"""
-
-    def setUp(self):
-        super(AndelaCentreAPITest, self).setUp()
-        self.admin = User.objects.create_superuser(
-            email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty123'
-        )
-
-        self.country = AndelaCentre.objects.create(country=KENYA)
-        self.centre = AndelaCentre.objects.create(centre_name="The dojo", country=self.country)
-        self.centre_url = reverse('andela-centres-list')
-        self.token_user = 'testToken'
-
     def test_non_authenticated_user_get_centres(self):
         response = client.get(self.centre_url)
         self.assertEqual(response.data, {
@@ -33,7 +20,7 @@ class AndelaCentreAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_post_centre(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
             "centre_name": "ET",
             "country": NIGERIA
@@ -47,10 +34,11 @@ class AndelaCentreAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cant_post_centre_with_same_name(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        center = AndelaCentre.objects.first()
         data = {
-            "centre_name": "The dojo",
-            "country": KENYA
+            "centre_name": center.centre_name,
+            "country": center.country
         }
         response = client.post(
             self.centre_url,
@@ -61,7 +49,7 @@ class AndelaCentreAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_editing_centre(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {
             "centre_name": "Matoke",
             "country": "Uganda",
@@ -81,7 +69,7 @@ class AndelaCentreAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_delete_centre(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {
             "centre_name": "New York",
             "country": NIGERIA

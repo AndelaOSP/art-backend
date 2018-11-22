@@ -1,6 +1,10 @@
+import logging
+
 from django_filters import rest_framework as filters
 
 from core.models import Asset, User
+
+logger = logging.getLogger(__name__)
 
 
 class AssetFilter(filters.FilterSet):
@@ -45,11 +49,13 @@ class UserFilter(filters.FilterSet):
         method='filter_by_allocated_asset_count',)
 
     def filter_by_allocated_asset_count(self, queryset, name, value):
-        users = [
-            user.id
-            for user in queryset
-            if user.assetassignee.asset_set.count() == int(value)
-        ]
+        users = []
+        for user in queryset:
+            try:
+                if user.assetassignee.asset_set.count() == int(value):
+                    users.append(user.id)
+            except Exception as e:
+                logger.info(str(e))
         return User.objects.filter(id__in=users)
 
     class Meta:

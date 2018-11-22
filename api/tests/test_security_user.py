@@ -1,7 +1,6 @@
 import json
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
-from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from core.models import SecurityUser, APIUser
@@ -13,41 +12,15 @@ User = get_user_model()
 
 class SecurityUserTestCase(APIBaseTestCase):
     def setUp(self):
-        super(SecurityUserTestCase, self).setUp()
-        self.security_users_url = reverse('security-user-emails-list')
-        self.security_users_admin_url = reverse('security-users-list')
-
-        self.user = User.objects.create(
-            email='test@site.com', cohort=20,
-            slack_handle='@test_user', password='devpassword'
-        )
-        self.token_user = 'testtoken'
-        self.admin_user = User.objects.create_superuser(
-            email='admin@site.com', cohort=20,
-            slack_handle='@admin', password='devpassword'
-        )
-        self.token_admin = 'admintesttoken'
-
-        SecurityUser.objects.create(
-            email="sectest1@andela.com",
-            password="devpassword",
-            first_name="TestFirst",
-            last_name="TestLast",
-            phone_number="254720900900",
-            badge_number="AE23"
-        )
-        SecurityUser.objects.create(
-            email="sectest2@andela.com",
-            password="devpassword",
-            first_name="TestFirst2",
-            last_name="TestLast2",
-            phone_number="254720900900",
-            badge_number="AE24"
-        )
-
-        api_user = APIUser.objects.create(
-            name="test_api_app"
-        )
+        # SecurityUser.objects.create(
+        #     email="sectest2@andela.com",
+        #     password="devpassword",
+        #     first_name="TestFirst2",
+        #     last_name="TestLast2",
+        #     phone_number="254720900900",
+        #     badge_number="AE24"
+        # )
+        api_user = APIUser.objects.create(name="test_api_app")
         url = '/api/v1/o/token/'
 
         payload = {

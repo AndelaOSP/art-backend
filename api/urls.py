@@ -35,7 +35,7 @@ class OptionalSlashRouter(SimpleRouter):
 
 
 router = OptionalSlashRouter()
-router.register('users', UserViewSet)
+router.register('users', UserViewSet, 'users')
 router.register('assets', AssetViewSet, 'assets')
 router.register('manage-assets', ManageAssetViewSet, 'manage-assets')
 router.register('allocations', AllocationsViewSet, 'allocations')

@@ -1,19 +1,9 @@
 from unittest.mock import patch
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from core.models import (
-    Asset,
-    AssetModelNumber,
-    AssetMake,
-    AssetType,
-    AssetSubCategory,
-    AssetCategory,
-    SecurityUser,
-    AssetLog,
-    AssetAssignee)
+from core.models import Asset, AssetModelNumber, AssetLog
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -24,34 +14,8 @@ class AssetLogModelTest(APIBaseTestCase):
     """Tests for the AssetLog Model and API"""
 
     def setUp(self):
-        super(AssetLogModelTest, self).setUp()
-        asset_category = AssetCategory.objects.create(
-            category_name="Computer")
-        asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name="Electronics", asset_category=asset_category)
-        asset_type = AssetType.objects.create(
-            asset_type="Accessory", asset_sub_category=asset_sub_category)
-        make_label = AssetMake.objects.create(
-            make_label="Sades", asset_type=asset_type)
-        self.assetmodel = AssetModelNumber(
-            model_number='IMN50987', make_label=make_label)
-        self.test_assetmodel1 = AssetModelNumber(
-            model_number="IMN50987", make_label=make_label)
-        self.test_assetmodel1.save()
-
-        self.normal_user = User.objects.create(
-            email='test@site.com', cohort=10,
-            slack_handle='@test_user', password='devpassword'
-        )
-        self.asset_assignee = AssetAssignee.objects.get(user=self.normal_user)
-        self.test_asset = Asset(
-            asset_code="IC001",
-            serial_number="SN001",
-            model_number=self.test_assetmodel1,
-            assigned_to=self.asset_assignee,
-            purchase_date="2018-07-10",
-        )
-        self.test_asset.save()
+        self.test_assetmodel1 = AssetModelNumber.objects.create(
+            model_number="IMN50987", make_label=self.make_label)
 
         self.test_other_asset = Asset(
             asset_code="IC00sf",
@@ -61,34 +25,20 @@ class AssetLogModelTest(APIBaseTestCase):
             purchase_date="2018-07-10",
         )
         self.test_other_asset.save()
-
-        self.checked_by = SecurityUser.objects.create(
-            email="sectest1@andela.com",
-            password="devpassword",
-            first_name="TestFirst",
-            last_name="TestLast",
-            phone_number="254720900900",
-            badge_number="AE23"
-        )
         self.checkin = AssetLog.objects.create(
-            checked_by=self.checked_by,
-            asset=self.test_asset,
+            checked_by=self.security_user,
+            asset=self.asset,
             log_type="Checkin"
         )
         self.checkout = AssetLog.objects.create(
-            checked_by=self.checked_by,
-            asset=self.test_asset,
+            checked_by=self.security_user,
+            asset=self.asset,
             log_type="Checkout"
         )
 
-        self.token_checked_by = 'test_token'
-        self.token_normal_user = 'test_other_token'
-
-        self.asset_logs_url = reverse('asset-logs-list')
-
     def test_add_checkin(self):
         AssetLog.objects.create(
-            checked_by=self.checked_by,
+            checked_by=self.security_user,
             asset=self.test_other_asset,
             log_type="Checkin"
         )
@@ -96,7 +46,7 @@ class AssetLogModelTest(APIBaseTestCase):
 
     def test_add_checkout(self):
         AssetLog.objects.create(
-            checked_by=self.checked_by,
+            checked_by=self.security_user,
             asset=self.test_other_asset,
             log_type="Checkout"
         )
@@ -105,7 +55,7 @@ class AssetLogModelTest(APIBaseTestCase):
     def test_add_checkin_without_log_type(self):
         with self.assertRaises(ValidationError) as e:
             AssetLog.objects.create(
-                checked_by=self.checked_by,
+                checked_by=self.security_user,
                 asset=self.test_other_asset,
             )
 
@@ -138,15 +88,15 @@ class AssetLogModelTest(APIBaseTestCase):
 
     def test_checkout_model_string_representation(self):
         self.assertEqual(str(self.checkin.asset.serial_number),
-                         self.test_asset.serial_number)
+                         self.asset.serial_number)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_normal_user_list_checkin_checkout(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.normal_user.email}
+        mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
             self.asset_logs_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_normal_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'You do not have permission to perform this action.'
         })
@@ -155,7 +105,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_list_checkin_checkout(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         response = client.get(
             self.asset_logs_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
@@ -167,10 +117,10 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_normal_user_create_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.normal_user.email}
+        mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
             self.asset_logs_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_normal_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
             'detail': 'You do not have permission to perform this action.'
         })
@@ -179,7 +129,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_create_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         data = {
             'asset': self.test_other_asset.id,
             'log_type': 'Checkin'
@@ -197,7 +147,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_create_checkout(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         data = {
             'asset': self.test_other_asset.id,
             'log_type': 'Checkout'
@@ -215,7 +165,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_create_with_invalid_log_type(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         log_type = "Invalid"
         data = {
             'asset': self.test_other_asset.id,
@@ -233,7 +183,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_create_checkin_without_asset(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         data = {
             'log_type': 'Checkin'
         }
@@ -249,7 +199,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_view_checkin_detail(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         response = client.get(
             "{}/{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
@@ -259,7 +209,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_cannot_delete_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         response = client.delete(
             "{}/{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
@@ -271,7 +221,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_cannot_put_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         response = client.put(
             "{}/{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))
@@ -283,7 +233,7 @@ class AssetLogModelTest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_cannot_patch_checkin(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.checked_by.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         response = client.patch(
             "{}/{}/".format(self.asset_logs_url, self.checkin.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by))

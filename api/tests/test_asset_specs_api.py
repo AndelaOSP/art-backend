@@ -1,8 +1,5 @@
 from unittest.mock import patch
 from rest_framework.test import APIClient
-from rest_framework.reverse import reverse
-
-from core.models import User, AssetSpecs
 
 from api.tests import APIBaseTestCase
 client = APIClient()
@@ -11,30 +8,9 @@ client = APIClient()
 class AssetSpecsAPITest(APIBaseTestCase):
     """ Tests for the AssetCategory endpoint"""
 
-    def setUp(self):
-        super(AssetSpecsAPITest, self).setUp()
-        self.token_admin = 'testtoken'
-        self.admin = User.objects.create_superuser(
-            email='testadmin@gmail.com', cohort=19,
-            slack_handle='admin', password='admin123'
-        )
-        self.user = User.objects.create(
-            email='test_user@site.com', cohort=10,
-            slack_handle='@test_user', password='user12345'
-        )
-        self.asset_specs_url = reverse('asset-specs-list')
-        self.asset_specs = AssetSpecs.objects.create(
-            screen_size=15,
-            year_of_manufacture=2017,
-            processor_speed=3.0,
-            processor_type="Intel core i7",
-            memory=8,
-            storage=512
-        )
-
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_can_create_asset_specs(self, mock_verify_token):
-        mock_verify_token.return_value = {"email": self.admin.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         data = {
             "year_of_manufacture": 2015,
             "processor_type": "Intel core i5",
@@ -52,7 +28,7 @@ class AssetSpecsAPITest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_can_create_specs_with_missing_fields(self,
                                                         mock_verify_token):
-        mock_verify_token.return_value = {"email": self.admin.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         data = {
             "year_of_manufacture": 2016,
             "processor_type": "Intel core i3",
@@ -69,7 +45,7 @@ class AssetSpecsAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_can_get_single_asset_specs(self, mock_verify_token):
-        mock_verify_token.return_value = {"email": self.admin.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         response = client.get(
             f"{self.asset_specs_url}/{self.asset_specs.id}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
@@ -121,7 +97,7 @@ class AssetSpecsAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_can_update_asset_specs(self, mock_verify_token):
-        mock_verify_token.return_value = {"email": self.admin.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         data = {
             "storage": 128,
             "memory": 32
@@ -135,7 +111,7 @@ class AssetSpecsAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_asset_specs_unique_validation(self, mock_verify_token):
-        mock_verify_token.return_value = {"email": self.admin.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         data = {
             "year_of_manufacture": 2017,
             "processor_type": "Intel core i7",

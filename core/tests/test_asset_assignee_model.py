@@ -1,7 +1,6 @@
 from django.db import IntegrityError
 
-from core.models import AssetAssignee, Department, OfficeFloorSection, \
-    OfficeFloor, OfficeBlock, OfficeWorkspace, AndelaCentre
+from core.models import AssetAssignee, Department, OfficeWorkspace
 from core.tests import CoreBaseTestCase
 
 from django.contrib.auth import get_user_model
@@ -11,31 +10,6 @@ User = get_user_model()
 
 class AssetAssigneeModelTest(CoreBaseTestCase):
     """Tests for AssetAssignee Model"""
-
-    def setUp(self):
-        super(AssetAssigneeModelTest, self).setUp()
-        self.user = User.objects.create(
-            email='test@site.com', cohort=10,
-            slack_handle='@test_user', password='devpassword'
-        )
-        self.department = Department.objects.create(name="Finance")
-        self.centre = AndelaCentre.objects.create(
-            centre_name="Dojo",
-            country="Kenya"
-        )
-        self.office_block = OfficeBlock.objects.create(
-            name='Andela Tower',
-            location=self.centre
-        )
-        self.office_floor = OfficeFloor.objects.create(
-            block=self.office_block,
-            number=14
-        )
-        self.office_section = OfficeFloorSection.objects.create(
-            name='Safari',
-            floor=self.office_floor
-        )
-
     def test_asset_assignee_is_created_when_a_user_is_saved(self):
         """
         Test every time a user is created, an asset assignee
