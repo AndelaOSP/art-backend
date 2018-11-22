@@ -1,7 +1,11 @@
+import logging
+
 from django.test import TestCase
 from unittest.mock import patch
 
 from core.slack_bot import SlackIntegration
+
+logging.disable(logging.WARNING)
 
 
 class APIBaseTestCase(TestCase):
