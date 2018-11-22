@@ -3,10 +3,8 @@ from rest_framework.exceptions import ValidationError
 
 
 class OfficeBlock(models.Model):
-    name = models.CharField(max_length=50,
-                            blank=False, null=False)
-    location = models.ForeignKey(
-        'AndelaCentre', on_delete=models.PROTECT, null=True)
+    name = models.CharField(max_length=50, blank=False, null=False)
+    location = models.ForeignKey('AndelaCentre', on_delete=models.PROTECT, null=True)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -67,8 +65,7 @@ class OfficeFloorSection(models.Model):
 
 class OfficeWorkspace(models.Model):
     name = models.CharField(max_length=50, blank=False)
-    section = models.ForeignKey(OfficeFloorSection,
-                                on_delete=models.PROTECT)
+    section = models.ForeignKey(OfficeFloorSection, on_delete=models.PROTECT)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
