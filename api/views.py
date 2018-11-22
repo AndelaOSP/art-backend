@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
@@ -435,8 +435,11 @@ class OfficeWorkspaceViewSet(ModelViewSet):
         return obj
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+        except Http404:
+            pass
         data = {"detail": "Deleted Successfully"}
         return Response(data=data, status=status.HTTP_204_NO_CONTENT)
 
