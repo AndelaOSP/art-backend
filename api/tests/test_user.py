@@ -2,11 +2,13 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from core.models import Asset, AssetModelNumber, \
-    AllocationHistory, AssetCategory, AssetSubCategory, AssetType, \
-    AssetMake
-
 from api.tests import APIBaseTestCase
+from core.models import (
+    Asset, AssetModelNumber, AssetSubCategory,
+    AllocationHistory, AssetCategory, AssetType,
+    AssetMake, AssetStatus
+)
+
 User = get_user_model()
 client = APIClient()
 
@@ -278,30 +280,7 @@ class UserTestCase(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_allocated_asset_count(self, mock_verify_token):
-        """Test the number of assets assigned to a user"""
-        asset_category = AssetCategory.objects.create(
-            category_name="Accessories")
-        asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name="Sub Category name",
-            asset_category=asset_category)
-        asset_type = AssetType.objects.create(
-            asset_type="Asset Type",
-            asset_sub_category=asset_sub_category)
-        make_label = AssetMake.objects.create(
-            make_label="Asset Make", asset_type=asset_type)
-        assetmodel = AssetModelNumber(
-            model_number="IMN50987", make_label=make_label)
-        assetmodel.save()
-
-        asset = Asset.objects.create(
-            asset_code="IC001",
-            serial_number="SN001",
-            purchase_date="2018-07-10",
-            current_status="Available",
-            assigned_to=self.user.assetassignee,
-            model_number=assetmodel
-        )
-
+        """Test allocated_asset_count returns count of assets allocated to a user"""
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             '{}{}/'.format(self.users_url, self.user.id),
@@ -309,63 +288,26 @@ class UserTestCase(APIBaseTestCase):
         )
         count = response.data['allocated_asset_count']
         AllocationHistory.objects.create(
-            asset=asset,
+            asset=self.asset,
             current_owner=self.user.assetassignee
         )
         response = client.get(
             '{}{}/'.format(self.users_url, self.user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
-        self.assertEqual(response.data['allocated_asset_count'], count + 1)
+        after_allocation = response.data['allocated_asset_count']
+        self.assertEqual(after_allocation, count + 1)
 
-    @patch('api.authentication.auth.verify_id_token')
-    def test_allocated_assets_are_returned(self, mock_verify_token):
-        """Test all assets allocated to a user are returned """
-        asset_category = AssetCategory.objects.create(
-            category_name="Accessories")
-        asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name="Sub Category name",
-            asset_category=asset_category)
-        asset_type = AssetType.objects.create(
-            asset_type="Asset Type",
-            asset_sub_category=asset_sub_category)
-        make_label = AssetMake.objects.create(
-            make_label="Asset Make", asset_type=asset_type)
-        assetmodel = AssetModelNumber(
-            model_number="IMN50987", make_label=make_label)
-        assetmodel.save()
-
-        asset = Asset.objects.create(
-            asset_code="IC001",
-            serial_number="SN001",
-            purchase_date="2018-07-10",
-            current_status="Available",
-            assigned_to=self.user.assetassignee,
-            model_number=assetmodel
-        )
-        mock_verify_token.return_value = {'email': self.admin_user.email}
-        response = client.get(
-            '{}{}/'.format(self.users_url, self.user.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
-        )
-        count = len(response.data['allocated_assets'])
-        self.assertEqual(count, 0)
-
-        AllocationHistory.objects.create(
-            asset=asset,
-            current_owner=self.user.assetassignee
+        AssetStatus.objects.create(
+            asset=self.asset,
+            current_status='Available'
         )
         response = client.get(
             '{}{}/'.format(self.users_url, self.user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
-        self.assertEqual(len(response.data['allocated_assets']), count + 1)
         self.assertEqual(
-            response.data['allocated_assets'][0].get('model_number'),
-            'IMN50987')
-        self.assertEqual(
-            response.data['allocated_assets'][0].get('serial_number'),
-            'SN001')
+            response.data['allocated_asset_count'], after_allocation - 1)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_user_filter_users_by_cohort(self, mock_verify_token):

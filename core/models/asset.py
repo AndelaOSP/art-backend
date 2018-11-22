@@ -501,8 +501,7 @@ def save_initial_asset_status(sender, **kwargs):
     current_asset = kwargs.get('instance')
     existing_status = AssetStatus.objects.filter(asset=current_asset)
     if current_asset and not existing_status:
-        AssetStatus.objects.create(asset=current_asset,
-                                   current_status=AVAILABLE)
+        AssetStatus.objects.create(asset=current_asset, current_status=AVAILABLE)
         current_asset.current_status = AVAILABLE
         current_asset.save()
 

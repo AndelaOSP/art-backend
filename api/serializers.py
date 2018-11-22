@@ -54,14 +54,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         """
         try:
-            return obj.assetassignee.current_owner_asset.count()
+            return obj.assetassignee.asset_set.count()
         except AttributeError:
             if isinstance(obj, User):
                 # In the unlikely event that a User has no corresponding
                 # AssetAssignee instance create it by calling save()
                 obj.save()
             elif isinstance(obj, AssetAssignee):
-                return obj.current_owner_asset.count()
+                return obj.asset_set.count()
             else:
                 return 0
 
