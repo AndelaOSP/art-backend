@@ -54,14 +54,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         """
         try:
-            return obj.assetassignee.current_owner_asset.count()
+            return obj.assetassignee.asset_set.count()
         except AttributeError:
             if isinstance(obj, User):
                 # In the unlikely event that a User has no corresponding
                 # AssetAssignee instance create it by calling save()
                 obj.save()
             elif isinstance(obj, AssetAssignee):
-                return obj.current_owner_asset.count()
+                return obj.asset_set.count()
             else:
                 return 0
 
@@ -91,10 +91,14 @@ class AssetSerializer(serializers.ModelSerializer):
     asset_sub_category = serializers.SerializerMethodField()
     make_label = serializers.SerializerMethodField()
     asset_type = serializers.SerializerMethodField()
+    asset_location = serializers.SlugRelatedField(
+        many=False,
+        slug_field='centre_name', required=False,
+        queryset=AndelaCentre.objects.all())
+
     model_number = serializers.SlugRelatedField(
         queryset=AssetModelNumber.objects.all(),
-        slug_field="model_number"
-    )
+        slug_field="model_number")
 
     class Meta:
         model = Asset
@@ -104,10 +108,10 @@ class AssetSerializer(serializers.ModelSerializer):
                   'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
-                  'notes', 'assigned_to', 'asset_location'
+                  'notes', 'assigned_to', 'asset_location', 'verified'
                   )
         depth = 1
-        read_only_fields = ("uuid", "asset_location")
+        read_only_fields = ("uuid",)
 
     def get_checkin_status(self, obj):
         try:

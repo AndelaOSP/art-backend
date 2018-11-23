@@ -11,7 +11,8 @@ from core.models import (Asset,
                          AssetMake,
                          AssetType,
                          AssetSubCategory,
-                         AssetCategory, AssetAssignee)
+                         AssetCategory, AssetAssignee,
+                         AndelaCentre)
 
 from api.tests import APIBaseTestCase
 User = get_user_model()
@@ -75,6 +76,10 @@ class ManageAssetTestCase(APIBaseTestCase):
             badge_number="AE23"
         )
         self.manage_asset_urls = reverse('manage-assets-list')
+        self.data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "model_number": self.assetmodel.model_number}
 
     def test_non_authenticated_admin_view_assets(self):
         response = client.get(self.manage_asset_urls)
@@ -393,8 +398,109 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_assets_have_allocation_history(
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin.email}
-        response = client.get(
-            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                              HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('allocation_history', response.data.keys())
         self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_update_assets_location(
+            self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "asset_location": "Nairobi",
+            "model_number": self.assetmodel.model_number}
+        AndelaCentre.objects.create(
+            centre_name="Nairobi",
+            country="Kenya")
+        res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                         HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(res.data.get('asset_location'), None)
+        client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                              HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+
+        self.assertEqual(response.data.get('asset_location'), "Nairobi")
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_cannot_update_assets_to_no_existing_location(
+            self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "asset_location": "Mombasa",
+            "model_number": self.assetmodel.model_number}
+        AndelaCentre.objects.create(
+            centre_name="Nairobi",
+            country="Kenya")
+        res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                         HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(res.data.get('asset_location'), None)
+        res = client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(res.status_code, 400)
+        response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                              HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(response.data.get('asset_location'), None)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_non_superuser_can_not_update_an_asset_location(self, mock_verify_id_token):
+        user = User.objects.create_user(
+            email='adminuser@site.com', cohort=20,
+            slack_handle='@adminu', password='devpassword', is_staff=True, is_superuser=False
+        )
+        mock_verify_id_token.return_value = {'email': user.email}
+        data = {
+            "asset_code": "IC003",
+            "serial_number": "SN003",
+            "asset_location": "Nairobi",
+            "model_number": self.assetmodel.model_number}
+        AndelaCentre.objects.create(
+            centre_name="Nairobi",
+            country="Kenya")
+        res = client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(res.status_code, 403)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_a_superuser_can_update_an_asset_location(self, mock_verify_id_token):
+        admin = User.objects.create_user(
+            email='adminadmin@site.com', cohort=20,
+            slack_handle='@adminsuper', password='devpassword', is_staff=True, is_superuser=True
+        )
+        mock_verify_id_token.return_value = {'email': admin.email}
+
+        AndelaCentre.objects.create(
+            centre_name="Nairobi",
+            country="Kenya")
+        data = self.data
+        data['asset_location'] = "Nairobi"
+
+        res = client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertEqual(res.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_update_asset_verification_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin.email}
+        data = self.data
+        data['verified'] = False
+        get = self.client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                              HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertTrue(get.data.get('verified'))
+        res = client.put(
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(res.status_code, 200)
+        response = self.client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+
+        self.assertFalse(response.data.get('verified'))

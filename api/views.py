@@ -11,6 +11,7 @@ from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
 from django.http import FileResponse, Http404
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
@@ -89,6 +90,14 @@ class ManageAssetViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(asset_location=self.request.user.location)
 
+    def perform_update(self, serializer):
+        if serializer.validated_data.get('asset_location'):
+            # check if it is a super user performing this
+            if not self.request.user.is_superuser:
+                raise PermissionDenied(
+                    "Only a super user can update an asset location")
+        serializer.save()
+
 
 class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
@@ -99,10 +108,15 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         asset_assignee = AssetAssignee.objects.filter(user=user).first()
-        queryset = Asset.objects.filter(
-            assigned_to=asset_assignee,
-            asset_location=user.location)
-
+        query_filter = {"assigned_to": asset_assignee}
+        # filter through the query_parameters for serial_number and asset_code
+        for field in self.request.query_params:
+            if field == 'serial_number' or field == 'asset_code':
+                query_filter[field] = self.request.query_params.get(field)
+        # take off the asset_assignee when a security user is querying
+        if hasattr(self.request.user, "securityuser"):
+            del query_filter["assigned_to"]
+        queryset = Asset.objects.filter(**query_filter)
         return queryset
 
     def get_object(self):
@@ -357,7 +371,17 @@ class SecurityUserViewSet(ModelViewSet):
     queryset = SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication, ]
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        data = {"detail": "Deleted Successfully"}
+        return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super(SecurityUserViewSet, self).update(request, *args, **kwargs)
 
 
 class AssetSpecsViewSet(ModelViewSet):

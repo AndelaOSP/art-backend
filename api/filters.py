@@ -48,7 +48,7 @@ class UserFilter(filters.FilterSet):
         users = [
             user.id
             for user in queryset
-            if user.assetassignee.current_owner_asset.count() == int(value)
+            if user.assetassignee.asset_set.count() == int(value)
         ]
         return User.objects.filter(id__in=users)
 
