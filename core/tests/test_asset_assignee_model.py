@@ -1,5 +1,3 @@
-from django.db import IntegrityError
-
 from core.models import AssetAssignee, Department, OfficeWorkspace
 from core.tests import CoreBaseTestCase
 
@@ -41,14 +39,3 @@ class AssetAssigneeModelTest(CoreBaseTestCase):
         )
         self.assertEqual(len(AssetAssignee.objects.filter(
             workspace=workspace)), 1)
-
-    def test_every_asset_assignee_is_unique(self):
-        """
-        Test every asset_assignee can only be associated
-        with only one user.
-        """
-        with self.assertRaises(IntegrityError):
-            User.objects.create(
-                email='test@site.com', cohort=10,
-                slack_handle='@test_user', password='devpassword'
-            )

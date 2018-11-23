@@ -1,5 +1,9 @@
+import logging
+
 from django.db import models
 from rest_framework.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 class OfficeBlock(models.Model):
@@ -78,7 +82,16 @@ class OfficeWorkspace(models.Model):
             self.full_clean()
         except Exception as e:
             raise ValidationError(e)
-        super().save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._create_assignee_object_for_workspace()
+
+    def _create_assignee_object_for_workspace(self):
+        from .asset import AssetAssignee
+        AssetAssignee.objects.get_or_create(workspace=self)
 
     class Meta:
         verbose_name = 'Office Workspace'
