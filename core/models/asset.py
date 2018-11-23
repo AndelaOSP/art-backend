@@ -1,14 +1,13 @@
+import logging
 import os
 import uuid
-from django.db import models
-from django.core.exceptions import ValidationError
-from django.dispatch import receiver
-from django.db.models.signals import post_save
+
 from datetime import datetime
 
-from .department import Department
-from .officeblock import OfficeWorkspace
-from .user import SecurityUser, User
+from django.db import models
+from django.core.exceptions import ValidationError
+
+from .user import SecurityUser
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
 from core.managers import CaseInsensitiveManager
@@ -88,6 +87,8 @@ for year in range(2013, (datetime.now().year + 1)):
     YEAR_CHOICES.append((year, year))
 
 slack = SlackIntegration()
+
+logger = logging.getLogger(__name__)
 
 
 class AssetCategory(models.Model):
@@ -282,7 +283,19 @@ class Asset(models.Model):
         are provided and an existing status is given
         """
         self.full_clean()
-        super(Asset, self).save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._save_initial_asset_status()
+
+    def _save_initial_asset_status(self):
+        existing_status = AssetStatus.objects.filter(asset=self)
+        if not existing_status:
+            AssetStatus.objects.create(asset=self, current_status=AVAILABLE)
+            self.current_status = AVAILABLE
+            self.save()
 
     def __str__(self):
         return '{}, {}, {}'.format(self.asset_code, self.serial_number, self.model_number)
@@ -375,7 +388,43 @@ class AssetStatus(models.Model):
         except Exception:
             self.previous_status = None
         self.full_clean()
-        super(AssetStatus, self).save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._set_current_status_for_asset()
+            self._check_asset_limit()
+            self._new_allocation_history_when_asset_is_made_available()
+
+    def _set_current_status_for_asset(self):
+        current_asset = self.asset
+        current_asset.current_status = self.current_status
+        if self.current_status == AVAILABLE:
+            current_asset.assigned_to = None
+        current_asset.save()
+
+    def _check_asset_limit(self):
+        """Check the assets have not exceeded the limit"""
+        model_number = self.asset.model_number
+        available_assets = Asset.objects.filter(current_status='Available', model_number=model_number).count()
+        if available_assets <= int(os.environ.get('ASSET_LIMIT', 0)):
+            message = "Warning!! The number of available {} ".format(
+                model_number) + " is {}".format(available_assets)
+            slack.send_message(message)
+
+    def _new_allocation_history_when_asset_is_made_available(self):
+        try:
+            last_allocation_record = AllocationHistory.objects.filter(asset=self.asset).latest('created_at')
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            if self.current_status == AVAILABLE and last_allocation_record:
+                AllocationHistory.objects.create(
+                    asset=self.asset,
+                    previous_owner=last_allocation_record.current_owner,
+                    current_owner=None,
+                )
 
 
 class AllocationHistory(models.Model):
@@ -405,7 +454,39 @@ class AllocationHistory(models.Model):
             self.previous_owner = latest_record.current_owner
         except Exception:
             self.previous_owner = None
-        super(AllocationHistory, self).save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            asset = self.asset
+            asset.assigned_to = self.current_owner
+            asset.save()
+            self._create_asset_status_when_asset_is_allocated()
+
+    def _create_asset_status_when_asset_is_allocated(self):
+        last_status = AssetStatus.objects.filter(asset=self.asset).latest('created_at')
+        if self.current_owner:
+            AssetStatus.objects.create(
+                asset=self.asset, current_status=ALLOCATED,
+                previous_status=last_status.current_status,
+            )
+
+    def _send_notification(self):
+        asset = self.asset
+        user = None
+
+        if asset.assigned_to and asset.current_status == ALLOCATED:
+            message = "The asset with serial number {} and asset code {} ".format(
+                asset.serial_number, asset.asset_code) + "has been allocated to you."
+            user = self.current_owner
+        elif (not asset.assigned_to and self.previous_owner):
+            message = "The asset with serial number {} and asset code {} ".format(
+                asset.serial_number, asset.asset_code) + "has been de-allocated from you."
+            user = self.previous_owner
+
+        if user and hasattr(user, 'email'):
+            slack.send_message(message, user=user)
 
 
 class AssetCondition(models.Model):
@@ -418,7 +499,18 @@ class AssetCondition(models.Model):
         ordering = ['-id']
 
     def save(self, *args, **kwargs):
-        super(AssetCondition, self).save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._save_notes()
+
+    def _save_notes(self):
+        related_asset = self.asset
+        if self.notes != related_asset.notes:
+            related_asset.notes = self.notes
+            related_asset.save()
 
 
 class AssetIncidentReport(models.Model):
@@ -452,132 +544,3 @@ class AndelaCentre(models.Model):
 
     def __str__(self):
         return self.centre_name
-
-
-@receiver(post_save, sender=AssetStatus)
-def set_current_asset_status(sender, **kwargs):
-    asset_status = kwargs.get('instance')
-    asset_status.asset.current_status = asset_status.current_status
-    if asset_status.current_status == AVAILABLE:
-        asset_status.asset.assigned_to = None
-    asset_status.asset.save()
-
-
-@receiver(post_save, sender=AssetStatus)
-def check_asset_limit(sender, **kwargs):
-    """Check the assets have not exceeded the limit"""
-    asset_status = kwargs.get('instance')
-    model_number = asset_status.asset.model_number
-    available_assets = Asset.objects.filter(
-        current_status='Available', model_number=model_number
-    ).count()
-    if available_assets <= int(os.environ.get('ASSET_LIMIT', 0)):
-        message = "Warning!! The number of available {} ".format(
-            model_number) + " is {}".format(available_assets)
-        slack.send_message(message)
-
-
-@receiver(post_save, sender=AssetStatus)
-def update_asset_allocation_history_when_status_changes(sender, **kwargs):
-    asset_status = kwargs.get('instance')
-
-    if kwargs.get('created'):
-        try:
-            last_allocation_record = \
-                AllocationHistory.objects.filter(
-                    asset=asset_status.asset).latest('created_at')
-        except Exception:
-            return
-        if asset_status.current_status == AVAILABLE \
-                and last_allocation_record:
-            AllocationHistory.objects.create(
-                asset=asset_status.asset,
-                previous_owner=last_allocation_record.current_owner,
-                current_owner=None)
-
-
-@receiver(post_save, sender=Asset)
-def save_initial_asset_status(sender, **kwargs):
-    current_asset = kwargs.get('instance')
-    existing_status = AssetStatus.objects.filter(asset=current_asset)
-    if current_asset and not existing_status:
-        AssetStatus.objects.create(asset=current_asset, current_status=AVAILABLE)
-        current_asset.current_status = AVAILABLE
-        current_asset.save()
-
-
-@receiver(post_save, sender=AssetCondition)
-def save_notes(sender, **kwargs):
-    new_condition = kwargs.get('instance')
-    related_asset = new_condition.asset
-    if not new_condition.notes == related_asset.notes:
-        related_asset.notes = \
-            new_condition.notes
-        related_asset.save()
-
-
-@receiver(post_save, sender=AllocationHistory)
-def update_asset_status_when_allocation_changes(sender, **kwargs):
-    allocation_history = kwargs.get('instance')
-
-    if kwargs.get('created'):
-        last_status = \
-            AssetStatus.objects.filter(
-                asset=allocation_history.asset).latest('created_at')
-        if allocation_history.current_owner:
-            AssetStatus.objects.create(
-                asset=allocation_history.asset,
-                current_status=ALLOCATED,
-                previous_status=last_status.current_status
-            )
-
-
-@receiver(post_save, sender=AllocationHistory)
-def allocation_history_post_save(sender, **kwargs):
-    allocation_history = kwargs.get('instance')
-    asset = allocation_history.asset
-    owner = allocation_history.current_owner
-    asset.assigned_to = owner
-    asset.save()
-
-    def send_slack_message(_message, send_to):
-        # send slack message only to user
-        if hasattr(send_to, 'email'):
-            slack.send_message(_message, user=send_to.user)
-
-    if asset.assigned_to and asset.current_status == ALLOCATED:
-        message = "The asset with serial number {} and asset code {} ".format(
-            asset.serial_number, asset.asset_code) + "has been allocated to you."
-        send_slack_message(message, owner)
-        asset_status = AssetStatus.objects.create(
-            asset=asset,
-            current_status=ALLOCATED
-        )
-        asset_status.save()
-    elif (not asset.assigned_to and allocation_history.previous_owner):
-        message = "The asset with serial number {} and asset code {} ".format(
-            asset.serial_number, asset.asset_code) + "has been de-allocated from you."
-
-        previous_owner = allocation_history.previous_owner
-        send_slack_message(message, previous_owner)
-
-
-@receiver(post_save, sender=User)
-def assetassignee_user(sender, instance, created, **kwargs):
-    if created or not hasattr(instance, 'assetassignee'):
-        AssetAssignee.objects.create(user=instance)
-    instance.assetassignee.save()
-
-
-@receiver(post_save, sender=Department)
-def assetassignee_department(sender, instance, created, **kwargs):
-    if created or not hasattr(instance, 'assetassignee'):
-        AssetAssignee.objects.create(department=instance)
-    instance.assetassignee.save()
-
-
-@receiver(post_save, sender=OfficeWorkspace)
-def assetassignee_workspace(sender, instance, created, **kwargs):
-    if created or not hasattr(instance, 'assetassignee'):
-        AssetAssignee.objects.create(workspace=instance)
-    instance.assetassignee.save()
