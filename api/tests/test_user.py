@@ -17,7 +17,7 @@ class UserTestCase(APIBaseTestCase):
     def setUp(self):
         super(UserTestCase, self).setUp()
         self.user = User.objects.create(
-            email='test@site.com', cohort=20,
+            email='test@site.com', cohort=10,
             slack_handle='@test_user', password='devpassword'
         )
         self.token_user = 'testtoken'
@@ -317,7 +317,20 @@ class UserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         self.assertEqual(response.data['results'][0]['cohort'],
                          self.user.cohort)
-        self.assertEqual(response.data['count'], 2)
+        users_count = User.objects.filter(cohort=self.user.cohort).count()
+        self.assertEqual(response.data['count'], users_count)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_filter_users_by_multiple_cohorts(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        cohorts = [user.cohort for user in User.objects.all() if user.cohort]
+        cohorts_str = ','.join(str(cohort) for cohort in cohorts)
+        response = client.get(
+            '{}?cohort={}'.format(self.users_url, cohorts_str),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertIn(response.data['results'][0]['cohort'], cohorts)
+        self.assertEqual(response.data['count'], User.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -377,4 +390,18 @@ class UserTestCase(APIBaseTestCase):
                          self.asset_count)
         self.assertEqual(response.data['count'], 1)
         self.assertTrue(isinstance(allocation_user, AllocationHistory))
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_filter_users_by_multiple_asset_count_values(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        AllocationHistory.objects.create(
+            asset=self.asset,
+            current_owner=self.user.assetassignee
+        )
+        response = client.get(
+            '{}?asset_count=0,1'.format(self.users_url),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertIn(response.data['results'][0]['allocated_asset_count'], [0, 1])
+        self.assertEqual(response.data['count'], User.objects.count())
         self.assertEqual(response.status_code, 200)

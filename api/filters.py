@@ -3,7 +3,13 @@ from django_filters import rest_framework as filters
 from core.models import Asset, User
 
 
-class AssetFilter(filters.FilterSet):
+class BaseFilter(filters.FilterSet):
+    def filter_with_multiple_query_values(self, queryset, name, value):
+        lookup = '__'.join([name, 'in'])
+        return queryset.filter(**{lookup: value.split(',')})
+
+
+class AssetFilter(BaseFilter):
     email = filters.CharFilter(
         field_name='assigned_to__user__email',
         lookup_expr='icontains', )
@@ -20,19 +26,17 @@ class AssetFilter(filters.FilterSet):
         lookup_expr='iexact',
     )
 
-    def filter_with_multiple_query_values(self, queryset, name, value):
-        lookup = '__'.join([name, 'in'])
-        return queryset.filter(**{lookup: value.split(',')})
-
     class Meta:
         model = Asset
         fields = ['asset_type', 'model_number', 'email', 'current_status']
 
 
-class UserFilter(filters.FilterSet):
+class UserFilter(BaseFilter):
     cohort = filters.CharFilter(
         field_name='cohort',
-        lookup_expr='iexact',)
+        lookup_expr='iexact',
+        method='filter_with_multiple_query_values',
+    )
 
     email = filters.CharFilter(
         field_name='email',
@@ -48,9 +52,9 @@ class UserFilter(filters.FilterSet):
         users = [
             user.id
             for user in queryset
-            if user.assetassignee.asset_set.count() == int(value)
+            if str(user.assetassignee.asset_set.count()) in value.split(',')
         ]
-        return User.objects.filter(id__in=users)
+        return queryset.filter(id__in=users)
 
     class Meta:
         model = User
