@@ -1,9 +1,7 @@
 from unittest.mock import patch
 from rest_framework.test import APIClient
-from rest_framework.reverse import reverse
 
-from core.models import User, AssetCategory, AssetSubCategory, \
-    AssetType
+from core.models import AssetCategory, AssetType
 
 from api.tests import APIBaseTestCase
 
@@ -12,29 +10,6 @@ client = APIClient()
 
 class AssetCategoryAPITest(APIBaseTestCase):
     """ Tests for the AssetCategory endpoint"""
-
-    def setUp(self):
-        super(AssetCategoryAPITest, self).setUp()
-        self.user = User.objects.create(
-            email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty123'
-        )
-
-        self.asset_category = AssetCategory.objects.create(
-            category_name="Accessories"
-        )
-        self.asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name="Key Board",
-            asset_category=self.asset_category
-        )
-        self.asset_type = AssetType.objects.create(
-            asset_type="Dell",
-            asset_sub_category=self.asset_sub_category
-        )
-
-        self.asset_type_url = reverse('asset-types-list')
-        self.token_user = 'testtoken'
-
     def test_non_authenticated_user_get_asset_sub_category(self):
         response = client.get(self.asset_type_url)
         self.assertEqual(response.data, {

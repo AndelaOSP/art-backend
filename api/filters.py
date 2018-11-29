@@ -1,6 +1,10 @@
+import logging
+
 from django_filters import rest_framework as filters
 
 from core.models import Asset, User
+
+logger = logging.getLogger(__name__)
 
 
 class BaseFilter(filters.FilterSet):

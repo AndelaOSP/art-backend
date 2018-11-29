@@ -1,6 +1,10 @@
+import logging
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from oauth2_provider.models import AbstractApplication
+
+logger = logging.getLogger(__name__)
 
 
 class UserManager(BaseUserManager):
@@ -62,6 +66,18 @@ class User(AbstractUser):
     class Meta:
         verbose_name_plural = "All Users"
         ordering = ['-id']
+
+    def save(self, *args, **kwargs):
+        try:
+            super(User, self).save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._create_assignee_object_for_user()
+
+    def _create_assignee_object_for_user(self):
+        from .asset import AssetAssignee
+        AssetAssignee.objects.get_or_create(user=self)
 
 
 class SecurityUser(User):

@@ -1,8 +1,7 @@
 from unittest.mock import patch
 from rest_framework.test import APIClient
-from rest_framework.reverse import reverse
 
-from core.models import User, AssetCategory
+from core.models import AssetCategory
 
 from api.tests import APIBaseTestCase
 
@@ -11,20 +10,6 @@ client = APIClient()
 
 class AssetCategoryAPITest(APIBaseTestCase):
     """ Tests for the AssetCategory endpoint"""
-
-    def setUp(self):
-        super(AssetCategoryAPITest, self).setUp()
-        self.user = User.objects.create(
-            email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty123'
-        )
-
-        self.asset_category = AssetCategory.objects.create(
-            category_name="Accessories"
-        )
-
-        self.category_url = reverse('asset-categories-list')
-        self.token_user = 'testtoken'
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_post_category(self, mock_verify_token):

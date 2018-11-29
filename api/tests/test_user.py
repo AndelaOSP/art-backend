@@ -3,53 +3,13 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
 from api.tests import APIBaseTestCase
-from core.models import (
-    Asset, AssetModelNumber, AssetSubCategory,
-    AllocationHistory, AssetCategory, AssetType,
-    AssetMake, AssetStatus
-)
+from core.models import AllocationHistory, AssetStatus
 
 User = get_user_model()
 client = APIClient()
 
 
 class UserTestCase(APIBaseTestCase):
-    def setUp(self):
-        super(UserTestCase, self).setUp()
-        self.user = User.objects.create(
-            email='test@site.com', cohort=10,
-            slack_handle='@test_user', password='devpassword'
-        )
-        self.token_user = 'testtoken'
-        self.admin_user = User.objects.create_superuser(
-            email='admin@site.com', cohort=20,
-            slack_handle='@admin', password='devpassword'
-        )
-        self.asset_category = AssetCategory.objects.create(
-            category_name="Accessoriesssss")
-
-        self.asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name="Sub Category nameseses",
-            asset_category=self.asset_category)
-        self.asset_type = AssetType.objects.create(
-            asset_type="Asset Types",
-            asset_sub_category=self.asset_sub_category)
-        self.make_label = AssetMake.objects.create(
-            make_label="Asset Makes", asset_type=self.asset_type)
-        self.assetmodel = AssetModelNumber.objects.create(
-            model_number="IMN50987345", make_label=self.make_label)
-
-        self.asset = Asset.objects.create(
-            asset_code="IC001455",
-            serial_number="SN00123455",
-            purchase_date="2018-07-10",
-            current_status="Available",
-            model_number=self.assetmodel
-        )
-
-        self.token_admin = 'admintesttoken'
-        self.users_url = "/api/v1/users/"
-        self.asset_count = 1
 
     def test_can_add_user(self):
         users_count_before = User.objects.count()
@@ -88,9 +48,6 @@ class UserTestCase(APIBaseTestCase):
         new_user.delete()
         users_count_after = User.objects.count()
         self.assertEqual(users_count_before, users_count_after + 1)
-
-    def test_user_model_string_representation(self):
-        self.assertEquals(str(self.user), 'test@site.com')
 
     def test_user_email_is_required(self):
         with self.assertRaises(ValueError):
@@ -245,45 +202,38 @@ class UserTestCase(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_add_user_api_endpoint_cant_allow_put(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        user = User.objects.filter(
-            email='test@site.com').first()
+        user = User.objects.first()
         response = client.put(
-            '{}{}/'.format(self.users_url, user.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data, {
-            'detail': 'Method "PUT" not allowed.'
-        })
+            '{}/{}/'.format(self.users_url, user.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+        )
+        self.assertEqual(response.json(), {'detail': 'Method "PUT" not allowed.'})
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_add_user_api_endpoint_cant_allow_patch(self, mock_verify_token):
+    def test_user_api_endpoint_cant_allow_patch(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        user = User.objects.filter(
-            email='test@site.com').first()
+        user = User.objects.first()
         response = client.patch(
-            '{}{}/'.format(self.users_url, user.id),
+            '{}/{}/'.format(self.users_url, user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data, {
-            'detail': 'Method "PATCH" not allowed.'
-        })
+        self.assertEqual(response.json(), {'detail': 'Method "PATCH" not allowed.'})
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_add_user_api_endpoint_cant_allow_delete(self, mock_verify_token):
+    def test_user_api_endpoint_cant_allow_delete(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        user = User.objects.filter(
-            email='test@site.com').first()
+        user = User.objects.first()
         response = client.delete(
-            '{}{}/'.format(self.users_url, user.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data, {
-            'detail': 'Method "DELETE" not allowed.'
-        })
+            '{}/{}/'.format(self.users_url, user.id), HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+        )
+        self.assertEqual(response.json(), {'detail': 'Method "DELETE" not allowed.'})
 
     @patch('api.authentication.auth.verify_id_token')
     def test_allocated_asset_count(self, mock_verify_token):
         """Test allocated_asset_count returns count of assets allocated to a user"""
         mock_verify_token.return_value = {'email': self.admin_user.email}
+        AssetStatus.objects.create(asset=self.asset, current_status='Available')
         response = client.get(
-            '{}{}/'.format(self.users_url, self.user.id),
+            '{}/{}/'.format(self.users_url, self.user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         count = response.data['allocated_asset_count']
@@ -292,7 +242,7 @@ class UserTestCase(APIBaseTestCase):
             current_owner=self.user.assetassignee
         )
         response = client.get(
-            '{}{}/'.format(self.users_url, self.user.id),
+            '{}/{}/'.format(self.users_url, self.user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         after_allocation = response.data['allocated_asset_count']
@@ -303,7 +253,7 @@ class UserTestCase(APIBaseTestCase):
             current_status='Available'
         )
         response = client.get(
-            '{}{}/'.format(self.users_url, self.user.id),
+            '{}/{}/'.format(self.users_url, self.user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         self.assertEqual(
@@ -324,13 +274,14 @@ class UserTestCase(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_user_filter_users_by_multiple_cohorts(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        cohorts = [user.cohort for user in User.objects.all() if user.cohort]
+        cohorts = set([user.cohort for user in User.objects.all() if user.cohort])
         cohorts_str = ','.join(str(cohort) for cohort in cohorts)
         response = client.get(
             '{}?cohort={}'.format(self.users_url, cohorts_str),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+
         self.assertIn(response.data['results'][0]['cohort'], cohorts)
-        self.assertEqual(response.data['count'], User.objects.count())
+        self.assertEqual(response.data['count'], User.objects.filter(cohort__isnull=False).count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -384,10 +335,9 @@ class UserTestCase(APIBaseTestCase):
             current_owner=self.user.assetassignee
         )
         response = client.get(
-            '{}?asset_count={}'.format(self.users_url, self.asset_count),
+            '{}?asset_count={}'.format(self.users_url, 1),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data['results'][0]['allocated_asset_count'],
-                         self.asset_count)
+        self.assertEqual(response.data['results'][0]['allocated_asset_count'], 1)
         self.assertEqual(response.data['count'], 1)
         self.assertTrue(isinstance(allocation_user, AllocationHistory))
         self.assertEqual(response.status_code, 200)
@@ -395,6 +345,7 @@ class UserTestCase(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_filter_users_by_multiple_asset_count_values(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
+        AssetStatus.objects.create(asset=self.asset, current_status='Available')
         AllocationHistory.objects.create(
             asset=self.asset,
             current_owner=self.user.assetassignee

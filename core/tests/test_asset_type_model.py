@@ -1,62 +1,37 @@
 from django.core.exceptions import ValidationError
-from ..models import AssetType, AssetSubCategory, AssetCategory
+from django.db.models import ProtectedError
+
+from core.models import AssetType
 from core.tests import CoreBaseTestCase
 
 
 class AssetTypeModelTest(CoreBaseTestCase):
     """Tests for the Asset Types Model"""
-
-    def setUp(self):
-        super(AssetTypeModelTest, self).setUp()
-        AssetCategory.objects.create(
-            category_name="Accessories"
-        )
-        self.category = AssetCategory.objects.get(
-            category_name="Accessories"
-        )
-        self.new_sub_category = AssetSubCategory(
-            sub_category_name="Computer Assessories",
-            asset_category=self.category
-        )
-        self.new_sub_category.save()
-        AssetType.objects.create(asset_type="Headset",
-                                 asset_sub_category=self.new_sub_category)
-        self.all_assettypes = AssetType.objects.all()
-
     def test_add_new_asset_type(self):
         """Test add new asset type in model"""
-        self.assertEqual(self.all_assettypes.count(), 1)
-        new_assettype = AssetType(asset_type="Macbook",
-                                  asset_sub_category=self.new_sub_category)
+        count = AssetType.objects.count()
+        new_assettype = AssetType(asset_type="Macbook", asset_sub_category=self.asset_sub_category)
         new_assettype.save()
-        self.assertEqual(self.all_assettypes.count(), 2)
+        self.assertEqual(AssetType.objects.count(), count + 1)
 
     def test_cannot_add_existing_asset_type(self):
-        self.assertEqual(AssetType.objects.count(), 1)
+        count = AssetType.objects.count()
         with self.assertRaises(ValidationError):
-            AssetType.objects.create(asset_type="Headset",
-                                     asset_sub_category=self.new_sub_category)
-        self.assertEqual(AssetType.objects.count(), 1)
-
-    def test_edit_asset_type(self):
-        """Test edit an asset type in model"""
-        get_asset = AssetType.objects.get(asset_type="Headset")
-        get_asset.asset_type = "New Name"
-        get_asset.save()
-        self.assertEqual(self.all_assettypes.count(), 1)
-        get_asset = AssetType.objects.get(asset_type="New Name")
-        self.assertEqual(get_asset.asset_type, "New Name")
+            AssetType.objects.create(asset_type=self.asset_type.asset_type,
+                                     asset_sub_category=self.asset_sub_category)
+        self.assertEqual(AssetType.objects.count(), count)
 
     def test_delete_asset_type(self):
         """Test delete an asset type in model"""
-        self.assertEqual(self.all_assettypes.count(), 1)
-        get_asset = AssetType.objects.get(asset_type="Headset")
-        get_asset.delete()
-        self.assertEqual(self.all_assettypes.count(), 0)
+        count = AssetType.objects.count()
+        asset_type = AssetType.objects.first()
+        with self.assertRaises(ProtectedError):
+            asset_type.delete()
+        self.assertEqual(AssetType.objects.count(), count)
 
     def test_asset_type_model_string_representation(self):
-        get_asset = AssetType.objects.get(asset_type="Headset")
-        self.assertEquals(str(get_asset), "Headset")
+        get_asset = AssetType.objects.first()
+        self.assertEqual(str(get_asset), get_asset.asset_type)
 
     def test_cannot_add_type_with_non_exisitng_subcategory(self):
         """ Test cannot add type with non-existing subcategory """

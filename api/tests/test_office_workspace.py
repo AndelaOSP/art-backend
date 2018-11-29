@@ -2,9 +2,6 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
-from core.models import OfficeWorkspace, User, \
-    OfficeFloor, OfficeBlock, OfficeFloorSection, AndelaCentre
-
 from api.tests import APIBaseTestCase
 
 client = APIClient()
@@ -12,36 +9,6 @@ client = APIClient()
 
 class OfficeWorkspaceAPITest(APIBaseTestCase):
     """ Tests for the Office Workspace endpoint"""
-
-    def setUp(self):
-        super(OfficeWorkspaceAPITest, self).setUp()
-        self.admin = User.objects.create_superuser(
-            email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty123'
-        )
-        self.centre = AndelaCentre.objects.create(
-            centre_name="Dojo",
-            country="Kenya"
-        )
-        self.building = OfficeBlock.objects.create(
-            name="Block A",
-            location=self.centre
-        )
-        self.floor_number = OfficeFloor.objects.create(
-            number=5,
-            block=self.building
-        )
-        self.floor_section = OfficeFloorSection.objects.create(
-            name="kitchenette",
-            floor=self.floor_number
-        )
-        self.office_workspace = OfficeWorkspace.objects.create(
-            name="Oculus",
-            section=self.floor_section
-        )
-        self.office_workspace_url = reverse('office-workspaces-list')
-        self.token_user = 'testtoken'
-
     def test_non_authenticated_user_get_office_workspace(self):
         response = client.get(self.office_workspace_url)
         self.assertEqual(response.data, {
@@ -50,7 +17,7 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_post_office_workspace(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
             "name": "Entebe",
             "section": self.floor_section.id
@@ -64,9 +31,9 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cant_post_workspace_with_same_name(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
-            "name": "Oculus",
+            "name": self.office_workspace.name,
             "section": self.floor_section.id
         }
         response = client.post(
@@ -81,7 +48,7 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_edit_workspace(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
             "name": "Deva Workspace",
             "section": self.floor_section.id
@@ -102,7 +69,7 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_delete_of_an_office_workspace(
             self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {
             "name": "Oculus1",
             "section": self.floor_section.id

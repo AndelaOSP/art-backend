@@ -1,9 +1,7 @@
 from unittest.mock import patch
 from rest_framework.test import APIClient
-from rest_framework.reverse import reverse
 
-from core.models import User, AssetCategory, AssetSubCategory, \
-    AssetType, AssetMake, AssetModelNumber
+from core.models import AssetCategory, AssetModelNumber
 
 from api.tests import APIBaseTestCase
 
@@ -12,38 +10,6 @@ client = APIClient()
 
 class AssetModelNumberAPITest(APIBaseTestCase):
     ''' Tests for the Asset Model Number endpoint'''
-
-    def setUp(self):
-        super(AssetModelNumberAPITest, self).setUp()
-        self.user = User.objects.create(
-            email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty123'
-        )
-
-        self.asset_category = AssetCategory.objects.create(
-            category_name='Accessories'
-        )
-        self.asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name='Key Board',
-            asset_category=self.asset_category
-        )
-        self.asset_type = AssetType.objects.create(
-            asset_type='Dell',
-            asset_sub_category=self.asset_sub_category
-        )
-
-        self.asset_label = AssetMake.objects.create(
-            make_label='ASSET-LABEL',
-            asset_type=self.asset_type
-        )
-
-        self.asset_model_no = AssetModelNumber.objects.create(
-            model_number='TEST-MODEL-NO',
-            make_label=self.asset_label
-        )
-
-        self.asset_model_no_url = reverse('asset-models-list')
-        self.token_user = 'testtoken'
 
     def test_non_authenticated_user_get_asset_model_number(self):
         response = client.get(self.asset_model_no_url)
@@ -56,7 +22,7 @@ class AssetModelNumberAPITest(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
             'model_number': 'TEST-MODEL-NO-1',
-            'make_label': self.asset_label.id
+            'make_label': self.make_label.id
         }
         response = client.post(
             self.asset_model_no_url,
@@ -82,11 +48,11 @@ class AssetModelNumberAPITest(APIBaseTestCase):
     def test_can_get_single_asset_model_number(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
-            f'{self.asset_model_no_url}/{self.asset_model_no.id}/',
+            f'{self.asset_model_no_url}/{self.assetmodel.id}/',
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
 
         self.assertIn('model_number', response.data.keys())
-        self.assertIn(self.asset_model_no.model_number,
+        self.assertIn(self.assetmodel.model_number,
                       response.data.values())
         self.assertEqual(response.status_code, 200)
 
@@ -138,13 +104,13 @@ class AssetModelNumberAPITest(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
             'model_number': '',
-            'make_label': self.asset_label.id
+            'make_label': self.make_label.id
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
-        self.assertEquals(response.data, {
+        self.assertEqual(response.data, {
             'model_number': ['This field may not be blank.']})
         self.assertEqual(response.status_code, 400)
 
@@ -160,7 +126,7 @@ class AssetModelNumberAPITest(APIBaseTestCase):
             self.asset_model_no_url,
             data=data,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
-        self.assertEquals(response.data, {
+        self.assertEqual(response.data, {
             'make_label': [
                 f'Invalid pk "{data["make_label"]}" - object does not exist.'
             ]})
@@ -178,7 +144,7 @@ class AssetModelNumberAPITest(APIBaseTestCase):
             self.asset_model_no_url,
             data=data,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
-        self.assertEquals(response.data, {
+        self.assertEqual(response.data, {
             'make_label': ['This field is required.']})
         self.assertEqual(response.status_code, 400)
 
@@ -188,11 +154,11 @@ class AssetModelNumberAPITest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.user.email}
         AssetModelNumber.objects.create(
             model_number='BCD6G4D6 1F',
-            make_label=self.asset_label
+            make_label=self.make_label
         )
         AssetModelNumber.objects.create(
             model_number='XD6GRD6 Q3',
-            make_label=self.asset_label
+            make_label=self.make_label
         )
 
         response = client.get(
