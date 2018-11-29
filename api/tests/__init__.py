@@ -35,7 +35,7 @@ class APIBaseTestCase(TestCase):
         )
         cls.token_admin = 'admintesttoken'
         cls.other_user = User.objects.create_user(
-            email='user1@site.com', cohort=20,
+            email='user1@site.com', cohort=2,
             slack_handle='@admin', password='devpassword'
         )
         cls.token_other_user = 'otherusertesttoken'
@@ -117,6 +117,7 @@ class APIBaseTestCase(TestCase):
         cls.centre_url = reverse('andela-centres-list')
         cls.department_url = reverse('departments-list')
         cls.feedback_url = reverse('user-feedback-list')
+        cls.filter_values_urls = reverse('available-filters')
         cls.floor_number_url = reverse('office-floors-list')
         cls.floor_section_url = reverse('floor-sections-list')
         cls.incident_report_url = reverse('incidence-reports-list')
