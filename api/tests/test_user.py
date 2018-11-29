@@ -281,7 +281,29 @@ class UserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
 
         self.assertIn(response.data['results'][0]['cohort'], cohorts)
-        self.assertEqual(response.data['count'], User.objects.filter(cohort__isnull=False).count())
+        self.assertEqual(
+            response.data['count'],
+            User.objects.filter(cohort__isnull=False).count()
+        )
+        cohorts_str += ',unspecified'
+        response = client.get(
+            '{}?cohort={}'.format(self.users_url, cohorts_str),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(
+            response.data['count'],
+            User.objects.count()
+        )
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_filter_users_without_cohort(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?cohort=unspecified'.format(self.users_url),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        self.assertEqual(
+            response.data['count'],
+            User.objects.filter(cohort__isnull=True).count()
+        )
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')

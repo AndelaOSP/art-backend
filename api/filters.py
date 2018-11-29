@@ -1,16 +1,24 @@
 import logging
 
+from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from core.models import Asset, User
 
 logger = logging.getLogger(__name__)
 
+NULL_VALUE = 'unspecified'
+
 
 class BaseFilter(filters.FilterSet):
     def filter_with_multiple_query_values(self, queryset, name, value):
-        lookup = '__'.join([name, 'in'])
-        return queryset.filter(**{lookup: value.split(',')})
+        options = set(value.split(','))
+        null_lookup = {}
+        if NULL_VALUE in options:
+            options.remove(NULL_VALUE)
+            null_lookup = {'__'.join([name, 'isnull']): True}
+        lookup = {'__'.join([name, 'in']): options}
+        return queryset.filter(Q(**lookup) | Q(**null_lookup))
 
 
 class AssetFilter(BaseFilter):
