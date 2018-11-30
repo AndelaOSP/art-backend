@@ -5,14 +5,14 @@ def add_default_spec_value(apps, schema_editor):
     Asset_Type = apps.get_model('core', 'AssetType')
     specs = False
     for asset_type in Asset_Type.objects.all():
-        asset_type.specs = specs
+        asset_type.has_specs = specs
         asset_type.save()
 
 
 class Migration(migrations.Migration):
     
     dependencies = [
-        ('core', '0033_auto_20181121_2302'),
+        ('core', '0001_auto_20181130_1125'),
     ]
 
     operations = [

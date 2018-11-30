@@ -297,7 +297,7 @@ class AssetSubCategorySerializer(serializers.ModelSerializer):
 class AssetTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssetType
-        fields = ("id", "asset_type", "asset_sub_category", "specs",
+        fields = ("id", "asset_type", "asset_sub_category", "has_specs",
                   "created_at", "last_modified")
 
     def to_representation(self, instance):
