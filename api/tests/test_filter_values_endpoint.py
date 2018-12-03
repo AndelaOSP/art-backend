@@ -30,7 +30,7 @@ class FilterValuesApiTest(APIBaseTestCase):
             cohort_data = {'id': user.cohort, 'option': user.cohort}
             assets = user.assetassignee.asset_set.count()
             asset_count_data = {'id': assets, 'option': assets}
-            if cohort_data not in cohorts:
+            if cohort_data not in cohorts and cohort_data.get('id') is not None:
                 cohorts.append(cohort_data)
             if asset_count_data not in asset_count:
                 asset_count.append(asset_count_data)
