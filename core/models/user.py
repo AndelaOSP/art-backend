@@ -1,6 +1,10 @@
+import logging
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from oauth2_provider.models import AbstractApplication
+
+logger = logging.getLogger(__name__)
 
 
 class UserManager(BaseUserManager):
@@ -48,16 +52,12 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(max_length=50, unique=True)
     cohort = models.IntegerField(blank=True, null=True)
-    slack_handle = models.CharField(max_length=50,
-                                    blank=True, null=True)
+    slack_handle = models.CharField(max_length=50, blank=True, null=True)
     picture = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     password = models.CharField(max_length=128, blank=True, null=True)
-    location = models.ForeignKey('AndelaCentre',
-                                 blank=False,
-                                 null=True,
-                                 on_delete=models.PROTECT)
+    location = models.ForeignKey('AndelaCentre', blank=False, null=True, on_delete=models.PROTECT)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cohort', 'slack_handle']
@@ -66,6 +66,18 @@ class User(AbstractUser):
     class Meta:
         verbose_name_plural = "All Users"
         ordering = ['-id']
+
+    def save(self, *args, **kwargs):
+        try:
+            super(User, self).save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._create_assignee_object_for_user()
+
+    def _create_assignee_object_for_user(self):
+        from .asset import AssetAssignee
+        AssetAssignee.objects.get_or_create(user=self)
 
 
 class SecurityUser(User):
@@ -107,10 +119,7 @@ class UserFeedback(models.Model):
     )
     reported_by = models.ForeignKey(User, on_delete=models.PROTECT)
     message = models.TextField(null=False)
-    report_type = models.CharField(max_length=20,
-                                   blank=False,
-                                   choices=option,
-                                   null=False)
+    report_type = models.CharField(max_length=20, blank=False, choices=option, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     resolved = models.BooleanField(default=False)
 

@@ -5,16 +5,14 @@ from core.models import (
     User, Asset, SecurityUser, AssetLog,
     UserFeedback, CHECKIN, CHECKOUT, AssetStatus, AllocationHistory,
     AssetCategory, AssetSubCategory, AssetType, AssetModelNumber, AssetMake,
-    AssetAssignee, AssetCondition, AssetIncidentReport, AssetSpecs,
-    OfficeBlock, OfficeFloor, OfficeFloorSection, OfficeWorkspace, AndelaCentre
+    AssetAssignee, AssetCondition, AssetIncidentReport, AssetSpecs, Department,
+    OfficeBlock, OfficeFloor, OfficeFloorSection, OfficeWorkspace, AndelaCentre,
 )
-from core.models.department import Department
 
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     allocated_asset_count = serializers.SerializerMethodField()
-    location = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -38,14 +36,6 @@ class UserSerializer(serializers.ModelSerializer):
             obj.last_name
         )
 
-    def get_location(self, obj):
-        if isinstance(obj, User) and obj.location:
-            return obj.location.centre_name
-        elif isinstance(obj, AssetAssignee) and obj.user.location:
-            return obj.user.location.centre_name
-        else:
-            return 'No location'
-
     def get_allocated_asset_count(self, obj):
         """Return the number of assets allocated to a user.
 
@@ -54,14 +44,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         """
         try:
-            return obj.assetassignee.current_owner_asset.count()
+            return obj.assetassignee.asset_set.count()
         except AttributeError:
             if isinstance(obj, User):
                 # In the unlikely event that a User has no corresponding
                 # AssetAssignee instance create it by calling save()
                 obj.save()
             elif isinstance(obj, AssetAssignee):
-                return obj.current_owner_asset.count()
+                return obj.asset_set.count()
             else:
                 return 0
 
@@ -86,7 +76,7 @@ class UserSerializerWithAssets(UserSerializer):
 class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
     allocation_history = serializers.SerializerMethodField()
-    assigned_to = UserSerializer(read_only=True)
+    assigned_to = serializers.SerializerMethodField()
     asset_category = serializers.SerializerMethodField()
     asset_sub_category = serializers.SerializerMethodField()
     make_label = serializers.SerializerMethodField()
@@ -108,7 +98,7 @@ class AssetSerializer(serializers.ModelSerializer):
                   'checkin_status', 'created_at',
                   'last_modified', 'current_status', 'asset_type',
                   'allocation_history', 'specs', 'purchase_date',
-                  'notes', 'assigned_to', 'asset_location'
+                  'notes', 'assigned_to', 'asset_location', 'verified'
                   )
         depth = 1
         read_only_fields = ("uuid",)
@@ -124,6 +114,19 @@ class AssetSerializer(serializers.ModelSerializer):
                 return "checked_out"
         except AttributeError:
             return None
+
+    def get_assigned_to(self, obj):
+        if not obj.assigned_to:
+            return None
+        if obj.assigned_to.department:
+            serialized_data = DepartmentSerializer(obj.assigned_to.department)
+        elif obj.assigned_to.workspace:
+            serialized_data = OfficeWorkspaceSerializer(obj.assigned_to.workspace)
+        elif obj.assigned_to.user:
+            serialized_data = UserSerializer(obj.assigned_to.user)
+        else:
+            return None
+        return serialized_data.data
 
     def get_asset_category(self, obj):
         return obj.model_number.make_label.asset_type. \

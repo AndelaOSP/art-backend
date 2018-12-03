@@ -2,6 +2,9 @@ from unittest.mock import patch
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
 
+from django.db import transaction
+from rest_framework.exceptions import ValidationError
+
 from core.models import User, AssetCategory, AssetSubCategory, \
     AssetType
 
@@ -15,26 +18,26 @@ class AssetCategoryAPITest(APIBaseTestCase):
 
     def setUp(self):
         super(AssetCategoryAPITest, self).setUp()
+        with transaction.atomic():
+            self.asset_category = AssetCategory.objects.create(
+                category_name="Accessories"
+            )
+            self.asset_sub_category = AssetSubCategory.objects.create(
+                sub_category_name="Key Board",
+                asset_category=self.asset_category
+            )
+            self.asset_type = AssetType.objects.create(
+                asset_type="Dell",
+                asset_sub_category=self.asset_sub_category
+            )
 
-        self.asset_category = AssetCategory.objects.create(
-            category_name="Accessories"
-        )
-        self.asset_sub_category = AssetSubCategory.objects.create(
-            sub_category_name="Key Board",
-            asset_category=self.asset_category
-        )
-        self.asset_type = AssetType.objects.create(
-            asset_type="Dell",
-            asset_sub_category=self.asset_sub_category
-        )
+            self.asset_type_url = reverse('asset-types-list')
 
-        self.asset_type_url = reverse('asset-types-list')
-
-        self.admin_user = User.objects.create_superuser(
-            email='admin@site.com', cohort=20,
-            slack_handle='@admin', password='devpassword'
-        )
-        self.token_admin = 'admintesttoken'
+            self.admin_user = User.objects.create_superuser(
+                email='admin@site.com', cohort=20,
+                slack_handle='@admin', password='devpassword'
+            )
+            self.token_admin = 'admintesttoken'
 
     def test_non_authenticated_user_get_asset_sub_category(self):
         response = client.get(self.asset_type_url)

@@ -7,12 +7,6 @@ from core.tests import CoreBaseTestCase
 
 class AndelaCentreModelTest(CoreBaseTestCase):
     """ Tests for the Andela Centre Model """
-
-    def setUp(self):
-        super(AndelaCentreModelTest, self).setUp()
-        self.centre = AndelaCentre.objects.create(centre_name="ET", country="Nigeria")
-        self.centre = AndelaCentre.objects.get(centre_name="ET")
-
     def test_can_save_a_centre(self):
         AndelaCentre.objects.create(centre_name="Gorilla", country="Rwanda")
         new_centre = AndelaCentre.objects.get(centre_name="Gorilla")
@@ -45,4 +39,4 @@ class AndelaCentreModelTest(CoreBaseTestCase):
         self.assertEqual(count_after_deletion, 1)
 
     def test_asset_centre_model_string_representation(self):
-        self.assertEquals(str(self.centre), "ET")
+        self.assertEqual(str(self.centre), "ET")

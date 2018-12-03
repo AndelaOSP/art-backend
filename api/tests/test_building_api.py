@@ -1,8 +1,5 @@
 from unittest.mock import patch
 from rest_framework.test import APIClient
-from rest_framework.reverse import reverse
-
-from core.models import OfficeBlock, User, AndelaCentre
 
 from api.tests import APIBaseTestCase
 
@@ -11,25 +8,6 @@ client = APIClient()
 
 class OfficeBlockAPITest(APIBaseTestCase):
     """ Tests for the OfficeBlock endpoint"""
-
-    def setUp(self):
-        super(OfficeBlockAPITest, self).setUp()
-        self.admin = User.objects.create_superuser(
-            email='testuser@gmail.com', cohort=19,
-            slack_handle='tester', password='qwerty123'
-        )
-        self.centre = AndelaCentre.objects.create(
-            centre_name="Dojo",
-            country="Kenya"
-        )
-        self.centre.save()
-        self.building = OfficeBlock.objects.create(
-            name="Block A",
-            location=self.centre
-        )
-        self.office_block_url = reverse('office-blocks-list')
-        self.token_user = 'testtoken'
-
     def test_non_authenticated_user_get_office_block(self):
         response = client.get(self.office_block_url)
         self.assertEqual(response.data, {
@@ -38,7 +16,7 @@ class OfficeBlockAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_post_office_block(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
             "name": "Block B",
             "location": self.centre.id
@@ -52,9 +30,9 @@ class OfficeBlockAPITest(APIBaseTestCase):
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cant_post_office_block_with_same_name(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin.email}
+        mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
-            "name": "Block A",
+            "name": self.office_block.name,
             "location": self.centre.id
         }
         response = client.post(
@@ -66,7 +44,7 @@ class OfficeBlockAPITest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_office_block_api_endpoint_cant_allow_put(self,
                                                       mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
         response = client.put(
             self.office_block_url,
@@ -80,7 +58,7 @@ class OfficeBlockAPITest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_office_block_api_endpoint_cant_allow_patch(self,
                                                         mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
         response = client.patch(
             self.office_block_url,
@@ -94,7 +72,7 @@ class OfficeBlockAPITest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_office_block_api_endpoint_cant_allow_delete(self,
                                                          mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin.email}
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
         response = client.delete(
             self.office_block_url,
