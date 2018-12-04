@@ -498,15 +498,16 @@ class AvailableFilterValues(APIView):
         cohorts = set()
         asset_count = set()
         for user in User.objects.all():
-            cohorts.add(user.cohort)
+            if user.cohort is not None:
+                cohorts.add(user.cohort)
             asset_count.add(user.assetassignee.asset_set.count())
 
         cohort_res = []
         asset_num = []
-        for cohort in cohorts:
+        for cohort in sorted(cohorts):
             cohort_res.append({"id": cohort, "option": cohort})
 
-        for count in asset_count:
+        for count in sorted(asset_count):
             asset_num.append({"id": count, "option": count})
 
         return Response(data={"cohorts": cohort_res, "asset_count": asset_num}, status=200)
