@@ -15,9 +15,4 @@ class Migration(migrations.Migration):
             name='has_specs',
             field=models.BooleanField(default=False),
         ),
-        migrations.AlterField(
-            model_name='andelacentre',
-            name='country',
-            field=models.CharField(choices=[('Kenya', 'Kenya'), ('Nigeria', 'Nigeria'), ('Rwanda', 'Rwanda'), ('Uganda', 'Uganda')], max_length=25),
-        ),
     ]
