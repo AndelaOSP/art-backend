@@ -37,7 +37,9 @@ def create_object(collection, parent=None, row=None, row_count=None, **values):
 def record_errors(row, row_count, object_error):
     for line in SKIPPED_ROWS:
         if line.get("Row") == row_count:
-            line["Error"] += object_error
+            error_as_list = list(line["Error"])
+            error_as_list += object_error
+            line["Error"] = error_as_list
             return
     row["Error"] = object_error
     row["Row"] = row_count
@@ -72,7 +74,8 @@ def write_skipped_records(records, filename=None):
         writer.writeheader()
         for row in records:
             row["Error"] = set(row["Error"])
-            del(row[""])
+            if "" in row.keys():
+                del(row[""])
             writer.writerow(row)
 
 
