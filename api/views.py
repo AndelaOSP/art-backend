@@ -204,7 +204,7 @@ class AssetSubCategoryViewSet(ModelViewSet):
 class AssetTypeViewSet(ModelViewSet):
     serializer_class = AssetTypeSerializer
     queryset = AssetType.objects.all()
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
     ordering = ('asset_type',)

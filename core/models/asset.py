@@ -149,7 +149,11 @@ class AssetType(models.Model):
     asset_type = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    asset_sub_category = models.ForeignKey(AssetSubCategory, on_delete=models.PROTECT)
+    asset_sub_category = models.ForeignKey(
+        AssetSubCategory,
+        on_delete=models.PROTECT
+    )
+    has_specs = models.BooleanField(blank=False, default=False)
 
     objects = CaseInsensitiveManager()
 
