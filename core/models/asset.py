@@ -153,7 +153,7 @@ class AssetType(models.Model):
         AssetSubCategory,
         on_delete=models.PROTECT
     )
-    has_specs = models.NullBooleanField(blank=False, null=True)
+    has_specs = models.BooleanField(blank=False, default=False)
 
     objects = CaseInsensitiveManager()
 
