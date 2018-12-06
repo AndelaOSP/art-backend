@@ -481,11 +481,11 @@ class AllocationHistory(models.Model):
         user = None
 
         if asset.assigned_to and asset.current_status == ALLOCATED:
-            message = "The asset with serial number {} and asset code {} ".format(
+            message = "The {assetype} with serial number {} and asset code {} ".format(
                 asset.serial_number, asset.asset_code) + "has been allocated to you."
             user = self.current_owner
         elif (not asset.assigned_to and self.previous_owner):
-            message = "The asset with serial number {} and asset code {} ".format(
+            message = "The {assetype} with serial number {} and asset code {} ".format(
                 asset.serial_number, asset.asset_code) + "has been de-allocated from you."
             user = self.previous_owner
 
