@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
+django = "==2.1.2"
 python-decouple = "*"
 dj-database-url = "*"
 django-jet = "==1.0.8"
@@ -29,6 +29,7 @@ gevent = "*"
 coverage = "*"
 coveralls = "*"
 "flake8" = "*"
+pytest-django = "*"
 
 [requires]
 python_version = "3.6.4"

@@ -204,7 +204,7 @@ class AssetSubCategoryViewSet(ModelViewSet):
 class AssetTypeViewSet(ModelViewSet):
     serializer_class = AssetTypeSerializer
     queryset = AssetType.objects.all()
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
     ordering = ('asset_type',)
@@ -488,3 +488,26 @@ class AndelaCentreViewset(ModelViewSet):
         self.perform_destroy(instance)
         data = {"detail": "Deleted Successfully"}
         return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+
+class AvailableFilterValues(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+
+    def get(self, request):
+        cohorts = set()
+        asset_count = set()
+        for user in User.objects.all():
+            if user.cohort is not None:
+                cohorts.add(user.cohort)
+            asset_count.add(user.assetassignee.asset_set.count())
+
+        cohort_res = []
+        asset_num = []
+        for cohort in sorted(cohorts):
+            cohort_res.append({"id": cohort, "option": cohort})
+
+        for count in sorted(asset_count):
+            asset_num.append({"id": count, "option": count})
+
+        return Response(data={"cohorts": cohort_res, "asset_count": asset_num}, status=200)

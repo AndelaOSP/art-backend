@@ -1,12 +1,14 @@
+import logging
+
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
+logger = logging.getLogger(__name__)
+
 
 class OfficeBlock(models.Model):
-    name = models.CharField(max_length=50,
-                            blank=False, null=False)
-    location = models.ForeignKey(
-        'AndelaCentre', on_delete=models.PROTECT, null=True)
+    name = models.CharField(max_length=50, blank=False, null=False)
+    location = models.ForeignKey('AndelaCentre', on_delete=models.PROTECT, null=True)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -67,8 +69,7 @@ class OfficeFloorSection(models.Model):
 
 class OfficeWorkspace(models.Model):
     name = models.CharField(max_length=50, blank=False)
-    section = models.ForeignKey(OfficeFloorSection,
-                                on_delete=models.PROTECT)
+    section = models.ForeignKey(OfficeFloorSection, on_delete=models.PROTECT)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -81,7 +82,16 @@ class OfficeWorkspace(models.Model):
             self.full_clean()
         except Exception as e:
             raise ValidationError(e)
-        super().save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._create_assignee_object_for_workspace()
+
+    def _create_assignee_object_for_workspace(self):
+        from .asset import AssetAssignee
+        AssetAssignee.objects.get_or_create(workspace=self)
 
     class Meta:
         verbose_name = 'Office Workspace'

@@ -1,18 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError
-from ..models import AssetCategory, AssetSubCategory
+from ..models import AssetCategory
 
 from core.tests import CoreBaseTestCase
 
 
 class AssetCategoryModelTest(CoreBaseTestCase):
     """ Tests for the Asset Category Model """
-
-    def setUp(self):
-        super(AssetCategoryModelTest, self).setUp()
-        AssetCategory.objects.create(category_name="Accessories")
-        self.category = AssetCategory.objects.get(category_name="Accessories")
-
     def test_can_save_a_category(self):
         AssetCategory.objects.create(category_name="Electronics")
         new_category = AssetCategory.objects.get(category_name="Electronics")
@@ -23,9 +17,9 @@ class AssetCategoryModelTest(CoreBaseTestCase):
 
     def test_cannot_add_existing_category_name(self):
         self.assertEqual(AssetCategory.objects.count(), 1)
+        cat_name = AssetCategory.objects.first().category_name
         with self.assertRaises(ValidationError):
-            AssetCategory.objects.create(
-                category_name="Accessories")
+            AssetCategory.objects.create(category_name=cat_name)
         self.assertEqual(AssetCategory.objects.count(), 1)
 
     def test_can_edit_a_category(self):
@@ -33,26 +27,10 @@ class AssetCategoryModelTest(CoreBaseTestCase):
         self.category.save()
         self.assertIn("Accessory", self.category.category_name)
 
-    def test_can_delete_a_category(self):
-        new_category = AssetCategory.objects.create(category_name="Screens")
-        new_category_count = AssetCategory.objects.count()
-        new_category.delete()
-        count_after_deletion = AssetCategory.objects.count()
-
-        self.assertEqual(new_category_count, 2)
-        self.assertEqual(count_after_deletion, 1)
-
     def test_asset_category_model_string_representation(self):
-        self.assertEquals(str(self.category), "Accessories")
+        self.assertEqual(str(self.category), self.category.category_name)
 
     def test_cannot_delete_category_with_existing_subcategories(self):
-        AssetSubCategory.objects.create(
-            sub_category_name="Computer Accessories",
-            asset_category=self.category
-        )
-        self.subcategory = AssetSubCategory.objects.get(
-            sub_category_name="Computer Accessories"
-        )
         count_before_delete = AssetCategory.objects.count()
         with self.assertRaises(ProtectedError):
             self.category.delete()
@@ -60,10 +38,9 @@ class AssetCategoryModelTest(CoreBaseTestCase):
         self.assertEqual(count_before_delete, count_after_delete)
 
     def test_can_delete_category_without_existing_subcategories(self):
-        new_category_without_subcategories = \
-            AssetCategory.objects.create(category_name="New Category")
+        new_category_without_subcategories = AssetCategory.objects.create(category_name="New Category")
 
         count_before_delete = AssetCategory.objects.count()
         new_category_without_subcategories.delete()
         count_after_delete = AssetCategory.objects.count()
-        self.assertEqual(count_before_delete, count_after_delete + 1)
+        self.assertEqual(count_after_delete, count_before_delete - 1)
