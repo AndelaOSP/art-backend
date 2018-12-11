@@ -46,6 +46,8 @@ from .serializers import UserSerializerWithAssets, \
     OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
     OfficeWorkspaceSerializer, DepartmentSerializer, \
     AssetAssigneeSerializer, AndelaCentreSerializer
+
+from core.management.commands.import_assets import SKIPPED_ROWS
 from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
@@ -459,6 +461,7 @@ class AssetsImportViewSet(APIView):
         response['success'] = "Asset import completed successfully "
         if error:
             response['success'] += "Assets that have not been imported have been written to a file."
+        del SKIPPED_ROWS[:]
         return Response(data=response, status=200)
 
 
