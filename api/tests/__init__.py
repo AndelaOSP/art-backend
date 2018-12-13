@@ -93,11 +93,22 @@ class APIBaseTestCase(TestCase):
         cls.office_block = apps.get_model('core', 'OfficeBlock').objects.create(name="Epic", location=cls.centre)
         cls.office_floor = apps.get_model('core', 'OfficeFloor').objects.create(number=7, block=cls.office_block)
         cls.floor_section = apps.get_model('core', 'OfficeFloorSection').objects.create(
-            name='The Big Apple', floor=cls.office_floor
-            )
+            name='The Big Apple', floor=cls.office_floor)
         cls.office_workspace = apps.get_model('core', 'OfficeWorkspace').objects.create(
-            name="Yaba", section=cls.floor_section
-        )
+            name="Yaba", section=cls.floor_section)
+
+        cls.user.location = cls.centre
+        cls.user.save()
+        cls.other_user.location = cls.centre
+        cls.other_user.save()
+        cls.admin_user.location = cls.centre
+        cls.admin_user.save()
+        cls.security_user.location = cls.centre
+        cls.security_user.save()
+        cls.asset.asset_location = cls.centre
+        cls.asset.save()
+        cls.asset_1.asset_location = cls.centre
+        cls.asset_1.save()
 
         # urls
         cls.allocations_urls = reverse('allocations-list')

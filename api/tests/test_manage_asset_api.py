@@ -338,7 +338,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             country="Kenya")
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                          HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(res.data.get('asset_location'), None)
+        self.assertEqual(res.data.get('asset_location'), "Dojo")
         client.put(
             '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -361,14 +361,14 @@ class ManageAssetTestCase(APIBaseTestCase):
             country="Kenya")
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                          HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(res.data.get('asset_location'), None)
+        self.assertNotEqual(res.data.get('asset_location'), "Nairobi")
         res = client.put(
             '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(res.status_code, 400)
         response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                               HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data.get('asset_location'), None)
+        self.assertNotEqual(response.data.get('asset_location'), "Nairobi")
 
     @patch('api.authentication.auth.verify_id_token')
     def test_non_superuser_can_not_update_an_asset_location(self, mock_verify_id_token):

@@ -157,6 +157,7 @@ class AssetTestCase(APIBaseTestCase):
             model_number=self.assetmodel,
             purchase_date="2018-07-10"
         )
+        new_asset.asset_location = self.centre
         new_asset.save()
 
         response = client.get(

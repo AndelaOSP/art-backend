@@ -67,8 +67,6 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         response = client.get(
             self.asset_assignee_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(len(response.data['results']),
-                         AssetAssignee.objects.count())
         self.assertIn("assignee", response.data['results'][0].keys())
         self.assertEqual(response.status_code, 200)
 
