@@ -1,7 +1,7 @@
 from unittest.mock import patch
 from rest_framework.test import APIClient
 
-from core.models import AssetAssignee, AssetModelNumber, Asset, AllocationHistory
+from core.models import AssetModelNumber, Asset, AllocationHistory
 
 from api.tests import APIBaseTestCase
 client = APIClient()

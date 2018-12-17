@@ -310,7 +310,7 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if (
-            self.request.data.get('command', None) is None) and \
+                self.request.data.get('command', None) is None) and \
                 (self.request.data.get('payload', None) is None):
             try:
                 response = super().create(request, *args, **kwargs)
@@ -452,6 +452,7 @@ class OfficeBlockViewSet(ModelViewSet):
             return self.queryset.filter(location=user_location)
         return self.queryset.none()
 
+
 class OfficeFloorViewSet(ModelViewSet):
     serializer_class = OfficeFloorSerializer
     queryset = OfficeFloor.objects.all()
@@ -475,9 +476,9 @@ class OfficeFloorSectionViewSet(ModelViewSet):
     def get_queryset(self):
         user_location = self.request.user.location
         if user_location:
-            return self.queryset.filter(
-            floor__block__location=user_location)
+            return self.queryset.filter(floor__block__location=user_location)
         return self.queryset.none()
+
 
 class OfficeWorkspaceViewSet(ModelViewSet):
     serializer_class = OfficeWorkspaceSerializer
@@ -526,7 +527,6 @@ class AssetsImportViewSet(APIView):
         error = False
 
         if not save_asset(csv_reader, file_name):
-
             path = request.build_absolute_uri(reverse('skipped'))
 
             response['fail'] = "Some assets were skipped." \
