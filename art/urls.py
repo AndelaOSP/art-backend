@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/v1/', include(urls)),
     path('jet/', include('jet.urls', 'jet')),
     path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
+    path('silk/', include('silk.urls', 'silk')),
     path('', TemplateView.as_view(
         template_name='api/api-index.html'),
         name='api-home'
@@ -34,8 +35,4 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns += [
-        path('silk/', include('silk.urls', namespace='silk')),
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

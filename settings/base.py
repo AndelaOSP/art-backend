@@ -210,7 +210,7 @@ REDOC_SETTINGS = {
 SILKY_PYTHON_PROFILER = True
 SILKY_AUTHENTICATION = True  # User must login
 SILKY_AUTHORISATION = True  # User must have permissions
-SILKY_MAX_REQUEST_BODY_SIZE = 512
+SILKY_META = True
 
 
 def SILKY_PERMISSIONS(user): return user.is_superuser
