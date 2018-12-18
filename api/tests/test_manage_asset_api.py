@@ -33,6 +33,23 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_admin_view_assets_in_their_centres_only(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        location = AndelaCentre.objects.create(
+            centre_name="Kitale", country="Uganda"
+        )
+        Asset.objects.create(
+            asset_code="IC001457", serial_number="SN00123457",
+            purchase_date="2018-07-10", model_number=self.assetmodel, asset_location=location
+        )
+        response = client.get(
+            self.manage_asset_urls,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+        self.assertIn(self.asset.asset_code, str(response.data['results']))
+        self.assertEqual(len(response.data['results']), Asset.objects.count() - 1)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_non_admin_cannot_view_all_assets(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
@@ -338,7 +355,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             country="Kenya")
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                          HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(res.data.get('asset_location'), None)
+        self.assertEqual(res.data.get('asset_location'), "Dojo")
         client.put(
             '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -361,14 +378,14 @@ class ManageAssetTestCase(APIBaseTestCase):
             country="Kenya")
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                          HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(res.data.get('asset_location'), None)
+        self.assertNotEqual(res.data.get('asset_location'), "Nairobi")
         res = client.put(
             '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(res.status_code, 400)
         response = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                               HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data.get('asset_location'), None)
+        self.assertNotEqual(response.data.get('asset_location'), "Nairobi")
 
     @patch('api.authentication.auth.verify_id_token')
     def test_non_superuser_can_not_update_an_asset_location(self, mock_verify_id_token):

@@ -63,6 +63,12 @@ class UserViewSet(ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = UserFilter
 
+    def get_queryset(self):
+        location = self.request.user.location
+        if location:
+            return self.queryset.filter(location=location)
+        return self.queryset.none()
+
 
 class ManageAssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
@@ -95,6 +101,12 @@ class ManageAssetViewSet(ModelViewSet):
                 raise PermissionDenied(
                     "Only a super user can update an asset location")
         serializer.save()
+
+    def get_queryset(self):
+        location = self.request.user.location
+        if location:
+            return self.queryset.filter(asset_location=location)
+        return self.queryset.none()
 
 
 class AssetViewSet(ModelViewSet):
@@ -132,6 +144,21 @@ class AssetAssigneeViewSet(ModelViewSet):
     queryset = AssetAssignee.objects.all()
     http_method_names = ['get']
 
+    def get_queryset(self):  # NOQA
+        user_location = self.request.user.location
+        asset_assignees = []
+        if user_location:
+            for asset_assignee in self.queryset:
+                if asset_assignee.user and asset_assignee.user.location == user_location:
+                    asset_assignees.append(asset_assignee)
+                if asset_assignee.department:
+                    asset_assignees.append(asset_assignee)
+                if asset_assignee.workspace and asset_assignee.workspace.section.floor.block.location == user_location:
+                    asset_assignees.append(asset_assignee)
+
+            return asset_assignees
+        return self.queryset.none()
+
 
 class SecurityUserEmailsViewSet(ModelViewSet):
     serializer_class = SecurityUserEmailsSerializer
@@ -151,6 +178,12 @@ class AssetLogViewSet(ModelViewSet):
     permission_classes = [IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
+
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(asset__asset_location=user_location)
+        return self.queryset.none()
 
     def perform_create(self, serializer):
         serializer.save(checked_by=self.request.user.securityuser)
@@ -174,6 +207,12 @@ class AssetStatusViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
 
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(asset__asset_location=user_location)
+        return self.queryset.none()
+
 
 class AllocationsViewSet(ModelViewSet):
     serializer_class = AllocationsSerializer
@@ -181,6 +220,12 @@ class AllocationsViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
+
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(asset__asset_location=user_location)
+        return self.queryset.none()
 
 
 class AssetCategoryViewSet(ModelViewSet):
@@ -240,6 +285,12 @@ class AssetConditionViewSet(ModelViewSet):
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(asset__asset_location=user_location)
+        return self.queryset.none()
+
 
 class AssetIncidentReportViewSet(ModelViewSet):
     serializer_class = AssetIncidentReportSerializer
@@ -247,6 +298,12 @@ class AssetIncidentReportViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post']
+
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(asset__asset_location=user_location)
+        return self.queryset.none()
 
     def perform_create(self, serializer):
         serializer.save(submitted_by=self.request.user)
@@ -262,7 +319,7 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if (
-            self.request.data.get('command', None) is None) and \
+                self.request.data.get('command', None) is None) and \
                 (self.request.data.get('payload', None) is None):
             try:
                 response = super().create(request, *args, **kwargs)
@@ -282,6 +339,12 @@ class AssetHealthCountViewSet(ModelViewSet):
     http_method_names = ['get', ]
     queryset = Asset.objects.all()
     data = None
+
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(asset_location=user_location)
+        return self.queryset.none()
 
     def _get_assets_status_condition(self, asset_models):
         asset_name, model_numbers = asset_models.popitem()
@@ -343,6 +406,12 @@ class SecurityUserViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication, ]
     http_method_names = ['get', 'post', 'put', 'delete']
 
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(location=user_location)
+        return self.queryset.none()
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
@@ -386,6 +455,12 @@ class OfficeBlockViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(location=user_location)
+        return self.queryset.none()
+
 
 class OfficeFloorViewSet(ModelViewSet):
     serializer_class = OfficeFloorSerializer
@@ -394,12 +469,24 @@ class OfficeFloorViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(block__location=user_location)
+        return self.queryset.none()
+
 
 class OfficeFloorSectionViewSet(ModelViewSet):
     serializer_class = OfficeFloorSectionSerializer
     queryset = OfficeFloorSection.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
+
+    def get_queryset(self):
+        user_location = self.request.user.location
+        if user_location:
+            return self.queryset.filter(floor__block__location=user_location)
+        return self.queryset.none()
 
 
 class OfficeWorkspaceViewSet(ModelViewSet):
@@ -449,7 +536,6 @@ class AssetsImportViewSet(APIView):
         error = False
 
         if not save_asset(csv_reader, file_name):
-
             path = request.build_absolute_uri(reverse('skipped'))
 
             response['fail'] = "Some assets were skipped." \

@@ -150,15 +150,13 @@ class AssetTestCase(APIBaseTestCase):
             '{}?current_status={}'.format(url, 'Available'),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         count = response.data.get('count')
-
-        new_asset = Asset(
+        Asset(
             asset_code="IC002",
             serial_number="SN002",
             model_number=self.assetmodel,
-            purchase_date="2018-07-10"
-        )
-        new_asset.save()
-
+            purchase_date="2018-07-10",
+            asset_location=self.centre
+        ).save()
         response = client.get(
             '{}?current_status={}'.format(url, 'Available'),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))

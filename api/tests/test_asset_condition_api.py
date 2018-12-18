@@ -85,6 +85,7 @@ class AssetConditionAPITest(APIBaseTestCase):
             assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
             purchase_date="2018-07-10",
+            asset_location=self.centre
         )
         test_asset.save()
         data = {
