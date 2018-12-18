@@ -211,6 +211,7 @@ SILKY_PYTHON_PROFILER = True
 SILKY_AUTHENTICATION = True  # User must login
 SILKY_AUTHORISATION = True  # User must have permissions
 SILKY_META = True
+SILKY_INTERCEPT_PERCENT = 10  # log only 10% of requests
 
 
 def SILKY_PERMISSIONS(user): return user.is_superuser
