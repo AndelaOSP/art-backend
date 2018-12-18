@@ -144,10 +144,19 @@ class AssetAssigneeViewSet(ModelViewSet):
     queryset = AssetAssignee.objects.all()
     http_method_names = ['get']
 
-    def get_queryset(self):
+    def get_queryset(self):  # NOQA
         user_location = self.request.user.location
+        asset_assignees = []
         if user_location:
-            return self.queryset.filter(user__location=user_location)
+            for asset_assignee in self.queryset:
+                if asset_assignee.user and asset_assignee.user.location == user_location:
+                    asset_assignees.append(asset_assignee)
+                if asset_assignee.department:
+                    asset_assignees.append(asset_assignee)
+                if asset_assignee.workspace and asset_assignee.workspace.section.floor.block.location == user_location:
+                    asset_assignees.append(asset_assignee)
+
+            return asset_assignees
         return self.queryset.none()
 
 

@@ -1,7 +1,7 @@
 from unittest.mock import patch
 from rest_framework.test import APIClient
 
-from core.models import AssetModelNumber, Asset, AllocationHistory
+from core.models import AssetModelNumber, Asset, AllocationHistory, AssetAssignee
 
 from api.tests import APIBaseTestCase
 client = APIClient()
@@ -68,6 +68,8 @@ class AssetAssigneeAPITest(APIBaseTestCase):
             self.asset_assignee_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn("assignee", response.data['results'][0].keys())
+        self.assertEqual(len(response.data['results']),
+                         AssetAssignee.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
