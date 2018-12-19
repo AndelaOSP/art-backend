@@ -32,9 +32,10 @@ urlpatterns = [
         name='api-home'
     )
 ]
+if 'silk' in settings.INSTALLED_APPS:
+    urlpatterns += [
+        path('silk/', include('silk.urls', 'silk')),
+    ]
 
 if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns += [
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

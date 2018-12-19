@@ -102,6 +102,7 @@ class UserAdmin(BaseUserAdmin):
                 'picture',
                 'is_staff',
                 'is_superuser',
+                'location',
             )
         }),
     )
