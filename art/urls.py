@@ -27,12 +27,15 @@ urlpatterns = [
     path('api/v1/', include(urls)),
     path('jet/', include('jet.urls', 'jet')),
     path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
-    path('silk/', include('silk.urls', 'silk')),
     path('', TemplateView.as_view(
         template_name='api/api-index.html'),
         name='api-home'
     )
 ]
+if 'silk' in settings.INSTALLED_APPS:
+    urlpatterns += [
+        path('silk/', include('silk.urls', 'silk')),
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
