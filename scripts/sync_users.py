@@ -9,11 +9,9 @@ from django.contrib.auth import get_user_model
 
 url = "https://api-prod.andela.com/api/v1/users"
 
-headers = {'Authorization': os.getenv('Bearer')}
-
+headers = {'api-token': os.getenv('TOKEN')}
 response = requests.get(url, headers=headers)
 
-# Go through json data save the data
 os.chdir("..")
 below_path = os.getcwd()
 sys.path.append(below_path)
@@ -23,7 +21,7 @@ django.setup()
 from core.models import AndelaCentre, User  # NOQA
 
 user = get_user_model()
-
+import ipdb; ipdb.set_trace()
 vlst = list(response.json().values())
 
 for value in vlst[0]:  # NOQA
@@ -40,6 +38,8 @@ for value in vlst[0]:  # NOQA
             cohort_num = int(re.search(r'\d+', cohort.get('name')).group())
 
     user, created = User.objects.get_or_create(email=values.get('email'))
+
+    import ipdb; ipdb.set_trace()
 
     if not created:
         # check if picture, cohort or slack_handle have changed
