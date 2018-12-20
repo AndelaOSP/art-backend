@@ -552,6 +552,8 @@ class AssetsImportViewSet(APIView):
 
 
 class SkippedAssets(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request):
         filename = os.path.join(settings.BASE_DIR,
                                 "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group()))
@@ -561,6 +563,22 @@ class SkippedAssets(APIView):
         file = open(filename, 'rb')
         response = FileResponse(file, content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="SkippedAssets.csv"'
+
+        return response
+
+
+class SampleImportFile(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        filename = os.path.join(settings.BASE_DIR,
+                                "Samples/sample_import.csv")
+
+        # send file
+
+        file = open(filename, 'rb')
+        response = FileResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="sample_import_file.csv"'
 
         return response
 
