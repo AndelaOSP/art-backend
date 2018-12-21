@@ -9,7 +9,9 @@ from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
+from django.core.management import call_command
 from django.http import FileResponse
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
@@ -28,7 +30,7 @@ from core.assets_saver_helper import save_asset
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
-    AssetIncidentReport, AssetSpecs, AssetAssignee, AndelaCentre
+    AssetIncidentReport, AssetSpecs, AssetAssignee, AndelaCentre, AISUserSync
 from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
@@ -103,6 +105,17 @@ class ManageAssetViewSet(ModelViewSet):
         serializer.save()
 
     def get_queryset(self):
+        # backup: if sync_users hasn't run in the last 24 hours
+        # run it here
+        try:
+            last_run = AISUserSync.objects.latest('created_at')
+        except Exception:
+            call_command('sync_users')
+        else:
+            seconds_since = (timezone.now() - last_run.created_at).total_seconds()
+            hours_since = seconds_since / 3600
+            if hours_since > 24:
+                call_command('sync_users')
         location = self.request.user.location
         if location:
             return self.queryset.filter(asset_location=location)
