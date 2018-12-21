@@ -22,8 +22,8 @@ tqdm = "==4.28.1"
 "psycopg2-binary" = "==2.7.6.1"
 gunicorn = "==19.9.0"
 gevent = "==1.3.7"
-silk = {git = "git+https://github.com/jazzband/django-silk.git", editable = true}
-python-crontab = "*"
+django-crontab = "*"
+silk = {git = "https://github.com/jazzband/django-silk.git", editable = true}
 
 [dev-packages]
 coverage = "==4.5.2"

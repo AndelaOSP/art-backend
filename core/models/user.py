@@ -120,3 +120,22 @@ class UserFeedback(models.Model):
     class Meta:
         verbose_name_plural = "User Feedback"
         ordering = ['-id']
+
+
+class AISUserSync(models.Model):
+    new_records = models.IntegerField(blank=True, null=True)
+    updated_records = models.IntegerField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    running_time = models.DurationField(help_text='Seconds')
+    successful = models.BooleanField()
+
+    class Meta:
+        verbose_name = "AIS User Sync"
+        verbose_name_plural = "AIS User Sync"
+
+    def __str__(self):
+        return "Date ran: {}, Result: {}, Took {} seconds".format(
+            self.created_at,
+            'Success' if self.successful else 'Failure',
+            self.running_time.total_seconds(),
+        )

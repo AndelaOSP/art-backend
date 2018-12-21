@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'django_filters',
+    'django_crontab',
 ]
 
 AUTH_USER_MODEL = 'core.User'
@@ -169,7 +170,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': config('LOGLEVEL', 'info').upper(),
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
@@ -189,7 +190,7 @@ LOGGING = {
 
 csv = Csv(cast=lambda s: tuple(s.split(':')))
 
-ADMINS = csv(os.environ.get('ADMINS', ''))
+ADMINS = csv(config('ADMINS', 'art:art.andela@andela.com,art_group:art@andela.com'))
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
@@ -204,3 +205,7 @@ SWAGGER_SETTINGS = {
 REDOC_SETTINGS = {
     'LAZY_RENDERING': True,
 }
+
+CRONJOBS = [
+    ('0 1 * * *', 'django.core.management.call_command', ['sync_users']),
+]

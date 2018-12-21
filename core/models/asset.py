@@ -27,12 +27,18 @@ KENYA = "Kenya"
 NIGERIA = "Nigeria"
 RWANDA = "Rwanda"
 UGANDA = "Uganda"
+EGYPT = "Egypt"
+USA = "USA"
+GHANA = "Ghana"
 
 COUNTRIES = (
+    (EGYPT, "Egypt"),
+    (GHANA, "Ghana"),
     (KENYA, "Kenya"),
     (NIGERIA, "Nigeria"),
     (RWANDA, "Rwanda"),
     (UGANDA, "Uganda"),
+    (USA, "USA"),
 )
 
 CHECKIN = "Checkin"

@@ -57,7 +57,10 @@ jobs:
           name: migrate
           command: |
             pipenv run "python manage.py migrate"
-
+      - run:
+          name: django_crontab
+          command: |
+            pipenv run "python manage.py crontab add"
       - run:
           name: pep8 checks on project
           command: |

@@ -17,7 +17,7 @@ from .models.asset import (
     AssetSpecs,
     AndelaCentre)
 from .models.department import Department
-from .models.user import SecurityUser, UserFeedback
+from .models.user import SecurityUser, UserFeedback, AISUserSync
 from .models.officeblock import OfficeBlock, \
     OfficeFloor, OfficeFloorSection, OfficeWorkspace
 
@@ -33,13 +33,14 @@ admin.site.register(
         AssetLog,
         AssetIncidentReport,
         AssetSpecs, OfficeBlock,
-        AndelaCentre
+        AndelaCentre,
     ]
 )
 
 
 class SecurityUserAdmin(BaseUserAdmin):
     add_form = UserRegistrationForm
+    search_fields = ('email', 'first_name', 'last_name')
     list_display = (
         'first_name',
         'last_name',
@@ -81,8 +82,9 @@ class SecurityUserAdmin(BaseUserAdmin):
 
 class UserAdmin(BaseUserAdmin):
     add_form = UserRegistrationForm
+    search_fields = ('email', 'first_name', 'last_name')
     list_display = (
-        'email', 'cohort', 'slack_handle', 'location'
+        'email', 'cohort', 'slack_handle', 'location', 'is_active', 'last_modified'
     )
     list_filter = (
         'cohort',
@@ -135,6 +137,11 @@ class AssetAdmin(admin.ModelAdmin):
     )
 
 
+class AISUserSyncAdmin(admin.ModelAdmin):
+    list_filter = ('running_time', 'successful', 'created_at')
+    list_display = ('running_time', 'successful', 'new_records', 'updated_records', 'created_at')
+
+
 class AssetStatusAdmin(admin.ModelAdmin):
     list_display = ('asset', 'current_status', 'previous_status', 'created_at')
 
@@ -174,6 +181,7 @@ class OfficeWorkspaceAdmin(admin.ModelAdmin):
     list_display = ('section', 'name')
 
 
+admin.site.register(AISUserSync, AISUserSyncAdmin)
 admin.site.register(Asset, AssetAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(SecurityUser, SecurityUserAdmin)
