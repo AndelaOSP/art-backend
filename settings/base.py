@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'django_filters',
-    'django_crontab',
 ]
 
 AUTH_USER_MODEL = 'core.User'
@@ -205,7 +204,3 @@ SWAGGER_SETTINGS = {
 REDOC_SETTINGS = {
     'LAZY_RENDERING': True,
 }
-
-CRONJOBS = [
-    ('0 1 * * *', 'django.core.management.call_command', ['sync_users']),
-]

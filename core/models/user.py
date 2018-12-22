@@ -126,16 +126,16 @@ class AISUserSync(models.Model):
     new_records = models.IntegerField(blank=True, null=True)
     updated_records = models.IntegerField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    running_time = models.DurationField(help_text='Seconds')
-    successful = models.BooleanField()
+    running_time = models.DurationField(blank=True, null=True)
+    successful = models.BooleanField(blank=True, null=True)
+    running = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "AIS User Sync"
         verbose_name_plural = "AIS User Sync"
 
     def __str__(self):
-        return "Date ran: {}, Result: {}, Took {} seconds".format(
+        return "Date ran: {}, Result: {}".format(
             self.created_at,
             'Success' if self.successful else 'Failure',
-            self.running_time.total_seconds(),
         )

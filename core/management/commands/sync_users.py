@@ -84,7 +84,11 @@ def load_users_to_art(ais_user_data):  # noqa: C901
         logger.error(str(e))
     if last_run:
         logger.warn('Last run: {}'.format(str(last_run)))
+    total_num = len(ais_user_data)
+    num = 0
     for ais_user in ais_user_data:
+        num += 1
+        logger.warn('*****{}/{}*****'.format(num, total_num))
         email = ais_user.get('email')
         try:
             user, user_created = User.objects.get_or_create(email=email)
@@ -174,6 +178,7 @@ class Command(BaseCommand):
         new_records = 0
         updated_records = 0
         start_time = time.time()
+        sync_record = AISUserSync.objects.create(running=True)
         ais_url = os.getenv('AIS_URL')
         ais_token = os.getenv('AIS_TOKEN')
         limit_per_page = os.getenv('AIS_LIMIT', 5000)
@@ -183,15 +188,16 @@ class Command(BaseCommand):
             logger.warn('{} records fetched'.format(len(ais_user_data)))
             if ais_user_data:
                 new_records, updated_records = load_users_to_art(ais_user_data)
+                sync_record.new_records = new_records
+                sync_record.updated_records = updated_records
                 logger.warn('Done. {} records added. {} records updated.'.format(new_records, updated_records))
         else:
             logger.error('Missing url or token.')
             SYNC_SUCCESS = False
         duration = time.time() - start_time
         running_time = timedelta(seconds=duration)
-        AISUserSync.objects.create(
-            running_time=running_time,
-            successful=SYNC_SUCCESS,
-            new_records=new_records,
-            updated_records=updated_records,
-        )
+
+        sync_record.running_time = running_time
+        sync_record.successful = SYNC_SUCCESS
+        sync_record.running = False
+        sync_record.save()

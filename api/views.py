@@ -114,7 +114,7 @@ class ManageAssetViewSet(ModelViewSet):
         else:
             seconds_since = (timezone.now() - last_run.created_at).total_seconds()
             hours_since = seconds_since / 3600
-            if hours_since > 24:
+            if hours_since > 24 and not last_run.running:
                 call_command('sync_users')
         location = self.request.user.location
         if location:
