@@ -1,5 +1,6 @@
 import csv
 import codecs
+import logging
 import os
 import re
 from itertools import chain
@@ -9,9 +10,7 @@ from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
-from django.core.management import call_command
 from django.http import FileResponse
-from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
@@ -30,7 +29,7 @@ from core.assets_saver_helper import save_asset
 from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
-    AssetIncidentReport, AssetSpecs, AssetAssignee, AndelaCentre, AISUserSync
+    AssetIncidentReport, AssetSpecs, AssetAssignee, AndelaCentre
 from core.models.officeblock import (
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
@@ -54,6 +53,7 @@ from api.permissions import IsApiUser, IsSecurityUser
 
 User = get_user_model()
 slack = SlackIntegration()
+logger = logging.getLogger(__name__)
 
 
 class UserViewSet(ModelViewSet):
@@ -105,17 +105,6 @@ class ManageAssetViewSet(ModelViewSet):
         serializer.save()
 
     def get_queryset(self):
-        # backup: if sync_users hasn't run in the last 24 hours
-        # run it here
-        try:
-            last_run = AISUserSync.objects.latest('created_at')
-        except Exception:
-            call_command('sync_users')
-        else:
-            seconds_since = (timezone.now() - last_run.created_at).total_seconds()
-            hours_since = seconds_since / 3600
-            if hours_since > 24 and not last_run.running:
-                call_command('sync_users')
         location = self.request.user.location
         if location:
             return self.queryset.filter(asset_location=location)
@@ -596,20 +585,22 @@ class AvailableFilterValues(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
 
-    def get(self, request):
+    def get(self, request):  # noqa: C901
         cohorts = set()
-        asset_count = set()
-        for user in User.objects.all():
-            if user.cohort is not None:
-                cohorts.add(user.cohort)
-            asset_count.add(user.assetassignee.asset_set.count())
-
         cohort_res = []
+        asset_count = set()
         asset_num = []
-        for cohort in sorted(cohorts):
-            cohort_res.append({"id": cohort, "option": cohort})
-
-        for count in sorted(asset_count):
-            asset_num.append({"id": count, "option": count})
-
+        for user in User.objects.all():
+            cohort = user.cohort
+            if cohort is not None and cohort not in cohorts:
+                cohorts.add(cohort)
+                cohort_res.append({"id": cohort, "option": cohort})
+            try:
+                count = user.assetassignee.asset_set.count()
+            except Exception as e:
+                logger.warn('Error: {}. User: {}'.format(str(e), user.id))
+            else:
+                if count is not None and count not in asset_count:
+                    asset_count.add(count)
+                    asset_num.append({"id": count, "option": count})
         return Response(data={"cohorts": cohort_res, "asset_count": asset_num}, status=200)

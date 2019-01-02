@@ -8,15 +8,20 @@ import time
 from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+from django.core.validators import validate_email
+from django.utils.dateparse import parse_datetime
 
 from core.management.commands import COMMAND_VERSION, DJANGO_VERSION
 from core.models import AISUserSync, AndelaCentre, KENYA, NIGERIA, RWANDA, UGANDA, EGYPT, USA, GHANA
+from core.slack_bot import SlackIntegration
 
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+slack = SlackIntegration()
 
 SYNC_SUCCESS = True
+SYNC_ERRORS = set()
 DEFAULT_COUNTRY_FOR_LOCATION = {
     'Accra': GHANA,
     'Cairo': EGYPT,
@@ -72,14 +77,15 @@ def fetch_ais_user_data(ais_url, ais_token, params):  # noqa: C901
     return ais_user_data
 
 
-def load_users_to_art(ais_user_data):  # noqa: C901
+def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
     global SYNC_SUCCESS
+    global SYNC_ERRORS
     last_run = None
     new_records = 0
     updated_records = 0
     logger.warn('Loading data to ART')
     try:
-        last_run = AISUserSync.objects.latest('created_at')
+        last_run = AISUserSync.objects.exclude(id=current_sync_id).latest('created_at')
     except Exception as e:
         logger.error(str(e))
     if last_run:
@@ -88,13 +94,26 @@ def load_users_to_art(ais_user_data):  # noqa: C901
     num = 0
     for ais_user in ais_user_data:
         num += 1
-        logger.warn('*****{}/{}*****'.format(num, total_num))
+        print('Processing: **{}** of **{}**'.format(num, total_num))
         email = ais_user.get('email')
+        updated_at = parse_datetime(ais_user.get('updated_at'))
+        try:
+            validate_email(email)
+        except Exception:
+            if not last_run or (last_run and updated_at > last_run.created_at):
+                SYNC_ERRORS.add('Invalid Email')
+                SYNC_SUCCESS = False
+            continue
         try:
             user, user_created = User.objects.get_or_create(email=email)
         except Exception as e:
             logger.error(str(e))
+            SYNC_ERRORS.add(str(e))
             SYNC_SUCCESS = False
+            continue
+
+        if (not user_created) and last_run and updated_at < last_run.created_at:
+            # if record has not been updated on AIS
             continue
         cohort_no = None
         andela_center = None
@@ -143,10 +162,10 @@ def load_users_to_art(ais_user_data):  # noqa: C901
         else:
             # check if picture or cohort have changed
             modified = False
-            if user.picture != picture:
+            if picture and user.picture != picture:
                 user.picture = picture
                 modified = True
-            if user.cohort != cohort_no:
+            if cohort_no and user.cohort != cohort_no:
                 user.cohort = cohort_no
                 modified = True
             if andela_center and user.location != andela_center:
@@ -175,6 +194,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         global SYNC_SUCCESS
+        global SYNC_ERRORS
         new_records = 0
         updated_records = 0
         start_time = time.time()
@@ -187,7 +207,7 @@ class Command(BaseCommand):
             ais_user_data = fetch_ais_user_data(ais_url, ais_token, params)
             logger.warn('{} records fetched'.format(len(ais_user_data)))
             if ais_user_data:
-                new_records, updated_records = load_users_to_art(ais_user_data)
+                new_records, updated_records = load_users_to_art(ais_user_data, current_sync_id=sync_record.id)
                 sync_record.new_records = new_records
                 sync_record.updated_records = updated_records
                 logger.warn('Done. {} records added. {} records updated.'.format(new_records, updated_records))
@@ -200,4 +220,9 @@ class Command(BaseCommand):
         sync_record.running_time = running_time
         sync_record.successful = SYNC_SUCCESS
         sync_record.running = False
+        if SYNC_ERRORS:
+            sync_record.message = ' '.join(SYNC_ERRORS)
         sync_record.save()
+        message = 'User sync complete - {}'.format(str(sync_record))
+        art_builds_channel = os.getenv('ART_BUILDS_CHANNEL') or '#art-builds'
+        slack.send_message(message, channel=art_builds_channel)
