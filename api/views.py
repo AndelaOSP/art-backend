@@ -601,7 +601,7 @@ class AvailableFilterValues(APIView):
             try:
                 assignee_asset_count = user.assetassignee.asset_set.count()
             except Exception as e:
-                logger.warn('Error: {}. User: {}'.format(str(e), user.id))
+                logger.warning('Error: {}. User: {}'.format(str(e), user.id))
             else:
                 asset_count.add(assignee_asset_count)
         cohort_res = [{"id": cohort, "option": cohort} for cohort in cohorts if cohort is not None]
