@@ -15,7 +15,7 @@ from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
     OfficeBlockViewSet, OfficeFloorViewSet, OfficeFloorSectionViewSet, \
     GroupViewSet, OfficeWorkspaceViewSet, DepartmentViewSet, \
     AssetAssigneeViewSet, AssetsImportViewSet, AndelaCentreViewset, \
-    SkippedAssets, AssetSlackIncidentReportViewSet, AvailableFilterValues
+    SkippedAssets, AssetSlackIncidentReportViewSet, AvailableFilterValues, SampleImportFile
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -82,6 +82,7 @@ urlpatterns = [
     ),
     path('upload/', AssetsImportViewSet.as_view(), name='import-assets'),
     path('skipped/', SkippedAssets.as_view(), name='skipped'),
+    path('files/sample_import_file/', SampleImportFile.as_view(), name='sample-import-file'),
     path('filter-values/', AvailableFilterValues.as_view(), name='available-filters')
 ]
 if settings.DEBUG:

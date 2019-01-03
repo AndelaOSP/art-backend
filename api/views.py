@@ -554,6 +554,8 @@ class AssetsImportViewSet(APIView):
 
 
 class SkippedAssets(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request):
         filename = os.path.join(settings.BASE_DIR,
                                 "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group()))
@@ -573,6 +575,22 @@ class CountryViewset(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put', 'delete']
+
+
+class SampleImportFile(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        filename = os.path.join(settings.BASE_DIR,
+                                "Samples/sample_import.csv")
+
+        # send file
+
+        file = open(filename, 'rb')
+        response = FileResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="sample_import_file.csv"'
+
+        return response
 
 
 class AndelaCentreViewset(ModelViewSet):
