@@ -30,10 +30,10 @@ from core.models import Asset, SecurityUser, AssetLog, UserFeedback, \
     AssetStatus, AllocationHistory, AssetCategory, AssetSubCategory, \
     AssetType, AssetModelNumber, AssetCondition, AssetMake, \
     AssetIncidentReport, AssetSpecs, AssetAssignee, AndelaCentre
-from core.models.officeblock import (
+from core.models import (
+    Department, Country,
     OfficeBlock,
     OfficeFloor, OfficeWorkspace, OfficeFloorSection)
-from core.models.department import Department
 from core.slack_bot import SlackIntegration
 from .serializers import UserSerializerWithAssets, \
     AssetSerializer, SecurityUserEmailsSerializer, \
@@ -46,7 +46,7 @@ from .serializers import UserSerializerWithAssets, \
     AssetSpecsSerializer, OfficeBlockSerializer, \
     OfficeFloorSectionSerializer, OfficeFloorSerializer, UserGroupSerializer, \
     OfficeWorkspaceSerializer, DepartmentSerializer, \
-    AssetAssigneeSerializer, AndelaCentreSerializer
+    AssetAssigneeSerializer, AndelaCentreSerializer, CountrySerializer
 
 from core.management.commands.import_assets import SKIPPED_ROWS
 from api.permissions import IsApiUser, IsSecurityUser
@@ -567,6 +567,14 @@ class SkippedAssets(APIView):
         return response
 
 
+class CountryViewset(ModelViewSet):
+    serializer_class = CountrySerializer
+    queryset = Country.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+
 class AndelaCentreViewset(ModelViewSet):
     serializer_class = AndelaCentreSerializer
     queryset = AndelaCentre.objects.all()
@@ -585,22 +593,17 @@ class AvailableFilterValues(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
 
-    def get(self, request):  # noqa: C901
+    def get(self, request):
         cohorts = set()
-        cohort_res = []
         asset_count = set()
-        asset_num = []
         for user in User.objects.all():
-            cohort = user.cohort
-            if cohort is not None and cohort not in cohorts:
-                cohorts.add(cohort)
-                cohort_res.append({"id": cohort, "option": cohort})
+            cohorts.add(user.cohort)
             try:
-                count = user.assetassignee.asset_set.count()
+                assignee_asset_count = user.assetassignee.asset_set.count()
             except Exception as e:
                 logger.warn('Error: {}. User: {}'.format(str(e), user.id))
             else:
-                if count is not None and count not in asset_count:
-                    asset_count.add(count)
-                    asset_num.append({"id": count, "option": count})
+                asset_count.add(assignee_asset_count)
+        cohort_res = [{"id": cohort, "option": cohort} for cohort in cohorts if cohort is not None]
+        asset_num = [{"id": count, "option": count} for count in asset_count if count is not None]
         return Response(data={"cohorts": cohort_res, "asset_count": asset_num}, status=200)

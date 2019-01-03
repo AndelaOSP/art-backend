@@ -15,11 +15,10 @@ from .models.asset import (
     AllocationHistory,
     AssetIncidentReport,
     AssetSpecs,
-    AndelaCentre)
-from .models.department import Department
+)
 from .models.user import SecurityUser, UserFeedback, AISUserSync
-from .models.officeblock import OfficeBlock, \
-    OfficeFloor, OfficeFloorSection, OfficeWorkspace
+from .models.centre import OfficeBlock, AndelaCentre, Country, \
+    OfficeFloor, OfficeFloorSection, OfficeWorkspace, Department
 
 User = get_user_model()
 
@@ -34,6 +33,7 @@ admin.site.register(
         AssetIncidentReport,
         AssetSpecs, OfficeBlock,
         AndelaCentre,
+        Country,
     ]
 )
 

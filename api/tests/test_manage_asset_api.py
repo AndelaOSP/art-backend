@@ -36,7 +36,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_authenticated_admin_view_assets_in_their_centres_only(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         location = AndelaCentre.objects.create(
-            centre_name="Kitale", country="Uganda"
+            centre_name="Kitale", country=self.country
         )
         Asset.objects.create(
             asset_code="IC001457", serial_number="SN00123457",
@@ -352,7 +352,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         data['asset_location'] = "Nairobi"
         AndelaCentre.objects.create(
             centre_name="Nairobi",
-            country="Kenya")
+            country=self.country)
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                          HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(res.data.get('asset_location'), "Dojo")
@@ -375,7 +375,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             "model_number": self.assetmodel.model_number}
         AndelaCentre.objects.create(
             centre_name="Nairobi",
-            country="Kenya")
+            country=self.country)
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                          HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertNotEqual(res.data.get('asset_location'), "Nairobi")
@@ -396,7 +396,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': user.email}
         data = self.data
         data['asset_location'] = "Nairobi"
-        AndelaCentre.objects.create(centre_name="Nairobi", country="Kenya")
+        AndelaCentre.objects.create(centre_name="Nairobi", country=self.country)
         res = client.put(
             '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -410,7 +410,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         )
         mock_verify_id_token.return_value = {'email': admin.email}
 
-        AndelaCentre.objects.create(centre_name="Nairobi", country="Kenya")
+        AndelaCentre.objects.create(centre_name="Nairobi", country=self.country)
         data = self.data
         data['asset_location'] = "Nairobi"
 

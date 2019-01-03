@@ -23,23 +23,6 @@ ASSET_STATUSES = (
     (LOST, "Lost"),
     (DAMAGED, "Damaged")
 )
-KENYA = "Kenya"
-NIGERIA = "Nigeria"
-RWANDA = "Rwanda"
-UGANDA = "Uganda"
-EGYPT = "Egypt"
-USA = "USA"
-GHANA = "Ghana"
-
-COUNTRIES = (
-    (EGYPT, "Egypt"),
-    (GHANA, "Ghana"),
-    (KENYA, "Kenya"),
-    (NIGERIA, "Nigeria"),
-    (RWANDA, "Rwanda"),
-    (UGANDA, "Uganda"),
-    (USA, "USA"),
-)
 
 CHECKIN = "Checkin"
 CHECKOUT = "Checkout"
@@ -539,18 +522,3 @@ class AssetIncidentReport(models.Model):
 
     class Meta:
         ordering = ['-id']
-
-
-class AndelaCentre(models.Model):
-    centre_name = models.CharField(max_length=25, unique=True, null=False, blank=False)
-    country = models.CharField(max_length=25, null=False, blank=False, choices=COUNTRIES)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    last_modified = models.DateTimeField(auto_now=True, editable=False)
-
-    objects = CaseInsensitiveManager()
-
-    class Meta:
-        verbose_name_plural = 'Andela Centres'
-
-    def __str__(self):
-        return self.centre_name

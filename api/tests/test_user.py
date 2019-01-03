@@ -163,7 +163,7 @@ class UserTestCase(APIBaseTestCase):
             self.users_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         location = AndelaCentre.objects.create(
-            centre_name="Kampala", country="Uganda"
+            centre_name="Kampala", country=self.country
         )
         User.objects.create(
             email='test1@site.com', cohort=20, slack_handle='@test1_user',

@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework import serializers
+from django.core.exceptions import ValidationError
+
 
 from core.models import Department
 from core.tests import CoreBaseTestCase
@@ -21,7 +22,7 @@ class DepartmentModelTest(CoreBaseTestCase):
         """Test cannot add existing department"""
         count = Department.objects.count()
         with transaction.atomic():
-            with self.assertRaises(serializers.ValidationError):
+            with self.assertRaises(ValidationError):
                 Department.objects.create(name=self.department.name)
 
         self.assertEqual(Department.objects.count(), count)
