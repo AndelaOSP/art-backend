@@ -56,20 +56,6 @@ class UserTestCase(APIBaseTestCase):
                 cohort=20, slack_handle='@test_user1',
                 password='devpassword')
 
-    def test_user_cohort_is_required(self):
-        with self.assertRaises(ValueError):
-            User.objects.create_user(
-                email='test1@site.com', name='test_name',
-                cohort='', slack_handle='@test_user1',
-                password='devpassword')
-
-    def test_user_slack_handle_is_required(self):
-        with self.assertRaises(ValueError):
-            User.objects.create_user(
-                email='test1@site.com', name='test_name',
-                cohort=20, slack_handle='',
-                password='devpassword')
-
     def test_create_normal_user(self):
         new_user_1 = User.objects.create_user(
             email='test-1@site.com', cohort=20,
@@ -177,7 +163,7 @@ class UserTestCase(APIBaseTestCase):
             self.users_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         location = AndelaCentre.objects.create(
-            centre_name="Kampala", country="Uganda"
+            centre_name="Kampala", country=self.country
         )
         User.objects.create(
             email='test1@site.com', cohort=20, slack_handle='@test1_user',

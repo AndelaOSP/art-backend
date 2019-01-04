@@ -2,89 +2,14 @@ import logging
 import os
 import uuid
 
-from datetime import datetime
-
 from django.db import models
 from django.core.exceptions import ValidationError
 
 from .user import SecurityUser
+from core import constants
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
 from core.managers import CaseInsensitiveManager
-
-AVAILABLE = "Available"
-ALLOCATED = "Allocated"
-LOST = "Lost"
-DAMAGED = "Damaged"
-
-ASSET_STATUSES = (
-    (AVAILABLE, "Available"),
-    (ALLOCATED, "Allocated"),
-    (LOST, "Lost"),
-    (DAMAGED, "Damaged")
-)
-KENYA = "Kenya"
-NIGERIA = "Nigeria"
-RWANDA = "Rwanda"
-UGANDA = "Uganda"
-
-COUNTRIES = (
-    (KENYA, "Kenya"),
-    (NIGERIA, "Nigeria"),
-    (RWANDA, "Rwanda"),
-    (UGANDA, "Uganda"),
-)
-
-CHECKIN = "Checkin"
-CHECKOUT = "Checkout"
-
-LOG_TYPE_CHOICES = (
-    (CHECKIN, "Checkin"),
-    (CHECKOUT, "Checkout"),
-)
-
-LOSS = 'Loss'
-DAMAGE = 'Damage'
-
-INCIDENT_TYPES = (
-    (LOSS, 'Loss'),
-    (DAMAGE, 'Damage')
-)
-
-PROCESSOR_TYPE = (
-    ("Intel core i3", "Intel core i3"),
-    ("Intel core i5", "Intel core i5"),
-    ("Intel core i7", "Intel core i7"),
-)
-
-PROCESSOR_SPEED = (
-    (1.8, "1.8GHz"),
-    (2.3, "2.3GHz"),
-    (3.0, "3.0GHz"),
-    (3.4, "3.4GHz")
-)
-
-SCREEN_SIZES = (
-    (13, "13\""),
-    (15, "15\""),
-    (17, "17\"")
-)
-
-MEMORY = (
-    (4, "4GB"),
-    (8, "8GB"),
-    (16, "16GB"),
-    (32, "32GB")
-)
-
-STORAGE_SIZES = (
-    (128, "128GB"),
-    (256, "256GB"),
-    (512, "512GB")
-)
-YEAR_CHOICES = []
-for year in range(2013, (datetime.now().year + 1)):
-    YEAR_CHOICES.append((year, year))
 
 slack = SlackIntegration()
 
@@ -225,12 +150,12 @@ class AssetModelNumber(models.Model):
 
 
 class AssetSpecs(models.Model):
-    year_of_manufacture = models.IntegerField(null=True, blank=True, choices=YEAR_CHOICES)
-    processor_type = models.CharField(max_length=300, blank=True, null=True, choices=PROCESSOR_TYPE)
-    processor_speed = models.FloatField(null=True, blank=True, choices=PROCESSOR_SPEED)
-    screen_size = models.IntegerField(null=True, blank=True, choices=SCREEN_SIZES)
-    storage = models.IntegerField(null=True, blank=True, choices=STORAGE_SIZES)
-    memory = models.IntegerField(null=True, blank=True, choices=MEMORY)
+    year_of_manufacture = models.IntegerField(null=True, blank=True, choices=constants.YEAR_CHOICES)
+    processor_type = models.CharField(max_length=300, blank=True, null=True, choices=constants.PROCESSOR_TYPE)
+    processor_speed = models.FloatField(null=True, blank=True, choices=constants.PROCESSOR_SPEED)
+    screen_size = models.IntegerField(null=True, blank=True, choices=constants.SCREEN_SIZES)
+    storage = models.IntegerField(null=True, blank=True, choices=constants.STORAGE_SIZES)
+    memory = models.IntegerField(null=True, blank=True, choices=constants.MEMORY)
 
     class Meta:
         verbose_name = "Asset Specification"
@@ -297,8 +222,8 @@ class Asset(models.Model):
     def _save_initial_asset_status(self):
         existing_status = AssetStatus.objects.filter(asset=self)
         if not existing_status:
-            AssetStatus.objects.create(asset=self, current_status=AVAILABLE)
-            self.current_status = AVAILABLE
+            AssetStatus.objects.create(asset=self, current_status=constants.AVAILABLE)
+            self.current_status = constants.AVAILABLE
             self.save()
 
     def __str__(self):
@@ -357,7 +282,7 @@ class AssetLog(models.Model):
     """Stores checkin/Checkout asset logs"""
     asset = models.ForeignKey(Asset, null=False, on_delete=models.PROTECT)
     checked_by = models.ForeignKey(SecurityUser, blank=True, on_delete=models.PROTECT)
-    log_type = models.CharField(max_length=10, blank=False, choices=LOG_TYPE_CHOICES)
+    log_type = models.CharField(max_length=10, blank=False, choices=constants.ASSET_LOG_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
@@ -377,8 +302,18 @@ class AssetLog(models.Model):
 class AssetStatus(models.Model):
     """Stores the previous and current status of models"""
     asset = models.ForeignKey(Asset, null=False, on_delete=models.PROTECT)
-    current_status = models.CharField(max_length=50, choices=ASSET_STATUSES, default=ASSET_STATUSES[0][0])
-    previous_status = models.CharField(max_length=50, choices=ASSET_STATUSES, null=True, blank=True, editable=False)
+    current_status = models.CharField(
+        max_length=50,
+        choices=constants.ASSET_STATUSES,
+        default=constants.AVAILABLE,
+    )
+    previous_status = models.CharField(
+        max_length=50,
+        choices=constants.ASSET_STATUSES,
+        null=True,
+        blank=True,
+        editable=False,
+    )
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
@@ -404,7 +339,7 @@ class AssetStatus(models.Model):
     def _set_current_status_for_asset(self):
         current_asset = self.asset
         current_asset.current_status = self.current_status
-        if self.current_status == AVAILABLE:
+        if self.current_status == constants.AVAILABLE:
             current_asset.assigned_to = None
         current_asset.save()
 
@@ -423,7 +358,7 @@ class AssetStatus(models.Model):
         except Exception as e:
             logger.warning(str(e))
         else:
-            if self.current_status == AVAILABLE and last_allocation_record:
+            if self.current_status == constants.AVAILABLE and last_allocation_record:
                 AllocationHistory.objects.create(
                     asset=self.asset,
                     previous_owner=last_allocation_record.current_owner,
@@ -448,7 +383,7 @@ class AllocationHistory(models.Model):
         ordering = ['-id']
 
     def clean(self):
-        if self.asset.current_status != AVAILABLE:
+        if self.asset.current_status != constants.AVAILABLE:
             raise ValidationError("You can only allocate available assets")
 
     def save(self, *args, **kwargs):
@@ -472,7 +407,7 @@ class AllocationHistory(models.Model):
         last_status = AssetStatus.objects.filter(asset=self.asset).latest('created_at')
         if self.current_owner:
             AssetStatus.objects.create(
-                asset=self.asset, current_status=ALLOCATED,
+                asset=self.asset, current_status=constants.ALLOCATED,
                 previous_status=last_status.current_status,
             )
 
@@ -480,7 +415,7 @@ class AllocationHistory(models.Model):
         asset = self.asset
         user = None
 
-        if asset.assigned_to and asset.current_status == ALLOCATED:
+        if asset.assigned_to and asset.current_status == constants.ALLOCATED:
             message = "The asset with serial number {} and asset code {} ".format(
                 asset.serial_number, asset.asset_code) + "has been allocated to you."
             user = self.current_owner
@@ -519,7 +454,7 @@ class AssetCondition(models.Model):
 
 class AssetIncidentReport(models.Model):
     asset = models.ForeignKey(Asset, null=False, on_delete=models.PROTECT)
-    incident_type = models.CharField(max_length=50, choices=INCIDENT_TYPES)
+    incident_type = models.CharField(max_length=50, choices=constants.INCIDENT_TYPES)
     incident_location = models.CharField(max_length=50, null=False, blank=False)
     incident_description = models.TextField(null=False, blank=False)
     injuries_sustained = models.TextField(null=True, blank=True)
@@ -533,18 +468,3 @@ class AssetIncidentReport(models.Model):
 
     class Meta:
         ordering = ['-id']
-
-
-class AndelaCentre(models.Model):
-    centre_name = models.CharField(max_length=25, unique=True, null=False, blank=False)
-    country = models.CharField(max_length=25, null=False, blank=False, choices=COUNTRIES)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    last_modified = models.DateTimeField(auto_now=True, editable=False)
-
-    objects = CaseInsensitiveManager()
-
-    class Meta:
-        verbose_name_plural = 'Andela Centres'
-
-    def __str__(self):
-        return self.centre_name

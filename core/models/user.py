@@ -16,14 +16,8 @@ class UserManager(BaseUserManager):
         """
         email = fields.pop('email')
         password = fields.get('password')
-        cohort = fields.get('cohort', None)
-        slack_handle = fields.get('slack_handle')
         if not email:
             raise ValueError("Email address is required")
-        elif cohort is None or isinstance(cohort, str):
-            raise ValueError("Cohort is required")
-        elif not slack_handle:
-            raise ValueError("Slack handle is required")
         email = self.normalize_email(email)
         user = self.model(email=email, **fields)
         user.set_password(password)
@@ -57,7 +51,7 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     password = models.CharField(max_length=128, blank=True, null=True)
-    location = models.ForeignKey('AndelaCentre', blank=False, null=True, on_delete=models.PROTECT)
+    location = models.ForeignKey('AndelaCentre', blank=True, null=True, on_delete=models.PROTECT)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cohort', 'slack_handle']
@@ -69,11 +63,16 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         try:
-            super(User, self).save(*args, **kwargs)
+            self.full_clean()
         except Exception as e:
             logger.warning(str(e))
         else:
-            self._create_assignee_object_for_user()
+            try:
+                super(User, self).save(*args, **kwargs)
+            except Exception as e:
+                logger.warning(str(e))
+            else:
+                self._create_assignee_object_for_user()
 
     def _create_assignee_object_for_user(self):
         from .asset import AssetAssignee
@@ -126,3 +125,23 @@ class UserFeedback(models.Model):
     class Meta:
         verbose_name_plural = "User Feedback"
         ordering = ['-id']
+
+
+class AISUserSync(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    message = models.TextField()
+    new_records = models.IntegerField(blank=True, null=True)
+    running = models.BooleanField(default=False)
+    running_time = models.DurationField(blank=True, null=True)
+    successful = models.BooleanField(blank=True, null=True)
+    updated_records = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "AIS User Sync"
+        verbose_name_plural = "AIS User Sync"
+
+    def __str__(self):
+        result = 'Unknown'
+        if self.successful is not None:
+            result = 'Success' if self.successful else 'Failure'
+        return "Date ran: {}, Result: {}".format(self.created_at, result)

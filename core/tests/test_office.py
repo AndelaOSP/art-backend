@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 
 from ..models import OfficeBlock, OfficeFloorSection, OfficeWorkspace, AndelaCentre
 
@@ -19,7 +19,7 @@ class OfficeBlockModelTest(CoreBaseTestCase):
         self.assertEqual(OfficeBlock.objects.count(), count + 1)
 
         """Test add similar named block in diff centers."""
-        other_center = AndelaCentre.objects.create(centre_name="Towers", country="Uganda")
+        other_center = AndelaCentre.objects.create(centre_name="Towers", country=self.country)
         OfficeBlock.objects.create(name="Block B", location=other_center)
         self.assertEqual(OfficeBlock.objects.count(), count + 2)
 

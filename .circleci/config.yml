@@ -57,7 +57,6 @@ jobs:
           name: migrate
           command: |
             pipenv run "python manage.py migrate"
-
       - run:
           name: pep8 checks on project
           command: |

@@ -59,7 +59,8 @@ class CoreBaseTestCase(TestCase):
         cls.test_asset_2 = apps.get_model('core', 'Asset').objects.create(
             asset_code='IC002', serial_number='SN002', model_number=cls.test_assetmodel, purchase_date="2018-07-10"
         )
-        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(centre_name="ET", country="Nigeria")
+        cls.country = apps.get_model('core', 'Country').objects.create(name="Nigeria")
+        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(centre_name="ET", country=cls.country)
         cls.office_block = apps.get_model('core', 'OfficeBlock').objects.create(
             name='Andela Tower', location=cls.centre
         )

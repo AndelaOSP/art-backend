@@ -26,7 +26,8 @@ class APIBaseTestCase(TestCase):
         cls.patch_send_message.start()
 
         # locations
-        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(centre_name="Dojo", country="Kenya")
+        cls.country = apps.get_model('core', 'Country').objects.create(name="Kenya")
+        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(centre_name="Dojo", country=cls.country)
         cls.department = apps.get_model('core', 'Department').objects.create(name="Finance")
         cls.office_block = apps.get_model('core', 'OfficeBlock').objects.create(name="Epic", location=cls.centre)
         cls.office_floor = apps.get_model('core', 'OfficeFloor').objects.create(number=7, block=cls.office_block)
