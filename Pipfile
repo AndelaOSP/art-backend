@@ -31,6 +31,8 @@ coverage = "==4.5.2"
 coveralls = "==1.5.1"
 "flake8" = "==3.6.0"
 pytest-django = "==3.4.4"
+pdbpp = "==0.9.3"
+isort = "==4.3.4"
 
 [requires]
 python_version = "3.6.4"

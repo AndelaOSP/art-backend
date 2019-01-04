@@ -61,6 +61,10 @@ jobs:
           name: pep8 checks on project
           command: |
             pipenv run flake8 .
+      - run:
+          name: isort - imports sorting
+          command: |
+            pipenv run isort -rc . --check-only
   tests:
     <<: *default
     steps:
