@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from oauth2_provider.models import AbstractApplication
 
+from core.constants import REPORT_TYPES
 logger = logging.getLogger(__name__)
 
 
@@ -110,17 +111,9 @@ class APIUser(AbstractApplication):
 
 class UserFeedback(models.Model):
     """ Stores user feedback data """
-    FEEDBACK = "feedback"
-    BUG = "bug"
-    FEATURE_REQUEST = "feature_request"
-    option = (
-        (FEEDBACK, "feedback"),
-        (BUG, "bug"),
-        (FEATURE_REQUEST, "feature request"),
-    )
     reported_by = models.ForeignKey(User, on_delete=models.PROTECT)
-    message = models.TextField(null=False)
-    report_type = models.CharField(max_length=20, blank=False, choices=option, null=False)
+    message = models.TextField()
+    report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     resolved = models.BooleanField(default=False)
 

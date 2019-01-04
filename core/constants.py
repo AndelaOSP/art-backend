@@ -1,6 +1,15 @@
 # Standard Library
 from datetime import datetime
 
+FEEDBACK = "feedback"
+BUG = "bug"
+FEATURE_REQUEST = "feature_request"
+REPORT_TYPES = (
+    (FEEDBACK, "feedback"),
+    (BUG, "bug"),
+    (FEATURE_REQUEST, "feature request"),
+)
+
 AVAILABLE = "Available"
 ALLOCATED = "Allocated"
 LOST = "Lost"
