@@ -1,5 +1,9 @@
-from core.management.commands.import_assets import SKIPPED_ROWS,\
-    write_skipped_records, read_csv_row_value, create_object
+from core.management.commands.import_assets import (
+    SKIPPED_ROWS,
+    write_skipped_records,
+    read_csv_row_value,
+    create_object,
+)
 
 
 def save_asset(data, skipped_file):  # noqa
