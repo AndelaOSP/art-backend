@@ -70,7 +70,7 @@ def fetch_ais_user_data(ais_url, ais_token, params):
     return ais_user_data
 
 
-def load_users_to_art(ais_user_data, current_sync_id=None):
+def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
     global SYNC_SUCCESS
     global SYNC_ERRORS
     last_run = None

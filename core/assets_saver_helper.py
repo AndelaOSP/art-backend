@@ -3,7 +3,7 @@ from core.management.commands.import_assets import (create_object, read_csv_row_
                                                     write_skipped_records)
 
 
-def save_asset(data, skipped_file):  # noqa
+def save_asset(data, skipped_file):
     for pos, row in enumerate(data):
         row_data = {
             "row": row,
@@ -11,9 +11,7 @@ def save_asset(data, skipped_file):  # noqa
             "required_for_import": True,
         }
         category_value = read_csv_row_value("Category", row)
-        category = create_object(
-            "AssetCategory", category_name=category_value, **row_data
-        )
+        category = create_object("AssetCategory", category_name=category_value, **row_data)
 
         subcategory_value = read_csv_row_value("Sub-Category", row)
         subcategory = create_object(

@@ -6,7 +6,9 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from oauth2_provider.models import AbstractApplication
 
+# App Imports
 from core.constants import REPORT_TYPES
+
 logger = logging.getLogger(__name__)
 
 

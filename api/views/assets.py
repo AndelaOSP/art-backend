@@ -113,7 +113,7 @@ class AssetAssigneeViewSet(ModelViewSet):
     queryset = models.AssetAssignee.objects.all()
     http_method_names = ['get']
 
-    def get_queryset(self):  # NOQA
+    def get_queryset(self):
         user_location = self.request.user.location
         asset_assignees = []
         if user_location:
@@ -362,7 +362,7 @@ class AssetsImportViewSet(APIView):
     parser_classes = (MultiPartParser,)
     permission_classes = [IsAuthenticated, IsAdminUser]
 
-    def post(self, request):  # noqa
+    def post(self, request):
         file_obj = request.data.get('file')
         if not file_obj:
             # file_obj is none so return error
