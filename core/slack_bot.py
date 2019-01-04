@@ -176,8 +176,7 @@ class SlackIntegration(object):
                                     'label': 'Incident description',
                                     'type': 'textarea',
                                     'name': 'incident_description',
-                                    'hint': '30 second description of \
-                                    the problem',
+                                    'hint': '30 second description of the problem',
                                 },
                                 {
                                     'label': 'Police Abstract Obtained',

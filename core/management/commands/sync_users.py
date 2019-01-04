@@ -25,7 +25,7 @@ SYNC_SUCCESS = True
 SYNC_ERRORS = set()
 
 
-def fetch_ais_user_data(ais_url, ais_token, params):  # noqa: C901
+def fetch_ais_user_data(ais_url, ais_token, params):
     global SYNC_SUCCESS
     headers = {'api-token': ais_token}
     if not ais_url.endswith('/'):
@@ -70,7 +70,7 @@ def fetch_ais_user_data(ais_url, ais_token, params):  # noqa: C901
     return ais_user_data
 
 
-def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
+def load_users_to_art(ais_user_data, current_sync_id=None):
     global SYNC_SUCCESS
     global SYNC_ERRORS
     last_run = None

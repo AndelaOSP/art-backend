@@ -27,10 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def get_full_name(self, obj):
-        return "{} {}".format(
-            obj.first_name,
-            obj.last_name
-        )
+        return "{} {}".format(obj.first_name, obj.last_name)
 
     def get_allocated_asset_count(self, obj):
         """Return the number of assets allocated to a user.
@@ -85,8 +82,7 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
-        user = models.User.objects.get(id=instance.reported_by.id)
-        instance_data['reported_by'] = user.email
+        instance_data['reported_by'] = instance.reported_by.email
         return instance_data
 
 

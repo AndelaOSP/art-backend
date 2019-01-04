@@ -97,7 +97,7 @@ def collection_bootstrap(collection, parent=None, **fields):
     return load_to_db(collection, parent, **fields)
 
 
-def load_to_db(collection, parent=None, **fields):  # noqa: C901
+def load_to_db(collection, parent=None, **fields):
     try:
         obj = collection.objects.get(**fields)
         if collection is Asset:
@@ -174,7 +174,7 @@ class Command(BaseCommand):
             type=FileType("r"),
         )
 
-    def handle(self, *args, **options):  # noqa: C901
+    def handle(self, *args, **options):
         data_file = options.get("filepath_or_url")
         data_file = data_file[0]
 

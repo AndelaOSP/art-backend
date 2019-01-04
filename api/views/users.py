@@ -44,8 +44,7 @@ class SecurityUserEmailsViewSet(ModelViewSet):
     permission_classes = (IsApiUser,)
 
     def list(self, request, *args, **kwargs):
-        list_of_emails = [security_user.email
-                          for security_user in models.SecurityUser.objects.all()]
+        list_of_emails = [security_user.email for security_user in models.SecurityUser.objects.all()]
 
         return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
 
@@ -94,8 +93,7 @@ class UserGroupViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         try:
-            name = " ".join(serializer.validated_data.get(
-                'name').title().split())
+            name = " ".join(serializer.validated_data.get('name').title().split())
             serializer.save(name=name)
         except IntegrityError:
             raise serializers.ValidationError(
@@ -117,8 +115,6 @@ class AvailableFilterValues(APIView):
                 logger.warning('Error: {}. User: {}'.format(str(e), user.id))
             else:
                 asset_count.add(assignee_asset_count)
-        cohort_res = [{"id": cohort, "option": cohort}
-                      for cohort in cohorts if cohort is not None]
-        asset_num = [{"id": count, "option": count}
-                     for count in asset_count if count is not None]
+        cohort_res = [{"id": cohort, "option": cohort} for cohort in cohorts if cohort is not None]
+        asset_num = [{"id": count, "option": count} for count in asset_count if count is not None]
         return Response(data={"cohorts": cohort_res, "asset_count": asset_num}, status=200)

@@ -87,15 +87,14 @@ class AssetViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        asset_assignee = models.AssetAssignee.objects.filter(user=user).first()
-        query_filter = {"assigned_to": asset_assignee}
+        query_filter = {}
+        if not hasattr(self.request.user, "securityuser"):
+            asset_assignee = models.AssetAssignee.objects.filter(user=user).first()
+            query_filter = {"assigned_to": asset_assignee}
         # filter through the query_parameters for serial_number and asset_code
         for field in self.request.query_params:
             if field == 'serial_number' or field == 'asset_code':
                 query_filter[field] = self.request.query_params.get(field)
-        # take off the asset_assignee when a security user is querying
-        if hasattr(self.request.user, "securityuser"):
-            del query_filter["assigned_to"]
         queryset = models.Asset.objects.filter(**query_filter)
         return queryset
 
@@ -266,8 +265,9 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if (
-                self.request.data.get('command', None) is None) and \
-                (self.request.data.get('payload', None) is None):
+            (self.request.data.get('command', None) is None) and
+            (self.request.data.get('payload', None) is None)
+        ):
             try:
                 response = super().create(request, *args, **kwargs)
             except ValidationError as err:
@@ -310,8 +310,7 @@ class AssetHealthCountViewSet(ModelViewSet):
             }
 
             def increment_asset_status(asset, model_number=model_number):
-                if asset['asset_type'] == asset_name and \
-                        asset['model_number'] == model_number:
+                if asset['asset_type'] == asset_name and asset['model_number'] == model_number:
                     nonlocal statuses
                     statuses[asset['count_by_status']] += 1
                 return statuses
@@ -380,8 +379,7 @@ class AssetsImportViewSet(APIView):
         if not save_asset(csv_reader, file_name):
             path = request.build_absolute_uri(reverse('skipped'))
 
-            response['fail'] = "Some assets were skipped." \
-                               " Download the skipped assets file from"
+            response['fail'] = "Some assets were skipped. Download the skipped assets file from"
             response['file'] = "{}".format(path)
 
             error = True
@@ -397,8 +395,9 @@ class SkippedAssets(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        filename = os.path.join(settings.BASE_DIR,
-                                "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group()))
+        filename = os.path.join(
+            settings.BASE_DIR, "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group())
+        )
 
         # send file
 
@@ -413,8 +412,7 @@ class SampleImportFile(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        filename = os.path.join(settings.BASE_DIR,
-                                "Samples/sample_import.csv")
+        filename = os.path.join(settings.BASE_DIR, "Samples/sample_import.csv")
 
         # send file
 
