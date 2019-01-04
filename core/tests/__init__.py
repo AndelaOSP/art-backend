@@ -1,8 +1,12 @@
+# Standard Library
 import logging
+from unittest.mock import patch
 
+# Third-Party Imports
 from django.apps import apps
 from django.test import TestCase
-from unittest.mock import patch
+
+# App Imports
 from core.slack_bot import SlackIntegration
 
 logging.disable(logging.WARNING)

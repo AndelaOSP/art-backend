@@ -1,10 +1,13 @@
+# Third-Party Imports
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
-from django.contrib.auth import get_user_model
+
+# App Imports
+from core.tests import CoreBaseTestCase
 
 from ..models import Asset, AssetModelNumber
 
-from core.tests import CoreBaseTestCase
 User = get_user_model()
 
 

@@ -1,23 +1,16 @@
-# -*- coding: UTF-8 -*-
+# Standard Library
 import os
+
+# Third-Party Imports
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db.models import Q
-
-from tableschema import Table, validate, exceptions
 from tqdm import tqdm
 
-from core.models.asset import (
-    Asset,
-    AssetCategory,
-    AssetSubCategory,
-    AssetType,
-    AssetMake,
-    AssetModelNumber,
-    AssetStatus,
-    AssetSpecs,
-    AssetCondition
-)
+# App Imports
+from core.models.asset import (Asset, AssetCategory, AssetCondition, AssetMake, AssetModelNumber, AssetSpecs,
+                               AssetStatus, AssetSubCategory, AssetType)
+from tableschema import exceptions, Table, validate
 
 User = get_user_model()
 

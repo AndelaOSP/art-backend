@@ -1,13 +1,15 @@
-# -*- coding: UTF-8 -*-
-import os
+# Standard Library
 import csv
-from argparse import RawDescriptionHelpFormatter, FileType
-from django.core.management.base import BaseCommand
-from django.conf import settings
-from django.apps import apps
+import os
+from argparse import FileType, RawDescriptionHelpFormatter
 
+# Third-Party Imports
+from django.apps import apps
+from django.conf import settings
+from django.core.management.base import BaseCommand
 from tqdm import tqdm
 
+# App Imports
 from core.management.commands import COMMAND_VERSION, DJANGO_VERSION
 from core.models.asset import Asset
 

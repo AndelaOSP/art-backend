@@ -1,6 +1,10 @@
+# Standard Library
 from unittest.mock import patch
+
+# Third-Party Imports
 from rest_framework.test import APIClient
 
+# App Imports
 from api.tests import APIBaseTestCase
 
 client = APIClient()

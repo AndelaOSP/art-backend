@@ -1,10 +1,12 @@
+# Third-Party Imports
 from django.contrib.auth import get_user_model
-from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
-from ..models import OfficeBlock, OfficeFloorSection, OfficeWorkspace, AndelaCentre
-
+# App Imports
 from core.tests import CoreBaseTestCase
+
+from ..models import AndelaCentre, OfficeBlock, OfficeFloorSection, OfficeWorkspace
 
 User = get_user_model()
 

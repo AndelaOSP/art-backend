@@ -1,10 +1,14 @@
+# Standard Library
 import logging
+from unittest.mock import patch
 
+# Third-Party Imports
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.reverse import reverse
-from unittest.mock import patch
+
+# App Imports
 from core.slack_bot import SlackIntegration
 
 logging.disable(logging.WARNING)

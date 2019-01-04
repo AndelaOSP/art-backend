@@ -1,20 +1,21 @@
-# -*- coding: UTF-8 -*-
+# Standard Library
 import logging
 import os
 import re
-import requests
 import time
-
 from datetime import timedelta
+
+# Third-Party Imports
+import requests
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.core.validators import validate_email
 from django.utils.dateparse import parse_datetime
 
+# App Imports
 from core.management.commands import COMMAND_VERSION, DJANGO_VERSION
 from core.models import AISUserSync, AndelaCentre
 from core.slack_bot import SlackIntegration
-
 
 logger = logging.getLogger(__name__)
 User = get_user_model()

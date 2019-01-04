@@ -1,15 +1,19 @@
+# Standard Library
 import logging
 import os
 import uuid
 
-from django.db import models
+# Third-Party Imports
 from django.core.exceptions import ValidationError
+from django.db import models
 
-from .user import SecurityUser
+# App Imports
 from core import constants
+from core.managers import CaseInsensitiveManager
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
-from core.managers import CaseInsensitiveManager
+
+from .user import SecurityUser
 
 slack = SlackIntegration()
 

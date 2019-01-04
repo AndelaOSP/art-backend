@@ -1,12 +1,14 @@
+# Standard Library
 import logging
 
+# Third-Party Imports
 from decouple import config
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from firebase_admin import auth, credentials, initialize_app
-from rest_framework.authentication import TokenAuthentication
 from rest_framework import exceptions
+from rest_framework.authentication import TokenAuthentication
 
 ADMIN_USER = 'admin'
 SUPERUSER = 'superuser'

@@ -1,8 +1,11 @@
+# Standard Library
 from unittest.mock import patch
 
-from rest_framework.test import APIClient
+# Third-Party Imports
 from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
 
+# App Imports
 from api.tests import APIBaseTestCase
 
 client = APIClient()

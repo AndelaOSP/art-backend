@@ -1,10 +1,13 @@
+# Standard Library
 import random
-import responses
 from unittest.mock import patch
 
+# Third-Party Imports
+import responses
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 
+# App Imports
 from core.models import AISUserSync
 from core.tests import CoreBaseTestCase
 

@@ -1,7 +1,9 @@
+# Standard Library
 import logging
 
-from django.db import models
+# Third-Party Imports
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
 from oauth2_provider.models import AbstractApplication
 
 logger = logging.getLogger(__name__)

@@ -1,9 +1,12 @@
-import os
+# Standard Library
 import json
 import logging
-from slackclient import SlackClient
+import os
+
+# Third-Party Imports
 from rest_framework import status
 from rest_framework.response import Response
+from slackclient import SlackClient
 
 
 class SlackIntegration(object):

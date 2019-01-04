@@ -64,7 +64,7 @@ jobs:
       - run:
           name: isort - imports sorting
           command: |
-            pipenv run isort -rc . --check-only
+            pipenv run isort -rc --check-only --diff --atomic .
   tests:
     <<: *default
     steps:

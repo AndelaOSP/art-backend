@@ -1,31 +1,6 @@
-from .user import (  # noqa: F401
-    User,
-    SecurityUser,
-    APIUser,
-    UserFeedback,
-    AISUserSync,
-)
-from .asset import (  # noqa: F401
-    AssetCategory,
-    AssetSubCategory,
-    AssetType,
-    AssetMake,
-    AssetModelNumber,
-    AssetSpecs,
-    Asset,
-    AssetAssignee,
-    AssetLog,
-    AssetStatus,
-    AllocationHistory,
-    AssetCondition,
-    AssetIncidentReport,
-)
-from .centre import (  # noqa: F401
-    AndelaCentre,
-    Country,
-    Department,
-    OfficeBlock,
-    OfficeFloor,
-    OfficeFloorSection,
-    OfficeWorkspace,
-)
+from .asset import (AllocationHistory, Asset, AssetAssignee, AssetCategory, AssetCondition,  # noqa: F401
+                    AssetIncidentReport, AssetLog, AssetMake, AssetModelNumber, AssetSpecs, AssetStatus,
+                    AssetSubCategory, AssetType)
+from .centre import (AndelaCentre, Country, Department, OfficeBlock, OfficeFloor,  # noqa: F401
+                     OfficeFloorSection, OfficeWorkspace)
+from .user import AISUserSync, APIUser, SecurityUser, User, UserFeedback  # noqa: F401

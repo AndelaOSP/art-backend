@@ -1,8 +1,9 @@
+# Third-Party Imports
 from django.contrib.auth import get_user_model
-from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
-
+# App Imports
 from core.models import Department
 from core.tests import CoreBaseTestCase
 

@@ -1,8 +1,10 @@
-from django.db import IntegrityError
-from django.db import transaction
-from ..models import AndelaCentre
+# Third-Party Imports
+from django.db import IntegrityError, transaction
 
+# App Imports
 from core.tests import CoreBaseTestCase
+
+from ..models import AndelaCentre
 
 
 class AndelaCentreModelTest(CoreBaseTestCase):

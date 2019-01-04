@@ -1,12 +1,12 @@
-from django.core.exceptions import ValidationError
+# Third-Party Imports
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 
-from ..models import (
-    AssetStatus,
-    AllocationHistory,
-)
-
+# App Imports
 from core.tests import CoreBaseTestCase
+
+from ..models import AllocationHistory, AssetStatus
+
 User = get_user_model()
 
 

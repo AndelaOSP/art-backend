@@ -1,9 +1,12 @@
+# Standard Library
 import logging
 
+# Third-Party Imports
 from django.core.exceptions import ValidationError
 from django.db import models
 from pycountry import countries
 
+# App Imports
 from core.managers import CaseInsensitiveManager
 
 logger = logging.getLogger(__name__)
