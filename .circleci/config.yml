@@ -68,6 +68,7 @@ jobs:
       - run:
           name: check sh files
           command: |
+            brew install shellcheck
             for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
   tests:
     <<: *default
