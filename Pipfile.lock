@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2bcdcfbc831452e3f92fbd080edbd412cfe694a9e74adbb73cdd423bc652a244"
+            "sha256": "e80f073b2215100c4391b308513749c767bae69bf7c76904a7f4afb232d1ece0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -755,9 +755,6 @@
         },
         "isort": {
             "editable": true,
-            "extras": [
-                "pipfile"
-            ],
             "git": "https://github.com/timothycrosley/isort"
         },
         "mccabe": {

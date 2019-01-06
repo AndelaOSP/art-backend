@@ -64,8 +64,8 @@ jobs:
       - run:
           name: isort - imports sorting
           command: |
-            pipenv run isort -rc --check-only --diff --atomic .
-      - run
+            pipenv run isort -rc --check-only --diff --atomic -q .
+      - run:
           name: check sh files
           command: |
             for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
