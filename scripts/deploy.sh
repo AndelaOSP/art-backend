@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2034
-# shellcheck disable=SC1090
 set -eo pipefail
 
 DEPLOY_SCRIPT_PATH="${HOME}/deploy"
 
 curl -o "$DEPLOY_SCRIPT_PATH" https://raw.githubusercontent.com/AndelaOSP/bash-helper-modules/master/k8s/deploy
 
+# shellcheck disable=SC1090
 source "$DEPLOY_SCRIPT_PATH"
 CURRENTIPS=""
 DOCKER_REGISTRY=gcr.io
-GCLOUD_SERVICE_KEY_NAME=gcloud-service-key.json
-ALLOWED_DEPLOY_ENVIRONMENTS=('staging' 'production')
+export GCLOUD_SERVICE_KEY_NAME=gcloud-service-key.json
+export ALLOWED_DEPLOY_ENVIRONMENTS=('staging' 'production')
 
 require 'PRODUCTION_GOOGLE_COMPUTE_ZONE' "$PRODUCTION_GOOGLE_COMPUTE_ZONE"
 require 'STAGING_GOOGLE_COMPUTE_ZONE' "$STAGING_GOOGLE_COMPUTE_ZONE"
@@ -54,7 +53,8 @@ isAllowedDeployEnvironment "$ENVIRONMENT"
 # get K8s deployment name
 getDeploymentName DEPLOYMENT_NAME
 # Set image image tag and name
-IMAGE_TAG=$(getImageTag "$(getCommitHash)")
+# shellcheck disable=SC2155
+export IMAGE_TAG=$(getImageTag "$(getCommitHash)")
 IMAGE_NAME=$(getImageName)
 
 main() {
