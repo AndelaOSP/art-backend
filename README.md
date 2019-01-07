@@ -26,7 +26,7 @@ This repository contains the API endpoints and models for the ART project implem
 | `PROJECT_ID` | **Required** - The Firebase project ID (We use Firebase for authentication) |
 | `PRIVATE_KEY` | **Required** - The Firebase private key |
 | `CLIENT_EMAIL` | **Required** - The firebase client email value |
-| `DJANGO_SETTINGS_MODULE` | **Required** - `settings.prod` for prod, **Optional** - optional for dev/staging since it defaults to `settings.dev` |
+| `DJANGO_SETTINGS_MODULE` | **Required** (if running the app using gunicorn `gunicorn art.wsgi`) - `settings.prod` for prod, `settings.dev` optional for dev/staging |
 | `SLACK_TOKEN` | **Optional** - The token to authenticate/authorize the slack app used to send slack notifications |
 | `ASSET_LIMIT` | **Optional** - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack. |
 | `AIS_URL` | **Optional** - Needed to sync users from AIS |
