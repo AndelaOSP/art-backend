@@ -1,9 +1,13 @@
+# Standard Library
 from unittest.mock import patch
+
+# Third-Party Imports
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
+# App Imports
 from api.tests import APIBaseTestCase
-from core.models import AllocationHistory, AssetStatus
+from core.models import AllocationHistory, AndelaCentre, AssetStatus
 
 User = get_user_model()
 client = APIClient()
@@ -54,20 +58,6 @@ class UserTestCase(APIBaseTestCase):
             User.objects.create_user(
                 email='', name='test_user1',
                 cohort=20, slack_handle='@test_user1',
-                password='devpassword')
-
-    def test_user_cohort_is_required(self):
-        with self.assertRaises(ValueError):
-            User.objects.create_user(
-                email='test1@site.com', name='test_name',
-                cohort='', slack_handle='@test_user1',
-                password='devpassword')
-
-    def test_user_slack_handle_is_required(self):
-        with self.assertRaises(ValueError):
-            User.objects.create_user(
-                email='test1@site.com', name='test_name',
-                cohort=20, slack_handle='',
                 password='devpassword')
 
     def test_create_normal_user(self):
@@ -168,6 +158,22 @@ class UserTestCase(APIBaseTestCase):
             self.users_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         self.assertEqual(len(response.data['results']), User.objects.count())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_can_get_users_from_their_centres_from_api_endpoint(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            self.users_url,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+        location = AndelaCentre.objects.create(
+            centre_name="Kampala", country=self.country
+        )
+        User.objects.create(
+            email='test1@site.com', cohort=20, slack_handle='@test1_user',
+            password='devpassword', location=location
+        )
+        self.assertEqual(len(response.data['results']), User.objects.count() - 1)
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')

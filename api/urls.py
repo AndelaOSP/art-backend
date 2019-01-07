@@ -1,21 +1,22 @@
-from django.views.generic import TemplateView
-from rest_framework.routers import SimpleRouter
+# Third-Party Imports
+from django.conf import settings
 from django.conf.urls import include
 from django.urls import path
-from drf_yasg.views import get_schema_view
+from django.views.generic import TemplateView
 from drf_yasg import openapi
-from django.conf import settings
+from drf_yasg.views import get_schema_view
+from rest_framework.routers import SimpleRouter
 
-from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
-    AssetLogViewSet, UserFeedbackViewSet, AssetStatusViewSet, \
-    AllocationsViewSet, AssetCategoryViewSet, AssetSubCategoryViewSet, \
-    AssetTypeViewSet, AssetModelNumberViewSet, AssetConditionViewSet, \
-    AssetMakeViewSet, AssetIncidentReportViewSet, AssetHealthCountViewSet, \
-    ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet, \
-    OfficeBlockViewSet, OfficeFloorViewSet, OfficeFloorSectionViewSet, \
-    GroupViewSet, OfficeWorkspaceViewSet, DepartmentViewSet, \
-    AssetAssigneeViewSet, AssetsImportViewSet, AndelaCentreViewset, \
-    SkippedAssets, AssetSlackIncidentReportViewSet, AvailableFilterValues
+# App Imports
+from api.views import (AllocationsViewSet, AndelaCentreViewset, AssetAssigneeViewSet, AssetCategoryViewSet,
+                       AssetConditionViewSet, AssetHealthCountViewSet, AssetIncidentReportViewSet,
+                       AssetLogViewSet, AssetMakeViewSet, AssetModelNumberViewSet, AssetsImportViewSet,
+                       AssetSlackIncidentReportViewSet, AssetSpecsViewSet, AssetStatusViewSet,
+                       AssetSubCategoryViewSet, AssetTypeViewSet, AssetViewSet, AvailableFilterValues,
+                       DepartmentViewSet, ManageAssetViewSet, OfficeBlockViewSet, OfficeFloorSectionViewSet,
+                       OfficeFloorViewSet, OfficeWorkspaceViewSet, SampleImportFile,
+                       SecurityUserEmailsViewSet, SecurityUserViewSet, SkippedAssets, UserFeedbackViewSet,
+                       UserGroupViewSet, UserViewSet)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -62,7 +63,7 @@ router.register('asset-health', AssetHealthCountViewSet, 'asset-health')
 router.register('security-users', SecurityUserViewSet,
                 'security-users')
 router.register('asset-specs', AssetSpecsViewSet, 'asset-specs')
-router.register('user-groups', GroupViewSet, 'user-groups')
+router.register('user-groups', UserGroupViewSet, 'user-groups')
 router.register('office-blocks', OfficeBlockViewSet, 'office-blocks')
 router.register('office-floors', OfficeFloorViewSet, 'office-floors')
 router.register('office-sections', OfficeFloorSectionViewSet, 'floor-sections')
@@ -82,6 +83,7 @@ urlpatterns = [
     ),
     path('upload/', AssetsImportViewSet.as_view(), name='import-assets'),
     path('skipped/', SkippedAssets.as_view(), name='skipped'),
+    path('files/sample_import_file/', SampleImportFile.as_view(), name='sample-import-file'),
     path('filter-values/', AvailableFilterValues.as_view(), name='available-filters')
 ]
 if settings.DEBUG:

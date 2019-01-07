@@ -1,12 +1,12 @@
-from django.core.exceptions import ValidationError
+# Third-Party Imports
 from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
+from django.core.exceptions import ValidationError
 
-from ..models import Asset, AssetStatus, AllocationHistory
-
+# App Imports
+from core.models import AllocationHistory, Asset, AssetStatus
 from core.tests import CoreBaseTestCase
+
 User = get_user_model()
-client = APIClient()
 
 
 class AssetStatusModelTest(CoreBaseTestCase):

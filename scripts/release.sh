@@ -1,11 +1,10 @@
 #!/bin/bash
 
 # current Git branch
-branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
 devBranch=develop
 
 # v1.0.0, v1.5.2, etc.
-lastTag=$(git describe --tags $(git rev-list --tags --max-count=1))
+lastTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
 
 git reset --hard origin/$devBranch
 git pull origin $devBranch
@@ -23,12 +22,12 @@ part2=$(cut -d'.' -f2 <<<"$removedV")
 part3=$(cut -d'.' -f3 <<<"$removedV")
 part3=$((part3 + 1))
 
-if (( $part3 > 9 )) ; then
+if (( part3 > 9 )) ; then
     part3=0
     part2=$((part2 + 1))
 fi
 
-if (( $part2 > 9 )) ; then
+if (( part2 > 9 )) ; then
     part2=0
     part1=$((part1 + 1))
 fi
@@ -39,7 +38,7 @@ echo "New version: $versionLabel"
 git tag -a $versionLabel -m "$tagMessage"
 
 echo "Release Notes:"
-echo $tagMessage
+echo "$tagMessage"
 
 # push including created tag
 git push origin $versionLabel

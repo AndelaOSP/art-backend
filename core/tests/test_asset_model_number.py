@@ -1,8 +1,11 @@
+# Third-Party Imports
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 
-from ..models import AssetModelNumber, AssetMake, AssetCategory
+# App Imports
 from core.tests import CoreBaseTestCase
+
+from ..models import AssetCategory, AssetMake, AssetModelNumber
 
 
 class AssetModelNumberTestCase(CoreBaseTestCase):

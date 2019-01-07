@@ -2,15 +2,6 @@ from .base import *  # noqa: F403,F401
 
 DEBUG = True
 
-INSTALLED_APPS += [  # noqa ignore=F405
-    'debug_toolbar',
-]
-
-MIDDLEWARE += [  # noqa ignore=F405
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-]
-
-
 ALLOWED_HOSTS += [   # noqa ignore=F405
     'api-staging-art.andela.com', '127.0.0.1'
 ]

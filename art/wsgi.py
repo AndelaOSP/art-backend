@@ -7,18 +7,14 @@ For more information on this file, see
 https://docs.djangoproject.com/en/2.0/howto/deployment/wsgi/
 """
 
+# Standard Library
 import os
 
-import dotenv
-
+# Third-Party Imports
 from django.core.wsgi import get_wsgi_application
 from whitenoise.django import DjangoWhiteNoise
 
-
-dotenv.read_dotenv(os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), '.env'))
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.dev")
 
 application = get_wsgi_application()
 application = DjangoWhiteNoise(application)

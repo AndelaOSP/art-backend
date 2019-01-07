@@ -1,10 +1,14 @@
+# Standard Library
 from unittest.mock import patch
+
+# Third-Party Imports
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
+# App Imports
+from api.tests import APIBaseTestCase
 from core.models import Asset
 
-from api.tests import APIBaseTestCase
 User = get_user_model()
 client = APIClient()
 
@@ -85,6 +89,7 @@ class AssetConditionAPITest(APIBaseTestCase):
             assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
             purchase_date="2018-07-10",
+            asset_location=self.centre
         )
         test_asset.save()
         data = {

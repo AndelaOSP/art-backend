@@ -10,10 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
+# Standard Library
 import os
-from decouple import config, Csv
-import dj_database_url
 
+# Third-Party Imports
+import dj_database_url
+from decouple import config, Csv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(
@@ -169,7 +171,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': config('LOGLEVEL', 'info').upper(),
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
@@ -189,7 +191,7 @@ LOGGING = {
 
 csv = Csv(cast=lambda s: tuple(s.split(':')))
 
-ADMINS = csv(os.environ.get('ADMINS', ''))
+ADMINS = csv(config('ADMINS', 'art:art.andela@andela.com,art_group:art@andela.com'))
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {

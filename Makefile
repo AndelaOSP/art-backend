@@ -2,6 +2,7 @@ compose:
 	cp docker-compose.yml.template docker-compose.yml
 
 start:
+	docker-compose build
 	docker-compose up
 
 exec:

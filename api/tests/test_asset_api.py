@@ -1,11 +1,15 @@
+# Standard Library
 from unittest.mock import patch
+
+# Third-Party Imports
 from django.contrib.auth import get_user_model
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from core.models import Asset, AssetLog, AllocationHistory, AssetStatus
-
+# App Imports
 from api.tests import APIBaseTestCase
+from core.models import AllocationHistory, Asset, AssetLog, AssetStatus
+
 User = get_user_model()
 client = APIClient()
 
@@ -150,15 +154,13 @@ class AssetTestCase(APIBaseTestCase):
             '{}?current_status={}'.format(url, 'Available'),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
         count = response.data.get('count')
-
-        new_asset = Asset(
+        Asset(
             asset_code="IC002",
             serial_number="SN002",
             model_number=self.assetmodel,
-            purchase_date="2018-07-10"
-        )
-        new_asset.save()
-
+            purchase_date="2018-07-10",
+            asset_location=self.centre
+        ).save()
         response = client.get(
             '{}?current_status={}'.format(url, 'Available'),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))

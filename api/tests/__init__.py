@@ -1,10 +1,14 @@
+# Standard Library
 import logging
+from unittest.mock import patch
 
+# Third-Party Imports
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.reverse import reverse
-from unittest.mock import patch
+
+# App Imports
 from core.slack_bot import SlackIntegration
 
 logging.disable(logging.WARNING)
@@ -25,18 +29,31 @@ class APIBaseTestCase(TestCase):
         cls.patch_slack_id.start()
         cls.patch_send_message.start()
 
+        # locations
+        cls.country = apps.get_model('core', 'Country').objects.create(name="Kenya")
+        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(centre_name="Dojo", country=cls.country)
+        cls.department = apps.get_model('core', 'Department').objects.create(name="Finance")
+        cls.office_block = apps.get_model('core', 'OfficeBlock').objects.create(name="Epic", location=cls.centre)
+        cls.office_floor = apps.get_model('core', 'OfficeFloor').objects.create(number=7, block=cls.office_block)
+        cls.floor_section = apps.get_model('core', 'OfficeFloorSection').objects.create(
+            name='The Big Apple', floor=cls.office_floor)
+        cls.office_workspace = apps.get_model('core', 'OfficeWorkspace').objects.create(
+            name="Yaba", section=cls.floor_section)
+
         # users
         cls.user = User.objects.create(
-            email='test@site.com', cohort=20, slack_handle='@test_user', password='devpassword'
+            email='test@site.com', cohort=20, slack_handle='@test_user',
+            password='devpassword', location=cls.centre
         )
         cls.token_user = 'testtoken'
         cls.admin_user = User.objects.create_superuser(
-            email='admin@site.com', cohort=20, slack_handle='@admin', password='devpassword'
+            email='admin@site.com', cohort=20, slack_handle='@admin',
+            password='devpassword', location=cls.centre
         )
         cls.token_admin = 'admintesttoken'
         cls.other_user = User.objects.create_user(
             email='user1@site.com', cohort=2,
-            slack_handle='@admin', password='devpassword'
+            slack_handle='@admin', password='devpassword', location=cls.centre
         )
         cls.token_other_user = 'otherusertesttoken'
 
@@ -46,7 +63,8 @@ class APIBaseTestCase(TestCase):
             first_name="TestFirst",
             last_name="TestLast",
             phone_number="254720900900",
-            badge_number="AE23"
+            badge_number="AE23",
+            location=cls.centre
         )
         cls.token_checked_by = "securityusertoken"
 
@@ -66,11 +84,11 @@ class APIBaseTestCase(TestCase):
 
         cls.asset = apps.get_model('core', 'Asset').objects.create(
             asset_code="IC001455", serial_number="SN00123455",
-            purchase_date="2018-07-10", model_number=cls.assetmodel
+            purchase_date="2018-07-10", model_number=cls.assetmodel, asset_location=cls.centre
         )
         cls.asset_1 = apps.get_model('core', 'Asset').objects.create(
             asset_code="IC001456", serial_number="SN00123456",
-            purchase_date="2018-07-10", model_number=cls.assetmodel
+            purchase_date="2018-07-10", model_number=cls.assetmodel, asset_location=cls.centre
         )
         cls.asset_assignee = apps.get_model('core', 'AssetAssignee').objects.get(user=cls.user)
         cls.asset_condition = apps.get_model('core', 'AssetCondition').objects.create(
@@ -86,18 +104,6 @@ class APIBaseTestCase(TestCase):
             processor_type="Intel core i7", memory=8, storage=512,
         )
         cls.asset_status = apps.get_model('core', 'AssetStatus').objects.get(asset=cls.asset)
-
-        # locations
-        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(centre_name="Dojo", country="Kenya")
-        cls.department = apps.get_model('core', 'Department').objects.create(name="Finance")
-        cls.office_block = apps.get_model('core', 'OfficeBlock').objects.create(name="Epic", location=cls.centre)
-        cls.office_floor = apps.get_model('core', 'OfficeFloor').objects.create(number=7, block=cls.office_block)
-        cls.floor_section = apps.get_model('core', 'OfficeFloorSection').objects.create(
-            name='The Big Apple', floor=cls.office_floor
-            )
-        cls.office_workspace = apps.get_model('core', 'OfficeWorkspace').objects.create(
-            name="Yaba", section=cls.floor_section
-        )
 
         # urls
         cls.allocations_urls = reverse('allocations-list')

@@ -1,9 +1,12 @@
-import os
+# Standard Library
 import json
 import logging
-from slackclient import SlackClient
+import os
+
+# Third-Party Imports
 from rest_framework import status
 from rest_framework.response import Response
+from slackclient import SlackClient
 
 
 class SlackIntegration(object):
@@ -19,8 +22,6 @@ class SlackIntegration(object):
 
     def get_user_slack_id(self, user):
         """Get the slack user ID using the user email"""
-        if not user:
-            return os.getenv('OPS_CHANNEL') or '#art-test'
         user_email = user.email
         response = self.slack_client.api_call("users.list")
         users = response.get("members")
@@ -35,13 +36,15 @@ class SlackIntegration(object):
             logging.info("User not found")
             return None
 
-    def send_message(self, message, user=None):
+    def send_message(self, message, user=None, channel=None):
         """Sends message to slack user or channel"""
         if hasattr(self, 'slack_client'):
-            slack_id = self.get_user_slack_id(user)
-            if not slack_id:
-                message = 'The message *"{}"* to {} not sent'.format(
-                    message, user.email)
+            if user:
+                slack_id = self.get_user_slack_id(user)
+            elif channel:
+                slack_id = channel
+            else:
+                slack_id = os.getenv('OPS_CHANNEL') or '#art-test'
             self.slack_client.api_call(
                 "chat.postMessage",
                 channel=slack_id,
@@ -66,7 +69,6 @@ class SlackIntegration(object):
             logging.info("User not found")
             return None
 
-    # flake8: noqa
     def send_incidence_report(self, incidence_report, Asset, AssetIncidentReport, User):
         """Sends incidence report from slack using a slash command"""
 
@@ -173,8 +175,7 @@ class SlackIntegration(object):
                                     'label': 'Incident description',
                                     'type': 'textarea',
                                     'name': 'incident_description',
-                                    'hint': '30 second description of \
-                                    the problem',
+                                    'hint': '30 second description of the problem',
                                 },
                                 {
                                     'label': 'Police Abstract Obtained',
