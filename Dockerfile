@@ -4,7 +4,7 @@ LABEL application="artbackend"
 
 
 ARG SECRET_KEY='secret key'
-ARG DJANGO_SETTINGS_MODULE='settings.prod'
+ARG DJANGO_SETTINGS_MODULE='settings.dev'
 ARG HOST_IP
 
 # Prevent dpkg errors
@@ -29,4 +29,4 @@ RUN pip install -r requirements.txt
 
 EXPOSE 8080
 RUN python manage.py collectstatic --noinput
-ENTRYPOINT ["gunicorn", "art.wsgi"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

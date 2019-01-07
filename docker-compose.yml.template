@@ -19,7 +19,6 @@ services:
       PRIVATE_KEY: "<enter-provided-private-key>"
       PROJECT_ID: "<enter-project-id>"
       CLIENT_EMAIL: "<enter-client-email>"
-      APP_ENV: "dev"
     ports:
       - "8080:8080"
     entrypoint: ./docker-entrypoint.sh
