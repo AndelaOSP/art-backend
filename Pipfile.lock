@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e80f073b2215100c4391b308513749c767bae69bf7c76904a7f4afb232d1ece0"
+            "sha256": "a8130b712ab9055ee865dcb887e07a20dd182068e6a7e97cf9aab827ee5c26f4"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,12 +16,6 @@
         ]
     },
     "default": {
-        "autopep8": {
-            "hashes": [
-                "sha256:33d2b5325b7e1afb4240814fe982eea3a92ebea712869bfd08b3c0393404248c"
-            ],
-            "version": "==1.4.3"
-        },
         "cachecontrol": {
             "hashes": [
                 "sha256:cef77effdf51b43178f6a2d3b787e3734f98ade253fa3187f3bb7315aaa42ff7"
@@ -94,14 +88,6 @@
             ],
             "index": "pypi",
             "version": "==1.11"
-        },
-        "django-dotenv": {
-            "hashes": [
-                "sha256:3812bb0f4876cf31f902aad140f0645e120e51ee30eb7c40c22050f58a0e4adb",
-                "sha256:a9b1b40a70bd321acd231926acedb9bd2c5e873e33a1873b34a7276d196a765e"
-            ],
-            "index": "pypi",
-            "version": "==1.4.2"
         },
         "django-filter": {
             "hashes": [
@@ -225,12 +211,6 @@
                 "sha256:0946967c4c29b1339bb211949e1e17dbe0ae9ff8265fafa7bf4cf2164ef5a3b1"
             ],
             "version": "==1.5.5"
-        },
-        "gprof2dot": {
-            "hashes": [
-                "sha256:48c1e168c28b8a8eb23bf30fda78fe2ef218269a41505341ec27c27083e47cf4"
-            ],
-            "version": "==2016.10.13"
         },
         "greenlet": {
             "hashes": [
@@ -484,14 +464,6 @@
             ],
             "version": "==0.2.3"
         },
-        "pycodestyle": {
-            "hashes": [
-                "sha256:74abc4e221d393ea5ce1f129ea6903209940c1ecd29e002e8c6933c2b21026e0",
-                "sha256:cbc619d09254895b0d12c2c691e237b2e91e9b2ecf5e84c26b35400f93dcfb83",
-                "sha256:cbfca99bd594a10f674d0cd97a3d802a1fdef635d4361e1a2658de47ed261e3a"
-            ],
-            "version": "==2.4.0"
-        },
         "pycountry": {
             "hashes": [
                 "sha256:104a8ca94c700898c42a0172da2eab5a5675c49637b729a11db9e1dac2d983cd",
@@ -499,20 +471,6 @@
             ],
             "index": "pypi",
             "version": "==18.12.8"
-        },
-        "pygments": {
-            "hashes": [
-                "sha256:5ffada19f6203563680669ee7f53b64dabbeb100eb51b61996085e99c03b284a",
-                "sha256:e8218dd399a61674745138520d0d4cf2621d7e032439341bc3f647bff125818d"
-            ],
-            "version": "==2.3.1"
-        },
-        "python-dateutil": {
-            "hashes": [
-                "sha256:063df5763652e21de43de7d9e00ccf239f953a832941e37be541614732cdfc93",
-                "sha256:88f9287c0174266bb0d8cedd395cfba9c58e87e5ad86b2ce58859bc11be3cf02"
-            ],
-            "version": "==2.7.5"
         },
         "python-decouple": {
             "hashes": [
@@ -523,10 +481,10 @@
         },
         "pytz": {
             "hashes": [
-                "sha256:31cb35c89bd7d333cd32c5f278fca91b523b0834369e757f4c5641ea252236ca",
-                "sha256:8e0f8568c118d3077b46be7d654cc8167fa916092e28320cde048e54bfc9f1e6"
+                "sha256:32b0891edff07e28efe91284ed9c31e123d84bea3fd98e1f72be2508f43ef8d9",
+                "sha256:d5f05e487007e29e03409f9398d074e158d920d36eb82eaf66fb1136b0c5374c"
             ],
-            "version": "==2018.7"
+            "version": "==2018.9"
         },
         "requests": {
             "hashes": [
@@ -576,10 +534,6 @@
                 "sha256:fc4e715ab8aea3e54df56a5c053784d7c2992339222da4a45c6b31249a42915c"
             ],
             "version": "==0.15.83"
-        },
-        "silk": {
-            "editable": true,
-            "git": "https://github.com/jazzband/django-silk.git"
         },
         "six": {
             "hashes": [
@@ -817,10 +771,10 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:f689bf2fc18c4585403348dd56f47d87780bf217c53ed9ae7a3e2d7faa45f8e9",
-                "sha256:f812ea39a0153566be53d88f8de94839db1e8a05352ed8a49525d7d7f37861e9"
+                "sha256:3e65a22eb0d4f1bdbc1eacccf4a3198bf8d4049dea5112d70a0c61b00e748d02",
+                "sha256:5924060b374f62608a078494b909d341720a050b5224ff87e17e12377486a71d"
             ],
-            "version": "==4.0.2"
+            "version": "==4.1.0"
         },
         "pytest-django": {
             "hashes": [

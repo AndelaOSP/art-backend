@@ -4,7 +4,7 @@ LABEL application="artbackend"
 
 
 ARG SECRET_KEY='secret key'
-ARG DJANGO_SETTINGS_MODULE='settings.prod'
+ARG DJANGO_SETTINGS_MODULE
 ARG HOST_IP
 
 # Prevent dpkg errors
