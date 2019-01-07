@@ -29,4 +29,4 @@ RUN pip install -r requirements.txt
 
 EXPOSE 8080
 RUN python manage.py collectstatic --noinput
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["gunicorn", "art.wsgi"]
