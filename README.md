@@ -21,16 +21,16 @@ This repository contains the API endpoints and models for the ART project implem
 
 | Variable | Description | |
 | --- | --- | --- |
-| DATABASE_URL | **Required** - Used by [dj_database_url](https://github.com/kennethreitz/dj-database-url#url-schema) to connect to the database. Format: 	 DATABASE_URL=postgresql://<user>:<password>@localhost:5432/<db> |
-| SECRET_KEY | **Required** - String of random characters used to provide cryptographic signing for [Django](https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY) projects. |
-| PROJECT_ID | **Required** - The Firebase project ID (We use Firebase for authentication) |
-| PRIVATE_KEY | **Required** - The Firebase private key |
-| CLIENT_EMAIL | **Required** - The firebase client email value |
-| DJANGO_SETTINGS_MODULE | **Required** - `settings.prod` for prod, **Optional** - optional for dev/staging since it defaults to `settings.dev` |
-| SLACK_TOKEN | **Optional** - The token to authenticate/authorize the slack app used to send slack notifications |
-| ASSET_LIMIT | **Optional** - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack. |
-| AIS_URL | **Optional** - Needed to sync users from AIS |
-| AIS_TOKEN | **Optional** - Needed to sync users from AIS |
+| `DATABASE_URL` | **Required** - Used by [dj_database_url](https://github.com/kennethreitz/dj-database-url#url-schema) to connect to the database. Format: 	 DATABASE_URL=postgresql://<user>:<password>@localhost:5432/<db> |
+| `SECRET_KEY` | **Required** - String of random characters used to provide cryptographic signing for [Django](https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY) projects. |
+| `PROJECT_ID` | **Required** - The Firebase project ID (We use Firebase for authentication) |
+| `PRIVATE_KEY` | **Required** - The Firebase private key |
+| `CLIENT_EMAIL` | **Required** - The firebase client email value |
+| `DJANGO_SETTINGS_MODULE` | **Required** - `settings.prod` for prod, **Optional** - optional for dev/staging since it defaults to `settings.dev` |
+| `SLACK_TOKEN` | **Optional** - The token to authenticate/authorize the slack app used to send slack notifications |
+| `ASSET_LIMIT` | **Optional** - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack. |
+| `AIS_URL` | **Optional** - Needed to sync users from AIS |
+| `AIS_TOKEN` | **Optional** - Needed to sync users from AIS |
 
 ### Project setup
 #### Installation script
