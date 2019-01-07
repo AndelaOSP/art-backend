@@ -1,23 +1,16 @@
-# -*- coding: UTF-8 -*-
+# Standard Library
 import os
+
+# Third-Party Imports
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db.models import Q
-
-from tableschema import Table, validate, exceptions
 from tqdm import tqdm
 
-from core.models.asset import (
-    Asset,
-    AssetCategory,
-    AssetSubCategory,
-    AssetType,
-    AssetMake,
-    AssetModelNumber,
-    AssetStatus,
-    AssetSpecs,
-    AssetCondition
-)
+# App Imports
+from core.models.asset import (Asset, AssetCategory, AssetCondition, AssetMake, AssetModelNumber, AssetSpecs,
+                               AssetStatus, AssetSubCategory, AssetType)
+from tableschema import exceptions, Table, validate
 
 User = get_user_model()
 
@@ -44,7 +37,7 @@ def write_skipped_assets(error, data=None):
         output_file.write(f'{error} - {data}')
 
 
-def load_data_from_local_csv(csv_file=ASSET_DATA_FILE):  # noqa: C901
+def load_data_from_local_csv(csv_file=ASSET_DATA_FILE):
     table = Table(csv_file, schema=SCHEMA_FILE)
 
     try:
@@ -64,7 +57,7 @@ def load_data_from_local_csv(csv_file=ASSET_DATA_FILE):  # noqa: C901
             # TODO: stream data from generator
 
 
-def save_to_models(validated_data):  # noqa: C901
+def save_to_models(validated_data):
     asset_category, _ = AssetCategory.objects.get_or_create(
         category_name=validated_data.get('category_name')
     )

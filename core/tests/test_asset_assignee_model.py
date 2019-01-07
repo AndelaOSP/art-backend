@@ -1,7 +1,9 @@
+# Third-Party Imports
+from django.contrib.auth import get_user_model
+
+# App Imports
 from core.models import AssetAssignee, Department, OfficeWorkspace
 from core.tests import CoreBaseTestCase
-
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 

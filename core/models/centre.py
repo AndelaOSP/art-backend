@@ -1,16 +1,19 @@
+# Standard Library
 import logging
 
+# Third-Party Imports
 from django.core.exceptions import ValidationError
 from django.db import models
 from pycountry import countries
 
+# App Imports
 from core.managers import CaseInsensitiveManager
 
 logger = logging.getLogger(__name__)
 
 
 class AndelaCentre(models.Model):
-    centre_name = models.CharField(max_length=25, unique=True, null=False, blank=False)
+    centre_name = models.CharField(max_length=25, unique=True)
     country = models.ForeignKey('Country', on_delete=models.PROTECT, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
@@ -88,7 +91,7 @@ class Department(models.Model):
 
 
 class OfficeBlock(models.Model):
-    name = models.CharField(max_length=50, blank=False, null=False)
+    name = models.CharField(max_length=50)
     location = models.ForeignKey('AndelaCentre', on_delete=models.PROTECT, null=True)
 
     def clean(self):
@@ -110,7 +113,7 @@ class OfficeBlock(models.Model):
 
 
 class OfficeFloor(models.Model):
-    number = models.PositiveIntegerField(blank=False, null=False)
+    number = models.PositiveIntegerField()
     block = models.ForeignKey(OfficeBlock, on_delete=models.PROTECT)
 
     class Meta:
@@ -123,7 +126,7 @@ class OfficeFloor(models.Model):
 
 
 class OfficeFloorSection(models.Model):
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name = models.CharField(max_length=100)
     floor = models.ForeignKey(OfficeFloor, on_delete=models.PROTECT)
 
     def clean(self):
@@ -149,7 +152,7 @@ class OfficeFloorSection(models.Model):
 
 
 class OfficeWorkspace(models.Model):
-    name = models.CharField(max_length=50, blank=False)
+    name = models.CharField(max_length=50)
     section = models.ForeignKey(OfficeFloorSection, on_delete=models.PROTECT)
 
     def clean(self):

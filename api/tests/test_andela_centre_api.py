@@ -1,11 +1,13 @@
+# Standard Library
 from unittest.mock import patch
 
-from rest_framework.test import APIClient
+# Third-Party Imports
 from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
 
-from core.models import AndelaCentre, Country
-
+# App Imports
 from api.tests import APIBaseTestCase
+from core.models import AndelaCentre, Country
 
 client = APIClient()
 

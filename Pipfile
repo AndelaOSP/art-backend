@@ -30,7 +30,9 @@ responses = "==0.10.5"
 coverage = "==4.5.2"
 coveralls = "==1.5.1"
 "flake8" = "==3.6.0"
+isort = {git = "https://github.com/timothycrosley/isort", editable = true}
 pytest-django = "==3.4.4"
+pdbpp = "==0.9.3"
 
 [requires]
 python_version = "3.6.4"

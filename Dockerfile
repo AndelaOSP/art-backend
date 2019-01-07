@@ -21,8 +21,10 @@ RUN apt-get update \
 
 WORKDIR /usr/src/app
 COPY . .
+RUN pip install --upgrade pip
 RUN pip install pipenv
-RUN pipenv lock -r | grep -E '==|-i' > requirements.txt
+RUN pipenv lock -r | grep -E '==|-i|-e' > requirements.txt
+RUN pipenv lock -r -d | grep -E '==|-i|-e' >> requirements.txt
 RUN pip install -r requirements.txt
 
 EXPOSE 8080

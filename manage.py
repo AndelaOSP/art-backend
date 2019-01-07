@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# Standard Library
 import os
 import sys
 

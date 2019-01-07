@@ -1,13 +1,15 @@
-# -*- coding: UTF-8 -*-
-import os
+# Standard Library
 import csv
-from argparse import RawDescriptionHelpFormatter, FileType
-from django.core.management.base import BaseCommand
-from django.conf import settings
-from django.apps import apps
+import os
+from argparse import FileType, RawDescriptionHelpFormatter
 
+# Third-Party Imports
+from django.apps import apps
+from django.conf import settings
+from django.core.management.base import BaseCommand
 from tqdm import tqdm
 
+# App Imports
 from core.management.commands import COMMAND_VERSION, DJANGO_VERSION
 from core.models.asset import Asset
 
@@ -95,7 +97,7 @@ def collection_bootstrap(collection, parent=None, **fields):
     return load_to_db(collection, parent, **fields)
 
 
-def load_to_db(collection, parent=None, **fields):  # noqa: C901
+def load_to_db(collection, parent=None, **fields):
     try:
         obj = collection.objects.get(**fields)
         if collection is Asset:
@@ -172,7 +174,7 @@ class Command(BaseCommand):
             type=FileType("r"),
         )
 
-    def handle(self, *args, **options):  # noqa: C901
+    def handle(self, *args, **options):
         data_file = options.get("filepath_or_url")
         data_file = data_file[0]
 

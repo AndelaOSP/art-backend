@@ -61,6 +61,15 @@ jobs:
           name: pep8 checks on project
           command: |
             pipenv run flake8 .
+      - run:
+          name: isort - imports sorting
+          command: |
+            pipenv run isort -rc --check-only --diff --atomic -q .
+      - run:
+          name: check sh files
+          command: |
+            sudo apt-get install shellcheck
+            for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
   tests:
     <<: *default
     steps:

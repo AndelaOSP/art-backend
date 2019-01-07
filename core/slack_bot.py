@@ -1,9 +1,12 @@
-import os
+# Standard Library
 import json
 import logging
-from slackclient import SlackClient
+import os
+
+# Third-Party Imports
 from rest_framework import status
 from rest_framework.response import Response
+from slackclient import SlackClient
 
 
 class SlackIntegration(object):
@@ -66,7 +69,6 @@ class SlackIntegration(object):
             logging.info("User not found")
             return None
 
-    # flake8: noqa
     def send_incidence_report(self, incidence_report, Asset, AssetIncidentReport, User):
         """Sends incidence report from slack using a slash command"""
 
@@ -173,8 +175,7 @@ class SlackIntegration(object):
                                     'label': 'Incident description',
                                     'type': 'textarea',
                                     'name': 'incident_description',
-                                    'hint': '30 second description of \
-                                    the problem',
+                                    'hint': '30 second description of the problem',
                                 },
                                 {
                                     'label': 'Police Abstract Obtained',

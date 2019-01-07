@@ -1,7 +1,11 @@
+# Third-Party Imports
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .forms import UserRegistrationForm
+
+# App Imports
 from core import models
+
+from .forms import UserRegistrationForm
 
 admin.site.register(
     [

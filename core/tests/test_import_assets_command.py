@@ -1,7 +1,10 @@
+# Standard Library
 from io import StringIO
-from django.test import TestCase
+
+# Third-Party Imports
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.test import TestCase
 
 
 class ImportAssetsCommandTestCase(TestCase):
