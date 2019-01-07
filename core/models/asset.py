@@ -262,7 +262,6 @@ class Asset(models.Model):
     notes = models.TextField(editable=False, default=" ")
     specs = models.ForeignKey(AssetSpecs, blank=True, null=True, on_delete=models.PROTECT)
     verified = models.BooleanField(default=True)
-
     objects = CaseInsensitiveManager()
 
     def clean(self):
@@ -481,11 +480,11 @@ class AllocationHistory(models.Model):
         user = None
 
         if asset.assigned_to and asset.current_status == ALLOCATED:
-            message = "The {assetype} with serial number {} and asset code {} ".format(
+            message = "The {} with serial number {} and asset code {} ".format(asset.model_number.make_label.asset_type.asset_type,
                 asset.serial_number, asset.asset_code) + "has been allocated to you."
             user = self.current_owner
         elif (not asset.assigned_to and self.previous_owner):
-            message = "The {assetype} with serial number {} and asset code {} ".format(
+            message = "The {} with serial number {} and asset code {} ".format(asset.model_number.make_label.asset_type.asset_type,
                 asset.serial_number, asset.asset_code) + "has been de-allocated from you."
             user = self.previous_owner
 
