@@ -28,5 +28,4 @@ RUN pipenv lock -r -d | grep -E '==|-i|-e' >> requirements.txt
 RUN pip install -r requirements.txt
 
 EXPOSE 8080
-RUN python manage.py collectstatic --noinput
 ENTRYPOINT ["gunicorn", "art.wsgi"]
