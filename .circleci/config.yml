@@ -56,7 +56,7 @@ jobs:
       - run:
           name: run black formatter on project
           command: |
-            pipenv run black . --check --diff -S
+            pipenv run black --check --diff -S --exclude="migrations|.venv" .
       - run:
           name: isort - imports sorting
           command: |

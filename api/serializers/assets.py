@@ -60,9 +60,6 @@ class AssetSerializer(serializers.ModelSerializer):
             "notes",
         )
 
-    # def _asset_make(self, obj):
-    # return obj.model_number.asset_make
-
     def get_checkin_status(self, obj):
         try:
             asset_log = (
