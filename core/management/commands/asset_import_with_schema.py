@@ -59,23 +59,23 @@ def load_data_from_local_csv(csv_file=ASSET_DATA_FILE):
 
 def save_to_models(validated_data):
     asset_category, _ = AssetCategory.objects.get_or_create(
-        category_name=validated_data.get('category_name')
+        name=validated_data.get('name')
     )
     asset_sub_category, _ = AssetSubCategory.objects.get_or_create(
-        sub_category_name=validated_data.get('sub_category_name'),
+        name=validated_data.get('name'),
         asset_category=asset_category
     )
     asset_type, _ = AssetType.objects.get_or_create(
-        asset_type=validated_data.get('asset_type'),
+        name=validated_data.get('name'),
         asset_sub_category=asset_sub_category
     )
     asset_make, _ = AssetMake.objects.get_or_create(
-        make_label=validated_data.get('make_label'),
+        asset_make=validated_data.get('asset_make'),
         asset_type=asset_type
     )
     asset_model_number, _ = AssetModelNumber.objects.get_or_create(
         model_number=validated_data.get('model_number'),
-        make_label=asset_make
+        asset_make=asset_make
     )
     asset_spec, _ = AssetSpecs.objects.get_or_create(
         memory=validated_data.get('memory'),

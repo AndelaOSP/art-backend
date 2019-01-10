@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class AndelaCentre(models.Model):
-    centre_name = models.CharField(max_length=25, unique=True)
+    name = models.CharField(max_length=25, unique=True)
     country = models.ForeignKey('Country', on_delete=models.PROTECT, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
@@ -24,7 +24,7 @@ class AndelaCentre(models.Model):
         verbose_name_plural = 'Andela Centres'
 
     def __str__(self):
-        return self.centre_name
+        return self.name
 
 
 class Country(models.Model):

@@ -114,7 +114,7 @@ class UserAdmin(BaseUserAdmin):
 
 class AssetAdmin(admin.ModelAdmin):
     list_filter = (
-        'model_number', 'model_number__make_label__asset_type__asset_type',
+        'model_number', 'model_number__asset_make__asset_type__name',
         'purchase_date', 'verified',
     )
     list_display = (

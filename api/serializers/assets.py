@@ -13,23 +13,23 @@ class AssetSerializer(serializers.ModelSerializer):
     assigned_to = serializers.SerializerMethodField()
     asset_category = serializers.SerializerMethodField()
     asset_sub_category = serializers.SerializerMethodField()
-    make_label = serializers.SerializerMethodField()
+    asset_make = serializers.SerializerMethodField()
     asset_type = serializers.SerializerMethodField()
     asset_location = serializers.SlugRelatedField(
         many=False,
-        slug_field='centre_name', required=False,
+        slug_field='name', required=False,
         queryset=models.AndelaCentre.objects.all(),
     )
 
     model_number = serializers.SlugRelatedField(
         queryset=models.AssetModelNumber.objects.all(),
-        slug_field="model_number",
+        slug_field="name",
     )
 
     class Meta:
         model = models.Asset
         fields = ('id', 'uuid', 'asset_category', 'asset_sub_category',
-                  'make_label', 'asset_code', 'serial_number', 'model_number',
+                  'asset_make', 'asset_code', 'serial_number', 'model_number',
                   'checkin_status', 'created_at', 'last_modified', 'current_status',
                   'asset_type', 'allocation_history', 'specs', 'purchase_date',
                   'notes', 'assigned_to', 'asset_location', 'verified',
@@ -37,8 +37,8 @@ class AssetSerializer(serializers.ModelSerializer):
         depth = 1
         read_only_fields = ("uuid", "created_at", "last_modified", "assigned_to", "current_status", "notes")
 
-    def _asset_make(self, obj):
-        return obj.model_number.make_label
+    # def _asset_make(self, obj):
+        # return obj.model_number.asset_make
 
     def get_checkin_status(self, obj):
         try:
@@ -67,20 +67,16 @@ class AssetSerializer(serializers.ModelSerializer):
         return serialized_data.data
 
     def get_asset_category(self, obj):
-        asset_make = self._asset_make(obj)
-        return asset_make.asset_type.asset_sub_category.asset_category.category_name
+        return obj.asset_category
 
     def get_asset_sub_category(self, obj):
-        asset_make = self._asset_make(obj)
-        return asset_make.asset_type.asset_sub_category.sub_category_name
+        return obj.asset_sub_category
 
-    def get_make_label(self, obj):
-        asset_make = self._asset_make(obj)
-        return asset_make.make_label
+    def get_asset_make(self, obj):
+        return obj.asset_make
 
     def get_asset_type(self, obj):
-        asset_make = self._asset_make(obj)
-        return asset_make.asset_type.asset_type
+        return obj.asset_type
 
     def get_allocation_history(self, obj):
         allocations = models.AllocationHistory.objects.filter(asset=obj.id)
@@ -100,7 +96,6 @@ class AssetSerializer(serializers.ModelSerializer):
         internals = super(AssetSerializer, self).to_internal_value(data)
         specs_serializer = AssetSpecsSerializer(data=data)
         specs_serializer.is_valid()
-
         if len(specs_serializer.data):
             try:
                 specs, _ = models.AssetSpecs.objects.get_or_create(
@@ -199,62 +194,61 @@ class AllocationsSerializer(serializers.ModelSerializer):
 class AssetCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AssetCategory
-        fields = ("id", "category_name", "created_at", "last_modified")
+        fields = ("id", "name", "created_at", "last_modified")
 
 
 class AssetSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AssetSubCategory
-        fields = ("id", "sub_category_name", "asset_category",
+        fields = ("id", "name", "asset_category",
                   "created_at", "last_modified")
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
-        instance_data['asset_category'] = instance.asset_category.category_name
+        instance_data['asset_category'] = instance.asset_category.name
         return instance_data
 
 
 class AssetTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AssetType
-        fields = ("id", "asset_type", "asset_sub_category", "has_specs",
+        fields = ("id", "name", "asset_sub_category", "has_specs",
                   "created_at", "last_modified")
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
-        instance_data['asset_sub_category'] = instance.asset_sub_category.sub_category_name
+        instance_data['asset_sub_category'] = instance.asset_sub_category.name
         return instance_data
 
 
 class AssetModelNumberSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AssetModelNumber
-        fields = ('id', 'model_number', 'make_label',
+        fields = ('id', 'name', 'asset_make',
                   'created_at', 'last_modified')
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
-        instance_data['make_label'] = models.AssetMake.objects.get(
-            id=instance.make_label.id).make_label
+        instance_data['asset_make'] = instance.asset_make.name
         return instance_data
 
     def to_internal_value(self, data):
-        make_label = data.get('make_label')
-        if not make_label:
+        asset_make = data.get('asset_make')
+        if not asset_make:
             raise serializers.ValidationError({
-                'make_label': [self.error_messages['required']]
+                'asset_make': [self.error_messages['required']]
             })
         try:
-            make_label_instance = models.AssetMake.objects.get(
-                id=make_label)
+            asset_make_instance = models.AssetMake.objects.get(
+                id=asset_make)
         except Exception:
             raise serializers.ValidationError({
-                'make_label': [
-                    f'Invalid pk \"{make_label}\" - object does not exist.'
+                'asset_make': [
+                    f'Invalid pk \"{asset_make}\" - object does not exist.'
                 ]})
         internal_value = super().to_internal_value(data)
         internal_value.update({
-            'make_label': make_label_instance
+            'asset_make': asset_make_instance
         })
         return internal_value
 
@@ -262,8 +256,7 @@ class AssetModelNumberSerializer(serializers.ModelSerializer):
 class AssetConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AssetCondition
-        fields = ("id", "asset", "notes",
-                  "created_at")
+        fields = ("id", "asset", "notes", "created_at")
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
@@ -278,11 +271,10 @@ class AssetMakeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.AssetMake
-        fields = ('id', 'make_label', 'asset_type',
-                  'created_at', 'last_modified_at')
+        fields = ('id', 'name', 'asset_type', 'created_at', 'last_modified_at')
 
     def get_asset_type(self, obj):
-        return obj.asset_type.asset_type
+        return obj.asset_type.name
 
     def to_internal_value(self, data):
         asset_type = data['asset_type']
@@ -332,13 +324,13 @@ class AssetHealthSerializer(serializers.ModelSerializer):
         fields = ('asset_type', 'model_number', 'count_by_status',)
 
     def get_asset_type(self, obj):
-        return obj.model_number.make_label.asset_type.asset_type
+        return obj.asset_type
 
     def get_count_by_status(self, obj):
         return obj.current_status
 
     def get_model_number(self, obj):
-        return obj.model_number.model_number
+        return obj.model_number.name
 
 
 class AssetSpecsSerializer(serializers.ModelSerializer):

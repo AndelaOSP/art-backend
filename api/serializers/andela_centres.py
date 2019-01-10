@@ -47,8 +47,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class AndelaCentreSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AndelaCentre
-        fields = ("id", "centre_name", "country", "created_at",
-                  "last_modified")
+        fields = ("id", "name", "country", "created_at", "last_modified")
 
 
 class CountrySerializer(serializers.ModelSerializer):

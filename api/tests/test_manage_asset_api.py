@@ -18,7 +18,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.data = {
             "asset_code": "IC003",
             "serial_number": "SN003",
-            "model_number": self.assetmodel.model_number}
+            "model_number": self.assetmodel.name}
 
     def test_non_authenticated_admin_view_assets(self):
         response = client.get(self.manage_asset_urls)
@@ -40,7 +40,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_authenticated_admin_view_assets_in_their_centres_only(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         location = AndelaCentre.objects.create(
-            centre_name="Kitale", country=self.country
+            name="Kitale", country=self.country
         )
         Asset.objects.create(
             asset_code="IC001457", serial_number="SN00123457",
@@ -94,7 +94,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         data = {
             "asset_code": "IC002",
             "serial_number": "SN002",
-            "model_number": self.assetmodel.model_number,
+            "model_number": self.assetmodel.name,
             "purchase_date": "2018-07-10"
         }
         count = Asset.objects.count()
@@ -118,7 +118,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         data = {
             "asset_code": "IC003",
             "serial_number": "SN003",
-            "model_number": self.assetmodel.model_number,
+            "model_number": self.assetmodel.name,
             "purchase_date": "2018-07-10",
             "processor_type": "Intel core i3",
             "processor_speed": 2.3,
@@ -143,7 +143,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         data = {
             "asset_code": "IC002",
             "serial_number": "SN002",
-            "model_number": self.assetmodel.model_number,
+            "model_number": self.assetmodel.name,
             "purchase_date": "2018-07-10",
             "processor_type": "Intel core i3",
             "processor_speed": 5.0,
@@ -164,7 +164,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {
-            "model_number": self.assetmodel.model_number,
+            "model_number": self.assetmodel.name,
             "purchase_date": "2018-07-10"
         }
 
@@ -181,12 +181,10 @@ class ManageAssetTestCase(APIBaseTestCase):
             self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
 
-        self.assetmodel.id = 300
-
         data = {
             "asset_code": "IC002",
             "serial_number": "SN002",
-            "model_number": self.assetmodel.id,
+            "model_number": 300,
             "purchase_date": "2018-07-10"
         }
         response = client.post(
@@ -194,7 +192,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertEqual(response.data, {
-            'model_number': ['Object with model_number=300 does not exist.']
+            'model_number': ['Object with name=300 does not exist.']
         })
         self.assertEqual(response.status_code, 400)
 
@@ -282,7 +280,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('asset_type', response.data.keys())
         self.assertEqual(response.data['asset_type'],
-                         self.asset_type.asset_type)
+                         self.asset_type.name)
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -309,10 +307,9 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_asset_filter_by_asset_type(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         response = client.get(
-            '{}?asset_type={}'.format(self.manage_asset_urls, self.asset_type.asset_type),
+            '{}?asset_type={}'.format(self.manage_asset_urls, self.asset_type.name),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertIn(self.asset_type.asset_type,
-                      response.data['results'][0]['asset_type'])
+        self.assertIn(self.asset_type.name, response.data['results'][0]['asset_type'])
 
     @patch('api.authentication.auth.verify_id_token')
     def test_asset_filter_by_invalid_asset_type_return_no_assets(self, mock_verify_id_token):
@@ -326,9 +323,9 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_asset_filter_by_model_number(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         response = client.get(
-            '{}?model_number={}'.format(self.manage_asset_urls, self.assetmodel.model_number),
+            '{}?model_number={}'.format(self.manage_asset_urls, self.assetmodel.name),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertIn(self.assetmodel.model_number,
+        self.assertIn(self.assetmodel.name,
                       response.data['results'][0]['model_number'])
 
     @patch('api.authentication.auth.verify_id_token')
@@ -355,7 +352,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         data = self.data
         data['asset_location'] = "Nairobi"
         AndelaCentre.objects.create(
-            centre_name="Nairobi",
+            name="Nairobi",
             country=self.country)
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                          HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -376,9 +373,9 @@ class ManageAssetTestCase(APIBaseTestCase):
             "asset_code": "IC003",
             "serial_number": "SN003",
             "asset_location": "Mombasa",
-            "model_number": self.assetmodel.model_number}
+            "model_number": self.assetmodel.name}
         AndelaCentre.objects.create(
-            centre_name="Nairobi",
+            name="Nairobi",
             country=self.country)
         res = client.get('{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
                          HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -400,7 +397,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': user.email}
         data = self.data
         data['asset_location'] = "Nairobi"
-        AndelaCentre.objects.create(centre_name="Nairobi", country=self.country)
+        AndelaCentre.objects.create(name="Nairobi", country=self.country)
         res = client.put(
             '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid), data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
@@ -414,7 +411,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         )
         mock_verify_id_token.return_value = {'email': admin.email}
 
-        AndelaCentre.objects.create(centre_name="Nairobi", country=self.country)
+        AndelaCentre.objects.create(name="Nairobi", country=self.country)
         data = self.data
         data['asset_location'] = "Nairobi"
 

@@ -45,16 +45,16 @@ class CoreBaseTestCase(TestCase):
             badge_number="AE23"
         )
 
-        cls.category = apps.get_model('core', 'AssetCategory').objects.create(category_name="Computer")
+        cls.category = apps.get_model('core', 'AssetCategory').objects.create(name="Computer")
         cls.asset_sub_category = apps.get_model('core', 'AssetSubCategory').objects.create(
-            sub_category_name="Computer Accessories", asset_category=cls.category
+            name="Computer Accessories", asset_category=cls.category
         )
         cls.asset_type = apps.get_model('core', 'AssetType').objects.create(
-            asset_type="Accessory", asset_sub_category=cls.asset_sub_category)
+            name="Accessory", asset_sub_category=cls.asset_sub_category)
         cls.asset_make = apps.get_model('core', 'AssetMake').objects.create(
-            make_label="Sades", asset_type=cls.asset_type)
+            name="Sades", asset_type=cls.asset_type)
         cls.test_assetmodel = apps.get_model('core', 'AssetModelNumber').objects.create(
-            model_number="12345", make_label=cls.asset_make)
+            name="12345", asset_make=cls.asset_make)
 
         cls.test_asset = apps.get_model('core', 'Asset').objects.create(
             asset_code="IC001", serial_number="SN001", model_number=cls.test_assetmodel, purchase_date="2018-07-10"
@@ -64,7 +64,7 @@ class CoreBaseTestCase(TestCase):
             asset_code='IC002', serial_number='SN002', model_number=cls.test_assetmodel, purchase_date="2018-07-10"
         )
         cls.country = apps.get_model('core', 'Country').objects.create(name="Nigeria")
-        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(centre_name="ET", country=cls.country)
+        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(name="ET", country=cls.country)
         cls.office_block = apps.get_model('core', 'OfficeBlock').objects.create(
             name='Andela Tower', location=cls.centre
         )

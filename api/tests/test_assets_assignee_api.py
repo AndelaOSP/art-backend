@@ -16,9 +16,9 @@ class AssetAssigneeAPITest(APIBaseTestCase):
 
     def setUp(self):
         self.assetmodel_2 = AssetModelNumber.objects.create(
-            model_number="IMN509889", make_label=self.make_label)
+            name="IMN509889", asset_make=self.asset_make)
         self.assetmodel_3 = AssetModelNumber.objects.create(
-            model_number="IMN509887868", make_label=self.make_label)
+            name="IMN509887868", asset_make=self.asset_make)
 
         self.asset = Asset.objects.create(
             asset_code="IC001",

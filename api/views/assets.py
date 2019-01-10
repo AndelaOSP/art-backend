@@ -180,7 +180,7 @@ class AssetCategoryViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
-    ordering = ('category_name',)
+    ordering = ('name',)
     http_method_names = ['get', 'post']
 
 
@@ -190,7 +190,7 @@ class AssetSubCategoryViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
-    ordering = ('sub_category_name',)
+    ordering = ('name',)
     http_method_names = ['get', 'post']
 
 
@@ -200,7 +200,7 @@ class AssetTypeViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
-    ordering = ('asset_type',)
+    ordering = ('name',)
     http_method_names = ['get', 'post']
 
 
@@ -210,7 +210,7 @@ class AssetModelNumberViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
     filter_backends = (OrderingFilter,)
-    ordering = ('model_number',)
+    ordering = ('name',)
     http_method_names = ['get', 'post']
 
 
@@ -220,7 +220,7 @@ class AssetMakeViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [FirebaseTokenAuthentication, ]
     filter_backends = (OrderingFilter,)
-    ordering = ('make_label',)
+    ordering = ('name',)
     http_method_names = ['get', 'post']
 
 
@@ -286,7 +286,7 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
 
 class AssetHealthCountViewSet(ModelViewSet):
     serializer_class = AssetHealthSerializer
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', ]
     queryset = models.Asset.objects.all()
@@ -338,16 +338,12 @@ class AssetHealthCountViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        is_admin = self.request.user.is_staff
-        if is_admin:
-            serializer = self.get_serializer(queryset, many=True)
-            self.data = serializer.data
-            asset_types = set(map(self._get_asset_type, self.data))
-            asset = map(self._get_model_numbers, asset_types)
-            asset_list = self._get_asset_list(asset)
-            return Response(asset_list)
-        return Response(exception=True, status=403,
-                        data={'detail': ['You do not have authorization']})
+        serializer = self.get_serializer(queryset, many=True)
+        self.data = serializer.data
+        asset_types = set(map(self._get_asset_type, self.data))
+        asset = map(self._get_model_numbers, asset_types)
+        asset_list = self._get_asset_list(asset)
+        return Response(asset_list)
 
 
 class AssetSpecsViewSet(ModelViewSet):
@@ -367,7 +363,6 @@ class AssetsImportViewSet(APIView):
         if not file_obj:
             # file_obj is none so return error
             return Response({"error": "Csv file to import from not provided"}, status=400)
-
         file_obj = codecs.iterdecode(file_obj, 'utf-8')
         csv_reader = csv.DictReader(file_obj, delimiter=",")
         skipped_file_name = self.request.user.email

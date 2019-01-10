@@ -21,7 +21,7 @@ class OfficeBlockModelTest(CoreBaseTestCase):
         self.assertEqual(OfficeBlock.objects.count(), count + 1)
 
         """Test add similar named block in diff centers."""
-        other_center = AndelaCentre.objects.create(centre_name="Towers", country=self.country)
+        other_center = AndelaCentre.objects.create(name="Towers", country=self.country)
         OfficeBlock.objects.create(name="Block B", location=other_center)
         self.assertEqual(OfficeBlock.objects.count(), count + 2)
 

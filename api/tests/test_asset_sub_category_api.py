@@ -24,15 +24,15 @@ class AssetCategoryAPITest(APIBaseTestCase):
     def test_can_post_sub_category(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "sub_category_name": "Monitor",
+            "name": "Monitor",
             "asset_category": self.asset_category.id
         }
         response = client.post(
             self.asset_sub_category_url,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn("sub_category_name", response.data.keys())
-        self.assertIn(data["sub_category_name"], response.data.values())
+        self.assertIn("name", response.data.keys())
+        self.assertIn(data["name"], response.data.values())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -44,7 +44,7 @@ class AssetCategoryAPITest(APIBaseTestCase):
 
         self.assertEqual(len(response.data['results']),
                          AssetCategory.objects.count())
-        self.assertIn("sub_category_name", response.data['results'][0].keys())
+        self.assertIn("name", response.data['results'][0].keys())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -54,8 +54,8 @@ class AssetCategoryAPITest(APIBaseTestCase):
             f"{self.asset_sub_category_url}/{self.asset_sub_category.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
 
-        self.assertIn("sub_category_name", response.data.keys())
-        self.assertIn(self.asset_sub_category.sub_category_name,
+        self.assertIn("name", response.data.keys())
+        self.assertIn(self.asset_sub_category.name,
                       response.data.values())
         self.assertEqual(response.status_code, 200)
 

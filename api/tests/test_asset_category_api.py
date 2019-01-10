@@ -18,14 +18,14 @@ class AssetCategoryAPITest(APIBaseTestCase):
     def test_can_post_category(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            "category_name": "computer"
+            "name": "computer"
         }
         response = client.post(
             self.category_url,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn("category_name", response.data.keys())
-        self.assertIn(data["category_name"].title(), response.data.values())
+        self.assertIn("name", response.data.keys())
+        self.assertIn(data["name"].title(), response.data.values())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -37,7 +37,7 @@ class AssetCategoryAPITest(APIBaseTestCase):
 
         self.assertEqual(len(response.data['results']),
                          AssetCategory.objects.count())
-        self.assertIn("category_name", response.data['results'][0].keys())
+        self.assertIn("name", response.data['results'][0].keys())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -47,14 +47,13 @@ class AssetCategoryAPITest(APIBaseTestCase):
             f"{self.category_url}/{self.asset_category.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
 
-        self.assertIn("category_name", response.data.keys())
-        self.assertIn(self.asset_category.category_name,
+        self.assertIn("name", response.data.keys())
+        self.assertIn(self.asset_category.name,
                       response.data.values())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_categories_api_endpoint_cant_allow_put(self,
-                                                    mock_verify_id_token):
+    def test_categories_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {}
         response = client.put(
@@ -67,8 +66,7 @@ class AssetCategoryAPITest(APIBaseTestCase):
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_categories_api_endpoint_cant_allow_patch(self,
-                                                      mock_verify_id_token):
+    def test_categories_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {}
         response = client.patch(
@@ -81,8 +79,7 @@ class AssetCategoryAPITest(APIBaseTestCase):
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_categories_api_endpoint_cant_allow_delete(self,
-                                                       mock_verify_id_token):
+    def test_categories_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {}
         response = client.delete(
@@ -95,14 +92,13 @@ class AssetCategoryAPITest(APIBaseTestCase):
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_categories_api_endpoint_orders_categories_by_category_name_by_default(self,
-                                                                                   mock_verify_id_token):
+    def test_categories_api_endpoint_orders_categories_by_name_by_default(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         AssetCategory.objects.create(
-            category_name="Electronics"
+            name="Electronics"
         )
         AssetCategory.objects.create(
-            category_name="Computer Accessories"
+            name="Computer Accessories"
         )
         response = client.get(
             self.category_url,
@@ -110,4 +106,4 @@ class AssetCategoryAPITest(APIBaseTestCase):
         # I am always sure that Electronics will be the last in the response
         #  since the categories are ordered.
         self.assertEqual(3, len(response.data.get('results')))
-        self.assertEqual(response.data.get('results')[2].get('category_name'), "Electronics")
+        self.assertEqual(response.data.get('results')[2].get('name'), "Electronics")

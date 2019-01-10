@@ -6,7 +6,7 @@ from django.db.models.query import QuerySet
 class CaseInsensitiveQuerySet(QuerySet):
     def _filter_or_exclude(self, mapper, *args, **kwargs):
         fields = [
-            'category_name', 'sub_category_name', 'asset_type', 'make_label',
+            'category_name', 'sub_category_name', 'asset_type', 'asset_make',
             'model_number', 'asset_code', 'serial_number'
         ]
         for field in fields:

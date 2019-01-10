@@ -31,7 +31,7 @@ class APIBaseTestCase(TestCase):
 
         # locations
         cls.country = apps.get_model('core', 'Country').objects.create(name="Kenya")
-        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(centre_name="Dojo", country=cls.country)
+        cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(name="Dojo", country=cls.country)
         cls.department = apps.get_model('core', 'Department').objects.create(name="Finance")
         cls.office_block = apps.get_model('core', 'OfficeBlock').objects.create(name="Epic", location=cls.centre)
         cls.office_floor = apps.get_model('core', 'OfficeFloor').objects.create(number=7, block=cls.office_block)
@@ -70,17 +70,17 @@ class APIBaseTestCase(TestCase):
 
         # assets
         cls.asset_category = apps.get_model('core', 'AssetCategory').objects.create(
-            category_name="Accessoriesssss")
+            name="Accessoriesssss")
 
         cls.asset_sub_category = apps.get_model('core', 'AssetSubCategory').objects.create(
-            sub_category_name="Sub Category nameseses", asset_category=cls.asset_category
+            name="Sub Category nameseses", asset_category=cls.asset_category
         )
         cls.asset_type = apps.get_model('core', 'AssetType').objects.create(
-            asset_type="Asset Types", asset_sub_category=cls.asset_sub_category)
-        cls.make_label = apps.get_model('core', 'AssetMake').objects.create(
-            make_label="Asset Makes", asset_type=cls.asset_type)
+            name="Asset Types", asset_sub_category=cls.asset_sub_category)
+        cls.asset_make = apps.get_model('core', 'AssetMake').objects.create(
+            name="Asset Makes", asset_type=cls.asset_type)
         cls.assetmodel = apps.get_model('core', 'AssetModelNumber').objects.create(
-            model_number="IMN50987345", make_label=cls.make_label)
+            name="IMN50987345", asset_make=cls.asset_make)
 
         cls.asset = apps.get_model('core', 'Asset').objects.create(
             asset_code="IC001455", serial_number="SN00123455",

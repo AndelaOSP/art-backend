@@ -24,15 +24,15 @@ class AssetModelNumberAPITest(APIBaseTestCase):
     def test_can_post_asset_model_number(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            'model_number': 'TEST-MODEL-NO-1',
-            'make_label': self.make_label.id
+            'name': 'TEST-MODEL-NO-1',
+            'asset_make': self.asset_make.id
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
-        self.assertIn('model_number', response.data.keys())
-        self.assertIn(data['model_number'], response.data.values())
+        self.assertIn('name', response.data.keys())
+        self.assertIn(data['name'], response.data.values())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -44,7 +44,7 @@ class AssetModelNumberAPITest(APIBaseTestCase):
 
         self.assertEqual(len(response.data['results']),
                          AssetCategory.objects.count())
-        self.assertIn('model_number', response.data['results'][0].keys())
+        self.assertIn('name', response.data['results'][0].keys())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -54,8 +54,8 @@ class AssetModelNumberAPITest(APIBaseTestCase):
             f'{self.asset_model_no_url}/{self.assetmodel.id}/',
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
 
-        self.assertIn('model_number', response.data.keys())
-        self.assertIn(self.assetmodel.model_number,
+        self.assertIn('name', response.data.keys())
+        self.assertIn(self.assetmodel.name,
                       response.data.values())
         self.assertEqual(response.status_code, 200)
 
@@ -106,62 +106,61 @@ class AssetModelNumberAPITest(APIBaseTestCase):
             self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            'model_number': '',
-            'make_label': self.make_label.id
+            'name': '',
+            'asset_make': self.asset_make.id
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(response.data, {
-            'model_number': ['This field may not be blank.']})
+            'name': ['This field may not be blank.']})
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_cannot_post_invalid_make_label(
+    def test_cannot_post_invalid_asset_make(
             self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            'model_number': 'TEST',
-            'make_label': 'Invalid'
+            'name': 'TEST',
+            'asset_make': 'Invalid'
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(response.data, {
-            'make_label': [
-                f'Invalid pk "{data["make_label"]}" - object does not exist.'
+            'asset_make': [
+                f'Invalid pk "{data["asset_make"]}" - object does not exist.'
             ]})
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_cannot_post_empty_make_label(
+    def test_cannot_post_empty_asset_make(
             self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         data = {
-            'model_number': 'TEST',
-            'make_label': ''
+            'name': 'TEST',
+            'asset_make': ''
         }
         response = client.post(
             self.asset_model_no_url,
             data=data,
             HTTP_AUTHORIZATION='Token {}'.format(self.token_user))
         self.assertEqual(response.data, {
-            'make_label': ['This field is required.']})
+            'asset_make': ['This field is required.']})
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_asset_model_number_api_orders_asset_models_by_model_number(self,
-                                                                        mock_verify_id_token):
+    def test_asset_model_number_api_orders_asset_models_by_model_number(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         AssetModelNumber.objects.create(
-            model_number='BCD6G4D6 1F',
-            make_label=self.make_label
+            name='BCD6G4D6 1F',
+            asset_make=self.asset_make
         )
         AssetModelNumber.objects.create(
-            model_number='XD6GRD6 Q3',
-            make_label=self.make_label
+            name='XD6GRD6 Q3',
+            asset_make=self.asset_make
         )
 
         response = client.get(
@@ -170,4 +169,4 @@ class AssetModelNumberAPITest(APIBaseTestCase):
         # I am always sure that 'XD6GRD6 Q3' will be the last in the response
         #  since the model numbers are ordered.
         self.assertEqual(3, len(response.data.get('results')))
-        self.assertEqual(response.data.get('results')[2].get('model_number'), "XD6GRD6 Q3")
+        self.assertEqual(response.data.get('results')[2].get('name'), "XD6GRD6 Q3")

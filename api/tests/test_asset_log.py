@@ -19,7 +19,8 @@ class AssetLogModelTest(APIBaseTestCase):
 
     def setUp(self):
         self.test_assetmodel1 = AssetModelNumber.objects.create(
-            model_number="IMN50987", make_label=self.make_label)
+            name="IMN50987", asset_make=self.asset_make
+        )
 
         self.test_other_asset = Asset(
             asset_code="IC00sf",
@@ -75,14 +76,12 @@ class AssetLogModelTest(APIBaseTestCase):
     def test_update_checkin(self):
         self.checkin.asset = self.test_other_asset
         self.checkin.save()
-        self.assertEqual(self.checkin.asset.asset_code,
-                         self.test_other_asset.asset_code)
+        self.assertEqual(self.checkin.asset.asset_code, self.test_other_asset.asset_code)
 
     def test_update_checkout(self):
         self.checkout.asset = self.test_other_asset
         self.checkout.save()
-        self.assertEqual(self.checkout.asset.asset_code,
-                         self.test_other_asset.asset_code)
+        self.assertEqual(self.checkout.asset.asset_code, self.test_other_asset.asset_code)
 
     def test_non_authenticated_user_checkin_checkout(self):
         response = client.get(self.asset_logs_url)

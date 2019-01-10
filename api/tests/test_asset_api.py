@@ -126,8 +126,7 @@ class AssetTestCase(APIBaseTestCase):
         response = client.get(
             '{}?email={}'.format(self.asset_urls, self.user.email),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(self.user.email,
-                      response.data['results'][0]['assigned_to']['email'])
+        self.assertIn(self.user.email, response.data['results'][0]['assigned_to']['email'])
 
     @patch('api.authentication.auth.verify_id_token')
     def test_non_admin_cannot_filter_asset_by_asset_status(self, mock_verify_id_token):
@@ -173,8 +172,7 @@ class AssetTestCase(APIBaseTestCase):
         response = client.get(
             '{}/{}/'.format(self.asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn(self.user.email,
-                      response.data['assigned_to'].values())
+        self.assertIn(self.user.email, response.data['assigned_to'].values())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -206,8 +204,7 @@ class AssetTestCase(APIBaseTestCase):
             '{}/{}/'.format(self.asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
-        self.assertEqual(response.data['checkin_status'],
-                         "checked_in")
+        self.assertEqual(response.data['checkin_status'], "checked_in")
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -218,8 +215,7 @@ class AssetTestCase(APIBaseTestCase):
             '{}/{}/'.format(self.asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('checkin_status', response.data.keys())
-        self.assertEqual(response.data['checkin_status'],
-                         "checked_out")
+        self.assertEqual(response.data['checkin_status'], "checked_out")
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -229,8 +225,7 @@ class AssetTestCase(APIBaseTestCase):
             '{}/{}/'.format(self.asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
         self.assertIn('asset_type', response.data.keys())
-        self.assertEqual(response.data['asset_type'],
-                         self.asset_type.asset_type)
+        self.assertEqual(response.data['asset_type'], self.asset_type.name)
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -261,12 +256,12 @@ class AssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_assets_have_make_label(self, mock_verify_id_token):
+    def test_assets_have_asset_make(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.get(
             '{}/{}/'.format(self.asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertIn('make_label', response.data.keys())
+        self.assertIn('asset_make', response.data.keys())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')

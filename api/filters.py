@@ -29,11 +29,11 @@ class AssetFilter(BaseFilter):
         field_name='assigned_to__user__email',
         lookup_expr='icontains', )
     model_number = filters.CharFilter(
-        field_name='model_number__model_number',
+        field_name='model_number__name',
         lookup_expr='iexact',
         method='filter_with_multiple_query_values')
     asset_type = filters.CharFilter(
-        field_name='model_number__make_label__asset_type__asset_type',
+        field_name='model_number__asset_make__asset_type__name',
         lookup_expr='iexact',
         method='filter_with_multiple_query_values')
     current_status = filters.CharFilter(

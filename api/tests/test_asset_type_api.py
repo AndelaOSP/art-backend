@@ -24,15 +24,15 @@ class AssetCategoryAPITest(APIBaseTestCase):
     def test_can_post_asset_type(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         data = {
-            "asset_type": "Asset Type Example",
+            "name": "Asset Type Example",
             "asset_sub_category": self.asset_sub_category.id
         }
         response = client.post(
             self.asset_type_url,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertIn("asset_type", response.data.keys())
-        self.assertIn(data["asset_type"], response.data.values())
+        self.assertIn("name", response.data.keys())
+        self.assertIn(data["name"], response.data.values())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -44,7 +44,7 @@ class AssetCategoryAPITest(APIBaseTestCase):
 
         self.assertEqual(len(response.data['results']),
                          AssetCategory.objects.count())
-        self.assertIn("asset_type", response.data['results'][0].keys())
+        self.assertIn("name", response.data['results'][0].keys())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -54,8 +54,8 @@ class AssetCategoryAPITest(APIBaseTestCase):
             f"{self.asset_type_url}/{self.asset_type.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
 
-        self.assertIn("asset_type", response.data.keys())
-        self.assertIn(self.asset_type.asset_type,
+        self.assertIn("name", response.data.keys())
+        self.assertIn(self.asset_type.name,
                       response.data.values())
         self.assertEqual(response.status_code, 200)
 
@@ -106,15 +106,15 @@ class AssetCategoryAPITest(APIBaseTestCase):
                                                        mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         AssetType.objects.create(
-            asset_type="HP",
+            name="HP",
             asset_sub_category=self.asset_sub_category
         )
         AssetType.objects.create(
-            asset_type="Samsung",
+            name="Samsung",
             asset_sub_category=self.asset_sub_category
         )
         AssetType.objects.create(
-            asset_type="Lenovo",
+            name="Lenovo",
             asset_sub_category=self.asset_sub_category
         )
 
@@ -124,4 +124,4 @@ class AssetCategoryAPITest(APIBaseTestCase):
         # I am always sure that 'Samsung' will be the last in the response
         #  since the asset types are ordered.
         self.assertEqual(4, len(response.data.get('results')))
-        self.assertEqual(response.data.get('results')[3].get('asset_type'), "Samsung")
+        self.assertEqual(response.data.get('results')[3].get('name'), "Samsung")
