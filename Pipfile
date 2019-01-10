@@ -31,6 +31,7 @@ coveralls = "==1.5.1"
 isort = {git = "https://github.com/timothycrosley/isort", editable = true}
 pytest-django = "==3.4.4"
 pdbpp = "==0.9.3"
+black = "==18.9b0"
 
 [requires]
 python_version = "3.6.4"

@@ -18,8 +18,7 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
         count = AssetModelNumber.objects.count()
         with self.assertRaises(ValidationError):
             AssetModelNumber.objects.create(
-                name=self.test_assetmodel.name,
-                asset_make=self.asset_make
+                name=self.test_assetmodel.name, asset_make=self.asset_make
             )
         self.assertEqual(AssetModelNumber.objects.count(), count)
 
@@ -36,7 +35,4 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
 
     def test_cannot_add_asset_model_with_non_existing_make(self):
         with self.assertRaises(ValueError):
-            AssetModelNumber.objects.create(
-                name="Test Model Number",
-                asset_make=39090
-            )
+            AssetModelNumber.objects.create(name="Test Model Number", asset_make=39090)

@@ -27,105 +27,136 @@ admin.site.register(
 class SecurityUserAdmin(BaseUserAdmin):
     add_form = UserRegistrationForm
     search_fields = ('email', 'first_name', 'last_name')
-    list_display = (
-        'first_name',
-        'last_name',
-        'email',
-        'badge_number',
-        'phone_number',
-    )
+    list_display = ('first_name', 'last_name', 'email', 'badge_number', 'phone_number')
 
-    list_filter = (
-        'badge_number',
-    )
+    list_filter = ('badge_number',)
 
     fieldsets = (
-        ('Account', {'fields': ('first_name',
-                                'last_name',
-                                'email',
-                                'badge_number',
-                                'phone_number',
-                                'password')}),
+        (
+            'Account',
+            {
+                'fields': (
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'badge_number',
+                    'phone_number',
+                    'password',
+                )
+            },
+        ),
     )
 
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('first_name',
-                       'last_name',
-                       'email',
-                       'badge_number',
-                       'phone_number',
-                       'password1',
-                       'password2')
-        }),
+        (
+            None,
+            {
+                'classes': ('wide',),
+                'fields': (
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'badge_number',
+                    'phone_number',
+                    'password1',
+                    'password2',
+                ),
+            },
+        ),
     )
 
-    ordering = (
-        'first_name', 'last_name', 'badge_number'
-    )
+    ordering = ('first_name', 'last_name', 'badge_number')
 
 
 class UserAdmin(BaseUserAdmin):
     add_form = UserRegistrationForm
     search_fields = ('email', 'first_name', 'last_name')
     list_display = (
-        'email', 'cohort', 'slack_handle', 'location', 'is_active', 'last_modified'
-    )
-    list_filter = (
+        'email',
         'cohort',
+        'slack_handle',
+        'location',
+        'is_active',
+        'last_modified',
     )
+    list_filter = ('cohort',)
 
     fieldsets = (
-        ('Account', {
-            'fields': ('email', 'password')
-        }),
-        ('Personal info', {
-            'fields': (
-                'first_name',
-                'last_name',
-                'cohort',
-                'slack_handle',
-                'phone_number',
-                'picture',
-                'is_staff',
-                'is_superuser',
-                'location',
-            )
-        }),
+        ('Account', {'fields': ('email', 'password')}),
+        (
+            'Personal info',
+            {
+                'fields': (
+                    'first_name',
+                    'last_name',
+                    'cohort',
+                    'slack_handle',
+                    'phone_number',
+                    'picture',
+                    'is_staff',
+                    'is_superuser',
+                    'location',
+                )
+            },
+        ),
     )
 
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'first_name',
-                       'last_name', 'cohort',
-                       'slack_handle', 'phone_number',
-                       'is_staff', 'is_superuser',
-                       'picture', 'password1',
-                       'password2')
-        }),
+        (
+            None,
+            {
+                'classes': ('wide',),
+                'fields': (
+                    'email',
+                    'first_name',
+                    'last_name',
+                    'cohort',
+                    'slack_handle',
+                    'phone_number',
+                    'is_staff',
+                    'is_superuser',
+                    'picture',
+                    'password1',
+                    'password2',
+                ),
+            },
+        ),
     )
 
-    ordering = (
-        'email', 'cohort', 'slack_handle'
-    )
+    ordering = ('email', 'cohort', 'slack_handle')
 
 
 class AssetAdmin(admin.ModelAdmin):
     list_filter = (
-        'model_number', 'model_number__asset_make__asset_type__name',
-        'purchase_date', 'verified',
+        'model_number',
+        'model_number__asset_make__asset_type__name',
+        'purchase_date',
+        'verified',
     )
     list_display = (
-        'uuid', 'asset_code', 'serial_number', 'model_number', 'created_at',
-        'assigned_to', 'current_status', 'notes', 'purchase_date', 'verified', 'asset_location',
+        'uuid',
+        'asset_code',
+        'serial_number',
+        'model_number',
+        'created_at',
+        'assigned_to',
+        'current_status',
+        'notes',
+        'purchase_date',
+        'verified',
+        'asset_location',
     )
 
 
 class AISUserSyncAdmin(admin.ModelAdmin):
     list_filter = ('running_time', 'successful', 'created_at')
-    list_display = ('running_time', 'successful', 'new_records', 'updated_records', 'created_at')
+    list_display = (
+        'running_time',
+        'successful',
+        'new_records',
+        'updated_records',
+        'created_at',
+    )
 
 
 class AssetStatusAdmin(admin.ModelAdmin):
@@ -155,7 +186,7 @@ class OfficeFloorAdmin(admin.ModelAdmin):
 
 
 class OfficeFloorSectionAdmin(admin.ModelAdmin):
-    list_filter = ('floor', 'floor__block',)
+    list_filter = ('floor', 'floor__block')
     list_display = ('name', 'floor')
 
 

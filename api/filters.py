@@ -26,19 +26,20 @@ class BaseFilter(filters.FilterSet):
 
 class AssetFilter(BaseFilter):
     email = filters.CharFilter(
-        field_name='assigned_to__user__email',
-        lookup_expr='icontains', )
+        field_name='assigned_to__user__email', lookup_expr='icontains'
+    )
     model_number = filters.CharFilter(
         field_name='model_number__name',
         lookup_expr='iexact',
-        method='filter_with_multiple_query_values')
+        method='filter_with_multiple_query_values',
+    )
     asset_type = filters.CharFilter(
         field_name='model_number__asset_make__asset_type__name',
         lookup_expr='iexact',
-        method='filter_with_multiple_query_values')
+        method='filter_with_multiple_query_values',
+    )
     current_status = filters.CharFilter(
-        field_name='current_status',
-        lookup_expr='iexact',
+        field_name='current_status', lookup_expr='iexact'
     )
 
     class Meta:
@@ -53,15 +54,14 @@ class UserFilter(BaseFilter):
         method='filter_with_multiple_query_values',
     )
 
-    email = filters.CharFilter(
-        field_name='email',
-        lookup_expr='istartswith',)
+    email = filters.CharFilter(field_name='email', lookup_expr='istartswith')
 
     asset_count = filters.CharFilter(
         field_name='allocated_asset_count',
         label='Asset count',
         lookup_expr='iexact',
-        method='filter_by_allocated_asset_count',)
+        method='filter_by_allocated_asset_count',
+    )
 
     def filter_by_allocated_asset_count(self, queryset, name, value):
         users = [

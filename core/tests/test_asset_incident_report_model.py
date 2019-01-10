@@ -17,6 +17,9 @@ class AssetIncidentReportModelTest(CoreBaseTestCase):
             loss_of_property="Laptop",
             witnesses="Omosh wa mtura",
             police_abstract_obtained="Yes",
-            submitted_by=self.user
+            submitted_by=self.user,
         )
-        self.assertEqual(str(incident_report), f"{incident_report.incident_type}: {incident_report.asset}")
+        self.assertEqual(
+            str(incident_report),
+            f"{incident_report.incident_type}: {incident_report.asset}",
+        )

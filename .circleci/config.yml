@@ -50,9 +50,13 @@ jobs:
       - *cmd_install_requirements
       - *cmd_save_cache
       - run:
-          name: pep8 checks on project
+          name: run flake8 checks on project
           command: |
             pipenv run flake8 .
+      - run:
+          name: run black formatter on project
+          command: |
+            pipenv run black . --check --diff -S
       - run:
           name: isort - imports sorting
           command: |

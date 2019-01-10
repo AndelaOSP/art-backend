@@ -31,8 +31,7 @@ class OfficeBlockModelTest(CoreBaseTestCase):
         with transaction.atomic():
             with self.assertRaises(ValidationError):
                 OfficeBlock.objects.create(
-                    name=OfficeBlock.objects.first().name,
-                    location=self.centre
+                    name=OfficeBlock.objects.first().name, location=self.centre
                 )
         self.assertEqual(OfficeBlock.objects.count(), count)
 
@@ -43,7 +42,7 @@ class OfficeBlockModelTest(CoreBaseTestCase):
             with self.assertRaises(ValidationError):
                 OfficeFloorSection.objects.create(
                     name=OfficeFloorSection.objects.first().name,
-                    floor=self.office_floor
+                    floor=self.office_floor,
                 )
         self.assertEqual(OfficeBlock.objects.count(), count)
 
@@ -54,7 +53,7 @@ class OfficeBlockModelTest(CoreBaseTestCase):
             with self.assertRaises(ValidationError):
                 OfficeWorkspace.objects.create(
                     name=OfficeWorkspace.objects.first().name,
-                    section=self.office_section
+                    section=self.office_section,
                 )
         self.assertEqual(OfficeWorkspace.objects.count(), count)
 

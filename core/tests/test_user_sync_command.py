@@ -33,12 +33,8 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'active',
-                    'cohort': {
-                        'name': 'Class 1 - NBO'
-                    },
-                    'location': {
-                        'name': 'Nairobi'
-                    },
+                    'cohort': {'name': 'Class 1 - NBO'},
+                    'location': {'name': 'Nairobi'},
                     'updated_at': '2018-12-18T13: 30: 02.780Z',
                 },
                 {
@@ -47,12 +43,8 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'active',
-                    'location': {
-                        'name': 'Nairobi'
-                    },
-                    'cohort': {
-                        'name': 'test'
-                    },
+                    'location': {'name': 'Nairobi'},
+                    'cohort': {'name': 'test'},
                     'updated_at': '2018-12-18T13: 30: 02.780Z',
                 },
                 {
@@ -61,12 +53,8 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'active',
-                    'cohort': {
-                        'name': 'Class 1 - NBO'
-                    },
-                    'location': {
-                        'name': 'unknown'
-                    },
+                    'cohort': {'name': 'Class 1 - NBO'},
+                    'location': {'name': 'unknown'},
                 },
                 {
                     'email': 'test.{}@email.com'.format(random.randint(1, 100)),
@@ -74,12 +62,8 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'active',
-                    'cohort': {
-                        'name': 'Staff'
-                    },
-                    'location': {
-                        'name': 'Lagos'
-                    },
+                    'cohort': {'name': 'Staff'},
+                    'location': {'name': 'Lagos'},
                     'updated_at': '2018-12-18T13: 30: 02.780Z',
                 },
                 {
@@ -88,12 +72,8 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'suspended',
-                    'cohort': {
-                        'name': 'Class 1 - KLA'
-                    },
-                    'location': {
-                        'name': 'Kampala'
-                    },
+                    'cohort': {'name': 'Class 1 - KLA'},
+                    'location': {'name': 'Kampala'},
                     'updated_at': '2018-12-18T13: 30: 02.780Z',
                 },
                 {
@@ -102,12 +82,8 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'suspended',
-                    'cohort': {
-                        'name': 'Class 1 - KLA'
-                    },
-                    'location': {
-                        'name': 'Kampala'
-                    },
+                    'cohort': {'name': 'Class 1 - KLA'},
+                    'location': {'name': 'Kampala'},
                     'updated_at': '2018-12-18T13: 30: 02.780Z',
                 },
                 {
@@ -116,12 +92,8 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'suspended',
-                    'cohort': {
-                        'name': 'Class 1 - KLA'
-                    },
-                    'location': {
-                        'name': 'Kampala'
-                    },
+                    'cohort': {'name': 'Class 1 - KLA'},
+                    'location': {'name': 'Kampala'},
                     'updated_at': '2018-12-18T13: 30: 02.780Z',
                 },
             ]
@@ -129,13 +101,16 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         # a call to page 3 will return an empty result
         responses.add(
             responses.GET,
-            self.ais_users_endpoint + '?limit={}&page=3'.format(self.env_vars['AIS_LIMIT']),
+            self.ais_users_endpoint
+            + '?limit={}&page=3'.format(self.env_vars['AIS_LIMIT']),
             json={},
         )
 
     def _confirm_call_count(self, expected_count, url=None):
         url = url or self.ais_users_endpoint
-        call_count = len([resp.request.url for resp in responses.calls if url in resp.request.url])
+        call_count = len(
+            [resp.request.url for resp in responses.calls if url in resp.request.url]
+        )
         self.assertEqual(call_count, expected_count)
 
     @responses.activate
@@ -165,7 +140,9 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
     def test_user_sync_valid_response(self):
         "Test valid response"
         user_count = User.objects.count()
-        responses.add(responses.GET, self.ais_users_endpoint, json=self.sample_user_data)
+        responses.add(
+            responses.GET, self.ais_users_endpoint, json=self.sample_user_data
+        )
         with patch.dict('os.environ', self.env_vars, clear=True):
             call_command('sync_users')
         # calls will exit at call number 3, since page 3 has empty result

@@ -9,6 +9,7 @@ from core.tests import CoreBaseTestCase
 
 class AssetSubCategoryModelTest(CoreBaseTestCase):
     """Tests for the assets subcategory model"""
+
     def test_can_save_a_sub_category(self):
         count = AssetSubCategory.objects.count()
         AssetSubCategory.objects.create(name="Gadgets", asset_category=self.category)
@@ -18,8 +19,7 @@ class AssetSubCategoryModelTest(CoreBaseTestCase):
         count = AssetSubCategory.objects.count()
         with self.assertRaises(ValidationError):
             AssetSubCategory.objects.create(
-                name="Computer Accessories",
-                asset_category=self.category,
+                name="Computer Accessories", asset_category=self.category
             )
         self.assertEqual(AssetSubCategory.objects.count(), count)
 

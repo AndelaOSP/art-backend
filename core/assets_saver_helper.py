@@ -1,15 +1,15 @@
 # App Imports
-from core.management.commands.import_assets import (create_object, read_csv_row_value, SKIPPED_ROWS,
-                                                    write_skipped_records)
+from core.management.commands.import_assets import (
+    create_object,
+    read_csv_row_value,
+    SKIPPED_ROWS,
+    write_skipped_records,
+)
 
 
 def save_asset(data, skipped_file):
     for pos, row in enumerate(data):
-        row_data = {
-            "row": row,
-            "row_count": pos,
-            "required_for_import": True,
-        }
+        row_data = {"row": row, "row_count": pos, "required_for_import": True}
         category_value = read_csv_row_value("Category", row)
         category = create_object("AssetCategory", name=category_value, **row_data)
 
@@ -25,15 +25,13 @@ def save_asset(data, skipped_file):
         asset_type = create_object(
             "AssetType",
             parent={"asset_sub_category": subcategory},
-            name=type_value, **row_data,
+            name=type_value,
+            **row_data,
         )
 
         make_value = read_csv_row_value("Make", row)
         asset_make = create_object(
-            "AssetMake",
-            parent={"asset_type": asset_type},
-            name=make_value,
-            **row_data,
+            "AssetMake", parent={"asset_type": asset_type}, name=make_value, **row_data
         )
 
         modelnumber_value = read_csv_row_value("Model Number", row)
@@ -52,19 +50,14 @@ def save_asset(data, skipped_file):
             "serial_number": serialnumber_value,
         }
         asset = create_object(
-            "Asset",
-            parent={"model_number": asset_model_no},
-            **row_data,
-            **asset_fields,
+            "Asset", parent={"model_number": asset_model_no}, **row_data, **asset_fields
         )
 
         if asset:
             row_data["required_for_import"] = False
 
             asset_verified_value = read_csv_row_value("Verified", row)
-            asset_verified_value = (True, False)[
-                asset_verified_value == "No"
-            ]
+            asset_verified_value = (True, False)[asset_verified_value == "No"]
             asset.verified = asset_verified_value
             asset.save()
 
@@ -101,13 +94,14 @@ def save_asset(data, skipped_file):
 
             spec_memory_value = read_csv_row_value("Memory", row)
             spec_storage_value = read_csv_row_value("Storage", row)
-            spec_processor_type_value = read_csv_row_value(
-                "Processor Type", row
-            )
+            spec_processor_type_value = read_csv_row_value("Processor Type", row)
             spec_year_of_manufacture_value = read_csv_row_value("YOM", row)
 
             spec_data = (
-                spec_memory_value or spec_storage_value or spec_processor_type_value or spec_year_of_manufacture_value
+                spec_memory_value
+                or spec_storage_value
+                or spec_processor_type_value
+                or spec_year_of_manufacture_value
             )
 
             if spec_data:

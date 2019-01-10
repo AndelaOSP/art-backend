@@ -9,9 +9,15 @@ from rest_framework.viewsets import ModelViewSet
 
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
-from api.serializers import (AndelaCentreSerializer, CountrySerializer, DepartmentSerializer,
-                             OfficeBlockSerializer, OfficeFloorSectionSerializer, OfficeFloorSerializer,
-                             OfficeWorkspaceSerializer)
+from api.serializers import (
+    AndelaCentreSerializer,
+    CountrySerializer,
+    DepartmentSerializer,
+    OfficeBlockSerializer,
+    OfficeFloorSectionSerializer,
+    OfficeFloorSerializer,
+    OfficeWorkspaceSerializer,
+)
 from core import models
 
 logger = logging.getLogger(__name__)

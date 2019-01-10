@@ -10,6 +10,7 @@ from ..models import AssetCategory
 
 class AssetCategoryModelTest(CoreBaseTestCase):
     """ Tests for the Asset Category Model """
+
     def test_can_save_a_category(self):
         AssetCategory.objects.create(name="Electronics")
         new_category = AssetCategory.objects.get(name="Electronics")
@@ -41,7 +42,9 @@ class AssetCategoryModelTest(CoreBaseTestCase):
         self.assertEqual(count_before_delete, count_after_delete)
 
     def test_can_delete_category_without_existing_subcategories(self):
-        new_category_without_subcategories = AssetCategory.objects.create(name="New Category")
+        new_category_without_subcategories = AssetCategory.objects.create(
+            name="New Category"
+        )
 
         count_before_delete = AssetCategory.objects.count()
         new_category_without_subcategories.delete()

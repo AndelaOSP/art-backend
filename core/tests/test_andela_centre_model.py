@@ -9,6 +9,7 @@ from ..models import AndelaCentre
 
 class AndelaCentreModelTest(CoreBaseTestCase):
     """ Tests for the Andela Centre Model """
+
     def test_can_save_a_centre(self):
         AndelaCentre.objects.create(name="Gorilla", country=self.country)
         new_centre = AndelaCentre.objects.get(name="Gorilla")

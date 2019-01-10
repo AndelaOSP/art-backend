@@ -81,6 +81,7 @@ class Department(models.Model):
 
     def _create_assignee_object_for_department(self):
         from .asset import AssetAssignee
+
         AssetAssignee.objects.get_or_create(department=self)
 
     class Meta:
@@ -175,6 +176,7 @@ class OfficeWorkspace(models.Model):
 
     def _create_assignee_object_for_workspace(self):
         from .asset import AssetAssignee
+
         AssetAssignee.objects.get_or_create(workspace=self)
 
     class Meta:
