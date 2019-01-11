@@ -13,10 +13,10 @@ from api.views import (AllocationsViewSet, AndelaCentreViewset, AssetAssigneeVie
                        AssetLogViewSet, AssetMakeViewSet, AssetModelNumberViewSet, AssetsImportViewSet,
                        AssetSlackIncidentReportViewSet, AssetSpecsViewSet, AssetStatusViewSet,
                        AssetSubCategoryViewSet, AssetTypeViewSet, AssetViewSet, AvailableFilterValues,
-                       DepartmentViewSet, ManageAssetViewSet, OfficeBlockViewSet, OfficeFloorSectionViewSet,
-                       OfficeFloorViewSet, OfficeWorkspaceViewSet, SampleImportFile,
-                       SecurityUserEmailsViewSet, SecurityUserViewSet, SkippedAssets, UserFeedbackViewSet,
-                       UserGroupViewSet, UserViewSet)
+                       CountryViewset, DepartmentViewSet, ManageAssetViewSet, OfficeBlockViewSet,
+                       OfficeFloorSectionViewSet, OfficeFloorViewSet, OfficeWorkspaceViewSet,
+                       SampleImportFile, SecurityUserEmailsViewSet, SecurityUserViewSet, SkippedAssets,
+                       UserFeedbackViewSet, UserGroupViewSet, UserViewSet)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -72,6 +72,7 @@ router.register('office-workspaces', OfficeWorkspaceViewSet,
 router.register('departments', DepartmentViewSet, 'departments')
 router.register('asset-assignee', AssetAssigneeViewSet, 'asset-assignee')
 router.register('andela-centres', AndelaCentreViewset, 'andela-centres')
+router.register('countries', CountryViewset, 'countries')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),

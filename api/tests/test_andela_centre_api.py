@@ -2,6 +2,7 @@
 from unittest.mock import patch
 
 # Third-Party Imports
+from pycountry import countries
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
@@ -91,3 +92,28 @@ class AndelaCentreAPITest(APIBaseTestCase):
             'detail': 'Deleted Successfully'
         })
         self.assertEqual(response.status_code, 204)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_country_create(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        data = {
+            "name": countries.lookup('Rwanda').name,
+        }
+        response = client.post(
+            self.country_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.admin_user))
+        self.assertIn("name", response.data.keys())
+        self.assertEqual(response.status_code, 201)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_duplicate_country_create(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        data = {
+            "name": self.country.name,
+        }
+        response = client.post(
+            self.country_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.admin_user))
+        self.assertEqual(response.status_code, 400)
