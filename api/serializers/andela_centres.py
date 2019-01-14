@@ -8,7 +8,7 @@ from core import models
 class OfficeBlockSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.OfficeBlock
-        fields = ("name", "id", "location",)
+        fields = ("name", "id", "location")
 
 
 class OfficeFloorSerializer(serializers.ModelSerializer):
@@ -41,14 +41,13 @@ class OfficeWorkspaceSerializer(serializers.ModelSerializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Department
-        fields = ("name", "id",)
+        fields = ("name", "id")
 
 
 class AndelaCentreSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AndelaCentre
-        fields = ("id", "centre_name", "country", "created_at",
-                  "last_modified")
+        fields = ("id", "centre_name", "country", "created_at", "last_modified")
 
 
 class CountrySerializer(serializers.ModelSerializer):

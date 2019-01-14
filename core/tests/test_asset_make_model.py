@@ -8,7 +8,6 @@ from core.tests import CoreBaseTestCase
 
 
 class AssetMakeTestCase(CoreBaseTestCase):
-
     def test_can_create_asset_make(self):
         count = AssetMake.objects.count()
         AssetMake.objects.create(make_label="Bose", asset_type=self.asset_type)
@@ -19,7 +18,7 @@ class AssetMakeTestCase(CoreBaseTestCase):
         with self.assertRaises(ValidationError):
             AssetMake.objects.create(
                 make_label=AssetMake.objects.first().make_label,
-                asset_type=self.asset_type
+                asset_type=self.asset_type,
             )
         self.assertEqual(AssetMake.objects.count(), count)
 
@@ -36,10 +35,7 @@ class AssetMakeTestCase(CoreBaseTestCase):
     def test_cannot_add_make_with_non_exisiting_type(self):
         """ Test cannot add make with non-existing type """
         with self.assertRaises(ValueError):
-            AssetMake.objects.create(
-                make_label="Skull Candy",
-                asset_type=6898
-            )
+            AssetMake.objects.create(make_label="Skull Candy", asset_type=6898)
 
     def test_delete_type_protects_make(self):
         """ Test that the make is not deleted when the type is deleted """

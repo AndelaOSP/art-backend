@@ -14,12 +14,13 @@ client = APIClient()
 
 
 class UserTestCase(APIBaseTestCase):
-
     def test_can_add_user(self):
         users_count_before = User.objects.count()
         new_user = User.objects.create(
-            email='test-1@site.com', cohort=20,
-            slack_handle='@test_user-1', password='devpassword'
+            email='test-1@site.com',
+            cohort=20,
+            slack_handle='@test_user-1',
+            password='devpassword',
         )
         users_count_after = User.objects.count()
         self.assertEqual(new_user.email, 'test-1@site.com')
@@ -31,8 +32,7 @@ class UserTestCase(APIBaseTestCase):
     def test_add_user_without_password(self):
         users_count_before = User.objects.count()
         new_user = User.objects.create(
-            email='test-1@site.com', cohort=20,
-            slack_handle='@test_user-1'
+            email='test-1@site.com', cohort=20, slack_handle='@test_user-1'
         )
         users_count_after = User.objects.count()
         self.assertEqual(new_user.password, None)
@@ -45,8 +45,10 @@ class UserTestCase(APIBaseTestCase):
 
     def test_can_delete_a_user(self):
         new_user = User.objects.create(
-            email='test-1@site.com', cohort=20,
-            slack_handle='@test_user-1', password='devpassword'
+            email='test-1@site.com',
+            cohort=20,
+            slack_handle='@test_user-1',
+            password='devpassword',
         )
         users_count_before = User.objects.count()
         new_user.delete()
@@ -56,18 +58,25 @@ class UserTestCase(APIBaseTestCase):
     def test_user_email_is_required(self):
         with self.assertRaises(ValueError):
             User.objects.create_user(
-                email='', name='test_user1',
-                cohort=20, slack_handle='@test_user1',
-                password='devpassword')
+                email='',
+                name='test_user1',
+                cohort=20,
+                slack_handle='@test_user1',
+                password='devpassword',
+            )
 
     def test_create_normal_user(self):
         new_user_1 = User.objects.create_user(
-            email='test-1@site.com', cohort=20,
-            slack_handle='@test_user-1', password='devpassword'
+            email='test-1@site.com',
+            cohort=20,
+            slack_handle='@test_user-1',
+            password='devpassword',
         )
         new_user_2 = User.objects._create_user(
-            email='test-2@site.com', cohort=20,
-            slack_handle='@test_user-2', password='devpassword'
+            email='test-2@site.com',
+            cohort=20,
+            slack_handle='@test_user-2',
+            password='devpassword',
         )
         self.assertFalse(new_user_1.is_staff)
         self.assertFalse(new_user_1.is_superuser)
@@ -76,8 +85,10 @@ class UserTestCase(APIBaseTestCase):
 
     def test_create_superuser(self):
         new_user_1 = User.objects.create_superuser(
-            email='test-2@site.com', cohort=20,
-            slack_handle='@test_user-2', password='devpassword'
+            email='test-2@site.com',
+            cohort=20,
+            slack_handle='@test_user-2',
+            password='devpassword',
         )
         self.assertTrue(new_user_1.is_staff)
         self.assertTrue(new_user_1.is_superuser)
@@ -85,68 +96,74 @@ class UserTestCase(APIBaseTestCase):
     def test_create_superuser_with_staff_false(self):
         with self.assertRaises(ValueError):
             User.objects.create_superuser(
-                email='test-2@site.com', cohort=20,
-                slack_handle='@test_user-2', password='devpassword',
-                is_staff=False, is_superuser=True
+                email='test-2@site.com',
+                cohort=20,
+                slack_handle='@test_user-2',
+                password='devpassword',
+                is_staff=False,
+                is_superuser=True,
             )
 
     def test_create_superuser_with_superuser_false(self):
         with self.assertRaises(ValueError):
             User.objects.create_superuser(
-                email='test-2@site.com', cohort=20,
-                slack_handle='@test_user-2', password='devpassword',
-                is_staff=True, is_superuser=False
+                email='test-2@site.com',
+                cohort=20,
+                slack_handle='@test_user-2',
+                password='devpassword',
+                is_staff=True,
+                is_superuser=False,
             )
 
     def test_non_authenticated_user_add_user_from_api_endpoint(self):
         response = client.post(self.users_url)
-        self.assertEqual(response.data, {
-            'detail': 'Authentication credentials were not provided.'
-        })
+        self.assertEqual(
+            response.data, {'detail': 'Authentication credentials were not provided.'}
+        )
         self.assertEqual(response.status_code, 401)
 
     def test_non_authenticated_user_get_user_from_api_endpoint(self):
         response = client.get(self.users_url)
-        self.assertEqual(response.data, {
-            'detail': 'Authentication credentials were not provided.'
-        })
+        self.assertEqual(
+            response.data, {'detail': 'Authentication credentials were not provided.'}
+        )
         self.assertEqual(response.status_code, 401)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_non_admin_add_user_from_api_endpoint(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.post(
-            self.users_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data, {
-            'detail': 'You do not have permission to perform this action.'
-        })
+            self.users_url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
+        )
+        self.assertEqual(
+            response.data,
+            {'detail': 'You do not have permission to perform this action.'},
+        )
         self.assertEqual(response.status_code, 403)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_non_admin_user_et_user_from_api_endpoint(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.user.email}
         response = client.get(
-            self.users_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data, {
-            'detail': 'You do not have permission to perform this action.'
-        })
+            self.users_url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
+        )
+        self.assertEqual(
+            response.data,
+            {'detail': 'You do not have permission to perform this action.'},
+        )
         self.assertEqual(response.status_code, 403)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_user_add_users_from_api_endpoint(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         users_count_before = User.objects.count()
-        data = {
-            "password": "devpassword",
-            "email": "test_user@mail.com",
-        }
+        data = {"password": "devpassword", "email": "test_user@mail.com"}
         response = client.post(
             self.users_url,
             data=data,
             format='json',
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
         users_count_after = User.objects.count()
         self.assertEqual(response.status_code, 201)
         self.assertEqual(users_count_after, users_count_before + 1)
@@ -155,23 +172,28 @@ class UserTestCase(APIBaseTestCase):
     def test_admin_user_get_users_from_api_endpoint(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
-            self.users_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            self.users_url, HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+        )
         self.assertEqual(len(response.data['results']), User.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_admin_user_can_get_users_from_their_centres_from_api_endpoint(self, mock_verify_token):
+    def test_admin_user_can_get_users_from_their_centres_from_api_endpoint(
+        self, mock_verify_token
+    ):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
-            self.users_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            self.users_url, HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+        )
         location = AndelaCentre.objects.create(
             centre_name="Kampala", country=self.country
         )
         User.objects.create(
-            email='test1@site.com', cohort=20, slack_handle='@test1_user',
-            password='devpassword', location=location
+            email='test1@site.com',
+            cohort=20,
+            slack_handle='@test1_user',
+            password='devpassword',
+            location=location,
         )
         self.assertEqual(len(response.data['results']), User.objects.count() - 1)
         self.assertEqual(response.status_code, 200)
@@ -182,27 +204,21 @@ class UserTestCase(APIBaseTestCase):
         self.admin_user.save()
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
-            self.users_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data, {
-            'detail': 'User inactive or deleted.'
-        })
+            self.users_url, HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+        )
+        self.assertEqual(response.data, {'detail': 'User inactive or deleted.'})
 
     @patch('api.authentication.auth.verify_id_token')
     def test_add_user_from_api_endpoint_without_email(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        data = {
-            "password": "devpassword",
-            "email": "",
-        }
+        data = {"password": "devpassword", "email": ""}
         response = client.post(
             self.users_url,
             data=data,
             format='json',
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data, {
-            'email': ['This field may not be blank.']
-        })
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data, {'email': ['This field may not be blank.']})
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -211,7 +227,7 @@ class UserTestCase(APIBaseTestCase):
         user = User.objects.first()
         response = client.put(
             '{}/{}/'.format(self.users_url, user.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.json(), {'detail': 'Method "PUT" not allowed.'})
 
@@ -221,7 +237,8 @@ class UserTestCase(APIBaseTestCase):
         user = User.objects.first()
         response = client.patch(
             '{}/{}/'.format(self.users_url, user.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
         self.assertEqual(response.json(), {'detail': 'Method "PATCH" not allowed.'})
 
     @patch('api.authentication.auth.verify_id_token')
@@ -229,7 +246,8 @@ class UserTestCase(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         user = User.objects.first()
         response = client.delete(
-            '{}/{}/'.format(self.users_url, user.id), HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+            '{}/{}/'.format(self.users_url, user.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.json(), {'detail': 'Method "DELETE" not allowed.'})
 
@@ -240,39 +258,34 @@ class UserTestCase(APIBaseTestCase):
         AssetStatus.objects.create(asset=self.asset, current_status='Available')
         response = client.get(
             '{}/{}/'.format(self.users_url, self.user.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         count = response.data['allocated_asset_count']
         AllocationHistory.objects.create(
-            asset=self.asset,
-            current_owner=self.user.assetassignee
+            asset=self.asset, current_owner=self.user.assetassignee
         )
         response = client.get(
             '{}/{}/'.format(self.users_url, self.user.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         after_allocation = response.data['allocated_asset_count']
         self.assertEqual(after_allocation, count + 1)
 
-        AssetStatus.objects.create(
-            asset=self.asset,
-            current_status='Available'
-        )
+        AssetStatus.objects.create(asset=self.asset, current_status='Available')
         response = client.get(
             '{}/{}/'.format(self.users_url, self.user.id),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(
-            response.data['allocated_asset_count'], after_allocation - 1)
+        self.assertEqual(response.data['allocated_asset_count'], after_allocation - 1)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_user_filter_users_by_cohort(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             '{}?cohort={}'.format(self.users_url, self.user.cohort),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data['results'][0]['cohort'],
-                         self.user.cohort)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data['results'][0]['cohort'], self.user.cohort)
         users_count = User.objects.filter(cohort=self.user.cohort).count()
         self.assertEqual(response.data['count'], users_count)
         self.assertEqual(response.status_code, 200)
@@ -284,31 +297,29 @@ class UserTestCase(APIBaseTestCase):
         cohorts_str = ','.join(str(cohort) for cohort in cohorts)
         response = client.get(
             '{}?cohort={}'.format(self.users_url, cohorts_str),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
 
         self.assertIn(response.data['results'][0]['cohort'], cohorts)
         self.assertEqual(
-            response.data['count'],
-            User.objects.filter(cohort__isnull=False).count()
+            response.data['count'], User.objects.filter(cohort__isnull=False).count()
         )
         cohorts_str += ',unspecified'
         response = client.get(
             '{}?cohort={}'.format(self.users_url, cohorts_str),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(
-            response.data['count'],
-            User.objects.count()
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
+        self.assertEqual(response.data['count'], User.objects.count())
 
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_user_filter_users_without_cohort(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             '{}?cohort=unspecified'.format(self.users_url),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
         self.assertEqual(
-            response.data['count'],
-            User.objects.filter(cohort__isnull=True).count()
+            response.data['count'], User.objects.filter(cohort__isnull=True).count()
         )
         self.assertEqual(response.status_code, 200)
 
@@ -317,21 +328,20 @@ class UserTestCase(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             '{}?email={}'.format(self.users_url, self.user.email),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data['results'][0]['email'],
-                         self.user.email)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data['results'][0]['email'], self.user.email)
         self.assertEqual(response.data['count'], 1)
         self.assertEqual(response.status_code, 200)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_admin_user_filter_users_by_email_first_letter(self,
-                                                           mock_verify_token):
+    def test_admin_user_filter_users_by_email_first_letter(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             '{}?email={}'.format(self.users_url, self.user.email[0:1].upper()),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data['results'][0]['email'],
-                         self.user.email)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data['results'][0]['email'], self.user.email)
         self.assertEqual(response.data['count'], 1)
         self.assertEqual(response.status_code, 200)
 
@@ -340,7 +350,8 @@ class UserTestCase(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             '{}?email={}'.format(self.users_url, 'sola@gmail.com'),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
         self.assertEqual(response.data['count'], 0)
         self.assertEqual(response.status_code, 200)
 
@@ -349,9 +360,11 @@ class UserTestCase(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             '{}?email={}'.format(self.users_url, self.user.email[0:3]),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
-        self.assertEqual(response.data['results'][0]['email'][0:3],
-                         self.user.email[0:3])
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(
+            response.data['results'][0]['email'][0:3], self.user.email[0:3]
+        )
         self.assertEqual(response.data['count'], 1)
         self.assertEqual(response.status_code, 200)
 
@@ -359,12 +372,12 @@ class UserTestCase(APIBaseTestCase):
     def test_admin_filter_users_by_asset_count(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         allocation_user = AllocationHistory.objects.create(
-            asset=self.asset,
-            current_owner=self.user.assetassignee
+            asset=self.asset, current_owner=self.user.assetassignee
         )
         response = client.get(
             '{}?asset_count={}'.format(self.users_url, 1),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
         self.assertEqual(response.data['results'][0]['allocated_asset_count'], 1)
         self.assertEqual(response.data['count'], 1)
         self.assertTrue(isinstance(allocation_user, AllocationHistory))
@@ -375,12 +388,12 @@ class UserTestCase(APIBaseTestCase):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         AssetStatus.objects.create(asset=self.asset, current_status='Available')
         AllocationHistory.objects.create(
-            asset=self.asset,
-            current_owner=self.user.assetassignee
+            asset=self.asset, current_owner=self.user.assetassignee
         )
         response = client.get(
             '{}?asset_count=0,1'.format(self.users_url),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
         self.assertIn(response.data['results'][0]['allocated_asset_count'], [0, 1])
         self.assertEqual(response.data['count'], User.objects.count())
         self.assertEqual(response.status_code, 200)

@@ -95,7 +95,9 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
         try:
             validate_email(email)
         except Exception:
-            if not last_run or (last_run and updated_at and updated_at > last_run.created_at):
+            if not last_run or (
+                last_run and updated_at and updated_at > last_run.created_at
+            ):
                 SYNC_ERRORS.add('Invalid Email')
                 SYNC_SUCCESS = False
             continue
@@ -107,7 +109,12 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
             SYNC_SUCCESS = False
             continue
 
-        if (not user_created) and last_run and updated_at and updated_at < last_run.created_at:
+        if (
+            (not user_created)
+            and last_run
+            and updated_at
+            and updated_at < last_run.created_at
+        ):
             # if record has not been updated on AIS
             continue
         cohort_no = None
@@ -120,7 +127,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
             location_name = location.get('name')
             try:
                 andela_center, location_created = AndelaCentre.objects.get_or_create(
-                    centre_name=location_name,
+                    centre_name=location_name
                 )
                 if location_created:
                     logger.warning('New location added: {}'.format(location_name))
@@ -200,10 +207,16 @@ class Command(BaseCommand):
             ais_user_data = fetch_ais_user_data(ais_url, ais_token, params)
             logger.warning('{} records fetched'.format(len(ais_user_data)))
             if ais_user_data:
-                new_records, updated_records = load_users_to_art(ais_user_data, current_sync_id=sync_record.id)
+                new_records, updated_records = load_users_to_art(
+                    ais_user_data, current_sync_id=sync_record.id
+                )
                 sync_record.new_records = new_records
                 sync_record.updated_records = updated_records
-                logger.warning('Done. {} records added. {} records updated.'.format(new_records, updated_records))
+                logger.warning(
+                    'Done. {} records added. {} records updated.'.format(
+                        new_records, updated_records
+                    )
+                )
         else:
             logger.error('Missing url or token.')
             SYNC_SUCCESS = False

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 class AssetCategory(models.Model):
     """ Stores all asset categories """
+
     category_name = models.CharField(unique=True, max_length=40)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
@@ -48,6 +49,7 @@ class AssetCategory(models.Model):
 
 class AssetSubCategory(models.Model):
     """Stores all asset sub categories"""
+
     sub_category_name = models.CharField(unique=True, max_length=40)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
@@ -75,6 +77,7 @@ class AssetSubCategory(models.Model):
 
 class AssetType(models.Model):
     """Stores all asset types"""
+
     asset_type = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
@@ -103,6 +106,7 @@ class AssetType(models.Model):
 
 class AssetMake(models.Model):
     """ stores all asset makes """
+
     make_label = models.CharField(unique=True, max_length=40, verbose_name="Asset Make")
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
@@ -132,7 +136,9 @@ class AssetModelNumber(models.Model):
     model_number = models.CharField(unique=True, max_length=100)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    make_label = models.ForeignKey(AssetMake, null=True, on_delete=models.PROTECT, verbose_name="Asset Make")
+    make_label = models.ForeignKey(
+        AssetMake, null=True, on_delete=models.PROTECT, verbose_name="Asset Make"
+    )
     objects = CaseInsensitiveManager()
 
     def clean(self):
@@ -151,18 +157,32 @@ class AssetModelNumber(models.Model):
 
 
 class AssetSpecs(models.Model):
-    year_of_manufacture = models.IntegerField(null=True, blank=True, choices=constants.YEAR_CHOICES)
-    processor_type = models.CharField(max_length=300, blank=True, null=True, choices=constants.PROCESSOR_TYPE)
-    processor_speed = models.FloatField(null=True, blank=True, choices=constants.PROCESSOR_SPEED)
-    screen_size = models.IntegerField(null=True, blank=True, choices=constants.SCREEN_SIZES)
-    storage = models.IntegerField(null=True, blank=True, choices=constants.STORAGE_SIZES)
+    year_of_manufacture = models.IntegerField(
+        null=True, blank=True, choices=constants.YEAR_CHOICES
+    )
+    processor_type = models.CharField(
+        max_length=300, blank=True, null=True, choices=constants.PROCESSOR_TYPE
+    )
+    processor_speed = models.FloatField(
+        null=True, blank=True, choices=constants.PROCESSOR_SPEED
+    )
+    screen_size = models.IntegerField(
+        null=True, blank=True, choices=constants.SCREEN_SIZES
+    )
+    storage = models.IntegerField(
+        null=True, blank=True, choices=constants.STORAGE_SIZES
+    )
     memory = models.IntegerField(null=True, blank=True, choices=constants.MEMORY)
 
     class Meta:
         verbose_name = "Asset Specification"
         unique_together = (
-            "storage", "memory", "screen_size", "processor_speed",
-            "year_of_manufacture", "processor_type"
+            "storage",
+            "memory",
+            "screen_size",
+            "processor_speed",
+            "year_of_manufacture",
+            "processor_type",
         )
 
     def save(self, *args, **kwargs):
@@ -175,26 +195,36 @@ class AssetSpecs(models.Model):
 
 class Asset(models.Model):
     """Stores all assets"""
+
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     asset_code = models.CharField(unique=True, null=True, blank=True, max_length=50)
     serial_number = models.CharField(unique=True, null=True, blank=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    asset_location = models.ForeignKey('AndelaCentre', blank=True, null=True, on_delete=models.PROTECT)
+    asset_location = models.ForeignKey(
+        'AndelaCentre', blank=True, null=True, on_delete=models.PROTECT
+    )
     purchase_date = models.DateField(validators=[validate_date], null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    assigned_to = models.ForeignKey('AssetAssignee', blank=True, editable=False, null=True, on_delete=models.PROTECT)
-    model_number = models.ForeignKey(AssetModelNumber, null=True, on_delete=models.PROTECT)
+    assigned_to = models.ForeignKey(
+        'AssetAssignee', blank=True, editable=False, null=True, on_delete=models.PROTECT
+    )
+    model_number = models.ForeignKey(
+        AssetModelNumber, null=True, on_delete=models.PROTECT
+    )
     current_status = models.CharField(editable=False, max_length=50)
     notes = models.TextField(editable=False, default=" ")
-    specs = models.ForeignKey(AssetSpecs, blank=True, null=True, on_delete=models.PROTECT)
+    specs = models.ForeignKey(
+        AssetSpecs, blank=True, null=True, on_delete=models.PROTECT
+    )
     verified = models.BooleanField(default=True)
     objects = CaseInsensitiveManager()
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
-            raise ValidationError((
-                'Please provide either the serial number, asset code or both.'
-            ), code='required')
+            raise ValidationError(
+                ('Please provide either the serial number, asset code or both.'),
+                code='required',
+            )
 
         if self.serial_number is None:
             self.asset_code = self.asset_code.upper()
@@ -227,16 +257,22 @@ class Asset(models.Model):
             self.save()
 
     def __str__(self):
-        return '{}, {}, {}'.format(self.asset_code, self.serial_number, self.model_number)
+        return '{}, {}, {}'.format(
+            self.asset_code, self.serial_number, self.model_number
+        )
 
     class Meta:
         ordering = ['-id']
-        unique_together = ("asset_code", "serial_number",)
+        unique_together = ("asset_code", "serial_number")
 
 
 class AssetAssignee(models.Model):
-    department = models.OneToOneField('Department', null=True, blank=True, on_delete=models.CASCADE)
-    workspace = models.OneToOneField('OfficeWorkspace', null=True, blank=True, on_delete=models.CASCADE)
+    department = models.OneToOneField(
+        'Department', null=True, blank=True, on_delete=models.CASCADE
+    )
+    workspace = models.OneToOneField(
+        'OfficeWorkspace', null=True, blank=True, on_delete=models.CASCADE
+    )
     user = models.OneToOneField('User', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -245,7 +281,8 @@ class AssetAssignee(models.Model):
             return str(assignee)
         else:
             raise ValidationError(
-                message="No Department, Workspace or User for this AssetAssignee")
+                message="No Department, Workspace or User for this AssetAssignee"
+            )
 
     class Meta:
         ordering = ['-id']
@@ -280,6 +317,7 @@ class AssetAssignee(models.Model):
 
 class AssetLog(models.Model):
     """Stores checkin/Checkout asset logs"""
+
     asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
     checked_by = models.ForeignKey(SecurityUser, blank=True, on_delete=models.PROTECT)
     log_type = models.CharField(max_length=10, choices=constants.ASSET_LOG_CHOICES)
@@ -301,11 +339,10 @@ class AssetLog(models.Model):
 
 class AssetStatus(models.Model):
     """Stores the previous and current status of models"""
+
     asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
     current_status = models.CharField(
-        max_length=50,
-        choices=constants.ASSET_STATUSES,
-        default=constants.AVAILABLE,
+        max_length=50, choices=constants.ASSET_STATUSES, default=constants.AVAILABLE
     )
     previous_status = models.CharField(
         max_length=50,
@@ -322,7 +359,9 @@ class AssetStatus(models.Model):
 
     def save(self, *args, **kwargs):
         try:
-            latest_record = AssetStatus.objects.filter(asset=self.asset).latest('created_at')
+            latest_record = AssetStatus.objects.filter(asset=self.asset).latest(
+                'created_at'
+            )
             self.previous_status = latest_record.current_status
         except Exception:
             self.previous_status = None
@@ -346,15 +385,20 @@ class AssetStatus(models.Model):
     def _check_asset_limit(self):
         """Check the assets have not exceeded the limit"""
         model_number = self.asset.model_number
-        available_assets = Asset.objects.filter(current_status='Available', model_number=model_number).count()
+        available_assets = Asset.objects.filter(
+            current_status='Available', model_number=model_number
+        ).count()
         if available_assets <= int(os.environ.get('ASSET_LIMIT', 0)):
             message = "Warning!! The number of available {} ".format(
-                model_number) + " is {}".format(available_assets)
+                model_number
+            ) + " is {}".format(available_assets)
             slack.send_message(message)
 
     def _new_allocation_history_when_asset_is_made_available(self):
         try:
-            last_allocation_record = AllocationHistory.objects.filter(asset=self.asset).latest('created_at')
+            last_allocation_record = AllocationHistory.objects.filter(
+                asset=self.asset
+            ).latest('created_at')
         except Exception as e:
             logger.warning(str(e))
         else:
@@ -369,12 +413,19 @@ class AssetStatus(models.Model):
 class AllocationHistory(models.Model):
     asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
     current_owner = models.ForeignKey(
-        'AssetAssignee', related_name='current_owner_asset',
-        blank=True, null=True, on_delete=models.PROTECT
+        'AssetAssignee',
+        related_name='current_owner_asset',
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
     )
     previous_owner = models.ForeignKey(
-        'AssetAssignee', related_name='previous_owner_asset',
-        editable=False, blank=True, null=True, on_delete=models.PROTECT
+        'AssetAssignee',
+        related_name='previous_owner_asset',
+        editable=False,
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
     )
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
@@ -389,7 +440,9 @@ class AllocationHistory(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         try:
-            latest_record = AllocationHistory.objects.filter(asset=self.asset).latest('created_at')
+            latest_record = AllocationHistory.objects.filter(asset=self.asset).latest(
+                'created_at'
+            )
             self.previous_owner = latest_record.current_owner
         except Exception:
             self.previous_owner = None
@@ -407,7 +460,8 @@ class AllocationHistory(models.Model):
         last_status = AssetStatus.objects.filter(asset=self.asset).latest('created_at')
         if self.current_owner:
             AssetStatus.objects.create(
-                asset=self.asset, current_status=constants.ALLOCATED,
+                asset=self.asset,
+                current_status=constants.ALLOCATED,
                 previous_status=last_status.current_status,
             )
 
@@ -416,14 +470,24 @@ class AllocationHistory(models.Model):
         user = None
 
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
-            message = "The {} with serial number {} and asset code {} ".format(
-                asset.model_number.make_label.asset_type.asset_type,
-                asset.serial_number, asset.asset_code) + "has been allocated to you."
+            message = (
+                "The {} with serial number {} and asset code {} ".format(
+                    asset.model_number.make_label.asset_type.asset_type,
+                    asset.serial_number,
+                    asset.asset_code,
+                )
+                + "has been allocated to you."
+            )
             user = self.current_owner
-        elif (not asset.assigned_to and self.previous_owner):
-            message = "The {} with serial number {} and asset code {} ".format(
-                asset.model_number.make_label.asset_type.asset_type,
-                asset.serial_number, asset.asset_code) + "has been de-allocated from you."
+        elif not asset.assigned_to and self.previous_owner:
+            message = (
+                "The {} with serial number {} and asset code {} ".format(
+                    asset.model_number.make_label.asset_type.asset_type,
+                    asset.serial_number,
+                    asset.asset_code,
+                )
+                + "has been de-allocated from you."
+            )
             user = self.previous_owner
 
         if user and hasattr(user, 'email'):

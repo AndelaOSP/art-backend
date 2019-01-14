@@ -36,7 +36,9 @@ class AssetStatusModelTest(CoreBaseTestCase):
         count = AssetStatus.objects.all().count()
         asset_status = AssetStatus(asset=self.test_asset, current_status="Damaged")
         asset_status.save()
-        new_asset_status = AssetStatus.objects.filter(asset=self.test_asset).latest('created_at')
+        new_asset_status = AssetStatus.objects.filter(asset=self.test_asset).latest(
+            'created_at'
+        )
         self.assertEqual(new_asset_status.previous_status, "Available")
         self.assertEqual(new_asset_status.current_status, "Damaged")
         self.assertEqual(AssetStatus.objects.all().count(), count + 1)
@@ -55,13 +57,10 @@ class AssetStatusModelTest(CoreBaseTestCase):
 
     def test_change_assigned_to_none(self):
         allocation_history = AllocationHistory(
-            asset=self.test_asset,
-            current_owner=self.asset_assignee
+            asset=self.test_asset, current_owner=self.asset_assignee
         )
 
-        asset_status = AssetStatus(
-            asset=self.test_asset,
-            current_status="Available")
+        asset_status = AssetStatus(asset=self.test_asset, current_status="Available")
 
         allocation_history.save()
 
@@ -69,8 +68,9 @@ class AssetStatusModelTest(CoreBaseTestCase):
 
         asset_status.save()
 
-        new_history = AllocationHistory.objects.filter(
-            asset=self.test_asset).latest('created_at')
+        new_history = AllocationHistory.objects.filter(asset=self.test_asset).latest(
+            'created_at'
+        )
 
         self.assertIn(test_owner, 'test@site.com')
         self.assertIsNone(self.test_asset.assigned_to)
