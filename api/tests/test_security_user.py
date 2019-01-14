@@ -16,14 +16,6 @@ User = get_user_model()
 
 class SecurityUserTestCase(APIBaseTestCase):
     def setUp(self):
-        # SecurityUser.objects.create(
-        #     email="sectest2@andela.com",
-        #     password="devpassword",
-        #     first_name="TestFirst2",
-        #     last_name="TestLast2",
-        #     phone_number="254720900900",
-        #     badge_number="AE24"
-        # )
         api_user = APIUser.objects.create(name="test_api_app")
         url = '/api/v1/o/token/'
 
@@ -100,6 +92,12 @@ class SecurityUserTestCase(APIBaseTestCase):
         users_count_after = User.objects.count()
         self.assertEqual(response.status_code, 201)
         self.assertEqual(users_count_after, users_count_before + 1)
+        response = client.get(
+            self.security_users_admin_url,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertIn(data.get('email'), str(response.json().get('results')))
 
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_user_view_security_users_from_api_endpoint(self, mock_verify_token):

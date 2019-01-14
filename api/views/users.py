@@ -90,6 +90,9 @@ class SecurityUserViewSet(ModelViewSet):
         kwargs['partial'] = True
         return super(SecurityUserViewSet, self).update(request, *args, **kwargs)
 
+    def perform_create(self, serializer):
+        serializer.save(location=self.request.user.location)
+
 
 class UserGroupViewSet(ModelViewSet):
     serializer_class = UserGroupSerializer
