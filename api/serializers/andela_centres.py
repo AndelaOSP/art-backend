@@ -46,8 +46,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 class AndelaCentreSerializer(serializers.ModelSerializer):
     country = serializers.SlugRelatedField(
-        queryset=models.Country.objects.all(),
-        slug_field='name'
+        queryset=models.Country.objects.all(), slug_field='name'
     )
 
     class Meta:
