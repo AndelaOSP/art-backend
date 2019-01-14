@@ -70,14 +70,16 @@ def write_skipped_records(records, filename=None):
     )
     if filename:
         global SKIPPED_ASSETS_FILE
-        SKIPPED_ASSETS_FILE = os.path.join(settings.BASE_DIR, "SkippedAssets/{}.csv".format(filename))
+        SKIPPED_ASSETS_FILE = os.path.join(
+            settings.BASE_DIR, "SkippedAssets/{}.csv".format(filename)
+        )
     with open(SKIPPED_ASSETS_FILE, "w") as skipped_file:
         writer = csv.DictWriter(skipped_file, delimiter=",", fieldnames=fieldnames)
         writer.writeheader()
         for row in records:
             row["Error"] = set(row["Error"])
             if "" in row.keys():
-                del(row[""])
+                del (row[""])
             writer.writerow(row)
 
 
@@ -309,8 +311,10 @@ class Command(BaseCommand):
 
         write_skipped_records(SKIPPED_ROWS)
         self.stdout.write(
-            self.style.SUCCESS("""
+            self.style.SUCCESS(
+                """
                 Asset import completed successfully.
                 Assets that have not been imported have been written to skipped.csv
-            """)
+            """
+            )
         )

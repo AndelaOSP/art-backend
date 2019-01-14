@@ -3,15 +3,15 @@ from rest_framework.pagination import PageNumberPagination
 
 
 def _positive_int(integer_string, strict=False, cutoff=None):
-        """
+    """
         Cast a string to a strictly positive integer.
         """
-        ret = int(integer_string)
-        if ret < 0 or (ret == 0 and strict):
-            raise ValueError()
-        if cutoff:
-            return min(ret, cutoff)
-        return ret
+    ret = int(integer_string)
+    if ret < 0 or (ret == 0 and strict):
+        raise ValueError()
+    if cutoff:
+        return min(ret, cutoff)
+    return ret
 
 
 class PageNumberPagination(PageNumberPagination):
@@ -28,7 +28,7 @@ class PageNumberPagination(PageNumberPagination):
                 return _positive_int(
                     request.query_params[self.page_size_query_param],
                     strict=True,
-                    cutoff=self.max_page_size
+                    cutoff=self.max_page_size,
                 )
             except (KeyError, ValueError):
                 pass

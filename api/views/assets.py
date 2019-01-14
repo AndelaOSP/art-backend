@@ -26,11 +26,22 @@ from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import AssetFilter
 from api.permissions import IsSecurityUser
-from api.serializers import (AllocationsSerializer, AssetAssigneeSerializer, AssetCategorySerializer,
-                             AssetConditionSerializer, AssetHealthSerializer, AssetIncidentReportSerializer,
-                             AssetLogSerializer, AssetMakeSerializer, AssetModelNumberSerializer,
-                             AssetSerializer, AssetSpecsSerializer, AssetStatusSerializer,
-                             AssetSubCategorySerializer, AssetTypeSerializer)
+from api.serializers import (
+    AllocationsSerializer,
+    AssetAssigneeSerializer,
+    AssetCategorySerializer,
+    AssetConditionSerializer,
+    AssetHealthSerializer,
+    AssetIncidentReportSerializer,
+    AssetLogSerializer,
+    AssetMakeSerializer,
+    AssetModelNumberSerializer,
+    AssetSerializer,
+    AssetSpecsSerializer,
+    AssetStatusSerializer,
+    AssetSubCategorySerializer,
+    AssetTypeSerializer,
+)
 from core import models
 from core.assets_saver_helper import save_asset
 from core.management.commands.import_assets import SKIPPED_ROWS
@@ -68,8 +79,7 @@ class ManageAssetViewSet(ModelViewSet):
         if serializer.validated_data.get('asset_location'):
             # check if it is a super user performing this
             if not self.request.user.is_superuser:
-                raise PermissionDenied(
-                    "Only a super user can update an asset location")
+                raise PermissionDenied("Only a super user can update an asset location")
         serializer.save()
 
     def get_queryset(self):
@@ -108,7 +118,7 @@ class AssetViewSet(ModelViewSet):
 
 class AssetAssigneeViewSet(ModelViewSet):
     serializer_class = AssetAssigneeSerializer
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
     queryset = models.AssetAssignee.objects.all()
     http_method_names = ['get']
@@ -118,11 +128,18 @@ class AssetAssigneeViewSet(ModelViewSet):
         asset_assignees = []
         if user_location:
             for asset_assignee in self.queryset:
-                if asset_assignee.user and asset_assignee.user.location == user_location:
+                if (
+                    asset_assignee.user
+                    and asset_assignee.user.location == user_location
+                ):
                     asset_assignees.append(asset_assignee)
                 if asset_assignee.department:
                     asset_assignees.append(asset_assignee)
-                if asset_assignee.workspace and asset_assignee.workspace.section.floor.block.location == user_location:
+                if (
+                    asset_assignee.workspace
+                    and asset_assignee.workspace.section.floor.block.location
+                    == user_location
+                ):
                     asset_assignees.append(asset_assignee)
 
             return asset_assignees
@@ -149,8 +166,8 @@ class AssetLogViewSet(ModelViewSet):
 class AssetStatusViewSet(ModelViewSet):
     serializer_class = AssetStatusSerializer
     queryset = models.AssetStatus.objects.all()
-    permission_classes = [IsAuthenticated, ]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
     def get_queryset(self):
@@ -163,7 +180,7 @@ class AssetStatusViewSet(ModelViewSet):
 class AllocationsViewSet(ModelViewSet):
     serializer_class = AllocationsSerializer
     queryset = models.AllocationHistory.objects.all()
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
@@ -177,7 +194,7 @@ class AllocationsViewSet(ModelViewSet):
 class AssetCategoryViewSet(ModelViewSet):
     serializer_class = AssetCategorySerializer
     queryset = models.AssetCategory.objects.all()
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
     ordering = ('category_name',)
@@ -187,7 +204,7 @@ class AssetCategoryViewSet(ModelViewSet):
 class AssetSubCategoryViewSet(ModelViewSet):
     serializer_class = AssetSubCategorySerializer
     queryset = models.AssetSubCategory.objects.all()
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
     ordering = ('sub_category_name',)
@@ -207,8 +224,8 @@ class AssetTypeViewSet(ModelViewSet):
 class AssetModelNumberViewSet(ModelViewSet):
     serializer_class = AssetModelNumberSerializer
     queryset = models.AssetModelNumber.objects.all()
-    permission_classes = [IsAuthenticated, ]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [FirebaseTokenAuthentication]
     filter_backends = (OrderingFilter,)
     ordering = ('model_number',)
     http_method_names = ['get', 'post']
@@ -217,8 +234,8 @@ class AssetModelNumberViewSet(ModelViewSet):
 class AssetMakeViewSet(ModelViewSet):
     serializer_class = AssetMakeSerializer
     queryset = models.AssetMake.objects.all()
-    permission_classes = [IsAuthenticated, ]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [FirebaseTokenAuthentication]
     filter_backends = (OrderingFilter,)
     ordering = ('make_label',)
     http_method_names = ['get', 'post']
@@ -227,7 +244,7 @@ class AssetMakeViewSet(ModelViewSet):
 class AssetConditionViewSet(ModelViewSet):
     serializer_class = AssetConditionSerializer
     queryset = models.AssetCondition.objects.all()
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
@@ -241,8 +258,8 @@ class AssetConditionViewSet(ModelViewSet):
 class AssetIncidentReportViewSet(ModelViewSet):
     serializer_class = AssetIncidentReportSerializer
     queryset = models.AssetIncidentReport.objects.all()
-    permission_classes = [IsAuthenticated, ]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post']
 
     def get_queryset(self):
@@ -264,9 +281,8 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
         serializer.save(submitted_by=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        if (
-            (self.request.data.get('command', None) is None) and
-            (self.request.data.get('payload', None) is None)
+        if (self.request.data.get('command', None) is None) and (
+            self.request.data.get('payload', None) is None
         ):
             try:
                 response = super().create(request, *args, **kwargs)
@@ -275,10 +291,7 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
             return response
         else:
             bot = slack.send_incidence_report(
-                self.request.data,
-                models.Asset,
-                models.AssetIncidentReport,
-                models.User,
+                self.request.data, models.Asset, models.AssetIncidentReport, models.User
             )
             if bot:
                 return Response(status=status.HTTP_200_OK)
@@ -286,9 +299,9 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
 
 class AssetHealthCountViewSet(ModelViewSet):
     serializer_class = AssetHealthSerializer
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ['get', ]
+    http_method_names = ['get']
     queryset = models.Asset.objects.all()
     data = None
 
@@ -302,15 +315,13 @@ class AssetHealthCountViewSet(ModelViewSet):
         asset_name, model_numbers = asset_models.popitem()
 
         def generate_asset_condition(model_number):
-            statuses = {
-                'Allocated': 0,
-                'Available': 0,
-                'Damaged': 0,
-                'Lost': 0
-            }
+            statuses = {'Allocated': 0, 'Available': 0, 'Damaged': 0, 'Lost': 0}
 
             def increment_asset_status(asset, model_number=model_number):
-                if asset['asset_type'] == asset_name and asset['model_number'] == model_number:
+                if (
+                    asset['asset_type'] == asset_name
+                    and asset['model_number'] == model_number
+                ):
                     nonlocal statuses
                     statuses[asset['count_by_status']] += 1
                 return statuses
@@ -319,7 +330,7 @@ class AssetHealthCountViewSet(ModelViewSet):
             return {
                 'asset_type': asset_name,
                 'model_number': model_number,
-                'count_by_status': statuses
+                'count_by_status': statuses,
             }
 
         return list(map(generate_asset_condition, model_numbers))
@@ -332,8 +343,10 @@ class AssetHealthCountViewSet(ModelViewSet):
         return asset['asset_type']
 
     def _get_model_numbers(self, asset_type):
-        asset_model_numbers = map(lambda asset: asset['model_number'], filter(
-            lambda asset: asset['asset_type'] == asset_type, self.data))
+        asset_model_numbers = map(
+            lambda asset: asset['model_number'],
+            filter(lambda asset: asset['asset_type'] == asset_type, self.data),
+        )
         return {asset_type: set(list(asset_model_numbers))}
 
     def list(self, request, *args, **kwargs):
@@ -346,8 +359,11 @@ class AssetHealthCountViewSet(ModelViewSet):
             asset = map(self._get_model_numbers, asset_types)
             asset_list = self._get_asset_list(asset)
             return Response(asset_list)
-        return Response(exception=True, status=403,
-                        data={'detail': ['You do not have authorization']})
+        return Response(
+            exception=True,
+            status=403,
+            data={'detail': ['You do not have authorization']},
+        )
 
 
 class AssetSpecsViewSet(ModelViewSet):
@@ -366,7 +382,9 @@ class AssetsImportViewSet(APIView):
         file_obj = request.data.get('file')
         if not file_obj:
             # file_obj is none so return error
-            return Response({"error": "Csv file to import from not provided"}, status=400)
+            return Response(
+                {"error": "Csv file to import from not provided"}, status=400
+            )
 
         file_obj = codecs.iterdecode(file_obj, 'utf-8')
         csv_reader = csv.DictReader(file_obj, delimiter=",")
@@ -379,14 +397,18 @@ class AssetsImportViewSet(APIView):
         if not save_asset(csv_reader, file_name):
             path = request.build_absolute_uri(reverse('skipped'))
 
-            response['fail'] = "Some assets were skipped. Download the skipped assets file from"
+            response[
+                'fail'
+            ] = "Some assets were skipped. Download the skipped assets file from"
             response['file'] = "{}".format(path)
 
             error = True
 
         response['success'] = "Asset import completed successfully "
         if error:
-            response['success'] += "Assets that have not been imported have been written to a file."
+            response[
+                'success'
+            ] += "Assets that have not been imported have been written to a file."
         del SKIPPED_ROWS[:]
         return Response(data=response, status=200)
 
@@ -396,7 +418,10 @@ class SkippedAssets(APIView):
 
     def get(self, request):
         filename = os.path.join(
-            settings.BASE_DIR, "SkippedAssets/{}.csv".format(re.search(r'\w+', request.user.email).group())
+            settings.BASE_DIR,
+            "SkippedAssets/{}.csv".format(
+                re.search(r'\w+', request.user.email).group()
+            ),
         )
 
         # send file
@@ -418,6 +443,8 @@ class SampleImportFile(APIView):
 
         file = open(filename, 'rb')
         response = FileResponse(file, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="sample_import_file.csv"'
+        response[
+            'Content-Disposition'
+        ] = 'attachment; filename="sample_import_file.csv"'
 
         return response

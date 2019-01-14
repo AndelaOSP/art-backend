@@ -11,8 +11,9 @@ from ..models import AssetCategory, AssetMake, AssetModelNumber
 class AssetModelNumberTestCase(CoreBaseTestCase):
     def test_can_create_new_model_number(self):
         count = AssetModelNumber.objects.count()
-        AssetModelNumber.objects.create(model_number="101505401",
-                                        make_label=self.asset_make)
+        AssetModelNumber.objects.create(
+            model_number="101505401", make_label=self.asset_make
+        )
         self.assertEqual(AssetModelNumber.objects.count(), count + 1)
 
     def test_cannot_add_existing_model_number(self):
@@ -20,7 +21,7 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
         with self.assertRaises(ValidationError):
             AssetModelNumber.objects.create(
                 model_number=self.test_assetmodel.model_number,
-                make_label=self.asset_make
+                make_label=self.asset_make,
             )
         self.assertEqual(AssetModelNumber.objects.count(), count)
 
@@ -38,6 +39,5 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
     def test_cannot_add_asset_model_with_non_existing_make(self):
         with self.assertRaises(ValueError):
             AssetModelNumber.objects.create(
-                model_number="Test Model Number",
-                make_label=39090
+                model_number="Test Model Number", make_label=39090
             )

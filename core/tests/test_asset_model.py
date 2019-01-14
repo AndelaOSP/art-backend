@@ -13,12 +13,16 @@ User = get_user_model()
 
 class AssetTypeModelTest(CoreBaseTestCase):
     """Tests for the Asset Model"""
+
     def test_add_new_asset(self):
         """Test add new asset"""
         count = Asset.objects.count()
         Asset.objects.create(
-            asset_code="testIC002", serial_number="testSN0045", model_number=self.test_assetmodel,
-            assigned_to=self.asset_assignee, purchase_date="2018-07-10"
+            asset_code="testIC002",
+            serial_number="testSN0045",
+            model_number=self.test_assetmodel,
+            assigned_to=self.asset_assignee,
+            purchase_date="2018-07-10",
         )
         self.assertEqual(Asset.objects.count(), count + 1)
 
@@ -28,8 +32,11 @@ class AssetTypeModelTest(CoreBaseTestCase):
         serial_no = Asset.objects.first().serial_number
         with self.assertRaises(ValidationError):
             Asset.objects.create(
-                asset_code="IC002", serial_number=serial_no, model_number=self.test_assetmodel,
-                assigned_to=self.asset_assignee, purchase_date="2018-07-10"
+                asset_code="IC002",
+                serial_number=serial_no,
+                model_number=self.test_assetmodel,
+                assigned_to=self.asset_assignee,
+                purchase_date="2018-07-10",
             )
         self.assertEqual(Asset.objects.count(), count)
 
@@ -39,8 +46,11 @@ class AssetTypeModelTest(CoreBaseTestCase):
         asset_code = Asset.objects.first().asset_code
         with self.assertRaises(ValidationError):
             Asset.objects.create(
-                asset_code=asset_code, serial_number="serial_no", model_number=self.test_assetmodel,
-                assigned_to=self.asset_assignee, purchase_date="2018-07-10"
+                asset_code=asset_code,
+                serial_number="serial_no",
+                model_number=self.test_assetmodel,
+                assigned_to=self.asset_assignee,
+                purchase_date="2018-07-10",
             )
         self.assertEqual(Asset.objects.count(), count)
 
@@ -63,14 +73,18 @@ class AssetTypeModelTest(CoreBaseTestCase):
 
     def test_asset_model_string_representation(self):
         repr_name = "{}, {}, {}".format(
-            self.test_asset.asset_code, self.test_asset.serial_number, self.test_asset.model_number
+            self.test_asset.asset_code,
+            self.test_asset.serial_number,
+            self.test_asset.model_number,
         )
         self.assertEqual(str(self.test_asset), repr_name)
 
     def test_can_add_asset_without_purchase_date_field(self):
-        new_asset = Asset(asset_code="IC0050",
-                          serial_number="SN0055",
-                          model_number=self.test_assetmodel)
+        new_asset = Asset(
+            asset_code="IC0050",
+            serial_number="SN0055",
+            model_number=self.test_assetmodel,
+        )
         new_asset.save()
         self.assertIsNone(new_asset.purchase_date)
 

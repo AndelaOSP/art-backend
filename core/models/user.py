@@ -56,7 +56,9 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     password = models.CharField(max_length=128, blank=True, null=True)
-    location = models.ForeignKey('AndelaCentre', blank=True, null=True, on_delete=models.PROTECT)
+    location = models.ForeignKey(
+        'AndelaCentre', blank=True, null=True, on_delete=models.PROTECT
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cohort', 'slack_handle']
@@ -81,6 +83,7 @@ class User(AbstractUser):
 
     def _create_assignee_object_for_user(self):
         from .asset import AssetAssignee
+
         AssetAssignee.objects.get_or_create(user=self)
 
 
@@ -88,8 +91,7 @@ class SecurityUser(User):
     badge_number = models.CharField(max_length=30, unique=True)
 
     USERNAME_FIELD = 'badge_number'
-    REQUIRED_FIELDS = ['first_name', 'last_name',
-                       'badge_number']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'badge_number']
 
     class Meta:
         verbose_name = "Security User"
@@ -99,11 +101,12 @@ class APIUser(AbstractApplication):
     client_type = models.CharField(
         max_length=32,
         choices=AbstractApplication.CLIENT_TYPES,
-        default=AbstractApplication.CLIENT_CONFIDENTIAL)
+        default=AbstractApplication.CLIENT_CONFIDENTIAL,
+    )
     authorization_grant_type = models.CharField(
         max_length=32,
         choices=AbstractApplication.GRANT_TYPES,
-        default=AbstractApplication.GRANT_CLIENT_CREDENTIALS
+        default=AbstractApplication.GRANT_CLIENT_CREDENTIALS,
     )
 
     class Meta:
@@ -113,6 +116,7 @@ class APIUser(AbstractApplication):
 
 class UserFeedback(models.Model):
     """ Stores user feedback data """
+
     reported_by = models.ForeignKey(User, on_delete=models.PROTECT)
     message = models.TextField()
     report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
