@@ -31,8 +31,9 @@ class AndelaCentreAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertIn("centre_name", response.data.keys())
         self.assertEqual(response.status_code, 201)
+        self.assertIn("centre_name", response.data.keys())
+        self.assertEqual(response.data.get('country'), self.country.name)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cant_post_centre_with_same_name(self, mock_verify_token):
