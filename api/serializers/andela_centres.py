@@ -1,4 +1,5 @@
 # Third-Party Imports
+from pycountry import countries
 from rest_framework import serializers
 
 # App Imports
@@ -62,7 +63,8 @@ class AndelaCentreSerializer(serializers.ModelSerializer):
         try:
             query_data = {'id': int(country_name)}
         except ValueError:
-            query_data = {'name': country_name}
+            country = countries.lookup(country_name)
+            query_data = {'name': country.name}
         finally:
             try:
                 country = models.Country.objects.get(**query_data)
