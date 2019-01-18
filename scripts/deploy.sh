@@ -45,6 +45,11 @@ kubectl patch deployment "$DEPLOYMENT_NAME" -p '{"spec":{"template":{"spec":{"in
 
 }
 
+updateCronjob() {
+    echo  "=========> Updating the ${CRONJOB} cronjob to the latest docker image: ${IMAGE} "
+    kubectl set image cronjob.batch/"${ENVIRONMENT}-art-${CRONJOB}" "${CRONJOB}=${IMAGE}" -n "$NAMESPACE"
+}
+
 BRANCH_NAME=$CIRCLE_BRANCH
 # set the deployment environment
 setEnvironment "$BRANCH_NAME"
@@ -69,6 +74,7 @@ main() {
     patchMigrationsImage
     logoutContainerRegistry $DOCKER_REGISTRY
     deployToKubernetesCluster backend
+    updateCronjob
 }
 
 main
