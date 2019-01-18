@@ -4,7 +4,7 @@ LABEL application="artbackend"
 
 
 ARG SECRET_KEY='secret key'
-ARG DJANGO_SETTINGS_MODULE
+ARG DJANGO_SETTINGS_MODULE='settings.prod'
 ARG HOST_IP
 
 # Prevent dpkg errors
@@ -24,7 +24,6 @@ COPY . .
 RUN pip install --upgrade pip
 RUN pip install pipenv
 RUN pipenv lock -r | grep -E '==|-i|-e' > requirements.txt
-RUN pipenv lock -r -d | grep -E '==|-i|-e' >> requirements.txt
 RUN pip install -r requirements.txt
 
 EXPOSE 8080
