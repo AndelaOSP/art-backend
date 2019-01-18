@@ -293,7 +293,7 @@ class UserTestCase(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_admin_user_filter_users_by_multiple_cohorts(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        cohorts = set([user.cohort for user in User.objects.all() if user.cohort])
+        cohorts = {user.cohort for user in User.objects.all() if user.cohort}
         cohorts_str = ','.join(str(cohort) for cohort in cohorts)
         response = client.get(
             '{}?cohort={}'.format(self.users_url, cohorts_str),
