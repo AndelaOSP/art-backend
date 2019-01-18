@@ -1,9 +1,12 @@
-import os
+# Standard Library
 import json
 import logging
-from slackclient import SlackClient
+import os
+
+# Third-Party Imports
 from rest_framework import status
 from rest_framework.response import Response
+from slackclient import SlackClient
 
 
 class SlackIntegration(object):
@@ -19,14 +22,13 @@ class SlackIntegration(object):
 
     def get_user_slack_id(self, user):
         """Get the slack user ID using the user email"""
-        if not user:
-            return os.getenv('OPS_CHANNEL') or '#art-test'
         user_email = user.email
         response = self.slack_client.api_call("users.list")
         users = response.get("members")
         if users:
             user_id = [
-                member.get('id') for member in users
+                member.get('id')
+                for member in users
                 if member.get('profile').get('email') == user_email
             ]
         try:
@@ -35,20 +37,23 @@ class SlackIntegration(object):
             logging.info("User not found")
             return None
 
-    def send_message(self, message, user=None):
+    def send_message(self, message, user=None, channel=None):
         """Sends message to slack user or channel"""
         if hasattr(self, 'slack_client'):
-            slack_id = self.get_user_slack_id(user)
-            if not slack_id:
-                message = 'The message *"{}"* to {} not sent'.format(
-                    message, user.email)
+            if user:
+                slack_id = self.get_user_slack_id(user)
+            elif channel:
+                slack_id = channel
+            else:
+                slack_id = os.getenv('OPS_CHANNEL') or '#art-test'
             self.slack_client.api_call(
                 "chat.postMessage",
                 channel=slack_id,
                 text=message,
                 username='@art-bot',
                 as_user=True,
-                icon_emoji=':ninja:')
+                icon_emoji=':ninja:',
+            )
 
     def get_user_slack_email(self, user_id):
         """Get the slack user ID using the user email"""
@@ -57,8 +62,7 @@ class SlackIntegration(object):
         users = response.get("members")
         if users:
             user = [
-                member.get('profile') for member in users
-                if member.get('id') == user_id
+                member.get('profile') for member in users if member.get('id') == user_id
             ]
         try:
             return user[0]['email']
@@ -66,7 +70,6 @@ class SlackIntegration(object):
             logging.info("User not found")
             return None
 
-    # flake8: noqa
     def send_incidence_report(self, incidence_report, Asset, AssetIncidentReport, User):
         """Sends incidence report from slack using a slash command"""
 
@@ -91,17 +94,17 @@ class SlackIntegration(object):
                                 "name": "game",
                                 "text": "Yes",
                                 "type": "button",
-                                "value": "yes"
+                                "value": "yes",
                             },
                             {
                                 "name": "game",
                                 "text": "No",
                                 "type": "button",
-                                "value": "no"
+                                "value": "no",
                             },
-                        ]
+                        ],
                     }
-                ]
+                ],
             )
             return Response(status=status.HTTP_200_OK)
 
@@ -116,7 +119,9 @@ class SlackIntegration(object):
             if payload['callback_id'] == 'choice_made':
                 if payload['actions'][0]['value'] == 'yes':
                     self.user_email = self.get_user_slack_email(payload['user']['id'])
-                    assets = Asset.objects.filter(assigned_to__user__email=self.user_email)
+                    assets = Asset.objects.filter(
+                        assigned_to__user__email=self.user_email
+                    )
                     if len(assets) == 0:
                         no_asset = self.slack_client.api_call(
                             'chat.postEphemeral',
@@ -125,7 +130,7 @@ class SlackIntegration(object):
                             user=payload['user']['id'],
                             response_url=payload['response_url'],
                             response_type='ephemeral',
-                            text='Sorry, No Asset is assigned to you!!!'
+                            text='Sorry, No Asset is assigned to you!!!',
                         )
                         if no_asset:
                             return Response(status=status.HTTP_200_OK)
@@ -138,7 +143,8 @@ class SlackIntegration(object):
                             "submit_label": "Submit",
                             "notify_on_cancel": True,
                             "callback_id": "{}_incidence_report_1".format(
-                                payload['user']['id']),
+                                payload['user']['id']
+                            ),
                             "elements": [
                                 {
                                     'label': 'Asset',
@@ -149,10 +155,12 @@ class SlackIntegration(object):
                                             'label': '{}, {}, {}'.format(
                                                 asset.asset_code,
                                                 asset.serial_number,
-                                                asset.model_number),
-                                            'value': asset.id
-                                        } for asset in assets
-                                    ]
+                                                asset.model_number,
+                                            ),
+                                            'value': asset.id,
+                                        }
+                                        for asset in assets
+                                    ],
                                 },
                                 {
                                     'label': 'Incident type',
@@ -160,8 +168,8 @@ class SlackIntegration(object):
                                     'name': 'incident_type',
                                     'options': [
                                         {'label': 'Loss', 'value': 'Loss'},
-                                        {'label': 'Damage', 'value': 'Damage'}
-                                    ]
+                                        {'label': 'Damage', 'value': 'Damage'},
+                                    ],
                                 },
                                 {
                                     'label': 'Incident location',
@@ -173,8 +181,7 @@ class SlackIntegration(object):
                                     'label': 'Incident description',
                                     'type': 'textarea',
                                     'name': 'incident_description',
-                                    'hint': '30 second description of \
-                                    the problem',
+                                    'hint': '30 second description of the problem',
                                 },
                                 {
                                     'label': 'Police Abstract Obtained',
@@ -182,8 +189,8 @@ class SlackIntegration(object):
                                     'name': 'police_abstract_obtained',
                                     'hint': 'Summary of Police Report',
                                 },
-                            ]
-                        }
+                            ],
+                        },
                     )
                     return Response(status=status.HTTP_200_OK)
                 return Response(status=status.HTTP_200_OK)
@@ -194,7 +201,9 @@ class SlackIntegration(object):
             report.incident_type = payload['submission']['incident_type']
             report.incident_location = payload['submission']['incident_location']
             report.incident_description = payload['submission']['incident_description']
-            report.police_abstract_obtained = payload['submission']['police_abstract_obtained']
+            report.police_abstract_obtained = payload['submission'][
+                'police_abstract_obtained'
+            ]
             report.submitted_by = User.objects.get(email=self.user_email)
             report.save()
             if report:
@@ -206,6 +215,6 @@ class SlackIntegration(object):
                     user=payload['user']['id'],
                     response_url=payload['response_url'],
                     response_type='ephemeral',
-                    text="Incident report logged. Thank you!!! {}".format(smile)
+                    text="Incident report logged. Thank you!!! {}".format(smile),
                 )
                 return Response(status=status.HTTP_200_OK)

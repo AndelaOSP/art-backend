@@ -1,21 +1,47 @@
-from django.views.generic import TemplateView
-from rest_framework.routers import SimpleRouter
+# Third-Party Imports
+from django.conf import settings
 from django.conf.urls import include
 from django.urls import path
-from drf_yasg.views import get_schema_view
+from django.views.generic import TemplateView
 from drf_yasg import openapi
-from django.conf import settings
+from drf_yasg.views import get_schema_view
+from rest_framework.routers import SimpleRouter
 
-from .views import UserViewSet, AssetViewSet, SecurityUserEmailsViewSet, \
-    AssetLogViewSet, UserFeedbackViewSet, AssetStatusViewSet, \
-    AllocationsViewSet, AssetCategoryViewSet, AssetSubCategoryViewSet, \
-    AssetTypeViewSet, AssetModelNumberViewSet, AssetConditionViewSet, \
-    AssetMakeViewSet, AssetIncidentReportViewSet, AssetHealthCountViewSet, \
-    ManageAssetViewSet, SecurityUserViewSet, AssetSpecsViewSet, \
-    OfficeBlockViewSet, OfficeFloorViewSet, OfficeFloorSectionViewSet, \
-    GroupViewSet, OfficeWorkspaceViewSet, DepartmentViewSet, \
-    AssetAssigneeViewSet, AssetsImportViewSet, AndelaCentreViewset, \
-    SkippedAssets, AssetSlackIncidentReportViewSet, AvailableFilterValues
+# App Imports
+from api.views import (
+    AllocationsViewSet,
+    AndelaCentreViewset,
+    AssetAssigneeViewSet,
+    AssetCategoryViewSet,
+    AssetConditionViewSet,
+    AssetHealthCountViewSet,
+    AssetIncidentReportViewSet,
+    AssetLogViewSet,
+    AssetMakeViewSet,
+    AssetModelNumberViewSet,
+    AssetsImportViewSet,
+    AssetSlackIncidentReportViewSet,
+    AssetSpecsViewSet,
+    AssetStatusViewSet,
+    AssetSubCategoryViewSet,
+    AssetTypeViewSet,
+    AssetViewSet,
+    AvailableFilterValues,
+    CountryViewset,
+    DepartmentViewSet,
+    ManageAssetViewSet,
+    OfficeBlockViewSet,
+    OfficeFloorSectionViewSet,
+    OfficeFloorViewSet,
+    OfficeWorkspaceViewSet,
+    SampleImportFile,
+    SecurityUserEmailsViewSet,
+    SecurityUserViewSet,
+    SkippedAssets,
+    UserFeedbackViewSet,
+    UserGroupViewSet,
+    UserViewSet,
+)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -39,55 +65,70 @@ router.register('users', UserViewSet, 'users')
 router.register('assets', AssetViewSet, 'assets')
 router.register('manage-assets', ManageAssetViewSet, 'manage-assets')
 router.register('allocations', AllocationsViewSet, 'allocations')
-router.register('security-user-emails',
-                SecurityUserEmailsViewSet, 'security-user-emails')
+router.register(
+    'security-user-emails', SecurityUserEmailsViewSet, 'security-user-emails'
+)
 router.register('asset-logs', AssetLogViewSet, 'asset-logs')
 router.register('user-feedback', UserFeedbackViewSet, 'user-feedback')
 router.register('asset-status', AssetStatusViewSet, 'asset-status')
 router.register('asset-categories', AssetCategoryViewSet, 'asset-categories')
-router.register('asset-sub-categories', AssetSubCategoryViewSet,
-                'asset-sub-categories')
-router.register('asset-types', AssetTypeViewSet,
-                'asset-types')
-router.register('asset-models', AssetModelNumberViewSet,
-                'asset-models')
-router.register('asset-condition', AssetConditionViewSet,
-                'asset-condition')
+router.register('asset-sub-categories', AssetSubCategoryViewSet, 'asset-sub-categories')
+router.register('asset-types', AssetTypeViewSet, 'asset-types')
+router.register('asset-models', AssetModelNumberViewSet, 'asset-models')
+router.register('asset-condition', AssetConditionViewSet, 'asset-condition')
 router.register('asset-makes', AssetMakeViewSet, 'asset-makes')
-router.register('incidence-reports', AssetIncidentReportViewSet,
-                'incidence-reports')
-router.register('slack-incidence-reports', AssetSlackIncidentReportViewSet,
-                'slack-incidence-reports')
+router.register('incidence-reports', AssetIncidentReportViewSet, 'incidence-reports')
+router.register(
+    'slack-incidence-reports',
+    AssetSlackIncidentReportViewSet,
+    'slack-incidence-reports',
+)
 router.register('asset-health', AssetHealthCountViewSet, 'asset-health')
-router.register('security-users', SecurityUserViewSet,
-                'security-users')
+router.register('security-users', SecurityUserViewSet, 'security-users')
 router.register('asset-specs', AssetSpecsViewSet, 'asset-specs')
-router.register('user-groups', GroupViewSet, 'user-groups')
+router.register('user-groups', UserGroupViewSet, 'user-groups')
 router.register('office-blocks', OfficeBlockViewSet, 'office-blocks')
 router.register('office-floors', OfficeFloorViewSet, 'office-floors')
 router.register('office-sections', OfficeFloorSectionViewSet, 'floor-sections')
-router.register('office-workspaces', OfficeWorkspaceViewSet,
-                'office-workspaces')
+router.register('office-workspaces', OfficeWorkspaceViewSet, 'office-workspaces')
 router.register('departments', DepartmentViewSet, 'departments')
 router.register('asset-assignee', AssetAssigneeViewSet, 'asset-assignee')
 router.register('andela-centres', AndelaCentreViewset, 'andela-centres')
+router.register('countries', CountryViewset, 'countries')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    path('', TemplateView.as_view(
-        template_name='api/api-index.html',
-        extra_context={'api_version': 'V1'}),
-        name='api-version-index'
+    path(
+        '',
+        TemplateView.as_view(
+            template_name='api/api-index.html', extra_context={'api_version': 'V1'}
+        ),
+        name='api-version-index',
     ),
     path('upload/', AssetsImportViewSet.as_view(), name='import-assets'),
     path('skipped/', SkippedAssets.as_view(), name='skipped'),
-    path('filter-values/', AvailableFilterValues.as_view(), name='available-filters')
+    path(
+        'files/sample_import_file/',
+        SampleImportFile.as_view(),
+        name='sample-import-file',
+    ),
+    path('filter-values/', AvailableFilterValues.as_view(), name='available-filters'),
 ]
 if settings.DEBUG:
-    urlpatterns.extend([
-        path('docs/', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
-        path('docs/live/', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger')
-    ])
+    urlpatterns.extend(
+        [
+            path(
+                'docs/',
+                schema_view.with_ui('redoc', cache_timeout=None),
+                name='schema-redoc',
+            ),
+            path(
+                'docs/live/',
+                schema_view.with_ui('swagger', cache_timeout=None),
+                name='schema-swagger',
+            ),
+        ]
+    )
 
 urlpatterns += router.urls

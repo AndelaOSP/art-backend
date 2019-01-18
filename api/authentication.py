@@ -1,12 +1,14 @@
+# Standard Library
 import logging
 
+# Third-Party Imports
 from decouple import config
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from firebase_admin import auth, credentials, initialize_app
-from rest_framework.authentication import TokenAuthentication
 from rest_framework import exceptions
+from rest_framework.authentication import TokenAuthentication
 
 ADMIN_USER = 'admin'
 SUPERUSER = 'superuser'
@@ -20,7 +22,7 @@ payload = {
     'project_id': config('PROJECT_ID'),
     'private_key': private_key,
     'client_email': config('CLIENT_EMAIL'),
-    'token_uri': 'https://accounts.google.com/o/oauth2/token'
+    'token_uri': 'https://accounts.google.com/o/oauth2/token',
 }
 
 cred = credentials.Certificate(payload)
@@ -51,8 +53,5 @@ def set_firebase_custom_claims(sender, instance, created, **kwargs):
         user = auth.create_user(email=instance.email)
     else:
         if user.uid:
-            attrs = {
-                ADMIN_USER: instance.is_staff,
-                SUPERUSER: instance.is_superuser,
-            }
+            attrs = {ADMIN_USER: instance.is_staff, SUPERUSER: instance.is_superuser}
             auth.set_custom_user_claims(user.uid, attrs)

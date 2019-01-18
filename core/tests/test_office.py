@@ -1,10 +1,12 @@
+# Third-Party Imports
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from rest_framework.exceptions import ValidationError
 
-from ..models import OfficeBlock, OfficeFloorSection, OfficeWorkspace, AndelaCentre
-
+# App Imports
 from core.tests import CoreBaseTestCase
+
+from ..models import AndelaCentre, OfficeBlock, OfficeFloorSection, OfficeWorkspace
 
 User = get_user_model()
 
@@ -19,7 +21,9 @@ class OfficeBlockModelTest(CoreBaseTestCase):
         self.assertEqual(OfficeBlock.objects.count(), count + 1)
 
         """Test add similar named block in diff centers."""
-        other_center = AndelaCentre.objects.create(centre_name="Towers", country="Uganda")
+        other_center = AndelaCentre.objects.create(
+            centre_name="Towers", country=self.country
+        )
         OfficeBlock.objects.create(name="Block B", location=other_center)
         self.assertEqual(OfficeBlock.objects.count(), count + 2)
 
@@ -29,8 +33,7 @@ class OfficeBlockModelTest(CoreBaseTestCase):
         with transaction.atomic():
             with self.assertRaises(ValidationError):
                 OfficeBlock.objects.create(
-                    name=OfficeBlock.objects.first().name,
-                    location=self.centre
+                    name=OfficeBlock.objects.first().name, location=self.centre
                 )
         self.assertEqual(OfficeBlock.objects.count(), count)
 
@@ -41,7 +44,7 @@ class OfficeBlockModelTest(CoreBaseTestCase):
             with self.assertRaises(ValidationError):
                 OfficeFloorSection.objects.create(
                     name=OfficeFloorSection.objects.first().name,
-                    floor=self.office_floor
+                    floor=self.office_floor,
                 )
         self.assertEqual(OfficeBlock.objects.count(), count)
 
@@ -52,7 +55,7 @@ class OfficeBlockModelTest(CoreBaseTestCase):
             with self.assertRaises(ValidationError):
                 OfficeWorkspace.objects.create(
                     name=OfficeWorkspace.objects.first().name,
-                    section=self.office_section
+                    section=self.office_section,
                 )
         self.assertEqual(OfficeWorkspace.objects.count(), count)
 

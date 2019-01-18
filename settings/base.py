@@ -10,14 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
+# Standard Library
 import os
-from decouple import config, Csv
-import dj_database_url
 
+# Third-Party Imports
+import dj_database_url
+from decouple import config, Csv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -85,9 +86,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-            ],
+            ]
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = 'art.wsgi.application'
@@ -99,20 +100,11 @@ WSGI_APPLICATION = 'art.wsgi.application'
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.'
-        'password_validation.UserAttributeSimilarityValidator',
+        'password_validation.UserAttributeSimilarityValidator'
     },
-    {
-        'NAME': 'django.contrib.auth.'
-        'password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.'
-        'password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.'
-        'password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.' 'password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.' 'password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.' 'password_validation.NumericPasswordValidator'},
 ]
 
 
@@ -133,23 +125,20 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 JET_SIDE_MENU_COMPACT = True
 
 JET_DEFAULT_THEME = 'andela'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS':
-        'core.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'core.pagination.PageNumberPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'api.authentication.FirebaseTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-    )
+    ),
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.APIUser'
@@ -158,49 +147,32 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
+        'verbose': {'format': '{levelname} {asctime} {module} {message}', 'style': '{'},
+        'simple': {'format': '{levelname} {message}', 'style': '{'},
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': config('LOGLEVEL', 'info').upper(),
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
+            'formatter': 'verbose',
         },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
-            'formatter': 'verbose'
-        }
-    },
-    'loggers': {
-        '': {
-            'handlers': ['console', 'mail_admins'],
-            'propagate': True,
+            'formatter': 'verbose',
         },
-    }
+    },
+    'loggers': {'': {'handlers': ['console', 'mail_admins'], 'propagate': True}},
 }
 
 csv = Csv(cast=lambda s: tuple(s.split(':')))
 
-ADMINS = csv(os.environ.get('ADMINS', ''))
+ADMINS = csv(config('ADMINS', 'art:art.andela@andela.com,art_group:art@andela.com'))
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'api_key': {
-            'type': 'apiKey',
-            'in': 'header',
-            'name': 'Authorization'
-        }
-    },
+        'api_key': {'type': 'apiKey', 'in': 'header', 'name': 'Authorization'}
+    }
 }
 
-REDOC_SETTINGS = {
-    'LAZY_RENDERING': True,
-}
+REDOC_SETTINGS = {'LAZY_RENDERING': True}

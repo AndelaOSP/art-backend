@@ -1,8 +1,13 @@
+# Standard Library
 import logging
 
-from django.db import models
+# Third-Party Imports
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
 from oauth2_provider.models import AbstractApplication
+
+# App Imports
+from core.constants import REPORT_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -16,14 +21,8 @@ class UserManager(BaseUserManager):
         """
         email = fields.pop('email')
         password = fields.get('password')
-        cohort = fields.get('cohort', None)
-        slack_handle = fields.get('slack_handle')
         if not email:
             raise ValueError("Email address is required")
-        elif cohort is None or isinstance(cohort, str):
-            raise ValueError("Cohort is required")
-        elif not slack_handle:
-            raise ValueError("Slack handle is required")
         email = self.normalize_email(email)
         user = self.model(email=email, **fields)
         user.set_password(password)
@@ -57,7 +56,9 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     password = models.CharField(max_length=128, blank=True, null=True)
-    location = models.ForeignKey('AndelaCentre', blank=False, null=True, on_delete=models.PROTECT)
+    location = models.ForeignKey(
+        'AndelaCentre', blank=True, null=True, on_delete=models.PROTECT
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['cohort', 'slack_handle']
@@ -69,14 +70,20 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         try:
-            super(User, self).save(*args, **kwargs)
+            self.full_clean()
         except Exception as e:
             logger.warning(str(e))
         else:
-            self._create_assignee_object_for_user()
+            try:
+                super(User, self).save(*args, **kwargs)
+            except Exception as e:
+                logger.warning(str(e))
+            else:
+                self._create_assignee_object_for_user()
 
     def _create_assignee_object_for_user(self):
         from .asset import AssetAssignee
+
         AssetAssignee.objects.get_or_create(user=self)
 
 
@@ -84,8 +91,7 @@ class SecurityUser(User):
     badge_number = models.CharField(max_length=30, unique=True)
 
     USERNAME_FIELD = 'badge_number'
-    REQUIRED_FIELDS = ['first_name', 'last_name',
-                       'badge_number']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'badge_number']
 
     class Meta:
         verbose_name = "Security User"
@@ -95,11 +101,12 @@ class APIUser(AbstractApplication):
     client_type = models.CharField(
         max_length=32,
         choices=AbstractApplication.CLIENT_TYPES,
-        default=AbstractApplication.CLIENT_CONFIDENTIAL)
+        default=AbstractApplication.CLIENT_CONFIDENTIAL,
+    )
     authorization_grant_type = models.CharField(
         max_length=32,
         choices=AbstractApplication.GRANT_TYPES,
-        default=AbstractApplication.GRANT_CLIENT_CREDENTIALS
+        default=AbstractApplication.GRANT_CLIENT_CREDENTIALS,
     )
 
     class Meta:
@@ -109,20 +116,33 @@ class APIUser(AbstractApplication):
 
 class UserFeedback(models.Model):
     """ Stores user feedback data """
-    FEEDBACK = "feedback"
-    BUG = "bug"
-    FEATURE_REQUEST = "feature_request"
-    option = (
-        (FEEDBACK, "feedback"),
-        (BUG, "bug"),
-        (FEATURE_REQUEST, "feature request"),
-    )
+
     reported_by = models.ForeignKey(User, on_delete=models.PROTECT)
-    message = models.TextField(null=False)
-    report_type = models.CharField(max_length=20, blank=False, choices=option, null=False)
+    message = models.TextField()
+    report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     resolved = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = "User Feedback"
         ordering = ['-id']
+
+
+class AISUserSync(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    message = models.TextField()
+    new_records = models.IntegerField(blank=True, null=True)
+    running = models.BooleanField(default=False)
+    running_time = models.DurationField(blank=True, null=True)
+    successful = models.BooleanField(blank=True, null=True)
+    updated_records = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "AIS User Sync"
+        verbose_name_plural = "AIS User Sync"
+
+    def __str__(self):
+        result = 'Unknown'
+        if self.successful is not None:
+            result = 'Success' if self.successful else 'Failure'
+        return "Date ran: {}, Result: {}".format(self.created_at, result)

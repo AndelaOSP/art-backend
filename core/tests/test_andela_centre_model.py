@@ -1,14 +1,17 @@
-from django.db import IntegrityError
-from django.db import transaction
-from ..models import AndelaCentre
+# Third-Party Imports
+from django.db import IntegrityError, transaction
 
+# App Imports
 from core.tests import CoreBaseTestCase
+
+from ..models import AndelaCentre
 
 
 class AndelaCentreModelTest(CoreBaseTestCase):
     """ Tests for the Andela Centre Model """
+
     def test_can_save_a_centre(self):
-        AndelaCentre.objects.create(centre_name="Gorilla", country="Rwanda")
+        AndelaCentre.objects.create(centre_name="Gorilla", country=self.country)
         new_centre = AndelaCentre.objects.get(centre_name="Gorilla")
         new_centre_count = AndelaCentre.objects.count()
 
@@ -30,7 +33,9 @@ class AndelaCentreModelTest(CoreBaseTestCase):
         self.assertIn("The dojo", self.centre.centre_name)
 
     def test_can_delete_a_centre(self):
-        new_centre = AndelaCentre.objects.create(centre_name="The dojo", country="Kenya")
+        new_centre = AndelaCentre.objects.create(
+            centre_name="The dojo", country=self.country
+        )
         new_centre_count = AndelaCentre.objects.count()
         new_centre.delete()
         count_after_deletion = AndelaCentre.objects.count()

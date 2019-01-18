@@ -1,7 +1,9 @@
+# Third-Party Imports
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from rest_framework import serializers
 
+# App Imports
 from core.models import Department
 from core.tests import CoreBaseTestCase
 
@@ -10,6 +12,7 @@ User = get_user_model()
 
 class DepartmentModelTest(CoreBaseTestCase):
     """Tests for the Department Model"""
+
     def test_add_department(self):
         """Test add new department"""
         count = Department.objects.count()
@@ -21,7 +24,7 @@ class DepartmentModelTest(CoreBaseTestCase):
         """Test cannot add existing department"""
         count = Department.objects.count()
         with transaction.atomic():
-            with self.assertRaises(serializers.ValidationError):
+            with self.assertRaises(ValidationError):
                 Department.objects.create(name=self.department.name)
 
         self.assertEqual(Department.objects.count(), count)

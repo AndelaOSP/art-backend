@@ -50,18 +50,30 @@ jobs:
       - *cmd_install_requirements
       - *cmd_save_cache
       - run:
-          name: make migrations
+          name: run flake8 checks on project
           command: |
-            pipenv run "python manage.py makemigrations"
+            pipenv run flake8 .
+      - run:
+          name: run black formatter on project
+          command: |
+            pipenv run black --check --diff -S --exclude="migrations|.venv" .
+      - run:
+          name: isort - imports sorting
+          command: |
+            pipenv run isort -rc --check-only --diff --atomic -q .
+      - run:
+          name: check sh files
+          command: |
+            sudo apt-get install shellcheck
+            for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
+      - run:
+          name: collect static files
+          command: |
+            pipenv run "python manage.py collectstatic --noinput"
       - run:
           name: migrate
           command: |
             pipenv run "python manage.py migrate"
-
-      - run:
-          name: pep8 checks on project
-          command: |
-            pipenv run flake8 .
   tests:
     <<: *default
     steps:

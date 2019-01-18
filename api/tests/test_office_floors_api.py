@@ -1,6 +1,10 @@
+# Standard Library
 from unittest.mock import patch
+
+# Third-Party Imports
 from rest_framework.test import APIClient
 
+# App Imports
 from api.tests import APIBaseTestCase
 
 client = APIClient()
@@ -8,42 +12,38 @@ client = APIClient()
 
 class OfficeFloorAPITest(APIBaseTestCase):
     """ Tests for the OfficeFloor endpoint"""
+
     def test_non_authenticated_user_get_office_block(self):
         response = client.get(self.floor_number_url)
-        self.assertEqual(response.data, {
-            'detail': 'Authentication credentials were not provided.'
-        })
+        self.assertEqual(
+            response.data, {'detail': 'Authentication credentials were not provided.'}
+        )
 
     @patch('api.authentication.auth.verify_id_token')
     def test_can_post_floor_number(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        data = {
-            "number": 25,
-            "block": self.office_block.id
-        }
+        data = {"number": 25, "block": self.office_block.id}
         response = client.post(
             self.floor_number_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
         self.assertIn("number", response.data.keys())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_cant_post_floor_number_with_same_name(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        data = {
-            "number": self.office_floor.number,
-            "block": self.office_block.id
-        }
+        data = {"number": self.office_floor.number, "block": self.office_block.id}
         response = client.post(
             self.floor_number_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data, {
-            'non_field_errors': [
-                'The fields block, number must make a unique set.'
-            ]
-        })
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(
+            response.data,
+            {'non_field_errors': ['The fields block, number must make a unique set.']},
+        )
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -53,10 +53,9 @@ class OfficeFloorAPITest(APIBaseTestCase):
         response = client.put(
             self.floor_number_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data, {
-            'detail': 'Method "PUT" not allowed.'
-        })
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -66,10 +65,9 @@ class OfficeFloorAPITest(APIBaseTestCase):
         response = client.patch(
             self.floor_number_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data, {
-            'detail': 'Method "PATCH" not allowed.'
-        })
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data, {'detail': 'Method "PATCH" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')
@@ -79,8 +77,7 @@ class OfficeFloorAPITest(APIBaseTestCase):
         response = client.delete(
             self.floor_number_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user))
-        self.assertEqual(response.data, {
-            'detail': 'Method "DELETE" not allowed.'
-        })
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data, {'detail': 'Method "DELETE" not allowed.'})
         self.assertEqual(response.status_code, 405)

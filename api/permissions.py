@@ -1,3 +1,4 @@
+# Third-Party Imports
 from rest_framework.permissions import BasePermission
 
 
@@ -5,6 +6,7 @@ class IsApiUser(BasePermission):
     """
     Allows access only to API users.
     """
+
     def has_permission(self, request, view):
         try:
             app = request.auth.application
@@ -17,6 +19,7 @@ class IsSecurityUser(BasePermission):
     """
     Allows access only to security users.
     """
+
     def has_permission(self, request, view):
         try:
             user = request.user.securityuser

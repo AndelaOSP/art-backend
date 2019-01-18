@@ -3,106 +3,83 @@
 [![Coverage Status](https://coveralls.io/repos/github/AndelaOSP/art-backend/badge.svg)](https://coveralls.io/github/AndelaOSP/art-backend)
 
 ## Description
-This repository contains the API endpoints and models for the ART project implemented using Django. Here in is also the implementation of the admin dashboards using Django templates.
+This repository contains the API endpoints and models for the ART project implemented using Django.
+ - [Local Development](#Local-Development)
+    - [Env setup](#Env-setup)
+    - [Project setup](#Project-setup)
+      - [Installation script](#Installation-script)
+      - [Manual setup](#Manual-setup)
+      - [Development using Docker](#Development-using-Docker)
+    - [Running the app](#Running-the-app)
+ - [CI / CD](#CI-/-CD)
 
-## Setup
+## Local Development
+### Env setup
+- Clone the repository: `git clone https://github.com/AndelaOSP/art-backend.git`
+- Open the project directory: `cd art-backend`
+- Create a .env file. We currrently use the following env variables.
 
-### Getting Started
+| Variable | Description | |
+| --- | --- | --- |
+| `DATABASE_URL` | **Required** - Used by [dj_database_url](https://github.com/kennethreitz/dj-database-url#url-schema) to connect to the database. Format: 	 DATABASE_URL=postgresql://<user>:<password>@localhost:5432/<db> |
+| `SECRET_KEY` | **Required** - String of random characters used to provide cryptographic signing for [Django](https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY) projects. |
+| `PROJECT_ID` | **Required** - The Firebase project ID (We use Firebase for authentication) |
+| `PRIVATE_KEY` | **Required** - The Firebase private key |
+| `CLIENT_EMAIL` | **Required** - The firebase client email value |
+| `DJANGO_SETTINGS_MODULE` | **Required** (if running the app using gunicorn `gunicorn art.wsgi`) - `settings.prod` for prod, `settings.dev` optional for dev/staging |
+| `SLACK_TOKEN` | **Optional** - The token to authenticate/authorize the slack app used to send slack notifications |
+| `ASSET_LIMIT` | **Optional** - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack. |
+| `AIS_URL` | **Optional** - Needed to sync users from AIS |
+| `AIS_TOKEN` | **Optional** - Needed to sync users from AIS |
 
-- Clone the repository:
-> $ git clone https://github.com/AndelaOSP/art-backend.git
+### Project setup
+#### Installation script
+The easiest way to set up is to run `. ./install_art.sh` which does the following:
+  - Installs the following if they don't exist:
+    - HomeBrew
+    - Python 3
+    - Pipenv
+    - dependencies
+    - ShellCheck
+    - PostgreSQL
+  - Creates a .env file if it doesn't exist
+  - Gives you an option to set up the database
 
-- Open the project directory:
-> $ cd art-backend
+#### Manual setup
+- Create a database and add its url to your project environment. eg `DATABASE_URL=postgresql://<user>:<password>@localhost:5432/<db>`
+- Create and activate a virtual environment - we recommend using [pipenv](https://github.com/pypa/pipenv) for this by running `pipenv shell`
+- Install the project dependencies stored in [Pipfile](/Pipfile). Run `pipenv install --dev`.
+- Run migrations - `python manage.py migrate`
 
-### Set up environment variables
-- To set up environment variables, define the following in a `.env` file:
+#### Development using Docker
+To use the Docker setup, ensure you have Docker installed then run the following commands:
 
-> DATABASE_URL -  Configuration to connect to project's database in [this](https://github.com/kennethreitz/dj-database-url#url-schema) format. Example; postgres://postgres@127.0.0.1:5432/art
+- `make compose` to create the docker-compose file from the template already in the repository. Open the file with your preferred editor and update the environment section under the `art-backend` service. Replace the values of the varaibles whose values are enclosed in angle brackets with values provided by a fellow team member or team lead.
 
-> SECRET_KEY - String of random characters used to provide cryptographic signing for [Django](https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY) project. Example; '1z5266&fgkvvdia5cnss50=t38dxr5894a3*-*m3wmv+7v@fh@'
-
-
-> PROJECT_ID - Project's identifier on firebase.
-
-> PRIVATE_KEY - Project's private key for firebase project.
-
-> CLIENT_EMAIL - Project's email for firebase project.
-
-> SLACK_TOKEN - String of characters to authenticate/authorize slack app to post in the Andela slack organisation.
-
-> ASSET_LIMIT - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack.
-
-- To set up the pre-commit Git hooks with the standard styling conventions, follow the instructions on the Wiki [here](https://github.com/AndelaOSP/art-backend/wiki/Styling-Conventions).
-
-### Access app on local dev environment
-- There are 3 ways to do this:
-
-1. Bash script
-  ```.install_art.sh```
-2. Docker setup found [here](https://github.com/AndelaOSP/art-backend/#local-development-docker-setup)
-3. Manual setup
-
-For the manual setup:
-
-### Dependencies
-- Install the project dependencies:
-> $ pipenv install
-> $ pipenv shell
-
-### Set up Database
-- Create a database:
-> $ createdb db_name
-- Run migrations
-> $ python manage.py migrate
+- `make start` to build and start the app services. Migrations will be ran here.
+- `make exec` to run any other commands as necessary. eg `python manage.py createsuperuser`
+- `make open` to run the application
 
 ### Running the app
-- To run tests:
-> $ python manage.py test
-- Run the app:
-> $ python manage.py runserver
+- Create a Superuser account: `python manage.py createsuperuser`
+- To run tests: `pytest`
+- Run the app: `python manage.py runserver`
+- You can now log into the admin dashboard on `http://127.0.0.1:8000/admin/`
 
-### Create a Superuser account
-- To create a super user account for accessing the admin dashboard, run the following command:
-> python manage.py createsuperuser
-- Enter your email
-- Enter the Cohort number
-- Enter the Slack handle
-- Enter a password
-- You can log into the admin dashboard using those credentials on `http://127.0.0.1:8000/admin/`
+## CI / CD
+We use CircleCI for this. Merging to develop deploys to [staging](https://staging-art.andela.com), and merging to master deploys to [production](https://art.andela.com).
 
+To ensure consistency we have automated checks for a couple of things:
+- Project tests - `pytest`
+- Python (pep8) styling checks - `flake8 .`
+- [Black](https://github.com/ambv/black) formatter checks - `black --diff -S --exclude="migrations|.venv" .` (include the `-S` or `--skip-string-normalization` option to allow single quotes on strings.)
+- Shell scripts styling checks - `for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;`
+- Imports sorting - `isort -rc --diff --atomic .`. Using `--check-only` will perform a dry-run
+ - Imports should be in the following order:
+   - Future imports
+   - Python standard library imports
+   - Third party packages
+   - Local app imports - absolute
+   - Local app imports - relative
 
-## Local Development Docker Setup
-To use the Docker setup, ensure you have Docker installed.
-
-### Create the `docker-compose.yml` file
-Run the `make compose` task to create the docker-compose file from the template alredy in the repository.
-```
-$ make compose
-```
-This will generate the file. Open the file with your preferred editor and make changes on the environment section under the `art-backend` service in the `docker-compose.yml` file that you just created. Replace the values of the varaibles whose values are enclosed in angle brackets with values provided by a fellow team member or team lead:
-```
-PRIVATE_KEY: "<enter-provided-private-key>"
-PROJECT_ID: "<enter-project-id>"
-CLIENT_EMAIL: "<enter-client-email>"
-```
-
-### Start The Services
-To start the services you run the make start task i.e.
-```
-$ make start
-```
-
-### Create the superuser account
-To create the superuser account, we are going to first connect the container of our application using the exec task in the Makefile. Run the task as shown:
-```
-$ make exec
-```
-If the task runs successfully, you will land inside a terminal session in the container. The prompt should look as follows:
-```
-root@<container-id>:/usr/src/app#
-```
-The `<container-id>` will vary on different machines but should be string of random letters and numbers for instance `6c6f455638d8`. While on this prompt, run the command `python manage.py createsuperuser` and enter the different values you are prompted for i.e. email address, cohort number, Slack handle and password.
-After successfully completing this, navigate to `http://127.0.0.1:8000/admin/` on your browser or run `make open` and use the credentials you just created to login.
-
-[Click here](https://art-backend.herokuapp.com/admin/) to view the app on Heroku.
+You can set up the pre-commit Git hooks with the standard styling conventions as per the guide inn the [Wiki](https://github.com/AndelaOSP/art-backend/wiki/Styling-Conventions).
