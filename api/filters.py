@@ -41,10 +41,11 @@ class AssetFilter(BaseFilter):
     current_status = filters.CharFilter(
         field_name='current_status', lookup_expr='iexact'
     )
+    verified = filters.CharFilter(field_name='verified', lookup_expr='iexact')
 
     class Meta:
         model = Asset
-        fields = ['asset_type', 'model_number', 'email', 'current_status']
+        fields = ['asset_type', 'model_number', 'email', 'current_status', 'verified']
 
 
 class UserFilter(BaseFilter):
