@@ -9,6 +9,7 @@ from ..models import AndelaCentre
 
 class AndelaCentreModelTest(CoreBaseTestCase):
     """ Tests for the Andela Centre Model """
+
     def test_can_save_a_centre(self):
         AndelaCentre.objects.create(centre_name="Gorilla", country=self.country)
         new_centre = AndelaCentre.objects.get(centre_name="Gorilla")
@@ -32,7 +33,9 @@ class AndelaCentreModelTest(CoreBaseTestCase):
         self.assertIn("The dojo", self.centre.centre_name)
 
     def test_can_delete_a_centre(self):
-        new_centre = AndelaCentre.objects.create(centre_name="The dojo", country=self.country)
+        new_centre = AndelaCentre.objects.create(
+            centre_name="The dojo", country=self.country
+        )
         new_centre_count = AndelaCentre.objects.count()
         new_centre.delete()
         count_after_deletion = AndelaCentre.objects.count()

@@ -8,28 +8,28 @@ from django.db.models import Q
 from tqdm import tqdm
 
 # App Imports
-from core.models.asset import (Asset, AssetCategory, AssetCondition, AssetMake, AssetModelNumber, AssetSpecs,
-                               AssetStatus, AssetSubCategory, AssetType)
+from core.models.asset import (
+    Asset,
+    AssetCategory,
+    AssetCondition,
+    AssetMake,
+    AssetModelNumber,
+    AssetSpecs,
+    AssetStatus,
+    AssetSubCategory,
+    AssetType,
+)
 from tableschema import exceptions, Table, validate
 
 User = get_user_model()
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
-ASSET_DATA_FILE = os.path.join(
-    BASE_PATH,
-    'assets.csv'
-)
+ASSET_DATA_FILE = os.path.join(BASE_PATH, 'assets.csv')
 
-SCHEMA_FILE = os.path.join(
-    BASE_PATH,
-    'schema.json'
-)
+SCHEMA_FILE = os.path.join(BASE_PATH, 'schema.json')
 
-SKIPPED_ASSETS_FILE = os.path.join(
-    BASE_PATH,
-    'skipped.csv'
-)
+SKIPPED_ASSETS_FILE = os.path.join(BASE_PATH, 'skipped.csv')
 
 
 def write_skipped_assets(error, data=None):
@@ -63,25 +63,23 @@ def save_to_models(validated_data):
     )
     asset_sub_category, _ = AssetSubCategory.objects.get_or_create(
         sub_category_name=validated_data.get('sub_category_name'),
-        asset_category=asset_category
+        asset_category=asset_category,
     )
     asset_type, _ = AssetType.objects.get_or_create(
         asset_type=validated_data.get('asset_type'),
-        asset_sub_category=asset_sub_category
+        asset_sub_category=asset_sub_category,
     )
     asset_make, _ = AssetMake.objects.get_or_create(
-        make_label=validated_data.get('make_label'),
-        asset_type=asset_type
+        make_label=validated_data.get('make_label'), asset_type=asset_type
     )
     asset_model_number, _ = AssetModelNumber.objects.get_or_create(
-        model_number=validated_data.get('model_number'),
-        make_label=asset_make
+        model_number=validated_data.get('model_number'), make_label=asset_make
     )
     asset_spec, _ = AssetSpecs.objects.get_or_create(
         memory=validated_data.get('memory'),
         storage=validated_data.get('storage'),
         processor_type=validated_data.get('processor_type'),
-        year_of_manufacture=validated_data.get('year_of_manufacture')
+        year_of_manufacture=validated_data.get('year_of_manufacture'),
     )
 
     specified_serial_number = validated_data.get('serial_number')
@@ -98,7 +96,7 @@ def save_to_models(validated_data):
         asset, _ = Asset.objects.get_or_create(
             asset_code=specified_asset_code,
             serial_number=specified_serial_number,
-            model_number=asset_model_number
+            model_number=asset_model_number,
         )
 
     asset.verified = not bool(validated_data.get('verified'))
@@ -107,24 +105,16 @@ def save_to_models(validated_data):
     specified_user_email = validated_data.get('email')
 
     if specified_user_email:
-        asset_assigned_to, _ = User.objects.get_or_create(
-            email=specified_user_email
-        )
+        asset_assigned_to, _ = User.objects.get_or_create(email=specified_user_email)
         asset.assigned_to = asset_assigned_to.assetassignee
         asset.save()
 
     asset_notes = validated_data.get('notes')
     if asset_notes:
-        AssetCondition.objects.create(
-            asset=asset,
-            notes=asset_notes
-        )
+        AssetCondition.objects.create(asset=asset, notes=asset_notes)
     specified_status = validated_data.get('current_status')
     if specified_status:
-        AssetStatus.objects.create(
-            asset=asset,
-            current_status=specified_status
-        )
+        AssetStatus.objects.create(asset=asset, current_status=specified_status)
 
 
 class Command(BaseCommand):

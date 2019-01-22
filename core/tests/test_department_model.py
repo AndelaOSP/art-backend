@@ -12,6 +12,7 @@ User = get_user_model()
 
 class DepartmentModelTest(CoreBaseTestCase):
     """Tests for the Department Model"""
+
     def test_add_department(self):
         """Test add new department"""
         count = Department.objects.count()

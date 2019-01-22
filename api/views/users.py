@@ -15,8 +15,13 @@ from rest_framework.viewsets import ModelViewSet
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import UserFilter
 from api.permissions import IsApiUser
-from api.serializers import (SecurityUserEmailsSerializer, SecurityUserSerializer, UserFeedbackSerializer,
-                             UserGroupSerializer, UserSerializerWithAssets)
+from api.serializers import (
+    SecurityUserEmailsSerializer,
+    SecurityUserSerializer,
+    UserFeedbackSerializer,
+    UserGroupSerializer,
+    UserSerializerWithAssets,
+)
 from core import models
 
 logger = logging.getLogger(__name__)
@@ -44,7 +49,9 @@ class SecurityUserEmailsViewSet(ModelViewSet):
     permission_classes = (IsApiUser,)
 
     def list(self, request, *args, **kwargs):
-        list_of_emails = [security_user.email for security_user in models.SecurityUser.objects.all()]
+        list_of_emails = [
+            security_user.email for security_user in models.SecurityUser.objects.all()
+        ]
 
         return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
 
@@ -64,7 +71,7 @@ class SecurityUserViewSet(ModelViewSet):
     serializer_class = SecurityUserSerializer
     queryset = models.SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication, ]
+    authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
@@ -83,6 +90,9 @@ class SecurityUserViewSet(ModelViewSet):
         kwargs['partial'] = True
         return super(SecurityUserViewSet, self).update(request, *args, **kwargs)
 
+    def perform_create(self, serializer):
+        serializer.save(location=self.request.user.location)
+
 
 class UserGroupViewSet(ModelViewSet):
     serializer_class = UserGroupSerializer
@@ -97,7 +107,8 @@ class UserGroupViewSet(ModelViewSet):
             serializer.save(name=name)
         except IntegrityError:
             raise serializers.ValidationError(
-                {"message": "{} already exist".format(name)})
+                {"message": "{} already exist".format(name)}
+            )
 
 
 class AvailableFilterValues(APIView):
@@ -107,7 +118,8 @@ class AvailableFilterValues(APIView):
     def get(self, request):
         cohorts = set()
         asset_count = set()
-        for user in models.User.objects.all():
+        location = self.request.user.location
+        for user in models.User.objects.filter(location=location):
             cohorts.add(user.cohort)
             try:
                 assignee_asset_count = user.assetassignee.asset_set.count()
@@ -115,6 +127,12 @@ class AvailableFilterValues(APIView):
                 logger.warning('Error: {}. User: {}'.format(str(e), user.id))
             else:
                 asset_count.add(assignee_asset_count)
-        cohort_res = [{"id": cohort, "option": cohort} for cohort in cohorts if cohort is not None]
-        asset_num = [{"id": count, "option": count} for count in asset_count if count is not None]
-        return Response(data={"cohorts": cohort_res, "asset_count": asset_num}, status=200)
+        cohort_res = [
+            {"id": cohort, "option": cohort} for cohort in cohorts if cohort is not None
+        ]
+        asset_num = [
+            {"id": count, "option": count} for count in asset_count if count is not None
+        ]
+        return Response(
+            data={"cohorts": cohort_res, "asset_count": asset_num}, status=200
+        )

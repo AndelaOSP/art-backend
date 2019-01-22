@@ -13,17 +13,27 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = (
-            'id', 'first_name', 'last_name', 'full_name', 'email', 'cohort',
-            'slack_handle', 'picture', 'phone_number', 'location',
-            'allocated_asset_count', 'last_modified', 'date_joined',
-            'last_login'
+            'id',
+            'first_name',
+            'last_name',
+            'full_name',
+            'email',
+            'cohort',
+            'slack_handle',
+            'picture',
+            'phone_number',
+            'location',
+            'allocated_asset_count',
+            'last_modified',
+            'date_joined',
+            'last_login',
         )
 
         extra_kwargs = {
             'last_modified': {'read_only': True},
             'date_joined': {'read_only': True},
             'last_login': {'read_only': True},
-            'cohort': {'min_value': 0}
+            'cohort': {'min_value': 0},
         }
 
     def get_full_name(self, obj):
@@ -59,6 +69,7 @@ class UserSerializerWithAssets(UserSerializer):
 
     def get_allocated_assets(self, obj):
         from .assets import AssetSerializer
+
         assets = models.Asset.objects.filter(assigned_to__user=obj)
         serialized_assets = AssetSerializer(assets, many=True)
         return serialized_assets.data
@@ -76,8 +87,7 @@ class SecurityUserEmailsSerializer(serializers.ModelSerializer):
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserFeedback
-        fields = ("reported_by", "message", "report_type", "created_at",
-                  "resolved")
+        fields = ("reported_by", "message", "report_type", "created_at", "resolved")
         read_only_fields = ("reported_by", "resolved")
 
     def to_representation(self, instance):
@@ -90,15 +100,22 @@ class SecurityUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SecurityUser
         fields = (
-            'id', 'first_name', 'last_name', 'email',
-            'badge_number', 'phone_number', 'last_modified',
-            'date_joined', 'last_login'
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'badge_number',
+            'is_active',
+            'phone_number',
+            'last_modified',
+            'date_joined',
+            'last_login',
         )
 
         extra_kwargs = {
             'last_modified': {'read_only': True},
             'date_joined': {'read_only': True},
-            'last_login': {'read_only': True}
+            'last_login': {'read_only': True},
         }
 
 
