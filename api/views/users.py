@@ -90,6 +90,9 @@ class SecurityUserViewSet(ModelViewSet):
         kwargs['partial'] = True
         return super(SecurityUserViewSet, self).update(request, *args, **kwargs)
 
+    def perform_create(self, serializer):
+        serializer.save(location=self.request.user.location)
+
 
 class UserGroupViewSet(ModelViewSet):
     serializer_class = UserGroupSerializer
@@ -115,7 +118,8 @@ class AvailableFilterValues(APIView):
     def get(self, request):
         cohorts = set()
         asset_count = set()
-        for user in models.User.objects.all():
+        location = self.request.user.location
+        for user in models.User.objects.filter(location=location):
             cohorts.add(user.cohort)
             try:
                 assignee_asset_count = user.assetassignee.asset_set.count()

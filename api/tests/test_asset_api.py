@@ -310,3 +310,27 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertIn('notes', response.data.keys())
         self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_filter_assets_by_verified_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        url = reverse('manage-assets-list')
+        res = client.get(
+            '{}?verified={}'.format(url, self.asset.verified),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        count = res.data['count']
+        Asset.objects.create(
+            asset_code="IC0014532",
+            serial_number="SN50123455",
+            purchase_date="2018-07-10",
+            model_number=self.assetmodel,
+            asset_location=self.centre,
+            verified=True,
+        )
+        response = client.get(
+            '{}?verified={}'.format(url, self.asset.verified),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data['count'], count + 1)
+        self.assertEqual(response.status_code, 200)

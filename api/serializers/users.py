@@ -105,6 +105,7 @@ class SecurityUserSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'badge_number',
+            'is_active',
             'phone_number',
             'last_modified',
             'date_joined',
