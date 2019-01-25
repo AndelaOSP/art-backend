@@ -49,22 +49,12 @@ jobs:
       - *cmd_restore_cache
       - *cmd_install_requirements
       - *cmd_save_cache
-      - run:
-          name: collect static files
-          command: |
-            pipenv run "python manage.py collectstatic --noinput"
-      - run:
-          name: migrate
-          command: |
-            pipenv run "python manage.py migrate"
   flake8:
     <<: *default
     steps:
       - checkout
       - *cmd_change_owner
       - *cmd_restore_cache
-      - *cmd_install_requirements
-      - *cmd_save_cache
       - run:
           name: run flake8 checks on project
           command: |
@@ -75,8 +65,6 @@ jobs:
       - checkout
       - *cmd_change_owner
       - *cmd_restore_cache
-      - *cmd_install_requirements
-      - *cmd_save_cache
       - run:
           name: run black formatter on project
           command: |
@@ -87,8 +75,6 @@ jobs:
       - checkout
       - *cmd_change_owner
       - *cmd_restore_cache
-      - *cmd_install_requirements
-      - *cmd_save_cache
       - run:
           name: isort - imports sorting
           command: |
@@ -99,8 +85,6 @@ jobs:
       - checkout
       - *cmd_change_owner
       - *cmd_restore_cache
-      - *cmd_install_requirements
-      - *cmd_save_cache
       - run:
           name: check sh files
           command: |
@@ -112,8 +96,6 @@ jobs:
       - checkout
       - *cmd_change_owner
       - *cmd_restore_cache
-      - *cmd_install_requirements
-      - *cmd_save_cache
       - run:
           name: run tests
           command: |
