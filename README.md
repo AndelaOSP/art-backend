@@ -19,18 +19,25 @@ This repository contains the API endpoints and models for the ART project implem
 - Open the project directory: `cd art-backend`
 - Create a .env file. We currrently use the following env variables.
 
-| Variable | Description | |
+| Variable | Description | Default |
 | --- | --- | --- |
-| `DATABASE_URL` | **Required** - Used by [dj_database_url](https://github.com/kennethreitz/dj-database-url#url-schema) to connect to the database. Format: 	 DATABASE_URL=postgresql://<user>:<password>@localhost:5432/<db> |
-| `SECRET_KEY` | **Required** - String of random characters used to provide cryptographic signing for [Django](https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY) projects. |
-| `PROJECT_ID` | **Required** - The Firebase project ID (We use Firebase for authentication) |
-| `PRIVATE_KEY` | **Required** - The Firebase private key |
-| `CLIENT_EMAIL` | **Required** - The firebase client email value |
-| `DJANGO_SETTINGS_MODULE` | **Required** (if running the app using gunicorn `gunicorn art.wsgi`) - `settings.prod` for prod, `settings.dev` optional for dev/staging |
-| `SLACK_TOKEN` | **Optional** - The token to authenticate/authorize the slack app used to send slack notifications |
-| `ASSET_LIMIT` | **Optional** - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack. |
-| `AIS_URL` | **Optional** - Needed to sync users from AIS |
-| `AIS_TOKEN` | **Optional** - Needed to sync users from AIS |
+| <sup>**DATABASE_URL**</sup> | <sup>**Required** - Used by [dj_database_url](https://github.com/kennethreitz/dj-database-url#url-schema) to connect to the database. Format: 	 DATABASE_URL=postgresql://<user>:<password>@localhost:5432/<db>.</sup> | |
+| <sup>**SECRET_KEY**</sup> | <sup>**Required** - String of random characters used to provide cryptographic signing for [Django](https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY) projects.</sup> | |
+| <sup>**PROJECT_ID**</sup> | <sup>**Required** - The Firebase project ID (We use Firebase for authentication).</sup> | |
+| <sup>**PRIVATE_KEY**</sup> | <sup>**Required** - The Firebase private key.</sup> | |
+| <sup>**CLIENT_EMAIL**</sup> | <sup>**Required** - The firebase client email value.</sup> | |
+| <sup>**DJANGO_SETTINGS_MODULE**</sup> | <sup>**Required** (if running the app using gunicorn _gunicorn art.wsgi_) - _settings.prod_ for prod, _settings.dev_ optional for dev/staging.</sup> | <sup>**settings.dev**</sup> |
+| <sup>**SLACK_TOKEN**</sup> | <sup>**Optional** - The token to authenticate/authorize the slack app used to send slack notifications.</sup> | |
+| <sup>**ASSET_LIMIT**</sup> | <sup>**Optional** - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack.</sup> | <sup>**0**</sup> |
+| <sup>**AIS_URL**</sup> | <sup>**Optional** - Needed to sync users from AIS.</sup> | |
+| <sup>**AIS_TOKEN**</sup> | <sup>**Optional** - Needed to sync users from AIS.</sup> | |
+| <sup>**AIS_LIMIT**</sup> | <sup>**Optional** - Number of records to fetch from AIS per request (call it pagination).</sup> | <sup>**5000**</sup> |
+| <sup>**ART_BUILDS_CHANNEL**</sup> | <sup>**Optional** - Slack channel when logs will be posted.</sup> | <sup>**#art-builds**</sup> |
+| <sup>**OPS_CHANNEL**</sup> | <sup>**Optional** - Slack channel when art bot posts ops related messages if recipient isn't defined.</sup> | <sup>**#art-test**</sup> |
+| <sup>**RETRIES**</sup> | <sup>**Optional** - Number of times to retry an external request (currently to AIS) if an error other than 401 is received.</sup> | <sup>**3**</sup> |
+| <sup>**RETRY_TIMEOUT**</sup> | <sup>**Optional** - Number of seconds to wait before retrying an external request (currently to AIS) if an error other than 401 is received.</sup> | <sup>**10**</sup> |
+| <sup>**LOGLEVEL**</sup> | <sup>**Optional** - Default log level - error, warning, info, debug.</sup> | <sup>**info**</sup> |
+| <sup>**ADMINS**</sup> | <sup>**Optional** - Email addresses to send error logs to.</sup> | <sup>**art:art.andela@andela.com,art_group:art@andela.com**</sup> |
 
 ### Project setup
 #### Installation script

@@ -3,10 +3,12 @@ import logging
 import os
 import re
 import time
+from collections import defaultdict
 from datetime import timedelta
 
 # Third-Party Imports
 import requests
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.core.validators import validate_email
@@ -22,7 +24,7 @@ User = get_user_model()
 slack = SlackIntegration()
 
 SYNC_SUCCESS = True
-SYNC_ERRORS = set()
+SYNC_ERRORS = defaultdict(set)
 
 
 def fetch_ais_user_data(ais_url, ais_token, params):
@@ -31,15 +33,15 @@ def fetch_ais_user_data(ais_url, ais_token, params):
     if not ais_url.endswith('/'):
         ais_url += '/'
     ais_url += 'users'
-    logger.warning('Fetching data from AIS: {}'.format(ais_url))
+    logger.info('Fetching data from AIS: {}'.format(ais_url))
     fetching_users = True
     ais_user_data = []
     page_num = params.get('page') or 1
-    retries = 3
-    retry_timeout = os.getenv('RETRY_TIMEOUT') or 5
+    retries = int(os.getenv('RETRIES') or 3)
+    retry_timeout = int(os.getenv('RETRY_TIMEOUT') or 10)
     while fetching_users:
         params['page'] = page_num
-        logger.warning('Params: {}'.format(params))
+        logger.info('Params: {}'.format(params))
         response = requests.get(ais_url, params=params, headers=headers)
         if response.ok:
             try:
@@ -48,25 +50,33 @@ def fetch_ais_user_data(ais_url, ais_token, params):
                 logger.error(str(e))
                 fetching_users = False
                 SYNC_SUCCESS = False
+                SYNC_ERRORS['failures'].add(str(e))
             else:
                 if fetched_users:
                     ais_user_data += fetched_users
                 else:
-                    logger.warning('No data on page {}'.format(page_num))
+                    logger.info('No data on page {}'.format(page_num))
                     fetching_users = False
             page_num += 1
+        elif response.status_code == 401:
+            logger.error(response.text)
+            fetching_users = False
+            SYNC_SUCCESS = False
+            SYNC_ERRORS['failures'].add(response.reason)
         else:
             logger.error(
-                'Unable to connect to AIS: {} : {} : {}. Retrying in 5 seconds'.format(
-                    response.status_code, response.reason, response.text
+                'Unable to connect to AIS: {} : {} : {}. Retrying in {} seconds'.format(
+                    response.status_code, response.reason, response.text, retry_timeout
                 )
             )
-            time.sleep(int(retry_timeout))
+            time.sleep(retry_timeout)
             retries -= 1
             if retries < 0:
-                logger.error('Unable to connect to AIS. Exiting after 3 retries')
+                err = 'Unable to connect to AIS. Exiting after 3 retries'
+                logger.error(err)
                 fetching_users = False
                 SYNC_SUCCESS = False
+                SYNC_ERRORS['failures'].add(err)
     return ais_user_data
 
 
@@ -76,18 +86,18 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
     last_run = None
     new_records = 0
     updated_records = 0
-    logger.warning('Loading data to ART')
+    logger.info('Loading data to ART')
     try:
         last_run = AISUserSync.objects.exclude(id=current_sync_id).latest('created_at')
     except Exception as e:
         logger.error(str(e))
     if last_run:
-        logger.warning('Last run: {}'.format(str(last_run)))
+        logger.info('Last run: {}'.format(str(last_run)))
     total_num = len(ais_user_data)
     num = 0
     for ais_user in ais_user_data:
         num += 1
-        print('Processing: **{}** of **{}**'.format(num, total_num))
+        logger.info('Processing: **{}** of **{}**'.format(num, total_num))
         email = ais_user.get('email')
         updated_at = ais_user.get('updated_at')
         if updated_at:
@@ -98,15 +108,13 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
             if not last_run or (
                 last_run and updated_at and updated_at > last_run.created_at
             ):
-                SYNC_ERRORS.add('Invalid Email')
-                SYNC_SUCCESS = False
+                SYNC_ERRORS['other_errors'].add('Invalid Email')
             continue
         try:
             user, user_created = User.objects.get_or_create(email=email)
         except Exception as e:
             logger.error(str(e))
-            SYNC_ERRORS.add(str(e))
-            SYNC_SUCCESS = False
+            SYNC_ERRORS['other_errors'].add(str(e))
             continue
 
         if (
@@ -130,7 +138,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
                     centre_name=location_name
                 )
                 if location_created:
-                    logger.warning('New location added: {}'.format(location_name))
+                    logger.info('New location added: {}'.format(location_name))
             except Exception as e:
                 logger.error(str(e))
         if cohort:
@@ -148,7 +156,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
                     else:
                         logger.error('Unable to extract user cohort')
         if user_created:
-            logger.warning('Additional data for new user.')
+            logger.info('Additional data for new user.')
             user.first_name = ais_user.get('first_name')
             user.last_name = ais_user.get('last_name')
             user.picture = picture
@@ -176,7 +184,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
                 modified = True
 
             if modified:
-                logger.warning('Existing user modified. Updating')
+                logger.info('Existing user modified. Updating')
                 user.save()
                 updated_records += 1
     return new_records, updated_records
@@ -205,30 +213,32 @@ class Command(BaseCommand):
         if ais_url and ais_token:
             params = {'limit': limit_per_page, 'page': 1}
             ais_user_data = fetch_ais_user_data(ais_url, ais_token, params)
-            logger.warning('{} records fetched'.format(len(ais_user_data)))
+            logger.info('{} records fetched'.format(len(ais_user_data)))
             if ais_user_data:
                 new_records, updated_records = load_users_to_art(
                     ais_user_data, current_sync_id=sync_record.id
                 )
                 sync_record.new_records = new_records
                 sync_record.updated_records = updated_records
-                logger.warning(
+                logger.info(
                     'Done. {} records added. {} records updated.'.format(
                         new_records, updated_records
                     )
                 )
         else:
-            logger.error('Missing url or token.')
+            err = 'Missing url or token.'
+            logger.error(err)
             SYNC_SUCCESS = False
+            SYNC_ERRORS['failures'].add(err)
         duration = time.time() - start_time
         running_time = timedelta(seconds=duration)
 
         sync_record.running_time = running_time
         sync_record.successful = SYNC_SUCCESS
         sync_record.running = False
-        if SYNC_ERRORS:
-            sync_record.message = ' '.join(SYNC_ERRORS)
+        sync_record.message = dict(SYNC_ERRORS)
         sync_record.save()
-        message = 'User sync complete - {}'.format(str(sync_record))
+        _env = 'dev' if settings.DEBUG else 'prod'
+        message = 'User sync complete *_({})_* - {}'.format(_env, str(sync_record))
         art_builds_channel = os.getenv('ART_BUILDS_CHANNEL') or '#art-builds'
         slack.send_message(message, channel=art_builds_channel)
