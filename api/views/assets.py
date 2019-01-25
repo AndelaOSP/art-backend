@@ -25,7 +25,7 @@ from rest_framework.viewsets import ModelViewSet
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import AssetFilter
-from api.permissions import IsSecurityUser, IsLogUser
+from api.permissions import IsLogUser
 from api.serializers import (
     AllocationsSerializer,
     AssetAssigneeSerializer,
