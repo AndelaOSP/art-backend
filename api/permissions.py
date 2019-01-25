@@ -26,3 +26,23 @@ class IsSecurityUser(BasePermission):
         except Exception:
             return False
         return user and request.user.is_authenticated
+
+
+class IsLogUser(BasePermission):
+    """
+    Allows access only to security users.
+    """
+
+    def has_permission(self, request, view):
+        try:
+            user = request.user
+        except Exception:
+            return False
+        if user.is_staff:
+            return user and request.user.is_authenticated
+        else:
+            try:
+                user = request.user.securityuser
+            except Exception:
+                return False
+            return user and request.user.is_authenticated
