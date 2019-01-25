@@ -50,23 +50,6 @@ jobs:
       - *cmd_install_requirements
       - *cmd_save_cache
       - run:
-          name: run flake8 checks on project
-          command: |
-            pipenv run flake8 .
-      - run:
-          name: run black formatter on project
-          command: |
-            pipenv run black --check --diff -S --exclude="migrations|.venv" .
-      - run:
-          name: isort - imports sorting
-          command: |
-            pipenv run isort -rc --check-only --diff --atomic -q .
-      - run:
-          name: check sh files
-          command: |
-            sudo apt-get install shellcheck
-            for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
-      - run:
           name: collect static files
           command: |
             pipenv run "python manage.py collectstatic --noinput"
@@ -74,6 +57,55 @@ jobs:
           name: migrate
           command: |
             pipenv run "python manage.py migrate"
+  flake8:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
+      - *cmd_install_requirements
+      - *cmd_save_cache
+      - run:
+          name: run flake8 checks on project
+          command: |
+            pipenv run flake8 .
+  black:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
+      - *cmd_install_requirements
+      - *cmd_save_cache
+      - run:
+          name: run black formatter on project
+          command: |
+            pipenv run black --check --diff -S --exclude="migrations|.venv" .
+  isort:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
+      - *cmd_install_requirements
+      - *cmd_save_cache
+      - run:
+          name: isort - imports sorting
+          command: |
+            pipenv run isort -rc --check-only --diff --atomic -q .
+  shellcheck:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
+      - *cmd_install_requirements
+      - *cmd_save_cache
+      - run:
+          name: check sh files
+          command: |
+            sudo apt-get install shellcheck
+            for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
   tests:
     <<: *default
     steps:
@@ -126,9 +158,24 @@ workflows:
   build_test_deploy:
     jobs:
       - build
-      - tests:
+      - flake8:
           requires:
             - build
+      - black:
+          requires:
+            - build
+      - isort:
+          requires:
+            - build
+      - shellcheck:
+          requires:
+            - build
+      - tests:
+          requires:
+            - flake8
+            - black
+            - isort
+            - shellcheck
       - deploy_staging:
           requires:
             - tests
