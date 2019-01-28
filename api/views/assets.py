@@ -150,7 +150,7 @@ class AssetLogViewSet(ModelViewSet):
     serializer_class = AssetLogSerializer
     queryset = models.AssetLog.objects.all()
     permission_classes = [IsAdminUser | IsSecurityUser]
-    # authentication_classes = (FirebaseTokenAuthentication,)
+    authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
     def get_queryset(self):
