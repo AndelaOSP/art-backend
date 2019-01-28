@@ -24,7 +24,7 @@ cmd_change_owner: &cmd_change_owner
       sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
 cmd_restore_cache: &cmd_restore_cache
   restore_cache:
-    key: deps9-{{ .Branch }}-
+    key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
 cmd_install_requirements: &cmd_install_requirements
   run:
     name: install application requirements
@@ -33,7 +33,7 @@ cmd_install_requirements: &cmd_install_requirements
       pipenv install -v -d
 cmd_save_cache: &cmd_save_cache
   save_cache:
-    key: deps9-{{ .Branch }}-
+    key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
     paths:
       - ".venv"
       - "/usr/local/bin"
