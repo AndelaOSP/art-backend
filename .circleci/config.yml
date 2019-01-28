@@ -10,7 +10,7 @@ default: &default
       environment:
         PIPENV_VENV_IN_PROJECT: 'true'
         DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
-    - image: circleci/postgres:9.4
+    - image: circleci/postgres:9.6
       environment:
         POSTGRES_USER: root
         POSTGRES_DB: circle_test
@@ -24,7 +24,7 @@ cmd_change_owner: &cmd_change_owner
       sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
 cmd_restore_cache: &cmd_restore_cache
   restore_cache:
-    key: deps9-{{ .Branch }}-
+    key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
 cmd_install_requirements: &cmd_install_requirements
   run:
     name: install application requirements
@@ -33,7 +33,7 @@ cmd_install_requirements: &cmd_install_requirements
       pipenv install -v -d
 cmd_save_cache: &cmd_save_cache
   save_cache:
-    key: deps9-{{ .Branch }}-
+    key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
     paths:
       - ".venv"
       - "/usr/local/bin"
@@ -49,39 +49,53 @@ jobs:
       - *cmd_restore_cache
       - *cmd_install_requirements
       - *cmd_save_cache
+  flake8:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
       - run:
           name: run flake8 checks on project
           command: |
             pipenv run flake8 .
+  black:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
       - run:
           name: run black formatter on project
           command: |
             pipenv run black --check --diff -S --exclude="migrations|.venv" .
+  isort:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
       - run:
           name: isort - imports sorting
           command: |
             pipenv run isort -rc --check-only --diff --atomic -q .
+  shellcheck:
+    <<: *default
+    steps:
+      - checkout
+      - *cmd_change_owner
+      - *cmd_restore_cache
       - run:
           name: check sh files
           command: |
             sudo apt-get install shellcheck
             for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
-      - run:
-          name: collect static files
-          command: |
-            pipenv run "python manage.py collectstatic --noinput"
-      - run:
-          name: migrate
-          command: |
-            pipenv run "python manage.py migrate"
   tests:
     <<: *default
     steps:
       - checkout
       - *cmd_change_owner
       - *cmd_restore_cache
-      - *cmd_install_requirements
-      - *cmd_save_cache
       - run:
           name: run tests
           command: |
@@ -126,9 +140,24 @@ workflows:
   build_test_deploy:
     jobs:
       - build
-      - tests:
+      - flake8:
           requires:
             - build
+      - black:
+          requires:
+            - build
+      - isort:
+          requires:
+            - build
+      - shellcheck:
+          requires:
+            - build
+      - tests:
+          requires:
+            - flake8
+            - black
+            - isort
+            - shellcheck
       - deploy_staging:
           requires:
             - tests
