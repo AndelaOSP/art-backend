@@ -62,14 +62,13 @@ class AssetCategoryAPITest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_asset_type_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
-        data = {}
+        data = {"name": "Test Edit", "asset_sub_category": self.asset_sub_category.id}
         response = client.put(
-            self.asset_type_url,
+            f"{self.asset_type_url}/{self.asset_type.id}/",
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.data.get('name'), 'Test Edit')
 
     @patch('api.authentication.auth.verify_id_token')
     def test_asset_type_api_endpoint_cant_allow_patch(self, mock_verify_id_token):

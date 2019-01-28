@@ -111,15 +111,6 @@ class SecurityUserTestCase(APIBaseTestCase):
         self.assertEqual(len(response.data['results']), SecurityUser.objects.count())
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_security_user_api_endpoint_cant_allow_put(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
-        response = client.put(
-            self.security_users_admin_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
-        )
-        self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})
-
-    @patch('api.authentication.auth.verify_id_token')
     def test_security_user_api_endpoint_cant_allow_patch(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.patch(

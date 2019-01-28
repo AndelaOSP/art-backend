@@ -56,7 +56,6 @@ class ManageAssetViewSet(ModelViewSet):
     queryset = models.Asset.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ["get", "post", "put", "delete"]
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = AssetFilter
 
@@ -198,7 +197,6 @@ class AssetCategoryViewSet(ModelViewSet):
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
     ordering = ("name",)
-    http_method_names = ["get", "post"]
 
 
 class AssetSubCategoryViewSet(ModelViewSet):
@@ -208,7 +206,6 @@ class AssetSubCategoryViewSet(ModelViewSet):
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
     ordering = ("name",)
-    http_method_names = ["get", "post"]
 
 
 class AssetTypeViewSet(ModelViewSet):
@@ -218,7 +215,6 @@ class AssetTypeViewSet(ModelViewSet):
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (OrderingFilter,)
     ordering = ("name",)
-    http_method_names = ["get", "post"]
 
 
 class AssetModelNumberViewSet(ModelViewSet):
@@ -228,7 +224,6 @@ class AssetModelNumberViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication]
     filter_backends = (OrderingFilter,)
     ordering = ("name",)
-    http_method_names = ["get", "post"]
 
 
 class AssetMakeViewSet(ModelViewSet):
@@ -238,7 +233,6 @@ class AssetMakeViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication]
     filter_backends = (OrderingFilter,)
     ordering = ("name",)
-    http_method_names = ["get", "post"]
 
 
 class AssetConditionViewSet(ModelViewSet):
@@ -246,7 +240,6 @@ class AssetConditionViewSet(ModelViewSet):
     queryset = models.AssetCondition.objects.all()
     permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ["get", "post"]
 
     def get_queryset(self):
         user_location = self.request.user.location
@@ -364,7 +357,6 @@ class AssetSpecsViewSet(ModelViewSet):
     queryset = models.AssetSpecs.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ["get", "post", "put"]
 
 
 class AssetsImportViewSet(APIView):

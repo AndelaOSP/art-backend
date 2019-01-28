@@ -80,7 +80,7 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {}
         response = client.put(
-            self.asset_assignee_url,
+            f"{self.asset_assignee_url}/{self.asset_assignee.id}/",
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )

@@ -72,19 +72,19 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_non_admin_cannot_post_put_or_delete(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.post(
-            self.manage_asset_urls,
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(response.status_code, 403)
 
         response = client.put(
-            self.manage_asset_urls,
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(response.status_code, 403)
 
         response = client.delete(
-            self.manage_asset_urls,
+            '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(response.status_code, 403)
@@ -203,13 +203,14 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 400)
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_assets_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
+    def test_assets_api_endpoint_patch(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         response = client.patch(
             '{}/{}/'.format(self.manage_asset_urls, self.asset.uuid),
+            data={},
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {'detail': 'Method "PATCH" not allowed.'})
+        self.assertEqual(response.data.get('serial_number'), self.asset.serial_number)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_assets_detail_api_endpoint_contain_assigned_to_details(

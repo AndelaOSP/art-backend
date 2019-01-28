@@ -93,14 +93,15 @@ class AssetMakeAPICase(APIBaseTestCase):
         self.assertIn(self.second_asset_make["name"].title(), response_data.values())
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_assets_api_endpoint_cant_allow_put(self, mock_verify_id_token):
+    def test_asset_make_api_endpoint_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}
+        data = {"name": "Test Edit", "asset_type": self.asset_type.id}
         response = client.put(
             "{}/{}/".format(self.asset_make_urls, self.asset_make.id),
+            data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {"detail": 'Method "PUT" not allowed.'})
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.data.get('name'), "Test Edit")
 
     @patch("api.authentication.auth.verify_id_token")
     def test_can_get_single_asset_make(self, mock_verify_token):
@@ -113,18 +114,6 @@ class AssetMakeAPICase(APIBaseTestCase):
         self.assertIn("name", response.data.keys())
         self.assertIn(self.asset_make.name, response.data.values())
         self.assertEqual(response.status_code, 200)
-
-    @patch("api.authentication.auth.verify_id_token")
-    def test_asset_make_api_endpoint_cant_allow_put(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {"email": self.user.email}
-        data = {}
-        response = client.put(
-            self.asset_make_urls,
-            data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
-        )
-        self.assertEqual(response.data, {"detail": 'Method "PUT" not allowed.'})
-        self.assertEqual(response.status_code, 405)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_make_api_endpoint_cant_allow_patch(self, mock_verify_id_token):

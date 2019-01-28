@@ -53,7 +53,7 @@ class AssetHealthTestCase(APIBaseTestCase):
     def test_assets_health_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         response = client.put(
-            self.asset_health_urls,
+            '{}/{}/'.format(self.asset_health_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})

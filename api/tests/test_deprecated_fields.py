@@ -32,6 +32,15 @@ class DeprecationTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 201)
 
+        # put
+        data = {"category_name": "Edited"}
+        edited_category = client.put(
+            f"{self.category_url}/{self.asset_category.id}/",
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(edited_category.data.get('name'), 'Edited')
+
     @patch("api.authentication.auth.verify_id_token")
     def test_deprecated_fields_sub_category(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -58,6 +67,15 @@ class DeprecationTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 201)
 
+        # put
+        data = {"sub_category_name": "Edited", "asset_category": self.asset_category.id}
+        edited_sub_category = client.put(
+            f"{self.asset_sub_category_url}/{self.asset_sub_category.id}/",
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(edited_sub_category.data.get('name'), 'Edited')
+
     @patch("api.authentication.auth.verify_id_token")
     def test_deprecated_fields_make(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -78,6 +96,15 @@ class DeprecationTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 201)
+
+        # put
+        data = {"make_label": "Edited", "asset_type": self.asset_type.id}
+        edited_make = client.put(
+            f"{self.asset_make_urls}/{self.asset_make.id}/",
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(edited_make.data.get('name'), 'Edited')
 
     @patch("api.authentication.auth.verify_id_token")
     def test_deprecated_fields_model_number(self, mock_verify_id_token):
@@ -107,6 +134,15 @@ class DeprecationTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 201)
 
+        # put
+        data = {"model_number": "EDITED", "make_label": self.asset_make.id}
+        edited_model_no = client.put(
+            f"{self.asset_model_no_url}/{self.assetmodel.id}/",
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(edited_model_no.data.get('name'), 'EDITED')
+
     @patch("api.authentication.auth.verify_id_token")
     def test_deprecated_fields_asset_type(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -131,6 +167,18 @@ class DeprecationTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 201)
 
+        # put
+        data = {
+            "asset_type": "Edited Asset Type",
+            "asset_sub_category": self.asset_sub_category.id,
+        }
+        edited_type = client.put(
+            f"{self.asset_type_url}/{self.asset_type.id}/",
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(edited_type.data.get('name'), 'Edited Asset Type')
+
     @patch("api.authentication.auth.verify_id_token")
     def test_deprecated_fields_andela_centre(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -153,6 +201,15 @@ class DeprecationTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 201)
+
+        # put
+        data = {"centre_name": "edited ET", "country": self.country.id}
+        edited_center = client.put(
+            f"{self.centre_url}/{self.asset_category.id}/",
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(edited_center.data.get("name"), "edited ET")
 
     @patch("api.authentication.auth.verify_id_token")
     def test_deprecated_fields_manage_asset(self, mock_verify_id_token):

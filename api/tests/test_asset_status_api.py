@@ -113,7 +113,7 @@ class AssetStatusAPITest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {}
         response = client.put(
-            self.asset_status_urls,
+            '{}/{}/'.format(self.asset_status_urls, self.asset_status.id),
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )

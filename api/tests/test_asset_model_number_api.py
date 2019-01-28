@@ -58,16 +58,15 @@ class AssetModelNumberAPITest(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_asset_model_number_api_endpoint_cant_allow_put(self, mock_verify_id_token):
+    def test_asset_model_number_api_endpoint_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}
-        data = {}
+        data = {"name": "TEST EDIT", "asset_make": self.asset_make.id}
         response = client.put(
-            self.asset_model_no_url,
+            f"{self.asset_model_no_url}/{self.assetmodel.id}/",
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {"detail": 'Method "PUT" not allowed.'})
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.data.get('name'), 'TEST EDIT')
 
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_model_number_api_endpoint_cant_allow_patch(

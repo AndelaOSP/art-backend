@@ -45,18 +45,6 @@ class OfficeFloorSectionAPITest(APIBaseTestCase):
         self.assertIn("floor", response.data.keys())
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_floor_section_api_endpoint_cant_allow_put(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin_user.email}
-        data = {}
-        response = client.put(
-            self.floor_section_url,
-            data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
-        )
-        self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})
-        self.assertEqual(response.status_code, 405)
-
-    @patch('api.authentication.auth.verify_id_token')
     def test_office_block_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
