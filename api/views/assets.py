@@ -25,7 +25,7 @@ from rest_framework.viewsets import ModelViewSet
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import AssetFilter
-from api.permissions import IsLogUser
+from api.permissions import IsSecurityUser
 from api.serializers import (
     AllocationsSerializer,
     AssetAssigneeSerializer,
@@ -149,8 +149,8 @@ class AssetAssigneeViewSet(ModelViewSet):
 class AssetLogViewSet(ModelViewSet):
     serializer_class = AssetLogSerializer
     queryset = models.AssetLog.objects.all()
-    permission_classes = [IsLogUser]
-    authentication_classes = (FirebaseTokenAuthentication,)
+    permission_classes = [IsAdminUser | IsSecurityUser]
+    # authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ['get', 'post']
 
     def get_queryset(self):
