@@ -32,7 +32,7 @@ class APIBaseTestCase(TestCase):
         # locations
         cls.country = apps.get_model('core', 'Country').objects.create(name="Kenya")
         cls.centre = apps.get_model('core', 'AndelaCentre').objects.create(
-            centre_name="Dojo", country=cls.country
+            name="Dojo", country=cls.country
         )
         cls.department = apps.get_model('core', 'Department').objects.create(
             name="Finance"
@@ -89,23 +89,22 @@ class APIBaseTestCase(TestCase):
 
         # assets
         cls.asset_category = apps.get_model('core', 'AssetCategory').objects.create(
-            category_name="Accessoriesssss"
+            name="Accessoriesssss"
         )
 
         cls.asset_sub_category = apps.get_model(
             'core', 'AssetSubCategory'
         ).objects.create(
-            sub_category_name="Sub Category nameseses",
-            asset_category=cls.asset_category,
+            name="Sub Category nameseses", asset_category=cls.asset_category
         )
         cls.asset_type = apps.get_model('core', 'AssetType').objects.create(
-            asset_type="Asset Types", asset_sub_category=cls.asset_sub_category
+            name="Asset Types", asset_sub_category=cls.asset_sub_category
         )
-        cls.make_label = apps.get_model('core', 'AssetMake').objects.create(
-            make_label="Asset Makes", asset_type=cls.asset_type
+        cls.asset_make = apps.get_model('core', 'AssetMake').objects.create(
+            name="Asset Makes", asset_type=cls.asset_type
         )
         cls.assetmodel = apps.get_model('core', 'AssetModelNumber').objects.create(
-            model_number="IMN50987345", make_label=cls.make_label
+            name="IMN50987345", asset_make=cls.asset_make
         )
 
         cls.asset = apps.get_model('core', 'Asset').objects.create(
@@ -168,7 +167,6 @@ class APIBaseTestCase(TestCase):
         cls.asset_urls = reverse('assets-list')
         cls.category_url = reverse('asset-categories-list')
         cls.centre_url = reverse('andela-centres-list')
-        cls.country_url = reverse('countries-list')
         cls.department_url = reverse('departments-list')
         cls.feedback_url = reverse('user-feedback-list')
         cls.filter_values_urls = reverse('available-filters')

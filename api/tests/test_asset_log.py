@@ -19,7 +19,7 @@ class AssetLogModelTest(APIBaseTestCase):
 
     def setUp(self):
         self.test_assetmodel1 = AssetModelNumber.objects.create(
-            model_number="IMN50987", make_label=self.make_label
+            name="IMN50987", asset_make=self.asset_make
         )
 
         self.test_other_asset = Asset(

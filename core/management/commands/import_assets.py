@@ -217,14 +217,14 @@ class Command(BaseCommand):
                     asset_make = create_object(
                         "AssetMake",
                         parent={"asset_type": asset_type},
-                        make_label=make_value,
+                        asset_make=make_value,
                         **row_data,
                     )
 
                     modelnumber_value = read_csv_row_value("Model Number", row)
                     asset_model_no = create_object(
                         "AssetModelNumber",
-                        parent={"make_label": asset_make},
+                        parent={"asset_make": asset_make},
                         model_number=modelnumber_value,
                         **row_data,
                     )

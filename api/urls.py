@@ -27,7 +27,6 @@ from api.views import (
     AssetTypeViewSet,
     AssetViewSet,
     AvailableFilterValues,
-    CountryViewset,
     DepartmentViewSet,
     ManageAssetViewSet,
     OfficeBlockViewSet,
@@ -94,7 +93,6 @@ router.register('office-workspaces', OfficeWorkspaceViewSet, 'office-workspaces'
 router.register('departments', DepartmentViewSet, 'departments')
 router.register('asset-assignee', AssetAssigneeViewSet, 'asset-assignee')
 router.register('andela-centres', AndelaCentreViewset, 'andela-centres')
-router.register('countries', CountryViewset, 'countries')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),

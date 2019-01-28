@@ -29,7 +29,6 @@ class AssetsUploadTestCase(APIBaseTestCase):
         data = {}
         count = Asset.objects.count()
         file_location = os.path.join(os.path.dirname(__file__), 'sample.csv')
-
         with open(file_location) as csv:
             data['file'] = csv
             response = client.post(

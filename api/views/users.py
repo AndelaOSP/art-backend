@@ -72,7 +72,6 @@ class SecurityUserViewSet(ModelViewSet):
     queryset = models.SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
         user_location = self.request.user.location
@@ -99,7 +98,6 @@ class UserGroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
         try:

@@ -76,17 +76,17 @@ To use the Docker setup, ensure you have Docker installed then run the following
 ## CI / CD
 We use CircleCI for this. Merging to develop deploys to [staging](https://staging-art.andela.com), and merging to master deploys to [production](https://art.andela.com).
 
-To ensure consistency we have automated checks for a couple of things:
+To ensure consistency we have automated checks for a couple of things. (To run these commands activate the env first `pipenv shell`, or use pipenv's `run` command. eg `pipenv run pytest`):
 - Project tests - `pytest`
 - Python (pep8) styling checks - `flake8 .`
 - [Black](https://github.com/ambv/black) formatter checks - `black --diff -S --exclude="migrations|.venv" .` (include the `-S` or `--skip-string-normalization` option to allow single quotes on strings.)
 - Shell scripts styling checks - `for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;`
 - Imports sorting - `isort -rc --diff --atomic .`. Using `--check-only` will perform a dry-run
- - Imports should be in the following order:
-   - Future imports
-   - Python standard library imports
-   - Third party packages
-   - Local app imports - absolute
-   - Local app imports - relative
+  - Imports should be in the following order:
+    - Future imports
+    - Python standard library imports
+    - Third party packages
+    - Local app imports - absolute
+    - Local app imports - relative
 
 You can set up the pre-commit Git hooks with the standard styling conventions as per the guide inn the [Wiki](https://github.com/AndelaOSP/art-backend/wiki/Styling-Conventions).

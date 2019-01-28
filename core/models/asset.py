@@ -23,17 +23,17 @@ logger = logging.getLogger(__name__)
 class AssetCategory(models.Model):
     """ Stores all asset categories """
 
-    category_name = models.CharField(unique=True, max_length=40)
+    name = models.CharField(unique=True, max_length=40)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
     objects = CaseInsensitiveManager()
 
     def clean(self):
-        if not self.category_name:
+        if not self.name:
             raise ValidationError('Category is required')
 
-        self.category_name = self.category_name.title()
+        self.name = self.name.title()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -44,13 +44,13 @@ class AssetCategory(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return self.category_name
+        return self.name
 
 
 class AssetSubCategory(models.Model):
     """Stores all asset sub categories"""
 
-    sub_category_name = models.CharField(unique=True, max_length=40)
+    name = models.CharField(unique=True, max_length=40)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
     asset_category = models.ForeignKey(AssetCategory, on_delete=models.PROTECT)
@@ -61,7 +61,7 @@ class AssetSubCategory(models.Model):
         if not self.asset_category:
             raise ValidationError('Category is required')
 
-        self.sub_category_name = self.sub_category_name.title()
+        self.name = self.name.title()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -72,13 +72,13 @@ class AssetSubCategory(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return self.sub_category_name
+        return self.name
 
 
 class AssetType(models.Model):
     """Stores all asset types"""
 
-    asset_type = models.CharField(unique=True, max_length=50)
+    name = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     asset_sub_category = models.ForeignKey(AssetSubCategory, on_delete=models.PROTECT)
@@ -90,7 +90,7 @@ class AssetType(models.Model):
         if not self.asset_sub_category:
             raise ValidationError('Sub category is required')
 
-        self.asset_type = self.asset_type.title()
+        self.name = self.name.title()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -101,13 +101,13 @@ class AssetType(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return self.asset_type
+        return self.name
 
 
 class AssetMake(models.Model):
     """ stores all asset makes """
 
-    make_label = models.CharField(unique=True, max_length=40, verbose_name="Asset Make")
+    name = models.CharField(unique=True, max_length=40, verbose_name="Asset Make")
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
     asset_type = models.ForeignKey(AssetType, on_delete=models.PROTECT)
@@ -118,7 +118,7 @@ class AssetMake(models.Model):
         if not self.asset_type:
             raise ValidationError('Type is required')
 
-        self.make_label = self.make_label.title()
+        self.name = self.name.title()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -129,20 +129,20 @@ class AssetMake(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return self.make_label
+        return self.name
 
 
 class AssetModelNumber(models.Model):
-    model_number = models.CharField(unique=True, max_length=100)
+    name = models.CharField(unique=True, max_length=100)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    make_label = models.ForeignKey(
+    asset_make = models.ForeignKey(
         AssetMake, null=True, on_delete=models.PROTECT, verbose_name="Asset Make"
     )
     objects = CaseInsensitiveManager()
 
     def clean(self):
-        self.model_number = self.model_number.upper()
+        self.name = self.name.upper()
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -153,7 +153,7 @@ class AssetModelNumber(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return self.model_number
+        return self.name
 
 
 class AssetSpecs(models.Model):
@@ -264,6 +264,34 @@ class Asset(models.Model):
     class Meta:
         ordering = ['-id']
         unique_together = ("asset_code", "serial_number")
+
+    def _get_asset_category(self):
+        return self._get_asset_sub_category().asset_category
+
+    def _get_asset_sub_category(self):
+        return self._get_asset_type().asset_sub_category
+
+    def _get_asset_make(self):
+        return self.model_number.asset_make
+
+    def _get_asset_type(self):
+        return self._get_asset_make().asset_type
+
+    @property
+    def asset_category(self):
+        return self._get_asset_category().name
+
+    @property
+    def asset_sub_category(self):
+        return self._get_asset_sub_category().name
+
+    @property
+    def asset_make(self):
+        return self._get_asset_make().name
+
+    @property
+    def asset_type(self):
+        return self._get_asset_type().name
 
 
 class AssetAssignee(models.Model):
@@ -472,9 +500,7 @@ class AllocationHistory(models.Model):
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
             message = (
                 "The {} with serial number {} and asset code {} ".format(
-                    asset.model_number.make_label.asset_type.asset_type,
-                    asset.serial_number,
-                    asset.asset_code,
+                    asset.asset_type, asset.serial_number, asset.asset_code
                 )
                 + "has been allocated to you."
             )
@@ -482,9 +508,7 @@ class AllocationHistory(models.Model):
         elif not asset.assigned_to and self.previous_owner:
             message = (
                 "The {} with serial number {} and asset code {} ".format(
-                    asset.model_number.make_label.asset_type.asset_type,
-                    asset.serial_number,
-                    asset.asset_code,
+                    asset.asset_type, asset.serial_number, asset.asset_code
                 )
                 + "has been de-allocated from you."
             )

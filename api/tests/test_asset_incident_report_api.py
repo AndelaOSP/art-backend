@@ -116,7 +116,7 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
     def test_cant_allow_put_incident_report(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.user.email}
         response = client.put(
-            f"{self.incident_report_url}",
+            f"{self.incident_report_url}/{self.incident_report.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})

@@ -9,7 +9,7 @@ class CaseInsensitiveQuerySet(QuerySet):
             'category_name',
             'sub_category_name',
             'asset_type',
-            'make_label',
+            'asset_make',
             'model_number',
             'asset_code',
             'serial_number',

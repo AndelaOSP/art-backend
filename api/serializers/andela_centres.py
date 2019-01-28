@@ -46,40 +46,46 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 
 class AndelaCentreSerializer(serializers.ModelSerializer):
+    centre_name = serializers.SerializerMethodField()
     country = serializers.SlugRelatedField(
-        queryset=models.Country.objects.all(), slug_field='name'
+        queryset=models.Country.objects.all(), slug_field="name"
     )
 
     class Meta:
         model = models.AndelaCentre
-        fields = ("id", "centre_name", "country", "created_at", "last_modified")
+        fields = ("id", "name", "country", "created_at", "last_modified", "centre_name")
 
     def to_internal_value(self, data):
-        country_name = data.get('country')
+        country_name = data.get("country")
         if not country_name:
             raise serializers.ValidationError(
-                {'country': [self.error_messages['required']]}
+                {"country": [self.error_messages["required"]]}
             )
         try:
-            query_data = {'id': int(country_name)}
+            query_data = {"id": int(country_name)}
         except ValueError:
             country = countries.lookup(country_name)
-            query_data = {'name': country.name}
+            query_data = {"name": country.name}
         finally:
             try:
                 country = models.Country.objects.get(**query_data)
             except Exception:
                 raise serializers.ValidationError(
                     {
-                        'country': [
-                            f'Invalid country \"{country_name}\" - object does not exist.'
+                        "country": [
+                            f'Invalid country "{country_name}" - object does not exist.'
                         ]
                     }
                 )
         data_ = data.copy()
-        data_['country'] = country.name
+        data_["country"] = country.name
+        if not data_.get("name"):
+            data_["name"] = data_.get("centre_name")
         internal_value = super().to_internal_value(data_)
         return internal_value
+
+    def get_centre_name(self, obj):
+        return obj.name
 
 
 class CountrySerializer(serializers.ModelSerializer):

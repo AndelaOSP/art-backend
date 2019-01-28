@@ -11,15 +11,13 @@ def save_asset(data, skipped_file):
     for pos, row in enumerate(data):
         row_data = {"row": row, "row_count": pos, "required_for_import": True}
         category_value = read_csv_row_value("Category", row)
-        category = create_object(
-            "AssetCategory", category_name=category_value, **row_data
-        )
+        category = create_object("AssetCategory", name=category_value, **row_data)
 
         subcategory_value = read_csv_row_value("Sub-Category", row)
         subcategory = create_object(
             "AssetSubCategory",
             parent={"asset_category": category},
-            sub_category_name=subcategory_value,
+            name=subcategory_value,
             **row_data,
         )
 
@@ -27,23 +25,20 @@ def save_asset(data, skipped_file):
         asset_type = create_object(
             "AssetType",
             parent={"asset_sub_category": subcategory},
-            asset_type=type_value,
+            name=type_value,
             **row_data,
         )
 
         make_value = read_csv_row_value("Make", row)
         asset_make = create_object(
-            "AssetMake",
-            parent={"asset_type": asset_type},
-            make_label=make_value,
-            **row_data,
+            "AssetMake", parent={"asset_type": asset_type}, name=make_value, **row_data
         )
 
         modelnumber_value = read_csv_row_value("Model Number", row)
         asset_model_no = create_object(
             "AssetModelNumber",
-            parent={"make_label": asset_make},
-            model_number=modelnumber_value,
+            parent={"asset_make": asset_make},
+            name=modelnumber_value,
             **row_data,
         )
 
