@@ -25,18 +25,12 @@ class OfficeFloorSectionSerializer(serializers.ModelSerializer):
 
 
 class OfficeWorkspaceSerializer(serializers.ModelSerializer):
-    floor = serializers.SerializerMethodField()
-    block = serializers.SerializerMethodField()
+    floor = serializers.ReadOnlyField(source='section__floor__number')
+    block = serializers.ReadOnlyField(source='section__floor__block__name')
 
     class Meta:
         model = models.OfficeWorkspace
         fields = ("id", "name", "section", "floor", "block")
-
-    def get_floor(self, obj):
-        return obj.section.floor.number
-
-    def get_block(self, obj):
-        return obj.section.floor.block.name
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -46,7 +40,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 
 class AndelaCentreSerializer(serializers.ModelSerializer):
-    centre_name = serializers.SerializerMethodField()
+    centre_name = serializers.ReadOnlyField(source='name')
     country = serializers.SlugRelatedField(
         queryset=models.Country.objects.all(), slug_field="name"
     )
@@ -83,9 +77,6 @@ class AndelaCentreSerializer(serializers.ModelSerializer):
             data_["name"] = data_.get("centre_name")
         internal_value = super().to_internal_value(data_)
         return internal_value
-
-    def get_centre_name(self, obj):
-        return obj.name
 
 
 class CountrySerializer(serializers.ModelSerializer):

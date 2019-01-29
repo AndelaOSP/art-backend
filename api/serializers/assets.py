@@ -11,11 +11,11 @@ class AssetSerializer(serializers.ModelSerializer):
     checkin_status = serializers.SerializerMethodField()
     allocation_history = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
-    asset_category = serializers.SerializerMethodField()
-    asset_sub_category = serializers.SerializerMethodField()
-    asset_make = serializers.SerializerMethodField()
-    make_label = serializers.SerializerMethodField()
-    asset_type = serializers.SerializerMethodField()
+    asset_category = serializers.ReadOnlyField()
+    asset_sub_category = serializers.ReadOnlyField()
+    asset_make = serializers.ReadOnlyField()
+    make_label = serializers.ReadOnlyField(source='asset_make')
+    asset_type = serializers.ReadOnlyField()
     asset_location = serializers.SlugRelatedField(
         many=False,
         slug_field="name",
@@ -97,21 +97,6 @@ class AssetSerializer(serializers.ModelSerializer):
         else:
             return None
         return serialized_data.data
-
-    def get_asset_category(self, obj):
-        return obj.asset_category
-
-    def get_asset_sub_category(self, obj):
-        return obj.asset_sub_category
-
-    def get_asset_make(self, obj):
-        return obj.asset_make
-
-    def get_make_label(self, obj):
-        return obj.asset_make
-
-    def get_asset_type(self, obj):
-        return obj.asset_type
 
     def get_allocation_history(self, obj):
         allocations = models.AllocationHistory.objects.filter(asset=obj.id)
@@ -233,7 +218,7 @@ class AllocationsSerializer(serializers.ModelSerializer):
 
 
 class AssetCategorySerializer(serializers.ModelSerializer):
-    category_name = serializers.SerializerMethodField()
+    category_name = serializers.ReadOnlyField(source='name')
 
     class Meta:
         model = models.AssetCategory
@@ -246,12 +231,9 @@ class AssetCategorySerializer(serializers.ModelSerializer):
         internal_value = super().to_internal_value(_data)
         return internal_value
 
-    def get_category_name(self, obj):
-        return obj.name
-
 
 class AssetSubCategorySerializer(serializers.ModelSerializer):
-    sub_category_name = serializers.SerializerMethodField()
+    sub_category_name = serializers.ReadOnlyField(source='name')
 
     class Meta:
         model = models.AssetSubCategory
@@ -276,12 +258,9 @@ class AssetSubCategorySerializer(serializers.ModelSerializer):
         instance_data["asset_category"] = instance.asset_category.name
         return instance_data
 
-    def get_sub_category_name(self, obj):
-        return obj.name
-
 
 class AssetTypeSerializer(serializers.ModelSerializer):
-    asset_type = serializers.SerializerMethodField()
+    asset_type = serializers.ReadOnlyField(source='name')
 
     class Meta:
         model = models.AssetType
@@ -307,13 +286,10 @@ class AssetTypeSerializer(serializers.ModelSerializer):
         instance_data["asset_sub_category"] = instance.asset_sub_category.name
         return instance_data
 
-    def get_asset_type(self, obj):
-        return obj.name
-
 
 class AssetModelNumberSerializer(serializers.ModelSerializer):
-    model_number = serializers.SerializerMethodField()
     make_label = serializers.SerializerMethodField()
+    model_number = serializers.ReadOnlyField(source='name')
 
     class Meta:
         model = models.AssetModelNumber
@@ -325,7 +301,6 @@ class AssetModelNumberSerializer(serializers.ModelSerializer):
             "last_modified",
             "model_number",
             "make_label",
-            "model_number",
         )
 
     def to_representation(self, instance):
@@ -356,9 +331,6 @@ class AssetModelNumberSerializer(serializers.ModelSerializer):
 
     def get_make_label(self, obj):
         return obj.asset_make.name
-
-    def get_model_number(self, obj):
-        return obj.name
 
 
 class AssetConditionSerializer(serializers.ModelSerializer):
@@ -447,22 +419,13 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
 
 
 class AssetHealthSerializer(serializers.ModelSerializer):
-    asset_type = serializers.SerializerMethodField()
-    model_number = serializers.SerializerMethodField()
-    count_by_status = serializers.SerializerMethodField()
+    asset_type = serializers.ReadOnlyField()
+    model_number = serializers.ReadOnlyField(source='model_number__name')
+    count_by_status = serializers.ReadOnlyField(source='current_status')
 
     class Meta:
         model = models.Asset
         fields = ("asset_type", "model_number", "count_by_status")
-
-    def get_asset_type(self, obj):
-        return obj.asset_type
-
-    def get_count_by_status(self, obj):
-        return obj.current_status
-
-    def get_model_number(self, obj):
-        return obj.model_number.name
 
 
 class AssetSpecsSerializer(serializers.ModelSerializer):
