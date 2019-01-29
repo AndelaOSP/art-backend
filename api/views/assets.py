@@ -312,8 +312,8 @@ class AssetHealthCountViewSet(ModelViewSet):
 
             def increment_asset_status(asset, model_number=model_number):
                 if (
-                    asset["asset_type"] == asset_name
-                    and asset["model_number"] == model_number
+                    asset.get("asset_type") == asset_name
+                    and asset.get("model_number") == model_number
                 ):
                     nonlocal statuses
                     statuses[asset["count_by_status"]] += 1
@@ -337,8 +337,8 @@ class AssetHealthCountViewSet(ModelViewSet):
 
     def _get_model_numbers(self, asset_type):
         asset_model_numbers = map(
-            lambda asset: asset["model_number"],
-            filter(lambda asset: asset["asset_type"] == asset_type, self.data),
+            lambda asset: asset.get("model_number"),
+            filter(lambda asset: asset.get("asset_type") == asset_type, self.data),
         )
         return {asset_type: set(list(asset_model_numbers))}
 

@@ -167,6 +167,7 @@ class APIBaseTestCase(TestCase):
         cls.asset_urls = reverse('assets-list')
         cls.category_url = reverse('asset-categories-list')
         cls.centre_url = reverse('andela-centres-list')
+        cls.country_url = reverse('countries-list')
         cls.department_url = reverse('departments-list')
         cls.feedback_url = reverse('user-feedback-list')
         cls.filter_values_urls = reverse('available-filters')
