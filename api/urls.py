@@ -87,7 +87,11 @@ router.register('asset-sub-categories', AssetSubCategoryViewSet, 'asset-sub-cate
 router.register('asset-types', AssetTypeViewSet, 'asset-types')
 router.register('incidence-reports', AssetIncidentReportViewSet, 'incidence-reports')
 router.register('manage-assets', ManageAssetViewSet, 'manage-assets')
-router.register('slack-incidence-reports', AssetSlackIncidentReportViewSet, 'slack-incidence-reports')
+router.register(
+    'slack-incidence-reports',
+    AssetSlackIncidentReportViewSet,
+    'slack-incidence-reports',
+)
 
 # centres
 router.register('andela-centres', AndelaCentreViewset, 'andela-centres')
@@ -118,19 +122,17 @@ urlpatterns = [
     path('filter-values/', AvailableFilterValues.as_view(), name='available-filters'),
 ]
 if settings.DEBUG:
-    urlpatterns.extend(
-        [
-            path(
-                'docs/',
-                schema_view.with_ui('redoc', cache_timeout=None),
-                name='schema-redoc',
-            ),
-            path(
-                'docs/live/',
-                schema_view.with_ui('swagger', cache_timeout=None),
-                name='schema-swagger',
-            ),
-        ]
-    )
+    urlpatterns += [
+        path(
+            'docs/',
+            schema_view.with_ui('redoc', cache_timeout=None),
+            name='schema-redoc',
+        ),
+        path(
+            'docs/live/',
+            schema_view.with_ui('swagger', cache_timeout=None),
+            name='schema-swagger',
+        ),
+    ]
 
 urlpatterns += router.urls

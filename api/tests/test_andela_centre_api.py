@@ -89,24 +89,22 @@ class AndelaCentreAPITest(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_country_create(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        data = {
-            "name": countries.lookup('Rwanda').name,
-        }
+        data = {"name": countries.lookup('Rwanda').name}
         response = client.post(
             self.country_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.admin_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.admin_user),
+        )
         self.assertIn("name", response.data.keys())
         self.assertEqual(response.status_code, 201)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_duplicate_country_create(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        data = {
-            "name": self.country.name,
-        }
+        data = {"name": self.country.name}
         response = client.post(
             self.country_url,
             data=data,
-            HTTP_AUTHORIZATION="Token {}".format(self.admin_user))
+            HTTP_AUTHORIZATION="Token {}".format(self.admin_user),
+        )
         self.assertEqual(response.status_code, 400)
