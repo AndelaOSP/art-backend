@@ -13,7 +13,7 @@ from rest_framework.viewsets import ModelViewSet
 
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
-from api.filters import UserFilter
+from api.filters import UserFilter, SecurityUserFilter
 from api.permissions import IsApiUser
 from api.serializers import (
     SecurityUserEmailsSerializer,
@@ -72,6 +72,8 @@ class SecurityUserViewSet(ModelViewSet):
     queryset = models.SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = SecurityUserFilter
 
     def get_queryset(self):
         user_location = self.request.user.location

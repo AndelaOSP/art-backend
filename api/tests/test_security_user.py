@@ -127,3 +127,14 @@ class SecurityUserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.data, {'detail': 'Method "DELETE" not allowed.'})
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_filter_security_users_by_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        # url = reverse('security_users-list')
+        response = client.get(
+            '{}?active={}'.format(self.security_users_admin_url, self.security_user.active),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['count'], 1)

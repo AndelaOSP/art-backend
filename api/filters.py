@@ -7,6 +7,7 @@ from django_filters import rest_framework as filters
 
 # App Imports
 from core.models import Asset, User
+from core import models
 
 logger = logging.getLogger(__name__)
 
@@ -75,3 +76,11 @@ class UserFilter(BaseFilter):
     class Meta:
         model = User
         fields = ['cohort', 'email', 'asset_count']
+
+
+class SecurityUserFilter(BaseFilter):
+    active = filters.CharFilter(field_name='active', lookup_expr='iexact')
+
+    class Meta:
+        model = models.SecurityUser
+        fields = ['active']
