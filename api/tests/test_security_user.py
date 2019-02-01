@@ -151,4 +151,4 @@ class SecurityUserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.data, self.security_user.email)
+        self.assertNotIn(self.security_user.email, response.data)
