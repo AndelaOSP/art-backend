@@ -110,7 +110,6 @@ class SecurityUserSerializer(serializers.ModelSerializer):
             'last_modified',
             'date_joined',
             'last_login',
-            'active',
         )
 
         extra_kwargs = {

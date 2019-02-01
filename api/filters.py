@@ -79,8 +79,8 @@ class UserFilter(BaseFilter):
 
 
 class SecurityUserFilter(BaseFilter):
-    active = filters.CharFilter(field_name='active', lookup_expr='iexact')
+    is_active = filters.CharFilter(field_name='is_active', lookup_expr='iexact')
 
     class Meta:
         model = models.SecurityUser
-        fields = ['active']
+        fields = ['is_active']

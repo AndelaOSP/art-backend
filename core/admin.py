@@ -27,9 +27,9 @@ admin.site.register(
 class SecurityUserAdmin(BaseUserAdmin):
     add_form = UserRegistrationForm
     search_fields = ('email', 'first_name', 'last_name')
-    list_display = ('first_name', 'last_name', 'email', 'badge_number', 'phone_number', 'active')
+    list_display = ('first_name', 'last_name', 'email', 'badge_number', 'phone_number', 'is_active')
 
-    list_filter = ('badge_number', 'active')
+    list_filter = ('badge_number', 'is_active')
 
     fieldsets = (
         (
@@ -42,7 +42,7 @@ class SecurityUserAdmin(BaseUserAdmin):
                     'badge_number',
                     'phone_number',
                     'password',
-                    'active',
+                    'is_active',
                 )
             },
         ),
