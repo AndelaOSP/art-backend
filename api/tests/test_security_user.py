@@ -133,7 +133,7 @@ class SecurityUserTestCase(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         response = client.get(
             '{}?active={}'.format(
-                self.security_users_admin_url, self.security_user.active
+                self.security_users_admin_url, self.security_user.is_active
             ),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
