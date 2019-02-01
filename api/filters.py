@@ -6,6 +6,7 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 
 # App Imports
+from core import models
 from core.models import Asset, User
 
 logger = logging.getLogger(__name__)
@@ -75,3 +76,11 @@ class UserFilter(BaseFilter):
     class Meta:
         model = User
         fields = ['cohort', 'email', 'asset_count']
+
+
+class SecurityUserFilter(BaseFilter):
+    is_active = filters.CharFilter(field_name='is_active', lookup_expr='iexact')
+
+    class Meta:
+        model = models.SecurityUser
+        fields = ['is_active']
