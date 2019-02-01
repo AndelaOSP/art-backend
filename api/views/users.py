@@ -71,7 +71,7 @@ class SecurityUserViewSet(ModelViewSet):
     serializer_class = SecurityUserSerializer
     queryset = models.SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [FirebaseTokenAuthentication]
+    # authentication_classes = [FirebaseTokenAuthentication]
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SecurityUserFilter
 
