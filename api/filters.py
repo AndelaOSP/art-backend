@@ -1,5 +1,7 @@
 # Standard Library
+import functools
 import logging
+import operator
 
 # Third-Party Imports
 from django.db.models import Q
@@ -21,8 +23,15 @@ class BaseFilter(filters.FilterSet):
         if NULL_VALUE in options:
             options.remove(NULL_VALUE)
             null_lookup = {'__'.join([name, 'isnull']): True}
-        lookup = {'__'.join([name, 'in']): options}
-        return queryset.filter(Q(**lookup) | Q(**null_lookup))
+        if options:
+            lookup = functools.reduce(
+                operator.or_,
+                {Q(**{'__'.join([name, 'icontains']): item}) for item in options},
+            )
+        else:
+            lookup = Q(**{})
+
+        return queryset.filter(Q(lookup | Q(**null_lookup)))
 
 
 class AssetFilter(BaseFilter):
@@ -32,6 +41,11 @@ class AssetFilter(BaseFilter):
     model_number = filters.CharFilter(
         field_name='model_number__name',
         lookup_expr='iexact',
+        method='filter_with_multiple_query_values',
+    )
+    serial_number = filters.CharFilter(
+        field_name='serial_number',
+        lookup_expr='icontains',
         method='filter_with_multiple_query_values',
     )
     asset_type = filters.CharFilter(

@@ -356,6 +356,70 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.data['count'], 0)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_asset_filter_by_serial_number(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        asset = Asset.objects.create(
+            asset_code="IC001457",
+            serial_number="SN12345",
+            purchase_date="2018-07-10",
+            model_number=self.assetmodel,
+            asset_location=self.centre,
+        )
+        asset_1 = Asset.objects.create(
+            asset_code="IC-1457",
+            serial_number="SN123890",
+            purchase_date="2018-07-10",
+            model_number=self.assetmodel,
+            asset_location=self.centre,
+        )
+
+        # non-existent serial
+        response = client.get(
+            '{}?serial_number={}'.format(self.manage_asset_urls, 'random-serial'),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data['count'], 0)
+        # 1 matching serial
+        response = client.get(
+            '{}?serial_number={}'.format(
+                self.manage_asset_urls, self.asset.serial_number
+            ),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data['count'], 1)
+
+        # one matching, one invalid serial
+        response = client.get(
+            '{}?serial_number=randomserial,{}'.format(
+                self.manage_asset_urls, self.asset.serial_number
+            ),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data['count'], 1)
+        # 2 exact matches
+        response = client.get(
+            '{}?serial_number={},{}'.format(
+                self.manage_asset_urls, asset.serial_number, asset_1.serial_number
+            ),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+
+        self.assertEqual(response.data['count'], 2)
+
+        # partial match
+        search_term = asset.serial_number[:-2]
+        all_assets = Asset.objects.all()
+        match_count = 0
+        for each in all_assets:
+            if search_term in each.serial_number:
+                match_count += 1
+        response = client.get(
+            '{}?serial_number={}'.format(self.manage_asset_urls, search_term),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.data['count'], match_count)
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_assets_have_allocation_history(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         response = client.get(
