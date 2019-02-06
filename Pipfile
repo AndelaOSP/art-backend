@@ -32,6 +32,7 @@ isort = {git = "https://github.com/timothycrosley/isort", editable = true}
 pytest-django = "==3.4.5"
 pdbpp = "==0.9.3"
 black = "==18.9b0"
+diff-cover = "==1.0.6"
 
 [requires]
 python_version = "3.6.4"
