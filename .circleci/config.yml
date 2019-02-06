@@ -96,14 +96,34 @@ jobs:
       - checkout
       - *cmd_change_owner
       - *cmd_restore_cache
+      - attach_workspace:
+          at: ~/art-backend/tmp
       - run:
           name: run tests
           command: |
             pipenv run coverage run --source core,api -m pytest --durations=0
       - run:
+          name: save coverage
+          command: pipenv run coverage xml -o ./tmp/coverage.xml
+      - run:
           name: run coveralls
           command: |
             pipenv run coveralls
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - coverage.xml
+  diff:
+      <<: *default
+      steps:
+        - checkout
+        - *cmd_change_owner
+        - *cmd_restore_cache
+        - attach_workspace:
+            at: ~/art-backend/tmp
+        - run:
+            name: diff cover
+            command: pipenv run diff-cover tmp/coverage.xml --compare-branch=origin/develop --fail-under=90
   deploy_staging:
     <<: *default
     steps:
@@ -158,6 +178,9 @@ workflows:
             - black
             - isort
             - shellcheck
+      - diff:
+          requires:
+            - tests
       - deploy_staging:
           requires:
             - tests
