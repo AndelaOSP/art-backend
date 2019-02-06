@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "49cc147ece40ea3fa35c9b8f9d95d41c1bc3ed70afe799ff37e4af7cb65061f0"
+            "sha256": "358d0d2c19847eed9c59bf84f4bd5423ed703a50d788a325586becb81c2f241c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -740,8 +740,13 @@
             "version": "==2.1.0"
         },
         "isort": {
-            "editable": true,
-            "git": "https://github.com/timothycrosley/isort"
+            "hashes": [
+                "sha256:1153601da39a25b14ddc54955dbbacbb6b2d19135386699e2ad58517953b34af",
+                "sha256:b9c40e9750f3d77e6e4d441d8b0266cf555e7cdabdcff33c4fd06366ca761ef8",
+                "sha256:ec9ef8f4a9bc6f71eec99e1806bfa2de401650d996c59330782b89a5555c1497"
+            ],
+            "index": "pypi",
+            "version": "==4.3.4"
         },
         "jinja2": {
             "hashes": [
@@ -857,11 +862,11 @@
         },
         "pytest-django": {
             "hashes": [
-                "sha256:1a5d33be930e3172fa238643a380414dc369fe8fa4b3c3de25e59ed142950736",
-                "sha256:e88e471d3d0f9acfb6293bb03d0ee8a33ed978734e92ea6b5312163a6c9e87cc"
+                "sha256:3d489db7c9bd18d7c154347b1bdfb82cc6b1ec8539543508b199c77e5eb2caec",
+                "sha256:87c31e53ad09ca4f061b82a9d71ad1e3e399c7a5ec9d28f7c3c38a9a9afbd027"
             ],
             "index": "pypi",
-            "version": "==3.4.5"
+            "version": "==3.4.7"
         },
         "requests": {
             "hashes": [
