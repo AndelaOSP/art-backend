@@ -377,18 +377,14 @@ class AssetsImportViewSet(APIView):
         file_obj = codecs.iterdecode(file_object, 'utf-8')
         csv_reader = csv.DictReader(file_obj, delimiter=",")
         if not (csv_reader.fieldnames and ' '.join(csv_reader.fieldnames).strip()):
-            return Response(
-                {"error": "CSV file is empty"}, status=400
-            )
+            return Response({"error": "CSV file is empty"}, status=400)
         csv_values = []
         for line in csv_reader.reader:
             line = [val for val in line if val and val.strip()]
             csv_values = csv_values + line
         csv_values = list(set(csv_values))
         if not csv_values:
-            return Response(
-                {"error": "CSV file only contains headings"}, status=400
-            )
+            return Response({"error": "CSV file only contains headings"}, status=400)
         skipped_file_name = self.request.user.email
         file_name = re.search(r"\w+", skipped_file_name).group()
         response = {}
