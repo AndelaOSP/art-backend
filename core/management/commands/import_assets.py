@@ -21,9 +21,9 @@ SKIPPED_ASSETS_FILE = os.path.join(settings.BASE_DIR, "skipped.csv")
 
 
 def read_csv_row_value(header_name, row):
-    value = row.get(header_name).strip()
+    value = row.get(header_name)
     if value:
-        return value
+        return value.strip()
     return None
 
 

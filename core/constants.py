@@ -48,3 +48,7 @@ STORAGE_SIZES = ((128, "128GB"), (256, "256GB"), (512, "512GB"))
 YEAR_CHOICES = []
 for year in range(2013, (datetime.now().year + 1)):
     YEAR_CHOICES.append((year, year))
+
+CSV_REQUIRED_HEADING = {'Make', 'Type', 'Asset Code', 'Category', 'Sub-Category'}
+CSV_REQUIRED_HEADING_MODEL = CSV_REQUIRED_HEADING.union({'Model Number'})
+CSV_REQUIRED_HEADING_SERIAL = CSV_REQUIRED_HEADING.union({'Serial No'})
