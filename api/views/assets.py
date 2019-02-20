@@ -44,9 +44,9 @@ from api.serializers import (
 )
 from core import models
 from core.assets_saver_helper import save_asset
+from core.constants import CSV_REQUIRED_HEADING_MODEL, CSV_REQUIRED_HEADING_SERIAL
 from core.management.commands.import_assets import SKIPPED_ROWS
 from core.slack_bot import SlackIntegration
-from core.constants import CSV_REQUIRED_HEADING_MODEL, CSV_REQUIRED_HEADING_SERIAL
 
 slack = SlackIntegration()
 logger = logging.getLogger(__name__)
@@ -380,10 +380,11 @@ class AssetsImportViewSet(APIView):
         if not (csv_reader.fieldnames and ' '.join(csv_reader.fieldnames).strip()):
             return Response({"error": "CSV file is empty"}, status=400)
         field_names_set = set(csv_reader.fieldnames)
-        if not (field_names_set >= CSV_REQUIRED_HEADING_MODEL or field_names_set >= CSV_REQUIRED_HEADING_SERIAL):
-            return Response(
-                {"error": "File contains missing headings"}, status=400
-            )
+        if not (
+            field_names_set >= CSV_REQUIRED_HEADING_MODEL
+            or field_names_set >= CSV_REQUIRED_HEADING_SERIAL
+        ):
+            return Response({"error": "File contains missing headings"}, status=400)
         csv_values = []
         for line in csv_reader.reader:
             line = [val for val in line if val and val.strip()]
