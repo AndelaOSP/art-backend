@@ -37,7 +37,11 @@ class FirebaseTokenAuthentication(TokenAuthentication):
             raise exceptions.AuthenticationFailed('Unable to authenticate.')
         else:
             email = token.get('email')
+        try:
             user = User.objects.get(email=email)
+        except Exception as e:
+            logger.error(str(e))
+            raise exceptions.AuthenticationFailed('User not found')
 
         if not user.is_active:
             raise exceptions.AuthenticationFailed('User inactive or deleted.')
