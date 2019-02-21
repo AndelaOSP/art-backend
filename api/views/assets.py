@@ -43,9 +43,8 @@ from api.serializers import (
     AssetTypeSerializer,
 )
 from core import models
-from core.assets_saver_helper import save_asset
 from core.constants import CSV_REQUIRED_HEADING_MODEL, CSV_REQUIRED_HEADING_SERIAL
-from core.management.commands.import_assets import SKIPPED_ROWS
+from core.assets_import_helper import process_file, SKIPPED_ROWS
 from core.slack_bot import SlackIntegration
 
 slack = SlackIntegration()
@@ -398,7 +397,7 @@ class AssetsImportViewSet(APIView):
         error = False
         file_obj = codecs.iterdecode(file_object, 'utf-8')
         csv_reader = csv.DictReader(file_obj, delimiter=",")
-        if not save_asset(csv_reader, file_name):
+        if not process_file(csv_reader, file_name):
             path = request.build_absolute_uri(reverse("skipped"))
 
             response[
@@ -423,7 +422,7 @@ class SkippedAssets(APIView):
     def get(self, request):
         filename = os.path.join(
             settings.BASE_DIR,
-            "SkippedAssets/{}.csv".format(
+            "skippedassets/{}.csv".format(
                 re.search(r"\w+", request.user.email).group()
             ),
         )
@@ -432,7 +431,7 @@ class SkippedAssets(APIView):
 
         file = open(filename, "rb")
         response = FileResponse(file, content_type="text/csv")
-        response["Content-Disposition"] = 'attachment; filename="SkippedAssets.csv"'
+        response["Content-Disposition"] = 'attachment; filename="skippedassets.csv"'
 
         return response
 
@@ -441,7 +440,7 @@ class SampleImportFile(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        filename = os.path.join(settings.BASE_DIR, "Samples/sample_import.csv")
+        filename = os.path.join(settings.BASE_DIR, "samples/sample_import.csv")
 
         # send file
 
