@@ -17,7 +17,7 @@ NULL_VALUE = 'unspecified'
 
 
 class BaseFilter(filters.FilterSet):
-    def filter_with_multiple_query_values(self, queryset, name, value):
+    def filter_contains_with_multiple_query_values(self, queryset, name, value):
         options = set(value.split(','))
         null_lookup = {}
         if NULL_VALUE in options:
@@ -33,6 +33,15 @@ class BaseFilter(filters.FilterSet):
 
         return queryset.filter(Q(lookup | Q(**null_lookup)))
 
+    def filter_exact_with_multiple_query_values(self, queryset, name, value):
+        options = set(value.split(','))
+        null_lookup = {}
+        if NULL_VALUE in options:
+            options.remove(NULL_VALUE)
+            null_lookup = {'__'.join([name, 'isnull']): True}
+        lookup = {'__'.join([name, 'in']): options}
+        return queryset.filter(Q(**lookup) | Q(**null_lookup))
+
 
 class AssetFilter(BaseFilter):
     email = filters.CharFilter(
@@ -41,17 +50,17 @@ class AssetFilter(BaseFilter):
     model_number = filters.CharFilter(
         field_name='model_number__name',
         lookup_expr='iexact',
-        method='filter_with_multiple_query_values',
+        method='filter_contains_with_multiple_query_values',
     )
     serial_number = filters.CharFilter(
         field_name='serial_number',
         lookup_expr='icontains',
-        method='filter_with_multiple_query_values',
+        method='filter_contains_with_multiple_query_values',
     )
     asset_type = filters.CharFilter(
         field_name='model_number__asset_make__asset_type__name',
         lookup_expr='iexact',
-        method='filter_with_multiple_query_values',
+        method='filter_contains_with_multiple_query_values',
     )
     current_status = filters.CharFilter(
         field_name='current_status', lookup_expr='iexact'
@@ -67,7 +76,7 @@ class UserFilter(BaseFilter):
     cohort = filters.CharFilter(
         field_name='cohort',
         lookup_expr='iexact',
-        method='filter_with_multiple_query_values',
+        method='filter_exact_with_multiple_query_values',
     )
 
     email = filters.CharFilter(field_name='email', lookup_expr='istartswith')
