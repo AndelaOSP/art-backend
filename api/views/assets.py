@@ -43,8 +43,8 @@ from api.serializers import (
     AssetTypeSerializer,
 )
 from core import models
-from core.constants import CSV_REQUIRED_HEADING_MODEL, CSV_REQUIRED_HEADING_SERIAL
 from core.assets_import_helper import process_file, SKIPPED_ROWS
+from core.constants import CSV_REQUIRED_HEADING_MODEL, CSV_REQUIRED_HEADING_SERIAL
 from core.slack_bot import SlackIntegration
 
 slack = SlackIntegration()

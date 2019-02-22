@@ -1,6 +1,2 @@
-Model Number,Asset Code,Serial No.
-HP 27ES ,PNT/PDW/117,
-HP 27ES,PNT/PDW/644,YIDQS-ZXC-PHK-QLM
-HP 27ES ,PNT/TRT/644,CJXNIKERFTE
-HP 27ES,PNT/TRT/793,IVGSKYXZHTD
- ,PNT/TRT/644,CJXNIKERFTE
+Make,Type,Asset Code,Category,Sub-Category,Model Number,Serial No.
+hp,Windows PC,PNT/PDW/888,Accessories,Computers,"Compaq Prio CQ 57 (15"")"

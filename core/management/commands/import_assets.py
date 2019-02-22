@@ -12,6 +12,7 @@ from core.management.commands import COMMAND_VERSION, DJANGO_VERSION
 
 SILENT, NORMAL, VERBOSE, VERY_VERBOSE = 0, 1, 2, 3
 
+
 class Command(BaseCommand):
 
     requires_system_checks = True
