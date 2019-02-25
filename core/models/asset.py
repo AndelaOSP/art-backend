@@ -483,6 +483,7 @@ class AllocationHistory(models.Model):
             asset.assigned_to = self.current_owner
             asset.save()
             self._create_asset_status_when_asset_is_allocated()
+            self._send_notification()
 
     def _create_asset_status_when_asset_is_allocated(self):
         last_status = AssetStatus.objects.filter(asset=self.asset).latest('created_at')
