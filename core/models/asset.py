@@ -5,6 +5,7 @@ import uuid
 
 # Third-Party Imports
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.db import models
 
 # App Imports
@@ -497,13 +498,15 @@ class AllocationHistory(models.Model):
     def _send_notification(self):
         asset = self.asset
         user = None
-
+        env_message = ''
+        if settings.DEBUG:
+            env_message = ' *_(this is a test message.)_*'
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
             message = (
                 "The {} with serial number {} and asset code {} ".format(
                     asset.asset_type, asset.serial_number, asset.asset_code
                 )
-                + "has been allocated to you."
+                + "has been allocated to you.{}".format(env_message)
             )
             user = self.current_owner
         elif not asset.assigned_to and self.previous_owner:
@@ -511,7 +514,7 @@ class AllocationHistory(models.Model):
                 "The {} with serial number {} and asset code {} ".format(
                     asset.asset_type, asset.serial_number, asset.asset_code
                 )
-                + "has been de-allocated from you."
+                + "has been de-allocated from you.{}".format(env_message)
             )
             user = self.previous_owner
 
