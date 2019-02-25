@@ -14,7 +14,7 @@ class AssetTypeModelTest(CoreBaseTestCase):
         """Test add new asset type in model"""
         count = AssetType.objects.count()
         new_assettype = AssetType(
-            asset_type="Macbook", asset_sub_category=self.asset_sub_category
+            name="Macbook", asset_sub_category=self.asset_sub_category
         )
         new_assettype.save()
         self.assertEqual(AssetType.objects.count(), count + 1)
@@ -23,8 +23,7 @@ class AssetTypeModelTest(CoreBaseTestCase):
         count = AssetType.objects.count()
         with self.assertRaises(ValidationError):
             AssetType.objects.create(
-                asset_type=self.asset_type.asset_type,
-                asset_sub_category=self.asset_sub_category,
+                name=self.asset_type.name, asset_sub_category=self.asset_sub_category
             )
         self.assertEqual(AssetType.objects.count(), count)
 
@@ -38,12 +37,12 @@ class AssetTypeModelTest(CoreBaseTestCase):
 
     def test_asset_type_model_string_representation(self):
         get_asset = AssetType.objects.first()
-        self.assertEqual(str(get_asset), get_asset.asset_type)
+        self.assertEqual(str(get_asset), get_asset.name)
 
     def test_cannot_add_type_with_non_exisitng_subcategory(self):
         """ Test cannot add type with non-existing subcategory """
         with self.assertRaises(ValueError) as context:
-            AssetType.objects.create(asset_type="Dongles", asset_sub_category=6)
+            AssetType.objects.create(name="Dongles", asset_sub_category=6)
         self.assertTrue(
             'Cannot assign "6": '
             '"AssetType.asset_sub_category" must '

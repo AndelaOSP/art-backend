@@ -25,8 +25,8 @@
       }
     },
     {
-      "name": "make_label",
-      "description": "make_label field on AssetMake model",
+      "name": "asset_make",
+      "description": "asset_make field on AssetMake model",
       "type": "string",
       "constraints": {
         "required": true

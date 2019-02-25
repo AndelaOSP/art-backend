@@ -61,40 +61,46 @@ class OptionalSlashRouter(SimpleRouter):
 
 
 router = OptionalSlashRouter()
-router.register('users', UserViewSet, 'users')
-router.register('assets', AssetViewSet, 'assets')
-router.register('manage-assets', ManageAssetViewSet, 'manage-assets')
-router.register('allocations', AllocationsViewSet, 'allocations')
+
+# users
 router.register(
     'security-user-emails', SecurityUserEmailsViewSet, 'security-user-emails'
 )
-router.register('asset-logs', AssetLogViewSet, 'asset-logs')
+router.register('security-users', SecurityUserViewSet, 'security-users')
 router.register('user-feedback', UserFeedbackViewSet, 'user-feedback')
-router.register('asset-status', AssetStatusViewSet, 'asset-status')
+router.register('user-groups', UserGroupViewSet, 'user-groups')
+router.register('users', UserViewSet, 'users')
+
+# assets
+router.register('allocations', AllocationsViewSet, 'allocations')
+router.register('assets', AssetViewSet, 'assets')
+router.register('asset-assignee', AssetAssigneeViewSet, 'asset-assignee')
+router.register('asset-logs', AssetLogViewSet, 'asset-logs')
 router.register('asset-categories', AssetCategoryViewSet, 'asset-categories')
+router.register('asset-condition', AssetConditionViewSet, 'asset-condition')
+router.register('asset-health', AssetHealthCountViewSet, 'asset-health')
+router.register('asset-makes', AssetMakeViewSet, 'asset-makes')
+router.register('asset-models', AssetModelNumberViewSet, 'asset-models')
+router.register('asset-specs', AssetSpecsViewSet, 'asset-specs')
+router.register('asset-status', AssetStatusViewSet, 'asset-status')
 router.register('asset-sub-categories', AssetSubCategoryViewSet, 'asset-sub-categories')
 router.register('asset-types', AssetTypeViewSet, 'asset-types')
-router.register('asset-models', AssetModelNumberViewSet, 'asset-models')
-router.register('asset-condition', AssetConditionViewSet, 'asset-condition')
-router.register('asset-makes', AssetMakeViewSet, 'asset-makes')
 router.register('incidence-reports', AssetIncidentReportViewSet, 'incidence-reports')
+router.register('manage-assets', ManageAssetViewSet, 'manage-assets')
 router.register(
     'slack-incidence-reports',
     AssetSlackIncidentReportViewSet,
     'slack-incidence-reports',
 )
-router.register('asset-health', AssetHealthCountViewSet, 'asset-health')
-router.register('security-users', SecurityUserViewSet, 'security-users')
-router.register('asset-specs', AssetSpecsViewSet, 'asset-specs')
-router.register('user-groups', UserGroupViewSet, 'user-groups')
+
+# centres
+router.register('andela-centres', AndelaCentreViewset, 'andela-centres')
+router.register('countries', CountryViewset, 'countries')
+router.register('departments', DepartmentViewSet, 'departments')
 router.register('office-blocks', OfficeBlockViewSet, 'office-blocks')
 router.register('office-floors', OfficeFloorViewSet, 'office-floors')
 router.register('office-sections', OfficeFloorSectionViewSet, 'floor-sections')
 router.register('office-workspaces', OfficeWorkspaceViewSet, 'office-workspaces')
-router.register('departments', DepartmentViewSet, 'departments')
-router.register('asset-assignee', AssetAssigneeViewSet, 'asset-assignee')
-router.register('andela-centres', AndelaCentreViewset, 'andela-centres')
-router.register('countries', CountryViewset, 'countries')
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -116,19 +122,17 @@ urlpatterns = [
     path('filter-values/', AvailableFilterValues.as_view(), name='available-filters'),
 ]
 if settings.DEBUG:
-    urlpatterns.extend(
-        [
-            path(
-                'docs/',
-                schema_view.with_ui('redoc', cache_timeout=None),
-                name='schema-redoc',
-            ),
-            path(
-                'docs/live/',
-                schema_view.with_ui('swagger', cache_timeout=None),
-                name='schema-swagger',
-            ),
-        ]
-    )
+    urlpatterns += [
+        path(
+            'docs/',
+            schema_view.with_ui('redoc', cache_timeout=None),
+            name='schema-redoc',
+        ),
+        path(
+            'docs/live/',
+            schema_view.with_ui('swagger', cache_timeout=None),
+            name='schema-swagger',
+        ),
+    ]
 
 urlpatterns += router.urls

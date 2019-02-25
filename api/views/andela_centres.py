@@ -28,7 +28,6 @@ class CountryViewset(ModelViewSet):
     queryset = models.Country.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post', 'put', 'delete']
 
 
 class AndelaCentreViewset(ModelViewSet):
@@ -36,7 +35,6 @@ class AndelaCentreViewset(ModelViewSet):
     queryset = models.AndelaCentre.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post', 'put', 'delete']
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -91,7 +89,6 @@ class OfficeWorkspaceViewSet(ModelViewSet):
     queryset = models.OfficeWorkspace.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post', 'put', 'delete']
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -105,7 +102,6 @@ class DepartmentViewSet(ModelViewSet):
     queryset = models.Department.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post', 'put', 'delete']
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

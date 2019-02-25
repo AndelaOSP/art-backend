@@ -122,6 +122,14 @@ class UserTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 401)
 
+    @patch('api.authentication.auth.verify_id_token')
+    def test_non_existent_user_add_user_from_api_endpoint(self, mock_verify_token):
+        mock_verify_token.return_value = {'email': 'test@notfound.com'}
+        response = client.post(
+            self.users_url, HTTP_AUTHORIZATION="Token {}".format('sometoken')
+        )
+        self.assertEqual(response.status_code, 401)
+
     def test_non_authenticated_user_get_user_from_api_endpoint(self):
         response = client.get(self.users_url)
         self.assertEqual(
@@ -185,9 +193,7 @@ class UserTestCase(APIBaseTestCase):
         response = client.get(
             self.users_url, HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
-        location = AndelaCentre.objects.create(
-            centre_name="Kampala", country=self.country
-        )
+        location = AndelaCentre.objects.create(name="Kampala", country=self.country)
         User.objects.create(
             email='test1@site.com',
             cohort=20,

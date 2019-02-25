@@ -13,7 +13,7 @@ from rest_framework.viewsets import ModelViewSet
 
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
-from api.filters import UserFilter
+from api.filters import SecurityUserFilter, UserFilter
 from api.permissions import IsApiUser
 from api.serializers import (
     SecurityUserEmailsSerializer,
@@ -72,7 +72,8 @@ class SecurityUserViewSet(ModelViewSet):
     queryset = models.SecurityUser.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post', 'put', 'delete']
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = SecurityUserFilter
 
     def get_queryset(self):
         user_location = self.request.user.location
@@ -99,7 +100,6 @@ class UserGroupViewSet(ModelViewSet):
     queryset = Group.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ['get', 'post']
 
     def perform_create(self, serializer):
         try:

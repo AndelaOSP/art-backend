@@ -19,7 +19,7 @@ class AssetLogModelTest(APIBaseTestCase):
 
     def setUp(self):
         self.test_assetmodel1 = AssetModelNumber.objects.create(
-            model_number="IMN50987", make_label=self.make_label
+            name="IMN50987", asset_make=self.asset_make
         )
 
         self.test_other_asset = Asset(
@@ -119,6 +119,16 @@ class AssetLogModelTest(APIBaseTestCase):
         response = client.get(
             self.asset_logs_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
+        )
+        self.assertIn(self.checkout.id, response.data['results'][0].values())
+        self.assertEqual(len(response.data['results']), AssetLog.objects.count())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_admin_user_list_checkin_checkout(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            self.asset_logs_url, HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         self.assertIn(self.checkout.id, response.data['results'][0].values())
         self.assertEqual(len(response.data['results']), AssetLog.objects.count())

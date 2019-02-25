@@ -16,10 +16,10 @@ class AssetAssigneeAPITest(APIBaseTestCase):
 
     def setUp(self):
         self.assetmodel_2 = AssetModelNumber.objects.create(
-            model_number="IMN509889", make_label=self.make_label
+            name="IMN509889", asset_make=self.asset_make
         )
         self.assetmodel_3 = AssetModelNumber.objects.create(
-            model_number="IMN509887868", make_label=self.make_label
+            name="IMN509887868", asset_make=self.asset_make
         )
 
         self.asset = Asset.objects.create(
@@ -80,7 +80,7 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.user.email}
         data = {}
         response = client.put(
-            self.asset_assignee_url,
+            f"{self.asset_assignee_url}/{self.asset_assignee.id}/",
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )

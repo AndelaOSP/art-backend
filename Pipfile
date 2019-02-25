@@ -4,11 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "==2.1.5"
+django = "==2.1.7"
 python-decouple = "==3.1"
 dj-database-url = "==0.5.0"
 django-jet = "==1.0.8"
-djangorestframework = "==3.7.7"
+djangorestframework = "==3.9.1"
 django-oauth-toolkit = "==1.0.0"
 drf-yasg = "==1.11.1"
 django-cors-headers = "==2.4.0"
@@ -28,10 +28,11 @@ responses = "==0.10.5"
 coverage = "==4.5.2"
 coveralls = "==1.5.1"
 "flake8" = "==3.6.0"
-isort = {git = "https://github.com/timothycrosley/isort", editable = true}
-pytest-django = "==3.4.5"
+isort = "==4.3.4"
+pytest-django = "==3.4.7"
 pdbpp = "==0.9.3"
 black = "==18.9b0"
+diff-cover = "==1.0.6"
 
 [requires]
 python_version = "3.6.4"

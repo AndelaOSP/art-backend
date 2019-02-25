@@ -47,7 +47,7 @@ class OfficeBlockAPITest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
         response = client.put(
-            self.office_block_url,
+            f"{self.office_block_url}/{self.office_block.id}/",
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )

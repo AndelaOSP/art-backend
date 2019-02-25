@@ -135,7 +135,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
             location_name = location.get('name')
             try:
                 andela_center, location_created = AndelaCentre.objects.get_or_create(
-                    centre_name=location_name
+                    name=location_name
                 )
                 if location_created:
                     logger.info('New location added: {}'.format(location_name))

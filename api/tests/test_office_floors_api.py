@@ -51,7 +51,7 @@ class OfficeFloorAPITest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         data = {}
         response = client.put(
-            self.floor_number_url,
+            '{}/{}/'.format(self.floor_number_url, self.office_floor.id),
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )

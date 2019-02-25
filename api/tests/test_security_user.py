@@ -111,15 +111,6 @@ class SecurityUserTestCase(APIBaseTestCase):
         self.assertEqual(len(response.data['results']), SecurityUser.objects.count())
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_security_user_api_endpoint_cant_allow_put(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
-        response = client.put(
-            self.security_users_admin_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
-        )
-        self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})
-
-    @patch('api.authentication.auth.verify_id_token')
     def test_security_user_api_endpoint_cant_allow_patch(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         response = client.patch(
@@ -136,3 +127,28 @@ class SecurityUserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.data, {'detail': 'Method "DELETE" not allowed.'})
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_can_filter_security_users_by_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?active={}'.format(
+                self.security_users_admin_url, self.security_user.is_active
+            ),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['count'], 1)
+        self.assertIn(response.data['results'][0]['email'], self.security_user.email)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_user_not_in_filter_of_in_active_security_user(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        response = client.get(
+            '{}?active={}'.format(
+                self.security_users_admin_url, not self.security_user.is_active
+            ),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.security_user.email, response.data)
