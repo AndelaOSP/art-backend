@@ -4,6 +4,7 @@ import os
 import uuid
 
 # Third-Party Imports
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -483,6 +484,7 @@ class AllocationHistory(models.Model):
             asset.assigned_to = self.current_owner
             asset.save()
             self._create_asset_status_when_asset_is_allocated()
+            self._send_notification()
 
     def _create_asset_status_when_asset_is_allocated(self):
         last_status = AssetStatus.objects.filter(asset=self.asset).latest('created_at')
@@ -496,22 +498,16 @@ class AllocationHistory(models.Model):
     def _send_notification(self):
         asset = self.asset
         user = None
-
+        env_message = ' *_(this is a test message.)_*' if settings.DEBUG else ''
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
-            message = (
-                "The {} with serial number {} and asset code {} ".format(
-                    asset.asset_type, asset.serial_number, asset.asset_code
-                )
-                + "has been allocated to you."
-            )
+            message = "The {} with serial number {} and asset code {} ".format(
+                asset.asset_type, asset.serial_number, asset.asset_code
+            ) + "has been allocated to you.{}".format(env_message)
             user = self.current_owner
         elif not asset.assigned_to and self.previous_owner:
-            message = (
-                "The {} with serial number {} and asset code {} ".format(
-                    asset.asset_type, asset.serial_number, asset.asset_code
-                )
-                + "has been de-allocated from you."
-            )
+            message = "The {} with serial number {} and asset code {} ".format(
+                asset.asset_type, asset.serial_number, asset.asset_code
+            ) + "has been de-allocated from you.{}".format(env_message)
             user = self.previous_owner
 
         if user and hasattr(user, 'email'):
