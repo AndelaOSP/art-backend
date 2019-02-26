@@ -13,10 +13,17 @@ from core.models.asset import Asset
 SKIPPED_ROWS = []
 
 
-def process_file(data, progress=None, skipped_file=None):
+def process_file(data, progress=None, user=None):
     global SKIPPED_ROWS
     SKIPPED_ROWS = []
+    location = None
+    skipped_file_name = None
     file_data = defaultdict(list)
+    if user:
+        email = user.email
+        location = user.location
+        skipped_file_name = email.split("@")[0]
+
     for row_id, row in enumerate(data):
         row_data = {"row": row, "row_count": row_id}
         try:
@@ -38,8 +45,8 @@ def process_file(data, progress=None, skipped_file=None):
         row_data["Processor Type"] = read_csv_row_value("Processor Type", row)
         row_data["YOM"] = read_csv_row_value("YOM", row)
         file_data[model_number].append(row_data)
-    process_asset_data(file_data)
-    write_skipped_records(SKIPPED_ROWS, filename=skipped_file)
+    process_asset_data(file_data, location=location)
+    write_skipped_records(SKIPPED_ROWS, filename=skipped_file_name)
     if len(SKIPPED_ROWS) > 0:
         return False
     else:
@@ -81,7 +88,7 @@ def process_model_number(row_data):
     )
 
 
-def process_asset_data(processed_file_data):  # noqa: C901
+def process_asset_data(processed_file_data, location=None):  # noqa: C901
     for model_number_value, row_datas in processed_file_data.items():
         collection = apps.get_model("core", 'AssetModelNumber')
         try:
@@ -104,6 +111,8 @@ def process_asset_data(processed_file_data):  # noqa: C901
                 "asset_code": assetcode_value,
                 "serial_number": serialnumber_value,
             }
+            if location:
+                asset_fields.update({"asset_location": location})
             asset = create_object(
                 "Asset",
                 parent={"model_number": asset_model_obj},
