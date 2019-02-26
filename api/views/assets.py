@@ -418,7 +418,7 @@ class SkippedAssets(APIView):
         # send file
 
         file = open(file_path, "rb")
-        response = FileResponse(file, content_type="text/csv")
+        response = FileResponse(file, content_type="text/csv", filename=filename)
         response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
 
         return response
@@ -433,7 +433,9 @@ class SampleImportFile(APIView):
         # send file
 
         file = open(filename, "rb")
-        response = FileResponse(file, content_type="text/csv")
+        response = FileResponse(
+            file, content_type="text/csv", filename='sample_import_file.csv'
+        )
         response[
             "Content-Disposition"
         ] = 'attachment; filename="sample_import_file.csv"'
