@@ -12,8 +12,6 @@ from core.models.asset import Asset
 
 SKIPPED_ROWS = []
 
-SKIPPED_ASSETS_FILE = os.path.join(settings.BASE_DIR, "skipped.csv")
-
 
 def process_file(data, progress=None, skipped_file=None):
     global SKIPPED_ROWS
@@ -223,12 +221,12 @@ def write_skipped_records(records, filename=None):
         "Notes",
         "Error",
     )
+    skipped_assets_file = os.path.join(settings.BASE_DIR, "skipped.csv")
     if filename:
-        global SKIPPED_ASSETS_FILE
-        SKIPPED_ASSETS_FILE = os.path.join(
+        skipped_assets_file = os.path.join(
             settings.BASE_DIR, "skippedassets/{}.csv".format(filename)
         )
-    with open(SKIPPED_ASSETS_FILE, "w") as skipped_file:
+    with open(skipped_assets_file, "w") as skipped_file:
         writer = csv.DictWriter(skipped_file, delimiter=",", fieldnames=fieldnames)
         writer.writeheader()
         for row in records:
