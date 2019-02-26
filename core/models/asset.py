@@ -498,16 +498,20 @@ class AllocationHistory(models.Model):
     def _send_notification(self):
         asset = self.asset
         user = None
+        serial_no = asset.serial_number
+        asset_code = asset.asset_code
+
         env_message = ' *_(this is a test message.)_*' if settings.DEBUG else ''
+        serial_no = f'Serial Number {serial_no} ' if serial_no else ''
+        asset_code = f'Asset Code {asset_code} ' if asset_code else ''
+        _and = f'and ' if asset_code and serial_no else ''
+        message = f'The {asset.asset_type} with {serial_no}{_and}{asset_code}'
+
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
-            message = "The {} with serial number {} and asset code {} ".format(
-                asset.asset_type, asset.serial_number, asset.asset_code
-            ) + "has been allocated to you.{}".format(env_message)
+            message += "has been allocated to you.{}".format(env_message)
             user = self.current_owner
         elif not asset.assigned_to and self.previous_owner:
-            message = "The {} with serial number {} and asset code {} ".format(
-                asset.asset_type, asset.serial_number, asset.asset_code
-            ) + "has been de-allocated from you.{}".format(env_message)
+            message += "has been de-allocated from you.{}".format(env_message)
             user = self.previous_owner
 
         if user and hasattr(user, 'email'):

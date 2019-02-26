@@ -390,7 +390,7 @@ class AssetsImportViewSet(APIView):
         error = False
         file_obj = codecs.iterdecode(file_object, 'utf-8')
         csv_reader = csv.DictReader(file_obj, delimiter=",")
-        if not process_file(csv_reader, file_name):
+        if not process_file(csv_reader, skipped_file=file_name):
             path = request.build_absolute_uri(reverse("skipped"))
 
             response[
