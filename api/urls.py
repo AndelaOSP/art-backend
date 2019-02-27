@@ -29,6 +29,7 @@ from api.views import (
     AvailableFilterValues,
     CountryViewset,
     DepartmentViewSet,
+    ExportAssetsDetails,
     ManageAssetViewSet,
     OfficeBlockViewSet,
     OfficeFloorSectionViewSet,
@@ -112,6 +113,7 @@ urlpatterns = [
         ),
         name='api-version-index',
     ),
+    path('export-assets/', ExportAssetsDetails.as_view(), name='export-assets'),
     path('upload/', AssetsImportViewSet.as_view(), name='import-assets'),
     path('skipped/', SkippedAssets.as_view(), name='skipped'),
     path(

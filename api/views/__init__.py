@@ -24,6 +24,7 @@ from .assets import (  # noqa: F401
     AssetSubCategoryViewSet,
     AssetTypeViewSet,
     AssetViewSet,
+    ExportAssetsDetails,
     ManageAssetViewSet,
     SampleImportFile,
     SkippedAssets,
