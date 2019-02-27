@@ -3,7 +3,6 @@ import codecs
 import csv
 import logging
 import os
-import re
 from itertools import chain
 
 # Third-Party Imports
@@ -384,13 +383,12 @@ class AssetsImportViewSet(APIView):
         csv_values = list(set(csv_values))
         if not csv_values:
             return Response({"error": "CSV file only contains headings"}, status=400)
-        skipped_file_name = self.request.user.email
-        file_name = re.search(r"\w+", skipped_file_name).group()
+        user = self.request.user
         response = {}
         error = False
         file_obj = codecs.iterdecode(file_object, 'utf-8')
         csv_reader = csv.DictReader(file_obj, delimiter=",")
-        if not process_file(csv_reader, skipped_file=file_name):
+        if not process_file(csv_reader, user=user):
             path = request.build_absolute_uri(reverse("skipped"))
 
             response[
@@ -413,18 +411,15 @@ class SkippedAssets(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        filename = os.path.join(
-            settings.BASE_DIR,
-            "skippedassets/{}.csv".format(
-                re.search(r"\w+", request.user.email).group()
-            ),
-        )
+        email = request.user.email
+        filename = "{}.csv".format(email.split("@")[0])
+        file_path = os.path.join(settings.BASE_DIR, "skippedassets/{}".format(filename))
 
         # send file
 
-        file = open(filename, "rb")
-        response = FileResponse(file, content_type="text/csv")
-        response["Content-Disposition"] = 'attachment; filename="skippedassets.csv"'
+        file = open(file_path, "rb")
+        response = FileResponse(file, content_type="text/csv", filename=filename)
+        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
 
         return response
 
@@ -438,7 +433,9 @@ class SampleImportFile(APIView):
         # send file
 
         file = open(filename, "rb")
-        response = FileResponse(file, content_type="text/csv")
+        response = FileResponse(
+            file, content_type="text/csv", filename='sample_import_file.csv'
+        )
         response[
             "Content-Disposition"
         ] = 'attachment; filename="sample_import_file.csv"'
