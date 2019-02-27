@@ -179,6 +179,7 @@ class APIBaseTestCase(TestCase):
         cls.office_workspace_url = reverse('office-workspaces-list')
         cls.security_users_admin_url = reverse('security-users-list')
         cls.security_users_url = reverse('security-user-emails-list')
+        cls.skipped_assets_url = reverse('skipped')
         cls.users_url = reverse('users-list')
 
     @classmethod
