@@ -452,13 +452,13 @@ class ExportAssetsDetails(APIView):
     authentication_classes = (FirebaseTokenAuthentication,)
 
     def get(self, request):
-        assets = models.Asset.objects.all()
+        assets = models.Asset.objects.filter(asset_location__name=request.user.location.name)
         serializer = AssetSerializer(assets, many=True)
         if len(serializer.data) == 0:
             return Response({"error": "You have no assets"}, status=400)
         self.create_sheet(serializer.data)
         return Response({
-            "Success": "Aseest details have been exported successfully, Find file in root folder"}, status=200)
+            "Success": "Assets details have been exported successfully, Find file in root folder"}, status=200)
 
     def create_sheet(self, assets_list):
         asset_types = []
