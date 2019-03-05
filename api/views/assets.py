@@ -1,6 +1,5 @@
 # Standard Library
 import codecs
-import csv
 import logging
 import os
 import re
@@ -43,8 +42,8 @@ from api.serializers import (
     AssetTypeSerializer,
 )
 from core import models
-from core.assets_import_helper import process_file, SKIPPED_ROWS
-from core.constants import CSV_REQUIRED_HEADING_MODEL, CSV_REQUIRED_HEADING_SERIAL
+from core.assets_import_helper import process_file, SKIPPED_ROWS, DictReaderStrip
+from core.constants import CSV_REQUIRED_HEADING_ASSET_CODE, CSV_REQUIRED_HEADING_SERIAL_NO, CSV_HEADERS
 from core.slack_bot import SlackIntegration
 
 slack = SlackIntegration()
@@ -375,13 +374,15 @@ class AssetsImportViewSet(APIView):
                 {"error": "File type not surported, import a CSV file"}, status=400
             )
         file_obj = codecs.iterdecode(file_object, 'utf-8')
-        csv_reader = csv.DictReader(file_obj, delimiter=",")
+        csv_reader = DictReaderStrip(file_obj, delimiter=",")
         if not (csv_reader.fieldnames and ' '.join(csv_reader.fieldnames).strip()):
             return Response({"error": "CSV file is empty"}, status=400)
         field_names_set = set(csv_reader.fieldnames)
+        if not field_names_set.issubset(CSV_HEADERS):
+            return Response({"error": "CSV file contains invalid headings"}, status=400)
         if not (
-            field_names_set >= CSV_REQUIRED_HEADING_MODEL
-            or field_names_set >= CSV_REQUIRED_HEADING_SERIAL
+            field_names_set >= CSV_REQUIRED_HEADING_ASSET_CODE
+            or field_names_set >= CSV_REQUIRED_HEADING_SERIAL_NO
         ):
             return Response({"error": "File contains missing headings"}, status=400)
         csv_values = []
@@ -396,7 +397,7 @@ class AssetsImportViewSet(APIView):
         response = {}
         error = False
         file_obj = codecs.iterdecode(file_object, 'utf-8')
-        csv_reader = csv.DictReader(file_obj, delimiter=",")
+        csv_reader = DictReaderStrip(file_obj, delimiter=",")
         if not process_file(csv_reader, file_name):
             path = request.build_absolute_uri(reverse("skipped"))
 

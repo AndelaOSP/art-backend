@@ -279,3 +279,13 @@ def load_to_db(collection, parent=None, **fields):
         except Exception as e:
             return [str(e)], False
     return "error creating {}".format(collection), False
+
+
+class DictReaderStrip(csv.DictReader):
+    @property
+    def fieldnames(self):
+        if self._fieldnames is None:
+            csv.DictReader.fieldnames.fget(self)
+            if self._fieldnames is not None:
+                self._fieldnames = [name.strip() for name in self._fieldnames if name and name.strip()]
+        return self._fieldnames
