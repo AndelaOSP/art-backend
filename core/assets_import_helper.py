@@ -287,5 +287,7 @@ class DictReaderStrip(csv.DictReader):
         if self._fieldnames is None:
             csv.DictReader.fieldnames.fget(self)
             if self._fieldnames is not None:
-                self._fieldnames = [name.strip() for name in self._fieldnames if name and name.strip()]
+                self._fieldnames = [
+                    name.strip() for name in self._fieldnames if name and name.strip()
+                ]
         return self._fieldnames
