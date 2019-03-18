@@ -8,19 +8,24 @@ import django.db.models.deletion
 
 User = get_user_model()
 
+
 def populate_asset_assignee(apps, schema_editor):
-    for user in User.objects.defer('location'):
-        user.save()
+    """
+    This affects new user field (slack_id), but it's no longer required
+    """
+    # for user in User.objects.defer('location'):
+    #     user.save()
 
-    Department = apps.get_model('core', 'Department')
+    # Department = apps.get_model('core', 'Department')
 
-    for department in Department.objects.all():
-        department.save()
+    # for department in Department.objects.all():
+    #     department.save()
 
-    OfficeWorkspace = apps.get_model('core', 'OfficeWorkspace')
+    # OfficeWorkspace = apps.get_model('core', 'OfficeWorkspace')
 
-    for workspace in OfficeWorkspace.objects.all():
-        workspace.save()
+    # for workspace in OfficeWorkspace.objects.all():
+    #     workspace.save()
+    pass
 
 
 class Migration(migrations.Migration):
