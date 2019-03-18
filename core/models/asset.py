@@ -552,9 +552,7 @@ class AssetIncidentReport(models.Model):
     witnesses = models.TextField(null=True, blank=True)
     police_abstract_obtained = models.CharField(max_length=255)
     submitted_by = models.ForeignKey('User', null=True, on_delete=models.PROTECT)
-    state_transitions = models.CharField(
-        max_length=50, choices=constants.TRANSITIONS, default=constants.NEWLY_REPORTED
-    )
+    state_transitions = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
 
     def __str__(self):
         return f"{self.incident_type}: {self.asset}"
