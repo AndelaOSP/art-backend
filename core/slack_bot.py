@@ -8,6 +8,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from slackclient import SlackClient
 
+logger = logging.getLogger(__name__)
+
 
 class SlackIntegration(object):
     """Slack Integration class"""
@@ -20,25 +22,65 @@ class SlackIntegration(object):
         if slack_token:
             self.slack_client = SlackClient(slack_token)
 
+    def process_user_data(self, users, email):
+        found = False
+        user_id = None
+        for member in users:
+            profile = member.get('profile')
+            if profile:
+                if profile.get('email') == email:
+                    user_id = member.get('id')
+                    found = True
+        return user_id, found
+
     def get_user_slack_id(self, user):
         """Get the slack user ID using the user email"""
+        saved_user_id = user.slack_id
         user_email = user.email
-        response = self.slack_client.api_call("users.list")
-        users = response.get("members")
-        if users:
-            user_id = [
-                member.get('id')
-                for member in users
-                if member.get('profile').get('email') == user_email
-            ]
-        try:
-            return user_id[0]
-        except Exception:
-            logging.info("User not found")
+        user_id = None
+        if saved_user_id:
+            email = self.get_user_slack_email(saved_user_id)
+            if email == user_email:
+                logger.info(f"Existing Slack ID valid.")
+                return saved_user_id
+        next_cursor = None
+        slack_limit = os.getenv('SLACK_LIMIT', 1000)
+
+        # slack_calls: To safeguard against too many calls to slack
+        # users should be less than < SLACK_LIMIT * SLACK_CALLS
+        slack_calls = os.getenv('SLACK_CALLS', 10)
+        user_id = None
+        cycles = 1
+
+        response = self.slack_client.api_call("users.list", limit=slack_limit)
+        if not response.get('ok'):
+            logger.error('Unable to connect to slack')
             return None
+        users = response.get("members")
+        user_id, found = self.process_user_data(users, user_email)
+
+        while not found:
+            metadata = response.get('response_metadata')
+            next_cursor = metadata.get('next_cursor')
+            if not next_cursor or cycles > slack_calls:
+                break
+            cycles += 1
+            response = self.slack_client.api_call(
+                "users.list", limit=slack_limit, cursor=next_cursor
+            )
+            users = response.get("members")
+            user_id, found = self.process_user_data(users, user_email)
+        if user_id:
+            user.slack_id = user_id
+            user.save()
+            logger.info(f"No of Slack requests: {cycles}")
+            return user_id
+        logger.error(f"User not found for {user_email} after {cycles} requests")
+        return user_id
 
     def send_message(self, message, user=None, channel=None):
         """Sends message to slack user or channel"""
+        resp = None
         if hasattr(self, 'slack_client'):
             if user:
                 slack_id = self.get_user_slack_id(user)
@@ -46,29 +88,33 @@ class SlackIntegration(object):
                 slack_id = channel
             else:
                 slack_id = os.getenv('OPS_CHANNEL') or '#art-test'
-            self.slack_client.api_call(
-                "chat.postMessage",
-                channel=slack_id,
-                text=message,
-                username='@art-bot',
-                as_user=True,
-                icon_emoji=':ninja:',
-            )
+            if slack_id:
+                resp = self.slack_client.api_call(
+                    "chat.postMessage",
+                    channel=slack_id,
+                    text=message,
+                    username='@art-bot',
+                    as_user=True,
+                    icon_emoji=':ninja:',
+                )
+        if resp:
+            error = resp.get('error')
+            if error:
+                logger.error(f'Error sending message for {slack_id}: {error}')
+        return resp
 
     def get_user_slack_email(self, user_id):
         """Get the slack user ID using the user email"""
 
-        response = self.slack_client.api_call("users.list")
-        users = response.get("members")
-        if users:
-            user = [
-                member.get('profile') for member in users if member.get('id') == user_id
-            ]
-        try:
-            return user[0]['email']
-        except Exception:
-            logging.info("User not found")
-            return None
+        response = self.slack_client.api_call("users.info", user=user_id)
+        user = response.get("user")
+        if response.get('ok'):
+            profile = user.get('profile')
+        email = profile.get('email')
+        if email:
+            return email
+        logger.error(f"User not found for id: {user_id}")
+        return None
 
     def send_incidence_report(self, incidence_report, Asset, AssetIncidentReport, User):
         """Sends incidence report from slack using a slash command"""

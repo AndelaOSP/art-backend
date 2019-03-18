@@ -47,7 +47,6 @@ def fetch_ais_user_data(ais_url, ais_token, params):
             try:
                 fetched_users = response.json().get('values')
             except Exception as e:
-                logger.error(str(e))
                 fetching_users = False
                 SYNC_SUCCESS = False
                 SYNC_ERRORS['failures'].add(str(e))
@@ -59,12 +58,11 @@ def fetch_ais_user_data(ais_url, ais_token, params):
                     fetching_users = False
             page_num += 1
         elif response.status_code == 401:
-            logger.error(response.text)
             fetching_users = False
             SYNC_SUCCESS = False
             SYNC_ERRORS['failures'].add(response.reason)
         else:
-            logger.error(
+            logger.warning(
                 'Unable to connect to AIS: {} : {} : {}. Retrying in {} seconds'.format(
                     response.status_code, response.reason, response.text, retry_timeout
                 )
@@ -73,7 +71,6 @@ def fetch_ais_user_data(ais_url, ais_token, params):
             retries -= 1
             if retries < 0:
                 err = 'Unable to connect to AIS. Exiting after 3 retries'
-                logger.error(err)
                 fetching_users = False
                 SYNC_SUCCESS = False
                 SYNC_ERRORS['failures'].add(err)
@@ -90,7 +87,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
     try:
         last_run = AISUserSync.objects.exclude(id=current_sync_id).latest('created_at')
     except Exception as e:
-        logger.error(str(e))
+        logger.warning(str(e))
     if last_run:
         logger.info('Last run: {}'.format(str(last_run)))
     total_num = len(ais_user_data)
@@ -113,7 +110,6 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
         try:
             user, user_created = User.objects.get_or_create(email=email)
         except Exception as e:
-            logger.error(str(e))
             SYNC_ERRORS['other_errors'].add(str(e))
             continue
 
@@ -140,7 +136,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
                 if location_created:
                     logger.info('New location added: {}'.format(location_name))
             except Exception as e:
-                logger.error(str(e))
+                logger.warning(str(e))
         if cohort:
             cohort_name = cohort.get('name')
             if cohort_name.lower() == 'staff':
@@ -149,12 +145,12 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
                 try:
                     cohort_num_data = re.findall(r'(\d+)', cohort_name)
                 except Exception as e:
-                    logger.error(str(e))
+                    logger.warning(str(e))
                 else:
                     if len(cohort_num_data) == 1:
                         cohort_no = int(cohort_num_data[0])
                     else:
-                        logger.error('Unable to extract user cohort')
+                        logger.warning('Unable to extract user cohort')
         if user_created:
             logger.info('Additional data for new user.')
             user.first_name = ais_user.get('first_name')
@@ -227,7 +223,6 @@ class Command(BaseCommand):
                 )
         else:
             err = 'Missing url or token.'
-            logger.error(err)
             SYNC_SUCCESS = False
             SYNC_ERRORS['failures'].add(err)
         duration = time.time() - start_time
@@ -236,8 +231,11 @@ class Command(BaseCommand):
         sync_record.running_time = running_time
         sync_record.successful = SYNC_SUCCESS
         sync_record.running = False
-        sync_record.message = dict(SYNC_ERRORS)
+        sync_errors = dict(SYNC_ERRORS)
+        sync_record.message = sync_errors
         sync_record.save()
+        if sync_errors:
+            logger.error(dict(SYNC_ERRORS))
         _env = 'dev' if settings.DEBUG else 'prod'
         message = 'User sync complete *_({})_* - {}'.format(_env, str(sync_record))
         art_builds_channel = os.getenv('ART_BUILDS_CHANNEL') or '#art-builds'

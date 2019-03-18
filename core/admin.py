@@ -99,6 +99,7 @@ class UserAdmin(BaseUserAdmin):
                     'last_name',
                     'cohort',
                     'slack_handle',
+                    'slack_id',
                     'phone_number',
                     'picture',
                     'is_staff',
