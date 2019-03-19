@@ -181,6 +181,7 @@ class APIBaseTestCase(TestCase):
         cls.security_users_url = reverse('security-user-emails-list')
         cls.skipped_assets_url = reverse('skipped')
         cls.users_url = reverse('users-list')
+        cls.print_asset_url = reverse('export-assets')
 
     @classmethod
     def tearDownClass(cls):
