@@ -30,6 +30,7 @@ from api.views import (
     CountryViewset,
     DepartmentViewSet,
     ExportAssetsDetails,
+    GetPrintAssetsFile,
     ManageAssetViewSet,
     OfficeBlockViewSet,
     OfficeFloorSectionViewSet,
@@ -114,6 +115,7 @@ urlpatterns = [
         name='api-version-index',
     ),
     path('export-assets/', ExportAssetsDetails.as_view(), name='export-assets'),
+    path('asset-details/', GetPrintAssetsFile.as_view(), name='asset-details'),
     path('upload/', AssetsImportViewSet.as_view(), name='import-assets'),
     path('skipped/', SkippedAssets.as_view(), name='skipped'),
     path(

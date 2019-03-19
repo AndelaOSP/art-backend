@@ -391,6 +391,7 @@ class AssetsImportViewSet(APIView):
         csv_reader = csv.DictReader(file_obj, delimiter=",")
         if not process_file(csv_reader, user=user):
             path = request.build_absolute_uri(reverse("skipped"))
+            print("path in main end point", path)
 
             response[
                 "fail"
@@ -456,9 +457,11 @@ class ExportAssetsDetails(APIView):
         if len(serializer.data) == 0:
             return Response({"error": "You have no assets"}, status=400)
         self.create_sheet(serializer.data)
+        path = request.build_absolute_uri(reverse("asset-details"))
         return Response(
             {
-                "Success": "Assets details have been exported successfully, Find file in root folder"
+                "Success": "Assets details have been exported successfully, Download the file from",
+                "file": path,
             },
             status=200,
         )
@@ -506,3 +509,17 @@ class ExportAssetsDetails(APIView):
                 worksheet.write(row, column + 8, asset.get("notes", ""))
                 row += 1
         workbook.close()
+
+
+class GetPrintAssetsFile(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        filename = "assets.xlsx"
+        file_path = os.path.join(settings.BASE_DIR, "{}".format(filename))
+
+        file = open(file_path, "rb")
+        response = FileResponse(file, content_type="text/xlsx", filename=filename)
+        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
+
+        return response
