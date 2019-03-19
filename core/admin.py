@@ -12,7 +12,6 @@ admin.site.register(
         models.AndelaCentre,
         models.AssetCategory,
         models.AssetIncidentReport,
-        models.AssetLog,
         models.AssetMake,
         models.AssetModelNumber,
         models.AssetSpecs,
@@ -209,6 +208,7 @@ class OfficeWorkspaceAdmin(admin.ModelAdmin):
 
 admin.site.register(models.AISUserSync, AISUserSyncAdmin)
 admin.site.register(models.Asset, AssetAdmin)
+admin.site.register(models.AssetLog, AssetLogsAdmin)
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.SecurityUser, SecurityUserAdmin)
 admin.site.register(models.AssetStatus, AssetStatusAdmin)

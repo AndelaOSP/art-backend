@@ -4,6 +4,7 @@ import logging
 import os
 
 # Third-Party Imports
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.response import Response
 from slackclient import SlackClient
@@ -44,14 +45,17 @@ class SlackIntegration(object):
                 logger.info(f"Existing Slack ID valid.")
                 return saved_user_id
         next_cursor = None
-        slack_limit = os.getenv('SLACK_LIMIT', 1000)
+        slack_limit = os.getenv('SLACK_LIMIT', '1000')
 
         # slack_calls: To safeguard against too many calls to slack
         # users should be less than < SLACK_LIMIT * SLACK_CALLS
-        slack_calls = os.getenv('SLACK_CALLS', 10)
+        slack_calls = os.getenv('SLACK_CALLS')
+        try:
+            slack_calls = int(slack_calls)
+        except Exception:
+            slack_calls = 10
         user_id = None
         cycles = 1
-
         response = self.slack_client.api_call("users.list", limit=slack_limit)
         if not response.get('ok'):
             logger.error('Unable to connect to slack')
@@ -62,7 +66,7 @@ class SlackIntegration(object):
         while not found:
             metadata = response.get('response_metadata')
             next_cursor = metadata.get('next_cursor')
-            if not next_cursor or cycles > slack_calls:
+            if not next_cursor or cycles >= slack_calls:
                 break
             cycles += 1
             response = self.slack_client.api_call(
@@ -80,7 +84,7 @@ class SlackIntegration(object):
 
     def send_message(self, message, user=None, channel=None):
         """Sends message to slack user or channel"""
-        resp = None
+        resp = {'ok': False}
         if hasattr(self, 'slack_client'):
             if user:
                 slack_id = self.get_user_slack_id(user)
@@ -110,18 +114,20 @@ class SlackIntegration(object):
         user = response.get("user")
         if response.get('ok'):
             profile = user.get('profile')
-        email = profile.get('email')
-        if email:
-            return email
+            email = profile.get('email')
+            if email:
+                return email
         logger.error(f"User not found for id: {user_id}")
         return None
 
-    def send_incidence_report(self, incidence_report, Asset, AssetIncidentReport, User):
+    def send_incidence_report(self, data):
         """Sends incidence report from slack using a slash command"""
+        from core.models import Asset, AssetIncidentReport
 
-        if incidence_report.get('payload') is None:
-            channel_id = incidence_report.get('channel_id')
-            user_id = incidence_report.get('user_id')
+        User = get_user_model()
+        if data.get('payload') is None:
+            channel_id = data.get('channel_id')
+            user_id = data.get('user_id')
             self.slack_client.api_call(
                 "chat.postEphemeral",
                 username='Art-incidence-report',
@@ -154,7 +160,7 @@ class SlackIntegration(object):
             )
             return Response(status=status.HTTP_200_OK)
 
-        payload = incidence_report.get('payload', None)
+        payload = data.get('payload', None)
         payload = json.loads(payload)
 
         if payload['type'] == 'dialog_cancellation':
