@@ -497,7 +497,7 @@ class AllocationHistory(models.Model):
 
     def _send_notification(self):
         asset = self.asset
-        user = None
+        assignee = None
         serial_no = asset.serial_number
         asset_code = asset.asset_code
 
@@ -509,13 +509,13 @@ class AllocationHistory(models.Model):
 
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
             message += "has been allocated to you.{}".format(env_message)
-            user = self.current_owner
+            assignee = self.current_owner
         elif not asset.assigned_to and self.previous_owner:
             message += "has been de-allocated from you.{}".format(env_message)
-            user = self.previous_owner
+            assignee = self.previous_owner
 
-        if user and hasattr(user, 'email'):
-            slack.send_message(message, user=user)
+        if assignee and hasattr(assignee, 'email'):
+            slack.send_message(message, user=assignee.user)
 
 
 class AssetCondition(models.Model):
