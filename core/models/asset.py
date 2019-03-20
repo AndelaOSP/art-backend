@@ -552,12 +552,17 @@ class AssetIncidentReport(models.Model):
     witnesses = models.TextField(null=True, blank=True)
     police_abstract_obtained = models.CharField(max_length=255)
     submitted_by = models.ForeignKey('User', null=True, on_delete=models.PROTECT)
-    state_transitions = models.CharField(
-        max_length=50, default=constants.NEWLY_REPORTED
-    )
 
     def __str__(self):
         return f"{self.incident_type}: {self.asset}"
 
     class Meta:
         ordering = ['-id']
+
+
+class StateTransitions(models.Model):
+    asset_incident_report = models.ForeignKey(AssetIncidentReport, on_delete=models.PROTECT)
+    transitions = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
+
+    class Meta:
+        verbose_name_plural = 'State Transitions'

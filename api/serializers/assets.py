@@ -403,7 +403,6 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
             "witnesses",
             "submitted_by",
             "police_abstract_obtained",
-            "state_transitions",
         )
 
     def get_submitted_by(self, instance):
@@ -458,3 +457,9 @@ class AssetSpecsSerializer(serializers.ModelSerializer):
                 "Similar asset specification already exist"
             )
         return fields
+
+
+class StateTransitionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.StateTransitions
+        fields = ("asset_incident_report", "transitions")

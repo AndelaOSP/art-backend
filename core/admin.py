@@ -19,6 +19,7 @@ admin.site.register(
         models.AssetType,
         models.Country,
         models.OfficeBlock,
+        models.StateTransitions,
     ]
 )
 

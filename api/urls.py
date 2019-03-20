@@ -43,6 +43,7 @@ from api.views import (
     UserFeedbackViewSet,
     UserGroupViewSet,
     UserViewSet,
+    StateTransitionsViewset,
 )
 
 schema_view = get_schema_view(
@@ -94,6 +95,7 @@ router.register(
     AssetSlackIncidentReportViewSet,
     'slack-incidence-reports',
 )
+router.register('state-transitions', StateTransitionsViewset, 'state-transitions')
 
 # centres
 router.register('andela-centres', AndelaCentreViewset, 'andela-centres')

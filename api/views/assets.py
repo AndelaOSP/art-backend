@@ -40,6 +40,7 @@ from api.serializers import (
     AssetStatusSerializer,
     AssetSubCategorySerializer,
     AssetTypeSerializer,
+    StateTransitionsSerializer,
 )
 from core import models
 from core.assets_import_helper import DictReaderStrip, process_file, SKIPPED_ROWS
@@ -541,3 +542,10 @@ class GetPrintAssetsFile(APIView):
         response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
 
         return response
+
+
+class StateTransitionsViewset(ModelViewSet):
+    serializer_class = StateTransitionsSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    queryset = models.StateTransitions.objects.all()

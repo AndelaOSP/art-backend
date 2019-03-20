@@ -22,6 +22,7 @@ from .assets import (  # noqa: F401
     AssetStatusSerializer,
     AssetSubCategorySerializer,
     AssetTypeSerializer,
+    StateTransitionsSerializer,
 )
 from .users import (  # noqa: F401
     SecurityUserEmailsSerializer,

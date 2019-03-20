@@ -29,6 +29,7 @@ from .assets import (  # noqa: F401
     ManageAssetViewSet,
     SampleImportFile,
     SkippedAssets,
+    StateTransitionsViewset,
 )
 from .users import (  # noqa: F401
     AvailableFilterValues,

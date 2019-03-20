@@ -12,6 +12,7 @@ from .asset import (  # noqa: F401
     AssetStatus,
     AssetSubCategory,
     AssetType,
+    StateTransitions,
 )
 from .centre import (  # noqa: F401
     AndelaCentre,
