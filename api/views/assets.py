@@ -282,9 +282,7 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
                 raise serializers.ValidationError(err.error_dict)
             return response
         else:
-            bot = slack.send_incidence_report(
-                self.request.data, models.Asset, models.AssetIncidentReport, models.User
-            )
+            bot = slack.send_incidence_report(self.request.data)
             if bot:
                 return Response(status=status.HTTP_200_OK)
 

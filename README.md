@@ -28,6 +28,8 @@ This repository contains the API endpoints and models for the ART project implem
 | <sup>**CLIENT_EMAIL**</sup> | <sup>**Required** - The firebase client email value.</sup> | |
 | <sup>**DJANGO_SETTINGS_MODULE**</sup> | <sup>**Required** (if running the app using gunicorn _gunicorn art.wsgi_) - _settings.prod_ for prod, _settings.dev_ optional for dev/staging.</sup> | <sup>**settings.dev**</sup> |
 | <sup>**SLACK_TOKEN**</sup> | <sup>**Optional** - The token to authenticate/authorize the slack app used to send slack notifications.</sup> | |
+| <sup>**SLACK_LIMIT**</sup> | <sup>**Optional** - The number of results per page for slack calls.</sup> | <sup>**1000**</sup> |
+| <sup>**SLACK_CALLS**</sup> | <sup>**Optional** - The number of calls to make to clask API before exiting.</sup> | <sup>**10**</sup> |
 | <sup>**ASSET_LIMIT**</sup> | <sup>**Optional** - A number representing the minimum number of allowed available assets to trigger notification on shortage to slack.</sup> | <sup>**0**</sup> |
 | <sup>**AIS_URL**</sup> | <sup>**Optional** - Needed to sync users from AIS.</sup> | |
 | <sup>**AIS_TOKEN**</sup> | <sup>**Optional** - Needed to sync users from AIS.</sup> | |
