@@ -40,10 +40,10 @@ from api.views import (
     SecurityUserEmailsViewSet,
     SecurityUserViewSet,
     SkippedAssets,
+    StateTransitionsViewset,
     UserFeedbackViewSet,
     UserGroupViewSet,
     UserViewSet,
-    StateTransitionsViewset,
 )
 
 schema_view = get_schema_view(

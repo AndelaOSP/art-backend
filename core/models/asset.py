@@ -561,7 +561,9 @@ class AssetIncidentReport(models.Model):
 
 
 class StateTransitions(models.Model):
-    asset_incident_report = models.ForeignKey(AssetIncidentReport, on_delete=models.PROTECT)
+    asset_incident_report = models.ForeignKey(
+        AssetIncidentReport, on_delete=models.PROTECT
+    )
     transitions = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
 
     class Meta:
