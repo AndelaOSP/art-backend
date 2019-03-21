@@ -44,9 +44,17 @@ from api.serializers import (
 from core import models
 from core.assets_import_helper import DictReaderStrip, process_file, SKIPPED_ROWS
 from core.constants import (
+    ASSET_CODE,
+    ASSIGNED_TO,
     CSV_HEADERS,
     CSV_REQUIRED_HEADING_ASSET_CODE,
     CSV_REQUIRED_HEADING_SERIAL_NO,
+    MAKE,
+    MODEL_NUMBER,
+    NOTES,
+    SERIAL_NUMBER,
+    STATUS,
+    VERIFIED,
 )
 from core.slack_bot import SlackIntegration
 
@@ -375,9 +383,9 @@ class AssetsImportViewSet(APIView):
             return Response(
                 {"error": "File type not surported, import a CSV file"}, status=400
             )
-        file_obj = codecs.iterdecode(file_object, 'utf-8')
+        file_obj = codecs.iterdecode(file_object, "utf-8")
         csv_reader = DictReaderStrip(file_obj, delimiter=",")
-        if not (csv_reader.fieldnames and ' '.join(csv_reader.fieldnames).strip()):
+        if not (csv_reader.fieldnames and " ".join(csv_reader.fieldnames).strip()):
             return Response({"error": "CSV file is empty"}, status=400)
         field_names_set = set(csv_reader.fieldnames)
         if not field_names_set.issubset(CSV_HEADERS):
@@ -397,7 +405,7 @@ class AssetsImportViewSet(APIView):
         user = self.request.user
         response = {}
         error = False
-        file_obj = codecs.iterdecode(file_object, 'utf-8')
+        file_obj = codecs.iterdecode(file_object, "utf-8")
         csv_reader = DictReaderStrip(file_obj, delimiter=",")
         if not process_file(csv_reader, user=user):
             path = request.build_absolute_uri(reverse("skipped"))
@@ -486,15 +494,15 @@ class ExportAssetsDetails(APIView):
         bold = workbook.add_format({"bold": True, "bg_color": "silver"})
         for asset_type in asset_types:
             worksheet = workbook.add_worksheet(asset_type)
-            worksheet.write("A1", "Make", bold)
+            worksheet.write("A1", MAKE, bold)
             worksheet.write("B1", "Location", bold)
-            worksheet.write("C1", "Asset Code", bold)
-            worksheet.write("D1", "Serial No", bold)
-            worksheet.write("E1", "Model No", bold)
-            worksheet.write("F1", "Assigned To", bold)
-            worksheet.write("G1", "Status", bold)
-            worksheet.write("H1", "Verified", bold)
-            worksheet.write("I1", "Notes", bold)
+            worksheet.write("C1", ASSET_CODE, bold)
+            worksheet.write("D1", SERIAL_NUMBER, bold)
+            worksheet.write("E1", MODEL_NUMBER, bold)
+            worksheet.write("F1", ASSIGNED_TO, bold)
+            worksheet.write("G1", STATUS, bold)
+            worksheet.write("H1", VERIFIED, bold)
+            worksheet.write("I1", NOTES, bold)
             grouped_assets = []
             for asset in assets_list:
                 if asset.get("asset_type") == asset_type:

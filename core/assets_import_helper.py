@@ -8,6 +8,23 @@ from django.apps import apps
 from django.conf import settings
 
 # App Imports
+from core.constants import (
+    ASSET_CODE,
+    ASSET_MEMORY,
+    ASSET_PROCESSOR_TYPE,
+    ASSIGNED_TO,
+    CATEGORY,
+    MAKE,
+    MODEL_NUMBER,
+    NOTES,
+    SERIAL_NUMBER,
+    STATUS,
+    STORAGE,
+    SUB_CATEGORY,
+    TYPE,
+    VERIFIED,
+    YOM,
+)
 from core.models.asset import Asset
 
 SKIPPED_ROWS = []
@@ -32,18 +49,18 @@ def process_file(data, progress=None, user=None):
             pass
 
         process_model_number(row_data)
-        model_number = read_csv_row_value("Model Number", row)
-        row_data["Asset Code"] = read_csv_row_value("Asset Code", row)
-        row_data["Serial No."] = read_csv_row_value("Serial No.", row)
-        row_data["Serial No."] = read_csv_row_value("Serial No.", row)
-        row_data["Verified"] = read_csv_row_value("Verified", row)
-        row_data["Assigned To"] = read_csv_row_value("Assigned To", row)
-        row_data["Status"] = read_csv_row_value("Status", row)
-        row_data["Notes"] = read_csv_row_value("Notes", row)
-        row_data["Memory"] = read_csv_row_value("Memory", row)
-        row_data["Storage"] = read_csv_row_value("Storage", row)
-        row_data["Processor Type"] = read_csv_row_value("Processor Type", row)
-        row_data["YOM"] = read_csv_row_value("YOM", row)
+        model_number = read_csv_row_value(MODEL_NUMBER, row)
+        row_data[ASSET_CODE] = read_csv_row_value(ASSET_CODE, row)
+        row_data[SERIAL_NUMBER] = read_csv_row_value(SERIAL_NUMBER, row)
+        row_data[SERIAL_NUMBER] = read_csv_row_value(SERIAL_NUMBER, row)
+        row_data[VERIFIED] = read_csv_row_value(VERIFIED, row)
+        row_data[ASSIGNED_TO] = read_csv_row_value(ASSIGNED_TO, row)
+        row_data[STATUS] = read_csv_row_value(STATUS, row)
+        row_data[NOTES] = read_csv_row_value(NOTES, row)
+        row_data[ASSET_MEMORY] = read_csv_row_value(ASSET_MEMORY, row)
+        row_data[STORAGE] = read_csv_row_value(STORAGE, row)
+        row_data[ASSET_PROCESSOR_TYPE] = read_csv_row_value(ASSET_PROCESSOR_TYPE, row)
+        row_data[YOM] = read_csv_row_value(YOM, row)
         file_data[model_number].append(row_data)
     process_asset_data(file_data, location=location)
     write_skipped_records(SKIPPED_ROWS, filename=skipped_file_name)
@@ -54,12 +71,12 @@ def process_file(data, progress=None, user=None):
 
 
 def process_model_number(row_data):
-    row = row_data.get('row')
+    row = row_data.get("row")
 
-    category_value = read_csv_row_value("Category", row)
+    category_value = read_csv_row_value(CATEGORY, row)
     category = create_object("AssetCategory", name=category_value, **row_data)
 
-    subcategory_value = read_csv_row_value("Sub-Category", row)
+    subcategory_value = read_csv_row_value(SUB_CATEGORY, row)
     subcategory = create_object(
         "AssetSubCategory",
         parent={"asset_category": category},
@@ -67,7 +84,7 @@ def process_model_number(row_data):
         **row_data,
     )
 
-    type_value = read_csv_row_value("Type", row)
+    type_value = read_csv_row_value(TYPE, row)
     asset_type = create_object(
         "AssetType",
         parent={"asset_sub_category": subcategory},
@@ -75,11 +92,11 @@ def process_model_number(row_data):
         **row_data,
     )
 
-    make_value = read_csv_row_value("Make", row)
+    make_value = read_csv_row_value(MAKE, row)
     asset_make = create_object(
         "AssetMake", parent={"asset_type": asset_type}, name=make_value, **row_data
     )
-    model_number_value = read_csv_row_value("Model Number", row)
+    model_number_value = read_csv_row_value(MODEL_NUMBER, row)
     create_object(
         "AssetModelNumber",
         parent={"asset_make": asset_make},
@@ -90,22 +107,22 @@ def process_model_number(row_data):
 
 def process_asset_data(processed_file_data, location=None):  # noqa: C901
     for model_number_value, row_datas in processed_file_data.items():
-        collection = apps.get_model("core", 'AssetModelNumber')
+        collection = apps.get_model("core", "AssetModelNumber")
         try:
             asset_model_obj = collection.objects.get(name__iexact=model_number_value)
         except Exception:
             asset_model_obj = model_number_value
         for row_data in row_datas:
-            assetcode_value = row_data.pop("Asset Code")
-            serialnumber_value = row_data.pop("Serial No.")
-            asset_verified_value = row_data.pop("Verified")
-            assigned_to_email_value = row_data.pop("Assigned To")
-            asset_status_value = row_data.pop("Status")
-            asset_condition_notes_value = row_data.pop("Notes")
-            spec_memory_value = row_data.pop("Memory")
-            spec_storage_value = row_data.pop("Storage")
-            spec_processor_type_value = row_data.pop("Processor Type")
-            spec_year_of_manufacture_value = row_data.pop("YOM")
+            assetcode_value = row_data.pop(ASSET_CODE)
+            serialnumber_value = row_data.pop(SERIAL_NUMBER)
+            asset_verified_value = row_data.pop(VERIFIED)
+            assigned_to_email_value = row_data.pop(ASSIGNED_TO)
+            asset_status_value = row_data.pop(STATUS)
+            asset_condition_notes_value = row_data.pop(NOTES)
+            spec_memory_value = row_data.pop(ASSET_MEMORY)
+            spec_storage_value = row_data.pop(STORAGE)
+            spec_processor_type_value = row_data.pop(ASSET_PROCESSOR_TYPE)
+            spec_year_of_manufacture_value = row_data.pop(YOM)
 
             asset_fields = {
                 "asset_code": assetcode_value,
