@@ -560,11 +560,18 @@ class AssetIncidentReport(models.Model):
         ordering = ['-id']
 
 
-class StateTransitions(models.Model):
+class StateTransition(models.Model):
     asset_incident_report = models.ForeignKey(
         AssetIncidentReport, on_delete=models.PROTECT
     )
-    transitions = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
+    state = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
 
     class Meta:
         verbose_name_plural = 'State Transitions'
+
+    def _save_initial_incident_report_state(self):
+        existing_state = StateTransition.objects.filter(asset_incident_report=self)
+        if not existing_state:
+            StateTransition.objects.create(
+                asset_incident_report=self, state=constants.NEWLY_REPORTED
+            )

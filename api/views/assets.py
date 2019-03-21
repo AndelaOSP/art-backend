@@ -40,7 +40,7 @@ from api.serializers import (
     AssetStatusSerializer,
     AssetSubCategorySerializer,
     AssetTypeSerializer,
-    StateTransitionsSerializer,
+    StateTransitionSerializer,
 )
 from core import models
 from core.assets_import_helper import DictReaderStrip, process_file, SKIPPED_ROWS
@@ -544,8 +544,8 @@ class GetPrintAssetsFile(APIView):
         return response
 
 
-class StateTransitionsViewset(ModelViewSet):
-    serializer_class = StateTransitionsSerializer
+class StateTransitionViewset(ModelViewSet):
+    serializer_class = StateTransitionSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    queryset = models.StateTransitions.objects.all()
+    queryset = models.StateTransition.objects.all()

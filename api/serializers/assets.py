@@ -459,7 +459,7 @@ class AssetSpecsSerializer(serializers.ModelSerializer):
         return fields
 
 
-class StateTransitionsSerializer(serializers.ModelSerializer):
+class StateTransitionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.StateTransitions
-        fields = ("asset_incident_report", "transitions")
+        model = models.StateTransition
+        fields = ("asset_incident_report", "state")
