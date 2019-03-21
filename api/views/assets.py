@@ -1,6 +1,5 @@
 # Standard Library
 import codecs
-import csv
 import logging
 import os
 from itertools import chain
@@ -43,7 +42,20 @@ from api.serializers import (
     AssetTypeSerializer,
 )
 from core import models
-from core.assets_import_helper import process_file, SKIPPED_ROWS
+from core.assets_import_helper import DictReaderStrip, process_file, SKIPPED_ROWS
+from core.constants import (
+    ASSET_CODE,
+    ASSIGNED_TO,
+    CSV_HEADERS,
+    CSV_REQUIRED_HEADING_ASSET_CODE,
+    CSV_REQUIRED_HEADING_SERIAL_NO,
+    MAKE,
+    MODEL_NUMBER,
+    NOTES,
+    SERIAL_NUMBER,
+    STATUS,
+    VERIFIED,
+)
 from core.slack_bot import SlackIntegration
 
 slack = SlackIntegration()
@@ -372,9 +384,17 @@ class AssetsImportViewSet(APIView):
                 {"error": "File type not surported, import a CSV file"}, status=400
             )
         file_obj = codecs.iterdecode(file_object, "utf-8")
-        csv_reader = csv.DictReader(file_obj, delimiter=",")
+        csv_reader = DictReaderStrip(file_obj, delimiter=",")
         if not (csv_reader.fieldnames and " ".join(csv_reader.fieldnames).strip()):
             return Response({"error": "CSV file is empty"}, status=400)
+        field_names_set = set(csv_reader.fieldnames)
+        if not field_names_set.issubset(CSV_HEADERS):
+            return Response({"error": "CSV file contains invalid headings"}, status=400)
+        if not (
+            field_names_set >= CSV_REQUIRED_HEADING_ASSET_CODE
+            or field_names_set >= CSV_REQUIRED_HEADING_SERIAL_NO
+        ):
+            return Response({"error": "File contains missing headings"}, status=400)
         csv_values = []
         for line in csv_reader.reader:
             line = [val for val in line if val and val.strip()]
@@ -386,7 +406,7 @@ class AssetsImportViewSet(APIView):
         response = {}
         error = False
         file_obj = codecs.iterdecode(file_object, "utf-8")
-        csv_reader = csv.DictReader(file_obj, delimiter=",")
+        csv_reader = DictReaderStrip(file_obj, delimiter=",")
         if not process_file(csv_reader, user=user):
             path = request.build_absolute_uri(reverse("skipped"))
             print("path in main end point", path)
@@ -474,15 +494,15 @@ class ExportAssetsDetails(APIView):
         bold = workbook.add_format({"bold": True, "bg_color": "silver"})
         for asset_type in asset_types:
             worksheet = workbook.add_worksheet(asset_type)
-            worksheet.write("A1", "Make", bold)
+            worksheet.write("A1", MAKE, bold)
             worksheet.write("B1", "Location", bold)
-            worksheet.write("C1", "Asset Code", bold)
-            worksheet.write("D1", "Serial No", bold)
-            worksheet.write("E1", "Model No", bold)
-            worksheet.write("F1", "Assigned To", bold)
-            worksheet.write("G1", "Status", bold)
-            worksheet.write("H1", "Verified", bold)
-            worksheet.write("I1", "Notes", bold)
+            worksheet.write("C1", ASSET_CODE, bold)
+            worksheet.write("D1", SERIAL_NUMBER, bold)
+            worksheet.write("E1", MODEL_NUMBER, bold)
+            worksheet.write("F1", ASSIGNED_TO, bold)
+            worksheet.write("G1", STATUS, bold)
+            worksheet.write("H1", VERIFIED, bold)
+            worksheet.write("I1", NOTES, bold)
             grouped_assets = []
             for asset in assets_list:
                 if asset.get("asset_type") == asset_type:
