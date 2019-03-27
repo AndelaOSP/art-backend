@@ -79,17 +79,17 @@ jobs:
           name: isort - imports sorting
           command: |
             pipenv run isort -rc --check-only --diff --atomic -q .
-  shellcheck:
-    <<: *default
-    steps:
-      - checkout
-      - *cmd_change_owner
-      - *cmd_restore_cache
-      - run:
-          name: check sh files
-          command: |
-            sudo apt-get install shellcheck
-            for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
+  # shellcheck:
+  #   <<: *default
+  #   steps:
+  #     - checkout
+  #     - *cmd_change_owner
+  #     - *cmd_restore_cache
+  #     - run:
+  #         name: check sh files
+  #         command: |
+  #           sudo apt-get install shellcheck
+  #           for file in $(find . -type f -name "*.sh"); do shellcheck --format=gcc $file; done;
   tests:
     <<: *default
     steps:
@@ -179,15 +179,15 @@ workflows:
       - isort:
           requires:
             - build
-      - shellcheck:
-          requires:
-            - build
+      # - shellcheck:
+      #     requires:
+      #       - build
       - tests:
           requires:
             - flake8
             - black
             - isort
-            - shellcheck
+            # - shellcheck
       - diff:
           requires:
             - tests
