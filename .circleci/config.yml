@@ -196,7 +196,9 @@ workflows:
             - tests
           filters:
             branches:
-              only: develop
+              only:
+                - develop
+                - ch-fix-problem-with-apt-CCI
       - deploy_production:
           requires:
             - tests
