@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2059
-set -eo pipefail
-
 rm /etc/apt/sources.list
 echo "deb http://archive.debian.org/debian/ jessie-backports main" |  tee -a /etc/apt/sources.list
 echo "deb-src http://archive.debian.org/debian/ jessie-backports main" |  tee -a /etc/apt/sources.list
