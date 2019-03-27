@@ -552,12 +552,29 @@ class AssetIncidentReport(models.Model):
     witnesses = models.TextField(null=True, blank=True)
     police_abstract_obtained = models.CharField(max_length=255)
     submitted_by = models.ForeignKey('User', null=True, on_delete=models.PROTECT)
+    state = models.CharField(max_length=50)
 
     def __str__(self):
         return f"{self.incident_type}: {self.asset}"
 
     class Meta:
         ordering = ['-id']
+
+    def save(self, *args, **kwargs):
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._save_initial_incident_report_state()
+
+    def _save_initial_incident_report_state(self):
+        existing_state = StateTransition.objects.filter(asset_incident_report=self)
+        if not existing_state:
+            StateTransition.objects.create(
+                asset_incident_report=self, state=constants.NEWLY_REPORTED
+            )
+            self.save()
 
 
 class StateTransition(models.Model):
@@ -568,10 +585,3 @@ class StateTransition(models.Model):
 
     class Meta:
         verbose_name_plural = 'State Transitions'
-
-    def _save_initial_incident_report_state(self):
-        existing_state = StateTransition.objects.filter(asset_incident_report=self)
-        if not existing_state:
-            StateTransition.objects.create(
-                asset_incident_report=self, state=constants.NEWLY_REPORTED
-            )
