@@ -202,13 +202,3 @@ class SlackIntegrationTestCase(TestCase):
         fake_slack.side_effect = side_effect_multiple_users
         resp = self.slack.send_message('should error', user=self.user2)
         self.assertFalse(resp.get('ok'))
-
-    @patch("core.slack_bot.SlackClient.api_call")
-    def test_slack_incidence_report_no_payload(self, fake_slack):
-        # TODO
-        pass
-
-    @patch("core.slack_bot.SlackClient.api_call")
-    def test_slack_incidence_report_with_payload(self, fake_slack):
-        # TODO
-        pass

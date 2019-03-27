@@ -28,10 +28,9 @@ class SlackIntegration(object):
         user_id = None
         for member in users:
             profile = member.get('profile')
-            if profile:
-                if profile.get('email') == email:
-                    user_id = member.get('id')
-                    found = True
+            if profile and profile.get('email') == email:
+                user_id = member.get('id')
+                found = True
         return user_id, found
 
     def get_user_slack_id(self, user):
@@ -140,7 +139,7 @@ class SlackIntegration(object):
             if assets.count() == 0:
                 no_asset_resp = self.slack_client.api_call(
                     'chat.postEphemeral',
-                    username='Art-incidence-report',
+                    username='@art-bot',
                     channel=channel_id,
                     user=user_id,
                     response_url=data.get('response_url'),
@@ -231,7 +230,7 @@ class SlackIntegration(object):
                 smile = ":simple_smile::simple_smile::simple_smile:"
                 self.slack_client.api_call(
                     "chat.postEphemeral",
-                    username='Art-incidence-report',
+                    username='@art-bot',
                     channel=channel_id,
                     user=user_id,
                     response_url=payload.get('response_url'),

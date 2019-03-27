@@ -59,7 +59,6 @@ class AssetConditionAPITest(APIBaseTestCase):
         test_asset = Asset(
             asset_code='IC002',
             serial_number='SN002',
-            assigned_to=self.asset_assignee,
             model_number=self.assetmodel,
             purchase_date="2018-07-10",
             asset_location=self.centre,
