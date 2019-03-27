@@ -1,7 +1,6 @@
 # App Imports
-from core.tests import CoreBaseTestCase
-
 from core.models import AssetIncidentReport, StateTransition
+from core.tests import CoreBaseTestCase
 
 
 class StateTransitionModelTest(CoreBaseTestCase):
@@ -20,11 +19,7 @@ class StateTransitionModelTest(CoreBaseTestCase):
             witnesses="Omosh wa mtura",
             police_abstract_obtained="Yes",
             submitted_by=self.user,
-            state="Newly reported"
+            state="Newly reported",
         )
-        self.assertEqual(
-            AssetIncidentReport.objects.count(), incident_report_count +1
-        )
-        self.assertEqual(
-            StateTransition.objects.count(), state_transition_count +1
-        )
+        self.assertEqual(AssetIncidentReport.objects.count(), incident_report_count + 1)
+        self.assertEqual(StateTransition.objects.count(), state_transition_count + 1)
