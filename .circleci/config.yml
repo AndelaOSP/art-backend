@@ -198,7 +198,6 @@ workflows:
             branches:
               only:
                 - develop
-                - ch-fix-problem-with-apt-CCI
       - deploy_production:
           requires:
             - tests
