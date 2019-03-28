@@ -533,13 +533,9 @@ class ExportAssetsDetails(APIView):
                 worksheet.write(row, column + 2, asset.get("asset_code"))
                 worksheet.write(row, column + 3, asset.get("serial_number", ""))
                 worksheet.write(row, column + 4, asset.get("model_number", ""))
-                worksheet.write(
-                    row,
-                    column + 5,
-                    asset.get("assigned_to")["email"]
-                    if asset.get("assigned_to")
-                    else "",
-                )
+                assigned = asset.get("assigned_to") or {}
+                assignee = assigned.get("email", "")
+                worksheet.write(row, column + 5, assignee)
                 worksheet.write(row, column + 6, asset.get("current_status", ""))
                 worksheet.write_boolean(row, column + 7, asset.get("verified", ""))
                 worksheet.write(row, column + 8, asset.get("notes", ""))
