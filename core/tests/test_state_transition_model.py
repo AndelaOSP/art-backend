@@ -19,7 +19,6 @@ class StateTransitionModelTest(CoreBaseTestCase):
             witnesses="Omosh wa mtura",
             police_abstract_obtained="Yes",
             submitted_by=self.user,
-            state="Newly reported",
         )
         self.assertEqual(AssetIncidentReport.objects.count(), incident_report_count + 1)
         self.assertEqual(StateTransition.objects.count(), state_transition_count + 1)
