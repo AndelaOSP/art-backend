@@ -360,6 +360,9 @@ class AssetLog(models.Model):
 
     def save(self, *args, **kwargs):
         self.full_clean()
+        log = AssetLog.objects.filter(asset=self.asset).first()
+        if log and log.log_type == self.log_type:
+            return None
         super().save(*args, **kwargs)
 
     class Meta:
