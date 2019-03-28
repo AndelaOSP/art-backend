@@ -1,6 +1,8 @@
 # Standard Library
 import codecs
+import functools
 import logging
+import operator
 import os
 from itertools import chain
 
@@ -8,6 +10,7 @@ from itertools import chain
 import xlsxwriter
 from django.conf import settings
 from django.core.validators import ValidationError
+from django.db.models import Q
 from django.http import FileResponse
 from django_filters import rest_framework as filters
 from rest_framework import serializers, status
@@ -464,33 +467,48 @@ class SampleImportFile(APIView):
 
 
 class ExportAssetsDetails(APIView):
+    serializer_class = AssetSerializer
+    queryset = models.Asset.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
 
     def get(self, request):
-        assets = models.Asset.objects.filter(
-            asset_location__name=request.user.location.name
-        )
-        serializer = AssetSerializer(assets, many=True)
-        if len(serializer.data) == 0:
+        filters = Q(**{})
+        for key, val in dict(request.query_params).items():
+            lookup = functools.reduce(
+                operator.or_,
+                {Q(**{'__'.join([key, 'icontains']): item}) for item in val},
+            )
+            filters |= lookup
+        try:
+            assets = self.queryset.filter(
+                filters, asset_location__name=request.user.location.name
+            )
+        except Exception as e:
+            logger.warning(str(e))
+            return Response({"error": "Unsupported filters included."}, status=400)
+        serializer = self.serializer_class(assets, many=True)
+        asset_count = len(serializer.data)
+        if asset_count == 0:
             return Response({"error": "You have no assets"}, status=400)
-        self.create_sheet(serializer.data)
+
+        email = request.user.email
+        filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
+        self.create_sheet(serializer.data, filename=filename)
         path = request.build_absolute_uri(reverse("asset-details"))
         return Response(
-            {
-                "Success": "Assets details have been exported successfully, Download the file from",
-                "file": path,
-            },
+            {"success": f"{asset_count} assets exported to {path} successfully"},
             status=200,
         )
 
-    def create_sheet(self, assets_list):
+    def create_sheet(self, assets_list, filename=None):
         asset_types = []
+        filename = filename or "exported_assets.xlsx"
         for asset in assets_list:
             if asset.get("asset_type") not in asset_types:
                 asset_types.append(asset.get("asset_type"))
 
-        workbook = xlsxwriter.Workbook("assets.xlsx")
+        workbook = xlsxwriter.Workbook(filename)
         bold = workbook.add_format({"bold": True, "bg_color": "silver"})
         for asset_type in asset_types:
             worksheet = workbook.add_worksheet(asset_type)
@@ -515,13 +533,9 @@ class ExportAssetsDetails(APIView):
                 worksheet.write(row, column + 2, asset.get("asset_code"))
                 worksheet.write(row, column + 3, asset.get("serial_number", ""))
                 worksheet.write(row, column + 4, asset.get("model_number", ""))
-                worksheet.write(
-                    row,
-                    column + 5,
-                    asset.get("assigned_to")["email"]
-                    if asset.get("assigned_to")
-                    else "",
-                )
+                assigned = asset.get("assigned_to") or {}
+                assignee = assigned.get("email", "")
+                worksheet.write(row, column + 5, assignee)
                 worksheet.write(row, column + 6, asset.get("current_status", ""))
                 worksheet.write_boolean(row, column + 7, asset.get("verified", ""))
                 worksheet.write(row, column + 8, asset.get("notes", ""))
@@ -533,7 +547,8 @@ class GetPrintAssetsFile(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        filename = "assets.xlsx"
+        email = request.user.email
+        filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
         file_path = os.path.join(settings.BASE_DIR, "{}".format(filename))
 
         file = open(file_path, "rb")
