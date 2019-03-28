@@ -26,7 +26,6 @@ class AssetLogModelTest(APIBaseTestCase):
             asset_code="IC00sf",
             serial_number="SN00134",
             model_number=self.test_assetmodel1,
-            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10",
         )
         self.test_other_asset.save()
