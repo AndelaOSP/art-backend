@@ -21,7 +21,6 @@ class AssetTypeModelTest(CoreBaseTestCase):
             asset_code="testIC002",
             serial_number="testSN0045",
             model_number=self.test_assetmodel,
-            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10",
         )
         self.assertEqual(Asset.objects.count(), count + 1)
@@ -35,7 +34,6 @@ class AssetTypeModelTest(CoreBaseTestCase):
                 asset_code="IC002",
                 serial_number=serial_no,
                 model_number=self.test_assetmodel,
-                assigned_to=self.asset_assignee,
                 purchase_date="2018-07-10",
             )
         self.assertEqual(Asset.objects.count(), count)
@@ -49,7 +47,6 @@ class AssetTypeModelTest(CoreBaseTestCase):
                 asset_code=asset_code,
                 serial_number="serial_no",
                 model_number=self.test_assetmodel,
-                assigned_to=self.asset_assignee,
                 purchase_date="2018-07-10",
             )
         self.assertEqual(Asset.objects.count(), count)

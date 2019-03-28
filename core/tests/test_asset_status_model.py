@@ -20,7 +20,6 @@ class AssetStatusModelTest(CoreBaseTestCase):
             asset_code="kkIC002",
             serial_number="kkSN002",
             model_number=self.test_assetmodel,
-            assigned_to=self.asset_assignee,
             purchase_date="2018-07-10",
         )
         self.assertEqual(AssetStatus.objects.count(), status_count + 1)

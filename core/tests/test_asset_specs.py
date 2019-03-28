@@ -28,7 +28,6 @@ class AssetModelNumberTestCase(CoreBaseTestCase):
             serial_number="SN00450",
             model_number=self.test_assetmodel,
             purchase_date="2018-07-10",
-            assigned_to=self.asset_assignee,
             specs=asset_specs,
         )
         self.assertEqual(new_asset.serial_number, "SN00450")
