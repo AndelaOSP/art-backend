@@ -558,3 +558,29 @@ class AssetIncidentReport(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+    def save(self, *args, **kwargs):
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._save_initial_incident_report_state()
+
+    def _save_initial_incident_report_state(self):
+        existing_state = StateTransition.objects.filter(asset_incident_report=self)
+        if not existing_state:
+            StateTransition.objects.create(
+                asset_incident_report=self, state=constants.NEWLY_REPORTED
+            )
+            self.save()
+
+
+class StateTransition(models.Model):
+    asset_incident_report = models.ForeignKey(
+        AssetIncidentReport, on_delete=models.PROTECT
+    )
+    state = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
+
+    class Meta:
+        verbose_name_plural = 'State Transitions'
