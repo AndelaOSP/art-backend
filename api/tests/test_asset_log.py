@@ -60,40 +60,8 @@ class AssetLogModelTest(APIBaseTestCase):
             log_type="Checkin",
         )
         self.assertEqual(AssetLog.objects.count(), 3)
-        created_log = AssetLog.objects.filter(asset=self.test_other_asset).first()
-        self.assertEqual(created_log.log_type, "Checkin")
-
-    def test_verify_double_checkin_for_asset(self):
-        # First log
-        AssetLog.objects.create(
-            checked_by=self.security_user,
-            asset=self.test_other_asset,
-            log_type="Checkin",
-        )
-        # Second log
-        AssetLog.objects.create(
-            checked_by=self.security_user,
-            asset=self.test_other_asset,
-            log_type="Checkin",
-        )
-        self.assertEqual(AssetLog.objects.count(), 3)
 
     def test_add_checkout(self):
-        AssetLog.objects.create(
-            checked_by=self.security_user,
-            asset=self.test_other_asset,
-            log_type="Checkout",
-        )
-        self.assertEqual(AssetLog.objects.count(), 3)
-    
-    def test_verify_double_checkout_for_asset(self):
-        # First log
-        AssetLog.objects.create(
-            checked_by=self.security_user,
-            asset=self.test_other_asset,
-            log_type="Checkout",
-        )
-        # Second log
         AssetLog.objects.create(
             checked_by=self.security_user,
             asset=self.test_other_asset,
