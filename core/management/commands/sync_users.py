@@ -80,16 +80,21 @@ def fetch_ais_user_data(ais_url, ais_token, params):
 def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
     global SYNC_SUCCESS
     global SYNC_ERRORS
-    last_run = None
-    new_records = 0
-    updated_records = 0
+    last_successful_run = None
+    new_records_count = 0
+    updated_records_count = 0
+    updated_data = {}
     logger.info('Loading data to ART')
     try:
-        last_run = AISUserSync.objects.exclude(id=current_sync_id).latest('created_at')
+        last_successful_run = (
+            AISUserSync.objects.exclude(id=current_sync_id)
+            .filter(successful=True)
+            .latest('created_at')
+        )
     except Exception as e:
         logger.warning(str(e))
-    if last_run:
-        logger.info('Last run: {}'.format(str(last_run)))
+    if last_successful_run:
+        logger.info('Last successful run: {}'.format(str(last_successful_run)))
     total_num = len(ais_user_data)
     num = 0
     for ais_user in ais_user_data:
@@ -97,15 +102,18 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
         logger.info('Processing: **{}** of **{}**'.format(num, total_num))
         email = ais_user.get('email')
         updated_at = ais_user.get('updated_at')
+        updated_user_data = []
         if updated_at:
             updated_at = parse_datetime(updated_at)
         try:
             validate_email(email)
         except Exception:
-            if not last_run or (
-                last_run and updated_at and updated_at > last_run.created_at
+            if not last_successful_run or (
+                last_successful_run
+                and updated_at
+                and updated_at > last_successful_run.created_at
             ):
-                SYNC_ERRORS['other_errors'].add('Invalid Email')
+                SYNC_ERRORS['other_errors'].add('Invalid Email - {}'.format(email))
             continue
         try:
             user, user_created = User.objects.get_or_create(email=email)
@@ -115,9 +123,9 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
 
         if (
             (not user_created)
-            and last_run
+            and last_successful_run
             and updated_at
-            and updated_at < last_run.created_at
+            and updated_at < last_successful_run.created_at
         ):
             # if record has not been updated on AIS
             continue
@@ -162,28 +170,33 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
                 user.is_active = False
 
             user.save()
-            new_records += 1
+            new_records_count += 1
         else:
             # check if picture or cohort have changed
             modified = False
             if picture and user.picture != picture:
                 user.picture = picture
                 modified = True
+                updated_user_data.append('picture')
             if cohort_no and user.cohort != cohort_no:
                 user.cohort = cohort_no
                 modified = True
+                updated_user_data.append('cohort_no')
             if andela_center and user.location != andela_center:
                 user.location = andela_center
                 modified = True
+                updated_user_data.append('andela_center')
             if user_status == 'suspended' and user.is_active:
                 user.is_active = False
                 modified = True
+                updated_user_data.append('user_status')
 
             if modified:
                 logger.info('Existing user modified. Updating')
                 user.save()
-                updated_records += 1
-    return new_records, updated_records
+                updated_records_count += 1
+                updated_data[email] = updated_user_data
+    return new_records_count, updated_records_count, updated_data
 
 
 class Command(BaseCommand):
@@ -199,8 +212,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         global SYNC_SUCCESS
         global SYNC_ERRORS
-        new_records = 0
-        updated_records = 0
+        new_records_count = 0
+        updated_records_count = 0
+        updated_data = None
         start_time = time.time()
         sync_record = AISUserSync.objects.create(running=True)
         ais_url = os.getenv('AIS_URL')
@@ -211,14 +225,14 @@ class Command(BaseCommand):
             ais_user_data = fetch_ais_user_data(ais_url, ais_token, params)
             logger.info('{} records fetched'.format(len(ais_user_data)))
             if ais_user_data:
-                new_records, updated_records = load_users_to_art(
+                new_records_count, updated_records_count, updated_data = load_users_to_art(
                     ais_user_data, current_sync_id=sync_record.id
                 )
-                sync_record.new_records = new_records
-                sync_record.updated_records = updated_records
+                sync_record.new_records = new_records_count
+                sync_record.updated_records = updated_records_count
                 logger.info(
                     'Done. {} records added. {} records updated.'.format(
-                        new_records, updated_records
+                        new_records_count, updated_records_count
                     )
                 )
         else:
@@ -232,7 +246,8 @@ class Command(BaseCommand):
         sync_record.successful = SYNC_SUCCESS
         sync_record.running = False
         sync_errors = dict(SYNC_ERRORS)
-        sync_record.message = sync_errors
+        sync_data = {'sync_errors': sync_errors, 'updated_data': updated_data}
+        sync_record.message = sync_data
         sync_record.save()
         if sync_errors:
             logger.error(dict(SYNC_ERRORS))

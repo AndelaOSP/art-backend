@@ -498,7 +498,10 @@ class ExportAssetsDetails(APIView):
         self.create_sheet(serializer.data, filename=filename)
         path = request.build_absolute_uri(reverse("asset-details"))
         return Response(
-            {"success": f"{asset_count} assets exported to {path} successfully"},
+            {
+                "success": f"{asset_count} assets exported to {path} successfully",
+                "file": path,
+            },
             status=200,
         )
 

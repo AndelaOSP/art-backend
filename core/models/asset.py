@@ -506,12 +506,15 @@ class AllocationHistory(models.Model):
         asset_code = f'Asset Code {asset_code} ' if asset_code else ''
         _and = f'and ' if asset_code and serial_no else ''
         message = f'The {asset.asset_type} with {serial_no}{_and}{asset_code}'
+        to_append = 'Please contact the Ops team if this information is inaccurate.'
 
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
-            message += "has been allocated to you.{}".format(env_message)
+            message += "has been allocated to you. {} {}".format(to_append, env_message)
             assignee = self.current_owner
         elif not asset.assigned_to and self.previous_owner:
-            message += "has been de-allocated from you.{}".format(env_message)
+            message += "has been de-allocated from you. {} {}".format(
+                to_append, env_message
+            )
             assignee = self.previous_owner
 
         if assignee and hasattr(assignee, 'email'):
