@@ -84,21 +84,6 @@ class AssetLogModelTest(APIBaseTestCase):
         )
         self.assertEqual(AssetLog.objects.count(), count_before_log + 1)
 
-    def test_verify_double_checkout_for_asset(self):
-        # First log
-        AssetLog.objects.create(
-            checked_by=self.security_user,
-            asset=self.test_other_asset,
-            log_type="Checkout",
-        )
-        # Second log
-        AssetLog.objects.create(
-            checked_by=self.security_user,
-            asset=self.test_other_asset,
-            log_type="Checkout",
-        )
-        self.assertEqual(AssetLog.objects.count(), 3)
-
     def test_add_checkin_without_log_type(self):
         with self.assertRaises(ValidationError) as e:
             AssetLog.objects.create(
