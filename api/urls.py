@@ -40,6 +40,7 @@ from api.views import (
     SecurityUserEmailsViewSet,
     SecurityUserViewSet,
     SkippedAssets,
+    StateTransitionViewset,
     UserFeedbackViewSet,
     UserGroupViewSet,
     UserViewSet,
@@ -94,6 +95,7 @@ router.register(
     AssetSlackIncidentReportViewSet,
     'slack-incidence-reports',
 )
+router.register('state-transitions', StateTransitionViewset, 'state-transitions')
 
 # centres
 router.register('andela-centres', AndelaCentreViewset, 'andela-centres')
