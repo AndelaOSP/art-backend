@@ -457,3 +457,9 @@ class AssetSpecsSerializer(serializers.ModelSerializer):
                 "Similar asset specification already exist"
             )
         return fields
+
+
+class StateTransitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.StateTransition
+        fields = ("asset_incident_report", "state")

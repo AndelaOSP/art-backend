@@ -123,6 +123,25 @@ class AssetsUploadTestCase(APIBaseTestCase):
         self.assertEqual(400, response.status_code)
 
     @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_user_cannot_upload_csv_file_with_missing_required_headings_to_save_assets(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        data = {}
+        count = Asset.objects.count()
+        file_location = os.path.join(os.path.dirname(__file__), 'missing_headings.csv')
+        with open(file_location) as csv:
+            data['file'] = csv
+            response = client.post(
+                self.asset_uploads_url,
+                data=data,
+                HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+            )
+
+        self.assertEqual(Asset.objects.count(), count)
+        self.assertEqual(400, response.status_code)
+
+    @patch('api.authentication.auth.verify_id_token')
     def test_uploading_assets_already_in_the_database_skips_saving_them(
         self, mock_verify_id_token
     ):

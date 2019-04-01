@@ -1,7 +1,8 @@
 # Standard Library
 import codecs
-import csv
+import functools
 import logging
+import operator
 import os
 from itertools import chain
 
@@ -9,6 +10,7 @@ from itertools import chain
 import xlsxwriter
 from django.conf import settings
 from django.core.validators import ValidationError
+from django.db.models import Q
 from django.http import FileResponse
 from django_filters import rest_framework as filters
 from rest_framework import serializers, status
@@ -41,9 +43,23 @@ from api.serializers import (
     AssetStatusSerializer,
     AssetSubCategorySerializer,
     AssetTypeSerializer,
+    StateTransitionSerializer,
 )
 from core import models
-from core.assets_import_helper import process_file, SKIPPED_ROWS
+from core.assets_import_helper import DictReaderStrip, process_file, SKIPPED_ROWS
+from core.constants import (
+    ASSET_CODE,
+    ASSIGNED_TO,
+    CSV_HEADERS,
+    CSV_REQUIRED_HEADING_ASSET_CODE,
+    CSV_REQUIRED_HEADING_SERIAL_NO,
+    MAKE,
+    MODEL_NUMBER,
+    NOTES,
+    SERIAL_NUMBER,
+    STATUS,
+    VERIFIED,
+)
 from core.slack_bot import SlackIntegration
 
 slack = SlackIntegration()
@@ -372,9 +388,17 @@ class AssetsImportViewSet(APIView):
                 {"error": "File type not surported, import a CSV file"}, status=400
             )
         file_obj = codecs.iterdecode(file_object, "utf-8")
-        csv_reader = csv.DictReader(file_obj, delimiter=",")
+        csv_reader = DictReaderStrip(file_obj, delimiter=",")
         if not (csv_reader.fieldnames and " ".join(csv_reader.fieldnames).strip()):
             return Response({"error": "CSV file is empty"}, status=400)
+        field_names_set = set(csv_reader.fieldnames)
+        if not field_names_set.issubset(CSV_HEADERS):
+            return Response({"error": "CSV file contains invalid headings"}, status=400)
+        if not (
+            field_names_set >= CSV_REQUIRED_HEADING_ASSET_CODE
+            or field_names_set >= CSV_REQUIRED_HEADING_SERIAL_NO
+        ):
+            return Response({"error": "File contains missing headings"}, status=400)
         csv_values = []
         for line in csv_reader.reader:
             line = [val for val in line if val and val.strip()]
@@ -386,7 +410,8 @@ class AssetsImportViewSet(APIView):
         response = {}
         error = False
         file_obj = codecs.iterdecode(file_object, "utf-8")
-        csv_reader = csv.DictReader(file_obj, delimiter=",")
+        csv_reader = DictReaderStrip(file_obj, delimiter=",")
+        print('Processing uploaded file:')
         if not process_file(csv_reader, user=user):
             path = request.build_absolute_uri(reverse("skipped"))
             print("path in main end point", path)
@@ -444,45 +469,63 @@ class SampleImportFile(APIView):
 
 
 class ExportAssetsDetails(APIView):
+    serializer_class = AssetSerializer
+    queryset = models.Asset.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
 
     def get(self, request):
-        assets = models.Asset.objects.filter(
-            asset_location__name=request.user.location.name
-        )
-        serializer = AssetSerializer(assets, many=True)
-        if len(serializer.data) == 0:
+        filters = Q(**{})
+        for key, val in dict(request.query_params).items():
+            lookup = functools.reduce(
+                operator.or_,
+                {Q(**{'__'.join([key, 'icontains']): item}) for item in val},
+            )
+            filters |= lookup
+        try:
+            assets = self.queryset.filter(
+                filters, asset_location__name=request.user.location.name
+            )
+        except Exception as e:
+            logger.warning(str(e))
+            return Response({"error": "Unsupported filters included."}, status=400)
+        serializer = self.serializer_class(assets, many=True)
+        asset_count = len(serializer.data)
+        if asset_count == 0:
             return Response({"error": "You have no assets"}, status=400)
-        self.create_sheet(serializer.data)
+
+        email = request.user.email
+        filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
+        self.create_sheet(serializer.data, filename=filename)
         path = request.build_absolute_uri(reverse("asset-details"))
         return Response(
             {
-                "Success": "Assets details have been exported successfully, Download the file from",
+                "success": f"{asset_count} assets exported to {path} successfully",
                 "file": path,
             },
             status=200,
         )
 
-    def create_sheet(self, assets_list):
+    def create_sheet(self, assets_list, filename=None):
         asset_types = []
+        filename = filename or "exported_assets.xlsx"
         for asset in assets_list:
             if asset.get("asset_type") not in asset_types:
                 asset_types.append(asset.get("asset_type"))
 
-        workbook = xlsxwriter.Workbook("assets.xlsx")
+        workbook = xlsxwriter.Workbook(filename)
         bold = workbook.add_format({"bold": True, "bg_color": "silver"})
         for asset_type in asset_types:
             worksheet = workbook.add_worksheet(asset_type)
-            worksheet.write("A1", "Make", bold)
+            worksheet.write("A1", MAKE, bold)
             worksheet.write("B1", "Location", bold)
-            worksheet.write("C1", "Asset Code", bold)
-            worksheet.write("D1", "Serial No", bold)
-            worksheet.write("E1", "Model No", bold)
-            worksheet.write("F1", "Assigned To", bold)
-            worksheet.write("G1", "Status", bold)
-            worksheet.write("H1", "Verified", bold)
-            worksheet.write("I1", "Notes", bold)
+            worksheet.write("C1", ASSET_CODE, bold)
+            worksheet.write("D1", SERIAL_NUMBER, bold)
+            worksheet.write("E1", MODEL_NUMBER, bold)
+            worksheet.write("F1", ASSIGNED_TO, bold)
+            worksheet.write("G1", STATUS, bold)
+            worksheet.write("H1", VERIFIED, bold)
+            worksheet.write("I1", NOTES, bold)
             grouped_assets = []
             for asset in assets_list:
                 if asset.get("asset_type") == asset_type:
@@ -495,13 +538,9 @@ class ExportAssetsDetails(APIView):
                 worksheet.write(row, column + 2, asset.get("asset_code"))
                 worksheet.write(row, column + 3, asset.get("serial_number", ""))
                 worksheet.write(row, column + 4, asset.get("model_number", ""))
-                worksheet.write(
-                    row,
-                    column + 5,
-                    asset.get("assigned_to")["email"]
-                    if asset.get("assigned_to")
-                    else "",
-                )
+                assigned = asset.get("assigned_to") or {}
+                assignee = assigned.get("email", "")
+                worksheet.write(row, column + 5, assignee)
                 worksheet.write(row, column + 6, asset.get("current_status", ""))
                 worksheet.write_boolean(row, column + 7, asset.get("verified", ""))
                 worksheet.write(row, column + 8, asset.get("notes", ""))
@@ -513,7 +552,8 @@ class GetPrintAssetsFile(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        filename = "assets.xlsx"
+        email = request.user.email
+        filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
         file_path = os.path.join(settings.BASE_DIR, "{}".format(filename))
 
         file = open(file_path, "rb")
@@ -521,3 +561,10 @@ class GetPrintAssetsFile(APIView):
         response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
 
         return response
+
+
+class StateTransitionViewset(ModelViewSet):
+    serializer_class = StateTransitionSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+    queryset = models.StateTransition.objects.all()

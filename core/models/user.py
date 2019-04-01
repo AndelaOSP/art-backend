@@ -68,6 +68,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name_plural = "All Users"
         ordering = ['-id']
+        indexes = [models.Index(fields=['cohort'])]
 
     def save(self, *args, **kwargs):
         try:

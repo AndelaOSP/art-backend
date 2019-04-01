@@ -220,6 +220,16 @@ class Asset(models.Model):
     verified = models.BooleanField(default=True)
     objects = CaseInsensitiveManager()
 
+    def __str__(self):
+        return '{}, {}, {}'.format(
+            self.asset_code, self.serial_number, self.model_number
+        )
+
+    class Meta:
+        ordering = ['-id']
+        unique_together = ("asset_code", "serial_number")
+        indexes = [models.Index(fields=['current_status', 'verified'])]
+
     def clean(self):
         if not self.asset_code and not self.serial_number:
             raise ValidationError(
@@ -256,15 +266,6 @@ class Asset(models.Model):
             AssetStatus.objects.create(asset=self, current_status=constants.AVAILABLE)
             self.current_status = constants.AVAILABLE
             self.save()
-
-    def __str__(self):
-        return '{}, {}, {}'.format(
-            self.asset_code, self.serial_number, self.model_number
-        )
-
-    class Meta:
-        ordering = ['-id']
-        unique_together = ("asset_code", "serial_number")
 
     def _get_asset_category(self):
         return self._get_asset_sub_category().asset_category
@@ -506,12 +507,15 @@ class AllocationHistory(models.Model):
         asset_code = f'Asset Code {asset_code} ' if asset_code else ''
         _and = f'and ' if asset_code and serial_no else ''
         message = f'The {asset.asset_type} with {serial_no}{_and}{asset_code}'
+        to_append = 'Please contact the Ops team if this information is inaccurate.'
 
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
-            message += "has been allocated to you.{}".format(env_message)
+            message += "has been allocated to you. {} {}".format(to_append, env_message)
             assignee = self.current_owner
         elif not asset.assigned_to and self.previous_owner:
-            message += "has been de-allocated from you.{}".format(env_message)
+            message += "has been de-allocated from you. {} {}".format(
+                to_append, env_message
+            )
             assignee = self.previous_owner
 
         if assignee and hasattr(assignee, 'email'):
@@ -558,3 +562,29 @@ class AssetIncidentReport(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+    def save(self, *args, **kwargs):
+        try:
+            super().save(*args, **kwargs)
+        except Exception as e:
+            logger.warning(str(e))
+        else:
+            self._save_initial_incident_report_state()
+
+    def _save_initial_incident_report_state(self):
+        existing_state = StateTransition.objects.filter(asset_incident_report=self)
+        if not existing_state:
+            StateTransition.objects.create(
+                asset_incident_report=self, state=constants.NEWLY_REPORTED
+            )
+            self.save()
+
+
+class StateTransition(models.Model):
+    asset_incident_report = models.ForeignKey(
+        AssetIncidentReport, on_delete=models.PROTECT
+    )
+    state = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
+
+    class Meta:
+        verbose_name_plural = 'State Transitions'
