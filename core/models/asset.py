@@ -220,6 +220,16 @@ class Asset(models.Model):
     verified = models.BooleanField(default=True)
     objects = CaseInsensitiveManager()
 
+    def __str__(self):
+        return '{}, {}, {}'.format(
+            self.asset_code, self.serial_number, self.model_number
+        )
+
+    class Meta:
+        ordering = ['-id']
+        unique_together = ("asset_code", "serial_number")
+        indexes = [models.Index(fields=['current_status', 'verified'])]
+
     def clean(self):
         if not self.asset_code and not self.serial_number:
             raise ValidationError(
@@ -256,15 +266,6 @@ class Asset(models.Model):
             AssetStatus.objects.create(asset=self, current_status=constants.AVAILABLE)
             self.current_status = constants.AVAILABLE
             self.save()
-
-    def __str__(self):
-        return '{}, {}, {}'.format(
-            self.asset_code, self.serial_number, self.model_number
-        )
-
-    class Meta:
-        ordering = ['-id']
-        unique_together = ("asset_code", "serial_number")
 
     def _get_asset_category(self):
         return self._get_asset_sub_category().asset_category

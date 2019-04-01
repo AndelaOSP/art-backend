@@ -411,6 +411,7 @@ class AssetsImportViewSet(APIView):
         error = False
         file_obj = codecs.iterdecode(file_object, "utf-8")
         csv_reader = DictReaderStrip(file_obj, delimiter=",")
+        print('Processing uploaded file:')
         if not process_file(csv_reader, user=user):
             path = request.build_absolute_uri(reverse("skipped"))
             print("path in main end point", path)

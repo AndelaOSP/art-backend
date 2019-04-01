@@ -1,11 +1,15 @@
 # Standard Library
 import csv
+import functools
+import logging
+import operator
 import os
 from collections import defaultdict
 
 # Third-Party Imports
 from django.apps import apps
 from django.conf import settings
+from django.db.models import Q
 
 # App Imports
 from core.constants import (
@@ -29,6 +33,8 @@ from core.models.asset import Asset
 
 SKIPPED_ROWS = []
 
+logger = logging.getLogger(__name__)
+
 
 def process_file(data, progress=None, user=None):
     global SKIPPED_ROWS
@@ -47,7 +53,6 @@ def process_file(data, progress=None, user=None):
             progress.update()
         except Exception:
             pass
-
         process_model_number(row_data)
         model_number = read_csv_row_value(MODEL_NUMBER, row)
         row_data[ASSET_CODE] = read_csv_row_value(ASSET_CODE, row)
@@ -71,6 +76,7 @@ def process_file(data, progress=None, user=None):
 
 
 def process_model_number(row_data):
+    logger.info('Checking model numbers.')
     row = row_data.get("row")
 
     category_value = read_csv_row_value(CATEGORY, row)
@@ -108,6 +114,7 @@ def process_model_number(row_data):
 def process_asset_data(processed_file_data, location=None):  # noqa: C901
     for model_number_value, row_datas in processed_file_data.items():
         collection = apps.get_model("core", "AssetModelNumber")
+        logger.info(f'Processing asset data for {model_number_value}.')
         try:
             asset_model_obj = collection.objects.get(name__iexact=model_number_value)
         except Exception:
@@ -264,13 +271,24 @@ def write_skipped_records(records, filename=None):
 
 def collection_bootstrap(collection, parent=None, **fields):
     collection = apps.get_model("core", collection)
+    query = set()
+    for key, val in fields.items():
+        if hasattr(val, 'pk'):
+            query.update({Q(**{key: val})})
+        else:
+            query.update({Q(**{'__'.join([key, 'iexact']): val})})
+    lookup = functools.reduce(operator.and_, query)
     try:
-        obj = collection.objects.get(**fields)
-    except Exception:
-        pass
+        obj = collection.objects.get(lookup)
+    except Exception as e:
+        logger.info(str(e))
     else:
-        if collection is not Asset:
-            return obj, True
+        if collection is Asset:
+            return (
+                ["Asset with similar asset code or serial number already imported"],
+                False,
+            )
+        return obj, True
     if parent is not None:
         missing_parent = [a for a, b in parent.items() if not b]
         if len(missing_parent) > 0:
@@ -286,22 +304,13 @@ def collection_bootstrap(collection, parent=None, **fields):
 
 
 def load_to_db(collection, parent=None, **fields):
+    if parent:
+        fields.update(parent)
+
     try:
-        obj = collection.objects.get(**fields)
-        if collection is Asset:
-            return (
-                ["Asset with similar asset code or serial number already imported"],
-                False,
-            )
-        return obj, True
-    except Exception:
-        try:
-            if parent:
-                return collection.objects.create(**fields, **parent), True
-            else:
-                return collection.objects.create(**fields), True
-        except Exception as e:
-            return [str(e)], False
+        return collection.objects.create(**fields), True
+    except Exception as e:
+        return [str(e)], False
     return "error creating {}".format(collection), False
 
 
