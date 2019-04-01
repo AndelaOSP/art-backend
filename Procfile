@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: gunicorn art.wsgi --log-file -
+web: uwsgi --ini uwsgi.ini

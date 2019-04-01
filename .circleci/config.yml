@@ -198,6 +198,7 @@ workflows:
             branches:
               only:
                 - develop
+                - 165027516-test-uwsgi
       - deploy_production:
           requires:
             - tests

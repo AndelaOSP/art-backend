@@ -31,4 +31,4 @@ RUN apt-get update \
 
 EXPOSE 8080
 RUN python manage.py collectstatic --noinput
-ENTRYPOINT ["gunicorn", "art.wsgi"]
+ENTRYPOINT ["uwsgi", "uwsgi.ini"]

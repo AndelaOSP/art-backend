@@ -24,6 +24,7 @@ gevent = "==1.3.7"
 pycountry = "==18.12.8"
 responses = "==0.10.5"
 xlsxwriter = "==1.1.5"
+uwsgi = "*"
 
 [dev-packages]
 coverage = "==4.5.2"
