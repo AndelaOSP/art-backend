@@ -304,11 +304,11 @@ def collection_bootstrap(collection, parent=None, **fields):
 
 
 def load_to_db(collection, parent=None, **fields):
+    if parent:
+        fields.update(parent)
+
     try:
-        if parent:
-            return collection.objects.create(**fields, **parent), True
-        else:
-            return collection.objects.create(**fields), True
+        return collection.objects.create(**fields), True
     except Exception as e:
         return [str(e)], False
     return "error creating {}".format(collection), False
