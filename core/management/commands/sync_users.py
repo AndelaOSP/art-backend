@@ -34,6 +34,7 @@ def fetch_ais_user_data(ais_url, ais_token, params):
         ais_url += '/'
     ais_url += 'users'
     logger.info('Fetching data from AIS: {}'.format(ais_url))
+    print('Fetching data from AIS: {}'.format(ais_url))
     fetching_users = True
     ais_user_data = []
     page_num = params.get('page') or 1
@@ -85,6 +86,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
     updated_records_count = 0
     updated_data = {}
     logger.info('Loading data to ART')
+    print('Loading data to ART')
     try:
         last_successful_run = (
             AISUserSync.objects.exclude(id=current_sync_id)
@@ -224,6 +226,7 @@ class Command(BaseCommand):
             params = {'limit': limit_per_page, 'page': 1}
             ais_user_data = fetch_ais_user_data(ais_url, ais_token, params)
             logger.info('{} records fetched'.format(len(ais_user_data)))
+            print('{} records fetched'.format(len(ais_user_data)))
             if ais_user_data:
                 new_records_count, updated_records_count, updated_data = load_users_to_art(
                     ais_user_data, current_sync_id=sync_record.id

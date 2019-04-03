@@ -1,11 +1,15 @@
+# Standard Library
+import threading
+
 # Third-Party Imports
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.core.management import call_command
 
 # App Imports
 from core import models
 
-from .forms import UserRegistrationForm
+from .forms import UserRegistrationForm, UserSyncForm
 
 admin.site.register(
     [
@@ -158,6 +162,7 @@ class AssetAdmin(admin.ModelAdmin):
 
 
 class AISUserSyncAdmin(admin.ModelAdmin):
+    form = UserSyncForm
     list_filter = ('running_time', 'successful', 'created_at')
     list_display = (
         'running_time',
@@ -166,6 +171,21 @@ class AISUserSyncAdmin(admin.ModelAdmin):
         'updated_records',
         'created_at',
     )
+
+    def save_model(self, request, obj, form, change):
+        if change:
+            return super(AISUserSyncAdmin, self).save_model(request, obj, form, change)
+        else:
+            t = threading.Thread(target=call_command, args=('sync_users',))
+            t.setDaemon(True)
+            t.start()
+
+    def get_fields(self, request, obj=None):
+        fields = super(AISUserSyncAdmin, self).get_fields(request, obj)
+        if obj:
+            fields.remove('new_sync')
+            return fields
+        return ['new_sync']
 
 
 class AssetStatusAdmin(admin.ModelAdmin):
