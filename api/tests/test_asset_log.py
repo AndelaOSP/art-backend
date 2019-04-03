@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 from api.tests import APIBaseTestCase
 from core.constants import CHECKIN, CHECKOUT
 from core.models import Asset, AssetLog, AssetModelNumber
+from core.constants import CHECKIN, CHECKOUT
 
 User = get_user_model()
 client = APIClient()
@@ -40,19 +41,25 @@ class AssetLogModelTest(APIBaseTestCase):
     def test_verify_double_checkin_for_asset(self):
         # First log
         AssetLog.objects.create(
-            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKIN,
         )
         initial_log_count = AssetLog.objects.count()
         # Second log
         AssetLog.objects.create(
-            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKIN,
         )
         final_log_count = AssetLog.objects.count()
         self.assertEqual(initial_log_count, final_log_count)
 
     def test_add_checkin(self):
         AssetLog.objects.create(
-            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKIN,
         )
         self.assertEqual(AssetLog.objects.count(), 3)
         created_log = AssetLog.objects.filter(asset=self.test_other_asset).first()
@@ -193,29 +200,31 @@ class AssetLogModelTest(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 201)
 
-    @patch("api.authentication.auth.verify_id_token")
+    @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_cannot_double_checkin_an_asset(
         self, mock_verify_id_token
     ):
-        mock_verify_id_token.return_value = {"email": self.security_user.email}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
         AssetLog.objects.create(
-            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKIN,
         )
         initial_log_count = AssetLog.objects.count()
-        data = {"asset": self.test_other_asset.id, "log_type": CHECKIN}
+        data = {'asset': self.test_other_asset.id, 'log_type': CHECKIN}
         response = client.post(
             self.asset_logs_url,
             data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by)
         )
         updated_log_count = AssetLog.objects.count()
         self.assertEquals(response.status_code, 400)
         self.assertEqual(initial_log_count, updated_log_count)
 
-    @patch("api.authentication.auth.verify_id_token")
+    @patch('api.authentication.auth.verify_id_token')
     def test_authenticated_security_user_create_checkout(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {"email": self.security_user.email}
-        data = {"asset": self.test_other_asset.id, "log_type": CHECKOUT}
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        data = {'asset': self.test_other_asset.id, 'log_type': CHECKOUT}
         response = client.post(
             self.asset_logs_url,
             data,
@@ -227,6 +236,27 @@ class AssetLogModelTest(APIBaseTestCase):
             f"{self.test_other_asset.asset_code}",
         )
         self.assertEqual(response.status_code, 201)
+    
+    @patch('api.authentication.auth.verify_id_token')
+    def test_authenticated_security_user_cannot_double_checkout_an_asset(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {'email': self.security_user.email}
+        AssetLog.objects.create(
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKOUT,
+        )
+        initial_log_count = AssetLog.objects.count()
+        data = {'asset': self.test_other_asset.id, 'log_type': CHECKOUT}
+        response = client.post(
+            self.asset_logs_url,
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by)
+        )
+        updated_log_count = AssetLog.objects.count()
+        self.assertEquals(response.status_code, 400)
+        self.assertEqual(initial_log_count, updated_log_count)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_security_user_cannot_double_checkout_an_asset(
