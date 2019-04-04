@@ -238,14 +238,48 @@ class UserTestCase(APIBaseTestCase):
         self.assertEqual(response.json(), {'detail': 'Method "PUT" not allowed.'})
 
     @patch('api.authentication.auth.verify_id_token')
-    def test_user_api_endpoint_cant_allow_patch(self, mock_verify_token):
+    def test_user_api_endpoint_can_allow_patch(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         user = User.objects.first()
         response = client.patch(
             '{}/{}/'.format(self.users_url, user.id),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(response.json(), {'detail': 'Method "PATCH" not allowed.'})
+        self.assertTrue(response.status_code == 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_admin_user_api_endpoint_allow_patch_for_is_staff_attr(
+        self, mock_verify_token
+    ):
+        mock_verify_token.return_value = {'email': self.admin_user.email}
+        user = User.objects.first()
+        update_data = {'is_staff': True}
+        response = client.patch(
+            '{}/{}/'.format(self.users_url, user.id),
+            data=update_data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+        )
+        self.assertEqual(response.status_code, 200)
+        is_staff = User.objects.first().is_staff
+        self.assertFalse(user.is_staff)
+        self.assertTrue(is_staff)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_non_admin_user_cant_update_is_staff_attr_of_user_from_api(
+        self, mock_verify_token
+    ):
+        mock_verify_token.return_value = {'email': self.user.email}
+        user = User.objects.first()
+        update_data = {'is_staff': True}
+        response = client.patch(
+            '{}/{}/'.format(self.users_url, user.id),
+            data=update_data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user)
+        )
+        self.assertEqual(response.status_code, 403)
+        updated_is_staff = User.objects.first().is_staff
+        self.assertEqual(user.is_staff, updated_is_staff)
+        self.assertFalse(updated_is_staff)
 
     @patch('api.authentication.auth.verify_id_token')
     def test_user_api_endpoint_cant_allow_delete(self, mock_verify_token):

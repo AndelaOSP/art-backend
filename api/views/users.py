@@ -32,7 +32,7 @@ class UserViewSet(ModelViewSet):
     queryset = models.User.objects.all()
     permission_classes = (IsAuthenticated, IsAdminUser)
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'patch']
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = UserFilter
 

@@ -18,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'full_name',
             'email',
+            'is_staff',
             'cohort',
             'slack_handle',
             'picture',
