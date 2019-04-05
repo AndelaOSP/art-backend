@@ -163,9 +163,7 @@ class AssetLogSerializer(serializers.ModelSerializer):
 
     def validate(self, fields):
         if models.AssetLog.objects.filter(**fields).exists():
-            raise serializers.ValidationError(
-                'Log for this asset already exist'
-            )
+            raise serializers.ValidationError('Log for this asset already exist')
         return fields
 
 
