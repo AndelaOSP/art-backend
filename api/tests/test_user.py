@@ -257,7 +257,7 @@ class UserTestCase(APIBaseTestCase):
         response = client.patch(
             '{}/{}/'.format(self.users_url, user.id),
             data=update_data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
         is_staff = User.objects.first().is_staff
@@ -274,7 +274,7 @@ class UserTestCase(APIBaseTestCase):
         response = client.patch(
             '{}/{}/'.format(self.users_url, user.id),
             data=update_data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user)
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(response.status_code, 403)
         updated_is_staff = User.objects.first().is_staff
