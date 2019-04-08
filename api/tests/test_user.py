@@ -252,7 +252,7 @@ class UserTestCase(APIBaseTestCase):
         self, mock_verify_token
     ):
         mock_verify_token.return_value = {'email': self.admin_user.email}
-        user = User.objects.first()
+        user = UserTestCase.user
         update_data = {'is_staff': True}
         response = client.patch(
             '{}/{}/'.format(self.users_url, user.id),
@@ -260,7 +260,7 @@ class UserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
-        is_staff = User.objects.first().is_staff
+        is_staff = User.objects.get(pk=user.id).is_staff
         self.assertFalse(user.is_staff)
         self.assertTrue(is_staff)
 
@@ -269,7 +269,7 @@ class UserTestCase(APIBaseTestCase):
         self, mock_verify_token
     ):
         mock_verify_token.return_value = {'email': self.user.email}
-        user = User.objects.first()
+        user = UserTestCase.user
         update_data = {'is_staff': True}
         response = client.patch(
             '{}/{}/'.format(self.users_url, user.id),
@@ -277,7 +277,7 @@ class UserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(response.status_code, 403)
-        updated_is_staff = User.objects.first().is_staff
+        updated_is_staff = User.objects.get(pk=user.id).is_staff
         self.assertEqual(user.is_staff, updated_is_staff)
         self.assertFalse(updated_is_staff)
 
