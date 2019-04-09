@@ -32,7 +32,7 @@ class AssetCategory(models.Model):
 
     def clean(self):
         if not self.name:
-            raise ValidationError('Category is required')
+            raise ValidationError("Category is required")
 
         self.name = self.name.title()
 
@@ -41,8 +41,8 @@ class AssetCategory(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'Asset Categories'
-        ordering = ['-id']
+        verbose_name_plural = "Asset Categories"
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -60,7 +60,7 @@ class AssetSubCategory(models.Model):
 
     def clean(self):
         if not self.asset_category:
-            raise ValidationError('Category is required')
+            raise ValidationError("Category is required")
 
         self.name = self.name.title()
 
@@ -69,8 +69,8 @@ class AssetSubCategory(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'Asset SubCategories'
-        ordering = ['-id']
+        verbose_name_plural = "Asset SubCategories"
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -89,7 +89,7 @@ class AssetType(models.Model):
 
     def clean(self):
         if not self.asset_sub_category:
-            raise ValidationError('Sub category is required')
+            raise ValidationError("Sub category is required")
 
         self.name = self.name.title()
 
@@ -99,7 +99,7 @@ class AssetType(models.Model):
 
     class Meta:
         verbose_name = "Asset Type"
-        ordering = ['-id']
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -117,7 +117,7 @@ class AssetMake(models.Model):
 
     def clean(self):
         if not self.asset_type:
-            raise ValidationError('Type is required')
+            raise ValidationError("Type is required")
 
         self.name = self.name.title()
 
@@ -127,7 +127,7 @@ class AssetMake(models.Model):
 
     class Meta:
         verbose_name = "Asset Make"
-        ordering = ['-id']
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -151,7 +151,7 @@ class AssetModelNumber(models.Model):
 
     class Meta:
         verbose_name = "Asset Model Number"
-        ordering = ['-id']
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -191,7 +191,7 @@ class AssetSpecs(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.memory}GB RAM, {self.storage}GB, {self.processor_speed}GHz, {self.screen_size}\""
+        return f'{self.memory}GB RAM, {self.storage}GB, {self.processor_speed}GHz, {self.screen_size}"'
 
 
 class Asset(models.Model):
@@ -202,12 +202,12 @@ class Asset(models.Model):
     serial_number = models.CharField(unique=True, null=True, blank=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     asset_location = models.ForeignKey(
-        'AndelaCentre', blank=True, null=True, on_delete=models.PROTECT
+        "AndelaCentre", blank=True, null=True, on_delete=models.PROTECT
     )
     purchase_date = models.DateField(validators=[validate_date], null=True, blank=True)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     assigned_to = models.ForeignKey(
-        'AssetAssignee', blank=True, editable=False, null=True, on_delete=models.PROTECT
+        "AssetAssignee", blank=True, editable=False, null=True, on_delete=models.PROTECT
     )
     model_number = models.ForeignKey(
         AssetModelNumber, null=True, on_delete=models.PROTECT
@@ -221,20 +221,20 @@ class Asset(models.Model):
     objects = CaseInsensitiveManager()
 
     def __str__(self):
-        return '{}, {}, {}'.format(
+        return "{}, {}, {}".format(
             self.asset_code, self.serial_number, self.model_number
         )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ["-id"]
         unique_together = ("asset_code", "serial_number")
-        indexes = [models.Index(fields=['current_status', 'verified'])]
+        indexes = [models.Index(fields=["current_status", "verified"])]
 
     def clean(self):
         if not self.asset_code and not self.serial_number:
             raise ValidationError(
-                ('Please provide either the serial number, asset code or both.'),
-                code='required',
+                ("Please provide either the serial number, asset code or both."),
+                code="required",
             )
 
         if self.serial_number is None:
@@ -298,12 +298,12 @@ class Asset(models.Model):
 
 class AssetAssignee(models.Model):
     department = models.OneToOneField(
-        'Department', null=True, blank=True, on_delete=models.CASCADE
+        "Department", null=True, blank=True, on_delete=models.CASCADE
     )
     workspace = models.OneToOneField(
-        'OfficeWorkspace', null=True, blank=True, on_delete=models.CASCADE
+        "OfficeWorkspace", null=True, blank=True, on_delete=models.CASCADE
     )
-    user = models.OneToOneField('User', null=True, blank=True, on_delete=models.CASCADE)
+    user = models.OneToOneField("User", null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         assignee = self.workspace or self.department or self.user
@@ -315,7 +315,7 @@ class AssetAssignee(models.Model):
             )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ["-id"]
 
     @property
     def first_name(self):
@@ -356,7 +356,7 @@ class AssetLog(models.Model):
 
     def clean(self):
         if not self.log_type:
-            raise ValidationError('Log type is required.', code='required')
+            raise ValidationError("Log type is required.", code="required")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -367,7 +367,7 @@ class AssetLog(models.Model):
 
     class Meta:
         verbose_name = "Asset Log"
-        ordering = ['-id']
+        ordering = ["-id"]
 
 
 class AssetStatus(models.Model):
@@ -387,13 +387,13 @@ class AssetStatus(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
-        verbose_name_plural = 'Asset Statuses'
-        ordering = ['-id']
+        verbose_name_plural = "Asset Statuses"
+        ordering = ["-id"]
 
     def save(self, *args, **kwargs):
         try:
             latest_record = AssetStatus.objects.filter(asset=self.asset).latest(
-                'created_at'
+                "created_at"
             )
             self.previous_status = latest_record.current_status
         except Exception:
@@ -419,9 +419,9 @@ class AssetStatus(models.Model):
         """Check the assets have not exceeded the limit"""
         model_number = self.asset.model_number
         available_assets = Asset.objects.filter(
-            current_status='Available', model_number=model_number
+            current_status="Available", model_number=model_number
         ).count()
-        if available_assets <= int(os.environ.get('ASSET_LIMIT', 0)):
+        if available_assets <= int(os.environ.get("ASSET_LIMIT", 0)):
             message = "Warning!! The number of available {} ".format(
                 model_number
             ) + " is {}".format(available_assets)
@@ -431,7 +431,7 @@ class AssetStatus(models.Model):
         try:
             last_allocation_record = AllocationHistory.objects.filter(
                 asset=self.asset
-            ).latest('created_at')
+            ).latest("created_at")
         except Exception as e:
             logger.warning(str(e))
         else:
@@ -446,15 +446,15 @@ class AssetStatus(models.Model):
 class AllocationHistory(models.Model):
     asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
     current_owner = models.ForeignKey(
-        'AssetAssignee',
-        related_name='current_owner_asset',
+        "AssetAssignee",
+        related_name="current_owner_asset",
         blank=True,
         null=True,
         on_delete=models.PROTECT,
     )
     previous_owner = models.ForeignKey(
-        'AssetAssignee',
-        related_name='previous_owner_asset',
+        "AssetAssignee",
+        related_name="previous_owner_asset",
         editable=False,
         blank=True,
         null=True,
@@ -464,7 +464,7 @@ class AllocationHistory(models.Model):
 
     class Meta:
         verbose_name_plural = "Allocation History"
-        ordering = ['-id']
+        ordering = ["-id"]
 
     def clean(self):
         if self.asset.current_status != constants.AVAILABLE:
@@ -474,7 +474,7 @@ class AllocationHistory(models.Model):
         self.full_clean()
         try:
             latest_record = AllocationHistory.objects.filter(asset=self.asset).latest(
-                'created_at'
+                "created_at"
             )
             self.previous_owner = latest_record.current_owner
         except Exception:
@@ -491,7 +491,7 @@ class AllocationHistory(models.Model):
             self._send_notification()
 
     def _create_asset_status_when_asset_is_allocated(self):
-        last_status = AssetStatus.objects.filter(asset=self.asset).latest('created_at')
+        last_status = AssetStatus.objects.filter(asset=self.asset).latest("created_at")
         if self.current_owner:
             AssetStatus.objects.create(
                 asset=self.asset,
@@ -505,12 +505,12 @@ class AllocationHistory(models.Model):
         serial_no = asset.serial_number
         asset_code = asset.asset_code
 
-        env_message = ' *_(this is a test message.)_*' if settings.DEBUG else ''
-        serial_no = f'Serial Number {serial_no} ' if serial_no else ''
-        asset_code = f'Asset Code {asset_code} ' if asset_code else ''
-        _and = f'and ' if asset_code and serial_no else ''
-        message = f'The {asset.asset_type} with {serial_no}{_and}{asset_code}'
-        to_append = 'Please contact the Ops team if this information is inaccurate.'
+        env_message = " *_(this is a test message.)_*" if settings.DEBUG else ""
+        serial_no = f"Serial Number {serial_no} " if serial_no else ""
+        asset_code = f"Asset Code {asset_code} " if asset_code else ""
+        _and = f"and " if asset_code and serial_no else ""
+        message = f"The {asset.asset_type} with {serial_no}{_and}{asset_code}"
+        to_append = "Please contact the Ops team if this information is inaccurate."
 
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
             message += "has been allocated to you. {} {}".format(to_append, env_message)
@@ -521,7 +521,7 @@ class AllocationHistory(models.Model):
             )
             assignee = self.previous_owner
 
-        if assignee and hasattr(assignee, 'email'):
+        if assignee and hasattr(assignee, "email"):
             slack.send_message(message, user=assignee.user)
 
 
@@ -531,8 +531,8 @@ class AssetCondition(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
-        verbose_name_plural = 'Asset Condition'
-        ordering = ['-id']
+        verbose_name_plural = "Asset Condition"
+        ordering = ["-id"]
 
     def save(self, *args, **kwargs):
         try:
@@ -558,13 +558,13 @@ class AssetIncidentReport(models.Model):
     loss_of_property = models.TextField(null=True, blank=True)
     witnesses = models.TextField(null=True, blank=True)
     police_abstract_obtained = models.CharField(max_length=255)
-    submitted_by = models.ForeignKey('User', null=True, on_delete=models.PROTECT)
+    submitted_by = models.ForeignKey("User", null=True, on_delete=models.PROTECT)
 
     def __str__(self):
         return f"{self.incident_type}: {self.asset}"
 
     class Meta:
-        ordering = ['-id']
+        ordering = ["-id"]
 
     def save(self, *args, **kwargs):
         try:
@@ -590,4 +590,4 @@ class StateTransition(models.Model):
     state = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
 
     class Meta:
-        verbose_name_plural = 'State Transitions'
+        verbose_name_plural = "State Transitions"
