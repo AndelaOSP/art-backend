@@ -91,4 +91,5 @@ To ensure consistency we have automated checks for a couple of things. (To run t
     - Local app imports - absolute
     - Local app imports - relative
 
+
 You can set up the pre-commit Git hooks with the standard styling conventions as per the guide inn the [Wiki](https://github.com/AndelaOSP/art-backend/wiki/Styling-Conventions).
