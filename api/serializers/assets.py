@@ -161,6 +161,11 @@ class AssetLogSerializer(serializers.ModelSerializer):
         instance_data["asset"] = f"{serial_no} - {asset_code}"
         return instance_data
 
+    def validate(self, fields):
+        if models.AssetLog.objects.filter(**fields).exists():
+            raise serializers.ValidationError('Log for this asset already exist')
+        return fields
+
 
 class AssetStatusSerializer(AssetSerializer):
     status_history = serializers.SerializerMethodField()
