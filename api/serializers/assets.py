@@ -14,7 +14,7 @@ class AssetSerializer(serializers.ModelSerializer):
     asset_category = serializers.ReadOnlyField()
     asset_sub_category = serializers.ReadOnlyField()
     asset_make = serializers.ReadOnlyField()
-    make_label = serializers.ReadOnlyField(source='asset_make')
+    make_label = serializers.ReadOnlyField(source="asset_make")
     asset_type = serializers.ReadOnlyField()
     asset_location = serializers.SlugRelatedField(
         many=False,
@@ -166,7 +166,8 @@ class AssetLogSerializer(serializers.ModelSerializer):
         existing_log = existing_log.first()
         if existing_log and existing_log.log_type == fields["log_type"]:
             raise serializers.ValidationError(
-                f"The asset log type is already {existing_log.log_type}")
+                f"The asset log type is already {existing_log.log_type}"
+            )
         return fields
 
 
@@ -226,7 +227,7 @@ class AllocationsSerializer(serializers.ModelSerializer):
 
 
 class AssetCategorySerializer(serializers.ModelSerializer):
-    category_name = serializers.ReadOnlyField(source='name')
+    category_name = serializers.ReadOnlyField(source="name")
 
     class Meta:
         model = models.AssetCategory
@@ -241,7 +242,7 @@ class AssetCategorySerializer(serializers.ModelSerializer):
 
 
 class AssetSubCategorySerializer(serializers.ModelSerializer):
-    sub_category_name = serializers.ReadOnlyField(source='name')
+    sub_category_name = serializers.ReadOnlyField(source="name")
 
     class Meta:
         model = models.AssetSubCategory
@@ -268,7 +269,7 @@ class AssetSubCategorySerializer(serializers.ModelSerializer):
 
 
 class AssetTypeSerializer(serializers.ModelSerializer):
-    asset_type = serializers.ReadOnlyField(source='name')
+    asset_type = serializers.ReadOnlyField(source="name")
 
     class Meta:
         model = models.AssetType
@@ -297,7 +298,7 @@ class AssetTypeSerializer(serializers.ModelSerializer):
 
 class AssetModelNumberSerializer(serializers.ModelSerializer):
     make_label = serializers.SerializerMethodField()
-    model_number = serializers.ReadOnlyField(source='name')
+    model_number = serializers.ReadOnlyField(source="name")
 
     class Meta:
         model = models.AssetModelNumber
@@ -428,8 +429,8 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
 
 class AssetHealthSerializer(serializers.ModelSerializer):
     asset_type = serializers.ReadOnlyField()
-    model_number = serializers.ReadOnlyField(source='model_number__name')
-    count_by_status = serializers.ReadOnlyField(source='current_status')
+    model_number = serializers.ReadOnlyField(source="model_number__name")
+    count_by_status = serializers.ReadOnlyField(source="current_status")
 
     class Meta:
         model = models.Asset
