@@ -162,8 +162,11 @@ class AssetLogSerializer(serializers.ModelSerializer):
         return instance_data
 
     def validate(self, fields):
-        if models.AssetLog.objects.filter(**fields).exists():
-            raise serializers.ValidationError('Log for this asset already exist')
+        existing_log = models.AssetLog.objects.filter(asset=fields["asset"])
+        existing_log = existing_log.first()
+        if existing_log and existing_log.log_type == fields["log_type"]:
+            raise serializers.ValidationError(
+                f"The asset log type is already {existing_log.log_type}")
         return fields
 
 
