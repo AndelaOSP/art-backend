@@ -301,6 +301,7 @@ class AssetSlackIncidentReportViewSet(ModelViewSet):
             bot = slack.send_incidence_report(self.request.data)
             if bot:
                 return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class AssetHealthCountViewSet(ModelViewSet):
