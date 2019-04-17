@@ -50,6 +50,25 @@ class AssetLogModelTest(APIBaseTestCase):
         final_log_count = AssetLog.objects.count()
         self.assertEqual(initial_log_count, final_log_count)
 
+    def test_verify_checkin_for_asset_once_checked_in(self):
+        # First log
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        # Second log
+        AssetLog.objects.create(
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKOUT,
+        )
+        initial_log_count = AssetLog.objects.count()
+        # Checkin First log again
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        final_log_count = AssetLog.objects.count()
+        self.assertEqual(initial_log_count + 1, final_log_count)
+
     def test_add_checkin(self):
         AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
@@ -74,6 +93,27 @@ class AssetLogModelTest(APIBaseTestCase):
         )
         final_log_count = AssetLog.objects.count()
         self.assertEqual(initial_log_count, final_log_count)
+
+    def test_verify_checkout_for_asset_once_checked_out(self):
+        # First log
+        AssetLog.objects.create(
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKOUT,
+        )
+        # Second log
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        initial_log_count = AssetLog.objects.count()
+        # Checkout First log again
+        AssetLog.objects.create(
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKOUT,
+        )
+        final_log_count = AssetLog.objects.count()
+        self.assertEqual(initial_log_count + 1, final_log_count)
 
     def test_add_checkout(self):
         count_before_log = AssetLog.objects.count()
@@ -211,6 +251,58 @@ class AssetLogModelTest(APIBaseTestCase):
         updated_log_count = AssetLog.objects.count()
         self.assertEquals(response.status_code, 400)
         self.assertEqual(initial_log_count, updated_log_count)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_that_authenticated_security_user_can_checkin_asset_previously_checked_in(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.security_user.email}
+        # Check in the asset
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        # Checkout the asset
+        AssetLog.objects.create(
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKOUT,
+        )
+        initial_log_count = AssetLog.objects.count()
+        data = {"asset": self.test_other_asset.id, "log_type": CHECKIN}
+        response = client.post(
+            self.asset_logs_url,
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
+        )
+        updated_log_count = AssetLog.objects.count()
+        self.assertEquals(response.status_code, 201)
+        self.assertEqual(initial_log_count + 1, updated_log_count)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_security_user_can_checkout_asset_previously_checked_out(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.security_user.email}
+        # Check in the asset
+        AssetLog.objects.create(
+            checked_by=self.security_user,
+            asset=self.test_other_asset,
+            log_type=CHECKOUT,
+        )
+        # Checkout the asset
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        initial_log_count = AssetLog.objects.count()
+        data = {"asset": self.test_other_asset.id, "log_type": CHECKOUT}
+        response = client.post(
+            self.asset_logs_url,
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
+        )
+        updated_log_count = AssetLog.objects.count()
+        self.assertEquals(response.status_code, 201)
+        self.assertEqual(initial_log_count + 1, updated_log_count)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_security_user_create_checkout(self, mock_verify_id_token):
