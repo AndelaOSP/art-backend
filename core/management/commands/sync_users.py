@@ -27,18 +27,20 @@ SYNC_SUCCESS = True
 SYNC_ERRORS = defaultdict(set)
 
 
-def fetch_ais_user_data(ais_url, ais_token, params):
+def fetch_ais_user_data(base_ais_url, ais_token, params={}, sec_fetch=False):
     global SYNC_SUCCESS
+    limit_per_page = os.getenv('AIS_LIMIT', 10000)
+    params['limit'] = limit_per_page
+    params['page'] = 1
     headers = {'api-token': ais_token}
-    if not ais_url.endswith('/'):
-        ais_url += '/'
-    ais_url += 'users'
+    ais_url = base_ais_url + 'users'
     logger.info('Fetching data from AIS: {}'.format(ais_url))
     print('Fetching data from AIS: {}'.format(ais_url))
     fetching_users = True
     ais_user_data = []
+    sec_url_used = False
     page_num = params.get('page') or 1
-    retries = int(os.getenv('RETRIES') or 3)
+    retries = int(os.getenv('RETRIES') or 4)
     retry_timeout = int(os.getenv('RETRY_TIMEOUT') or 10)
     while fetching_users:
         params['page'] = page_num
@@ -70,21 +72,31 @@ def fetch_ais_user_data(ais_url, ais_token, params):
             )
             time.sleep(retry_timeout)
             retries -= 1
+            if retries == 2 and not sec_fetch:
+                err = 'Unable to connect to AIS after 2 retries. Trying secondary url'
+                SYNC_ERRORS['failures'].add(err)
+                ais_url = base_ais_url + 'users/basic'
+                sec_url_used = True
+
             if retries < 0:
-                err = 'Unable to connect to AIS. Exiting after 3 retries'
+                err = 'Unable to connect to AIS. Exiting.'
                 fetching_users = False
                 SYNC_SUCCESS = False
                 SYNC_ERRORS['failures'].add(err)
-    return ais_user_data
+
+    return ais_user_data, sec_url_used
 
 
-def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
+def load_users_to_art(  # noqa: C901
+    ais_user_data, current_sync_id=None, sec_url_used=False
+):
     global SYNC_SUCCESS
     global SYNC_ERRORS
     last_successful_run = None
     new_records_count = 0
     updated_records_count = 0
     updated_data = {}
+    ids = set()
     logger.info('Loading data to ART')
     print('Loading data to ART')
     try:
@@ -137,6 +149,9 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
         cohort = ais_user.get('cohort')
         picture = ais_user.get('picture').replace('?sz=50', '')
         user_status = ais_user.get('status')
+        if user_created and sec_url_used:
+            ids.add(ais_user.get('id'))
+
         if location:
             location_name = location.get('name')
             try:
@@ -161,10 +176,14 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
                         cohort_no = int(cohort_num_data[0])
                     else:
                         logger.warning('Unable to extract user cohort')
+        if not user.first_name:
+            first_name = ais_user.get('first_name')
+            user.first_name = first_name or ''
+        if not user.last_name:
+            last_name = ais_user.get('last_name')
+            user.last_name = last_name or ''
         if user_created:
             logger.info('Additional data for new user.')
-            user.first_name = ais_user.get('first_name')
-            user.last_name = ais_user.get('last_name')
             user.picture = picture
             user.cohort = cohort_no
             user.location = andela_center
@@ -198,7 +217,7 @@ def load_users_to_art(ais_user_data, current_sync_id=None):  # noqa: C901
                 user.save()
                 updated_records_count += 1
                 updated_data[email] = updated_user_data
-    return new_records_count, updated_records_count, updated_data
+    return new_records_count, updated_records_count, updated_data, ids
 
 
 class Command(BaseCommand):
@@ -217,20 +236,31 @@ class Command(BaseCommand):
         new_records_count = 0
         updated_records_count = 0
         updated_data = None
+        sec_url_used = False
         start_time = time.time()
         sync_record = AISUserSync.objects.create(running=True)
         ais_url = os.getenv('AIS_URL')
+        if not ais_url.endswith('/'):
+            ais_url += '/'
         ais_token = os.getenv('AIS_TOKEN')
-        limit_per_page = os.getenv('AIS_LIMIT', 5000)
         if ais_url and ais_token:
-            params = {'limit': limit_per_page, 'page': 1}
-            ais_user_data = fetch_ais_user_data(ais_url, ais_token, params)
+            ais_user_data, sec_url_used = fetch_ais_user_data(ais_url, ais_token)
             logger.info('{} records fetched'.format(len(ais_user_data)))
             print('{} records fetched'.format(len(ais_user_data)))
             if ais_user_data:
-                new_records_count, updated_records_count, updated_data = load_users_to_art(
-                    ais_user_data, current_sync_id=sync_record.id
+                new_records_count, updated_records_count, updated_data, ids = load_users_to_art(
+                    ais_user_data,
+                    current_sync_id=sync_record.id,
+                    sec_url_used=sec_url_used,
                 )
+                if ids:
+                    SYNC_SUCCESS = False
+                    params = {'ids': ids}
+                    sec_user_data, _ = fetch_ais_user_data(
+                        ais_url, ais_token, params=params, sec_fetch=True
+                    )
+                    if ais_user_data:
+                        load_users_to_art(sec_user_data, current_sync_id=sync_record.id)
                 sync_record.new_records = new_records_count
                 sync_record.updated_records = updated_records_count
                 logger.info(
