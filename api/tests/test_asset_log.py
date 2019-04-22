@@ -249,7 +249,7 @@ class AssetLogModelTest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
         updated_log_count = AssetLog.objects.count()
-        self.assertEquals(response.status_code, 400)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(initial_log_count, updated_log_count)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -275,7 +275,7 @@ class AssetLogModelTest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
         updated_log_count = AssetLog.objects.count()
-        self.assertEquals(response.status_code, 201)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(initial_log_count + 1, updated_log_count)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -301,7 +301,7 @@ class AssetLogModelTest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
         updated_log_count = AssetLog.objects.count()
-        self.assertEquals(response.status_code, 201)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(initial_log_count + 1, updated_log_count)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -338,7 +338,7 @@ class AssetLogModelTest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
         updated_log_count = AssetLog.objects.count()
-        self.assertEquals(response.status_code, 400)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(initial_log_count, updated_log_count)
 
     @patch("api.authentication.auth.verify_id_token")
