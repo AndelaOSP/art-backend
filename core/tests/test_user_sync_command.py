@@ -16,22 +16,14 @@ User = get_user_model()
 
 class UserSyncCommandsTestCase(CoreBaseTestCase):
     def setUp(self):
-        self.ais_api_endpoint = 'http://ais_api.example.com'
-        self.ais_users_endpoint = self.ais_api_endpoint + '/users'
         self.sec_ais_users_endpoint = self.ais_api_endpoint + '/users/basic'
-        self.env_vars = {
-            'AIS_LIMIT': '100',
-            'AIS_URL': self.ais_api_endpoint,
-            'AIS_TOKEN': 'testtoken',
-            'RETRY_TIMEOUT': '1',
-            'RETRIES': '4',
-        }
-        self.invalid_email = 'invalid email @email.com'
+        self.invalid_email = 'invalidemail@email.com'
+        self.invalid_email1 = 'invalid email @andela.com'
         self.sample_user_data = {
             'values': [
                 {
                     'id': 'testid1',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'first_name': 'first1',
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
@@ -42,7 +34,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                 },
                 {
                     'id': 'testid2',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'first_name': 'first1',
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
@@ -53,7 +45,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                 },
                 {
                     'id': 'testid3',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'first_name': 'first1',
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
@@ -63,7 +55,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                 },
                 {
                     'id': 'testid4',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'first_name': 'first1',
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
@@ -74,7 +66,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                 },
                 {
                     'id': 'testid5',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'first_name': 'first1',
                     'last_name': 'last2',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
@@ -105,13 +97,24 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                     'location': {'name': 'Kampala'},
                     'updated_at': '2018-12-18T13: 30: 02.780Z',
                 },
+                {
+                    'id': 'testid7',
+                    'email': self.invalid_email1,
+                    'first_name': 'first1',
+                    'last_name': 'last2',
+                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
+                    'status': 'suspended',
+                    'cohort': {'name': 'Class 1 - KLA'},
+                    'location': {'name': 'Kampala'},
+                    'updated_at': '2018-12-18T13: 30: 02.780Z',
+                },
             ]
         }
         self.sample_basic_user_data = {
             'values': [
                 {
                     'id': 'testid8',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'name': 'first1 last',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'active',
@@ -119,7 +122,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                 },
                 {
                     'id': 'testid9',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'name': 'first1 last',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'active',
@@ -127,7 +130,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                 },
                 {
                     'id': 'testid10',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'name': 'first1 last',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'active',
@@ -135,7 +138,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                 },
                 {
                     'id': 'testid11',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'name': 'first1 last',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'active',
@@ -143,7 +146,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
                 },
                 {
                     'id': 'testid12',
-                    'email': 'test.{}@email.com'.format(random.randint(1, 100)),
+                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
                     'name': 'first1 last',
                     'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
                     'status': 'suspended',
@@ -205,8 +208,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         user_count = User.objects.count()
         responses.add(responses.GET, self.ais_users_endpoint, status=404)
         responses.add(responses.GET, self.sec_ais_users_endpoint, status=404)
-        with patch.dict('os.environ', self.env_vars, clear=True):
-            call_command('sync_users')
+        call_command('sync_users')
         # +3 retries
         self._confirm_call_count(5)
         # no change in user count
@@ -219,8 +221,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         responses.add(
             responses.GET, self.ais_users_endpoint, json=self.sample_user_data
         )
-        with patch.dict('os.environ', self.env_vars, clear=True):
-            call_command('sync_users')
+        call_command('sync_users')
         # calls will exit at call number 3, since page 3 has empty result
         self._confirm_call_count(3)
         # additional users loaded to db
@@ -228,6 +229,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         # invalid emails not saved
         user_emails = [user.email for user in User.objects.all()]
         self.assertNotIn(self.invalid_email, user_emails)
+        self.assertNotIn(self.invalid_email1, user_emails)
 
     @responses.activate
     def test_sec_user_sync_valid_response(self):
@@ -245,8 +247,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
             responses.GET, self.ais_users_endpoint, json=self.sample_user_data
         )
         responses.add(responses.GET, self.ais_users_endpoint, json={})
-        with patch.dict('os.environ', self.env_vars, clear=True):
-            call_command('sync_users')
+        call_command('sync_users')
 
         self._confirm_call_count(7)
         # additional users loaded to db
@@ -261,8 +262,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         AISUserSync.objects.create()
         user_count = User.objects.count()
         responses.add(responses.GET, self.ais_users_endpoint, json=[])
-        with patch.dict('os.environ', self.env_vars, clear=True):
-            call_command('sync_users')
+        call_command('sync_users')
         # calls will exit at call number 3, since page 3 has empty result
         self._confirm_call_count(1)
         # no change in user count

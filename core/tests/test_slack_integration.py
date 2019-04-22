@@ -29,14 +29,14 @@ def side_effect_success(*args, **kwargs):
                     "team_id": "teamid",
                     "name": "name",
                     "deleted": False,
-                    "profile": {"email": "test@site.com"},
+                    "profile": {"email": "slacktest@andela.com"},
                 },
                 {
                     "id": "anotherid",
                     "team_id": "teamid",
                     "name": "name1",
                     "deleted": False,
-                    "profile": {"email": "test1@site.com"},
+                    "profile": {"email": "slacktest1@andela.com"},
                 },
             ],
             "response_metadata": {},
@@ -49,7 +49,7 @@ def side_effect_success(*args, **kwargs):
                 "team_id": "teamid",
                 "name": "name",
                 "deleted": False,
-                "profile": {"email": "test@site.com"},
+                "profile": {"email": "slacktest@andela.com"},
             },
         }
     return resp
@@ -66,14 +66,14 @@ def side_effect_multiple_users(*args, **kwargs):
                     "team_id": "teamid",
                     "name": "name",
                     "deleted": False,
-                    "profile": {"email": "test@site.com"},
+                    "profile": {"email": "slacktest@andela.com"},
                 },
                 {
                     "id": "anotherid",
                     "team_id": "teamid",
                     "name": "name1",
                     "deleted": False,
-                    "profile": {"email": "test1@site.com"},
+                    "profile": {"email": "slacktest1@andela.com"},
                 },
             ],
             "response_metadata": {"next_cursor": "some_key"},
@@ -87,19 +87,41 @@ def side_effect_failure(*args, **kwargs):
 
 
 class SlackIntegrationTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env_vars = {
+            'SLACK_TOKEN': 'testtoken',
+            'SLACK_LIMIT': '100',
+            'AIS_LIMIT': '100',
+            'AIS_URL': '',
+            'AIS_TOKEN': 'testtoken',
+            'RETRY_TIMEOUT': '1',
+            'RETRIES': '4',
+            'PROJECT_ID': '',
+            'PRIVATE_KEY': '',
+            'CLIENT_EMAIL': '',
+        }
+        cls.patch_env = patch.dict('os.environ', cls.env_vars)
+        cls.patch_firebase = patch('api.authentication.auth')
+
+        cls.patch_env.start()
+        cls.patch_firebase.start()
+
     def setUp(self):
-        self.env_vars = {'SLACK_TOKEN': 'testtoken', 'SLACK_LIMIT': '100'}
+        self.slack = SlackIntegration()
         self.user, _ = User.objects.get_or_create(
-            email='test@site.com', cohort=10, slack_id='someid', password='devpassword'
+            email='slacktest@andela.com',
+            cohort=10,
+            slack_id='someid',
+            password='devpassword',
         )
         self.user1, _ = User.objects.get_or_create(
-            email='test1@site.com', cohort=10, password='devpassword'
+            email='slacktest1@andela.com', cohort=10, password='devpassword'
         )
         self.user2, _ = User.objects.get_or_create(
-            email='test2@site.com', cohort=10, password='devpassword'
+            email='slacktest2@andela.com', cohort=10, password='devpassword'
         )
-        with patch.dict('os.environ', self.env_vars, clear=True):
-            self.slack = SlackIntegration()
 
     @patch("core.slack_bot.SlackClient.api_call")
     def test_send_message_to_specified_channel(self, fake_slack):
@@ -161,8 +183,7 @@ class SlackIntegrationTestCase(TestCase):
     @patch("core.slack_bot.SlackClient.api_call")
     def test_send_message_to_user_without_existing_slack_id(self, fake_slack):
         fake_slack.side_effect = side_effect_success
-        with patch.dict('os.environ', self.env_vars, clear=True):
-            self.slack.send_message('without_existing_slack_id', user=self.user1)
+        self.slack.send_message('without_existing_slack_id', user=self.user1)
 
         # 2 calls for existing id - info and send message
         self.assertEqual(fake_slack.call_count, 2)
@@ -183,12 +204,8 @@ class SlackIntegrationTestCase(TestCase):
     @patch("core.slack_bot.SlackClient.api_call")
     def test_send_message_to_user_not_on_slack(self, fake_slack):
         fake_slack.side_effect = side_effect_success
-        with patch.dict('os.environ', self.env_vars, clear=True):
-            resp = self.slack.send_message('without_existing_slack_id', user=self.user2)
-
-        # 2 calls for existing id - info and send message
+        resp = self.slack.send_message('not_on_slack', user=self.user2)
         self.assertEqual(fake_slack.call_count, 1)
-        fake_slack.assert_any_call('users.list', limit=self.env_vars.get('SLACK_LIMIT'))
         self.assertFalse(resp.get('ok'))
 
     @patch("core.slack_bot.SlackClient.api_call")
@@ -202,3 +219,9 @@ class SlackIntegrationTestCase(TestCase):
         fake_slack.side_effect = side_effect_multiple_users
         resp = self.slack.send_message('should error', user=self.user2)
         self.assertFalse(resp.get('ok'))
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        cls.patch_env.stop()
+        cls.patch_firebase.stop()

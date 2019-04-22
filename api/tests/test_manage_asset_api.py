@@ -310,7 +310,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     def test_asset_filter_non_existing_email_return_empty(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         response = client.get(
-            '{}?email={}'.format(self.manage_asset_urls, 'userwithnoasset@site.com'),
+            '{}?email={}'.format(self.manage_asset_urls, 'userwithnoasset@andela.com'),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertFalse(len(response.data['results']) > 0)
@@ -484,9 +484,8 @@ class ManageAssetTestCase(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_non_superuser_can_not_update_an_asset_location(self, mock_verify_id_token):
         user = User.objects.create_user(
-            email='adminuser@site.com',
+            email='adminuser@andela.com',
             cohort=20,
-            slack_handle='@adminu',
             password='devpassword',
             is_staff=True,
             is_superuser=False,
@@ -505,9 +504,8 @@ class ManageAssetTestCase(APIBaseTestCase):
     @patch('api.authentication.auth.verify_id_token')
     def test_a_superuser_can_update_an_asset_location(self, mock_verify_id_token):
         admin = User.objects.create_user(
-            email='adminadmin@site.com',
+            email='adminadmin@andela.com',
             cohort=20,
-            slack_handle='@adminsuper',
             password='devpassword',
             is_staff=True,
             is_superuser=True,

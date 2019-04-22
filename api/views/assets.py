@@ -112,7 +112,7 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         query_filter = {}
-        if not hasattr(self.request.user, "securityuser"):
+        if not self.request.user.is_securityuser:
             asset_assignee = models.AssetAssignee.objects.filter(user=user).first()
             query_filter = {"assigned_to": asset_assignee}
         # filter through the query_parameters for serial_number and asset_code
@@ -174,7 +174,7 @@ class AssetLogViewSet(ModelViewSet):
         return self.queryset.none()
 
     def perform_create(self, serializer):
-        serializer.save(checked_by=self.request.user.securityuser)
+        serializer.save(checked_by=self.request.user)
 
 
 class AssetStatusViewSet(ModelViewSet):

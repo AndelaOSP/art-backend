@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             'full_name',
             'email',
             'cohort',
-            'slack_handle',
+            'slack_id',
             'picture',
             'phone_number',
             'location',
@@ -80,7 +80,7 @@ class UserSerializerWithAssets(UserSerializer):
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.SecurityUser
+        model = models.User
         fields = ("email",)
 
 
@@ -94,29 +94,6 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
         instance_data = super().to_representation(instance)
         instance_data['reported_by'] = instance.reported_by.email
         return instance_data
-
-
-class SecurityUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.SecurityUser
-        fields = (
-            'id',
-            'first_name',
-            'last_name',
-            'email',
-            'badge_number',
-            'is_active',
-            'phone_number',
-            'last_modified',
-            'date_joined',
-            'last_login',
-        )
-
-        extra_kwargs = {
-            'last_modified': {'read_only': True},
-            'date_joined': {'read_only': True},
-            'last_login': {'read_only': True},
-        }
 
 
 class UserGroupSerializer(serializers.ModelSerializer):

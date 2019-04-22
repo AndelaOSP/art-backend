@@ -3,6 +3,7 @@ import logging
 
 # Third-Party Imports
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.exceptions import ValidationError
 from django.db import models
 from oauth2_provider.models import AbstractApplication
 
@@ -51,7 +52,6 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(max_length=50, unique=True)
     cohort = models.IntegerField(blank=True, null=True)
-    slack_handle = models.CharField(max_length=50, blank=True, null=True)
     slack_id = models.CharField(max_length=50, blank=True, null=True)
     picture = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True, null=True)
@@ -60,9 +60,10 @@ class User(AbstractUser):
     location = models.ForeignKey(
         'AndelaCentre', blank=True, null=True, on_delete=models.PROTECT
     )
+    is_securityuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['cohort', 'slack_handle']
+    REQUIRED_FIELDS = []
     objects = UserManager()
 
     class Meta:
@@ -70,18 +71,19 @@ class User(AbstractUser):
         ordering = ['-id']
         indexes = [models.Index(fields=['cohort'])]
 
+    def clean(self):
+        email_domain = self.email.split('@')[1]
+        if 'andela' not in email_domain.lower():
+            raise ValidationError('Only andela email addresses allowed')
+
     def save(self, *args, **kwargs):
+        self.full_clean()
         try:
-            self.full_clean()
-        except Exception as e:
-            logger.warning(str(e))
+            super(User, self).save(*args, **kwargs)
+        except Exception:
+            raise
         else:
-            try:
-                super(User, self).save(*args, **kwargs)
-            except Exception as e:
-                logger.warning(str(e))
-            else:
-                self._create_assignee_object_for_user()
+            self._create_assignee_object_for_user()
 
     def _create_assignee_object_for_user(self):
         from .asset import AssetAssignee
@@ -119,7 +121,7 @@ class APIUser(AbstractApplication):
 class UserFeedback(models.Model):
     """ Stores user feedback data """
 
-    reported_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    reported_by = models.ForeignKey('User', on_delete=models.PROTECT)
     message = models.TextField()
     report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)

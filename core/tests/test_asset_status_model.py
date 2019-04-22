@@ -71,7 +71,7 @@ class AssetStatusModelTest(CoreBaseTestCase):
             'created_at'
         )
 
-        self.assertIn(test_owner, 'test@site.com')
+        self.assertIn(test_owner, 'test@andela.com')
         self.assertIsNone(self.test_asset.assigned_to)
         self.assertIsNone(new_history.current_owner)
-        self.assertIn(str(new_history.previous_owner), 'test@site.com')
+        self.assertIn(str(new_history.previous_owner), 'test@andela.com')
