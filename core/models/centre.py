@@ -41,14 +41,8 @@ class Country(models.Model):
             self.name = country.name
 
     def save(self, *args, **kwargs):
-        try:
-            self.full_clean()
-        except Exception as e:
-            raise ValidationError(str(e))
-        try:
-            super().save(*args, **kwargs)
-        except Exception as e:
-            logger.warning(str(e))
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "Countries"
@@ -68,14 +62,11 @@ class Department(models.Model):
         self.name = " ".join(self.name.title().split())
 
     def save(self, *args, **kwargs):
-        try:
-            self.full_clean()
-        except Exception as e:
-            raise ValidationError(str(e))
+        self.full_clean()
         try:
             super().save(*args, **kwargs)
-        except Exception as e:
-            logger.warning(str(e))
+        except Exception:
+            raise
         else:
             self._create_assignee_object_for_department()
 
@@ -99,10 +90,7 @@ class OfficeBlock(models.Model):
         self.name = " ".join(self.name.title().split())
 
     def save(self, *args, **kwargs):
-        try:
-            self.full_clean()
-        except Exception as e:
-            raise ValidationError(str(e))
+        self.full_clean()
         super().save(*args, **kwargs)
 
     class Meta:
@@ -115,7 +103,7 @@ class OfficeBlock(models.Model):
 
 class OfficeFloor(models.Model):
     number = models.PositiveIntegerField()
-    block = models.ForeignKey(OfficeBlock, on_delete=models.PROTECT)
+    block = models.ForeignKey('OfficeBlock', on_delete=models.PROTECT)
 
     class Meta:
         unique_together = (('block', 'number'),)
@@ -128,7 +116,7 @@ class OfficeFloor(models.Model):
 
 class OfficeFloorSection(models.Model):
     name = models.CharField(max_length=100)
-    floor = models.ForeignKey(OfficeFloor, on_delete=models.PROTECT)
+    floor = models.ForeignKey('OfficeFloor', on_delete=models.PROTECT)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -137,10 +125,7 @@ class OfficeFloorSection(models.Model):
         """
         Validate office floor section name
         """
-        try:
-            self.full_clean()
-        except Exception as e:
-            raise ValidationError(e)
+        self.full_clean()
         super().save(*args, **kwargs)
 
     class Meta:
@@ -154,7 +139,7 @@ class OfficeFloorSection(models.Model):
 
 class OfficeWorkspace(models.Model):
     name = models.CharField(max_length=50)
-    section = models.ForeignKey(OfficeFloorSection, on_delete=models.PROTECT)
+    section = models.ForeignKey('OfficeFloorSection', on_delete=models.PROTECT)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -163,14 +148,11 @@ class OfficeWorkspace(models.Model):
         """
         Validate office workspace name
         """
-        try:
-            self.full_clean()
-        except Exception as e:
-            raise ValidationError(e)
+        self.full_clean()
         try:
             super().save(*args, **kwargs)
-        except Exception as e:
-            logger.warning(str(e))
+        except Exception:
+            raise
         else:
             self._create_assignee_object_for_workspace()
 

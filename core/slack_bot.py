@@ -202,7 +202,9 @@ class SlackIntegration(object):
             )
             if not dialog_response.get('ok'):
                 error = dialog_response.get('error')
-                logger.error(f'Error sending message for {user_id}: {error}')
+                logger.error(
+                    f'Error sending message for {user_id} - (email {user_email}): {error}'
+                )
                 return False
             return True
 

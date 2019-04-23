@@ -14,8 +14,6 @@ from core.managers import CaseInsensitiveManager
 from core.slack_bot import SlackIntegration
 from core.validator import validate_date
 
-from .user import SecurityUser
-
 slack = SlackIntegration()
 
 logger = logging.getLogger(__name__)
@@ -54,7 +52,7 @@ class AssetSubCategory(models.Model):
     name = models.CharField(unique=True, max_length=40)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now_add=True, editable=False)
-    asset_category = models.ForeignKey(AssetCategory, on_delete=models.PROTECT)
+    asset_category = models.ForeignKey('AssetCategory', on_delete=models.PROTECT)
 
     objects = CaseInsensitiveManager()
 
@@ -82,7 +80,7 @@ class AssetType(models.Model):
     name = models.CharField(unique=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
-    asset_sub_category = models.ForeignKey(AssetSubCategory, on_delete=models.PROTECT)
+    asset_sub_category = models.ForeignKey('AssetSubCategory', on_delete=models.PROTECT)
     has_specs = models.BooleanField(default=False)
 
     objects = CaseInsensitiveManager()
@@ -111,7 +109,7 @@ class AssetMake(models.Model):
     name = models.CharField(unique=True, max_length=40, verbose_name="Asset Make")
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified_at = models.DateTimeField(auto_now=True, editable=False)
-    asset_type = models.ForeignKey(AssetType, on_delete=models.PROTECT)
+    asset_type = models.ForeignKey('AssetType', on_delete=models.PROTECT)
 
     objects = CaseInsensitiveManager()
 
@@ -138,7 +136,7 @@ class AssetModelNumber(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     asset_make = models.ForeignKey(
-        AssetMake, null=True, on_delete=models.PROTECT, verbose_name="Asset Make"
+        'AssetMake', null=True, on_delete=models.PROTECT, verbose_name="Asset Make"
     )
     objects = CaseInsensitiveManager()
 
@@ -210,12 +208,12 @@ class Asset(models.Model):
         'AssetAssignee', blank=True, editable=False, null=True, on_delete=models.PROTECT
     )
     model_number = models.ForeignKey(
-        AssetModelNumber, null=True, on_delete=models.PROTECT
+        'AssetModelNumber', null=True, on_delete=models.PROTECT
     )
     current_status = models.CharField(editable=False, max_length=50)
     notes = models.TextField(editable=False, default=" ")
     specs = models.ForeignKey(
-        AssetSpecs, blank=True, null=True, on_delete=models.PROTECT
+        'AssetSpecs', blank=True, null=True, on_delete=models.PROTECT
     )
     verified = models.BooleanField(default=True)
     objects = CaseInsensitiveManager()
@@ -255,8 +253,8 @@ class Asset(models.Model):
         self.full_clean()
         try:
             super().save(*args, **kwargs)
-        except Exception as e:
-            logger.warning(str(e))
+        except Exception:
+            raise
         else:
             self._save_initial_asset_status()
 
@@ -348,8 +346,8 @@ class AssetAssignee(models.Model):
 class AssetLog(models.Model):
     """Stores checkin/Checkout asset logs"""
 
-    asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
-    checked_by = models.ForeignKey(SecurityUser, blank=True, on_delete=models.PROTECT)
+    asset = models.ForeignKey('Asset', on_delete=models.PROTECT)
+    checked_by = models.ForeignKey('User', blank=True, on_delete=models.PROTECT)
     log_type = models.CharField(max_length=10, choices=constants.ASSET_LOG_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
@@ -373,7 +371,7 @@ class AssetLog(models.Model):
 class AssetStatus(models.Model):
     """Stores the previous and current status of models"""
 
-    asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
+    asset = models.ForeignKey('Asset', on_delete=models.PROTECT)
     current_status = models.CharField(
         max_length=50, choices=constants.ASSET_STATUSES, default=constants.AVAILABLE
     )
@@ -401,8 +399,8 @@ class AssetStatus(models.Model):
         self.full_clean()
         try:
             super().save(*args, **kwargs)
-        except Exception as e:
-            logger.warning(str(e))
+        except Exception:
+            raise
         else:
             self._set_current_status_for_asset()
             self._check_asset_limit()
@@ -444,7 +442,7 @@ class AssetStatus(models.Model):
 
 
 class AllocationHistory(models.Model):
-    asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
+    asset = models.ForeignKey('Asset', on_delete=models.PROTECT)
     current_owner = models.ForeignKey(
         'AssetAssignee',
         related_name='current_owner_asset',
@@ -481,8 +479,8 @@ class AllocationHistory(models.Model):
             self.previous_owner = None
         try:
             super().save(*args, **kwargs)
-        except Exception as e:
-            logger.warning(str(e))
+        except Exception:
+            raise
         else:
             asset = self.asset
             asset.assigned_to = self.current_owner
@@ -526,8 +524,8 @@ class AllocationHistory(models.Model):
 
 
 class AssetCondition(models.Model):
-    asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
-    notes = models.TextField(editable=True, blank=True, null=True)
+    asset = models.ForeignKey('Asset', on_delete=models.PROTECT)
+    notes = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
@@ -537,8 +535,8 @@ class AssetCondition(models.Model):
     def save(self, *args, **kwargs):
         try:
             super().save(*args, **kwargs)
-        except Exception as e:
-            logger.warning(str(e))
+        except Exception:
+            raise
         else:
             self._save_notes()
 
@@ -550,7 +548,7 @@ class AssetCondition(models.Model):
 
 
 class AssetIncidentReport(models.Model):
-    asset = models.ForeignKey(Asset, on_delete=models.PROTECT)
+    asset = models.ForeignKey('Asset', on_delete=models.PROTECT)
     incident_type = models.CharField(max_length=50, choices=constants.INCIDENT_TYPES)
     incident_location = models.CharField(max_length=50)
     incident_description = models.TextField()
@@ -569,8 +567,8 @@ class AssetIncidentReport(models.Model):
     def save(self, *args, **kwargs):
         try:
             super().save(*args, **kwargs)
-        except Exception as e:
-            logger.warning(str(e))
+        except Exception:
+            raise
         else:
             self._save_initial_incident_report_state()
 
@@ -585,7 +583,7 @@ class AssetIncidentReport(models.Model):
 
 class StateTransition(models.Model):
     asset_incident_report = models.ForeignKey(
-        AssetIncidentReport, on_delete=models.PROTECT
+        'AssetIncidentReport', on_delete=models.PROTECT
     )
     state = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
 

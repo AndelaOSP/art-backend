@@ -8,7 +8,6 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 
 # App Imports
-from core import models
 from core.models import Asset, User
 
 logger = logging.getLogger(__name__)
@@ -78,15 +77,14 @@ class UserFilter(BaseFilter):
         lookup_expr='iexact',
         method='filter_exact_with_multiple_query_values',
     )
-
     email = filters.CharFilter(field_name='email', lookup_expr='istartswith')
-
     asset_count = filters.CharFilter(
         field_name='allocated_asset_count',
         label='Asset count',
         lookup_expr='iexact',
         method='filter_by_allocated_asset_count',
     )
+    is_active = filters.CharFilter(field_name='is_active', lookup_expr='iexact')
 
     def filter_by_allocated_asset_count(self, queryset, name, value):
         users = [
@@ -99,11 +97,3 @@ class UserFilter(BaseFilter):
     class Meta:
         model = User
         fields = ['cohort', 'email', 'asset_count']
-
-
-class SecurityUserFilter(BaseFilter):
-    is_active = filters.CharFilter(field_name='is_active', lookup_expr='iexact')
-
-    class Meta:
-        model = models.SecurityUser
-        fields = ['is_active']
