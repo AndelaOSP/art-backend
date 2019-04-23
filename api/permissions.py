@@ -21,8 +21,4 @@ class IsSecurityUser(BasePermission):
     """
 
     def has_permission(self, request, view):
-        try:
-            user = request.user.securityuser
-        except Exception:
-            return False
-        return user and request.user.is_authenticated
+        return request.user.is_authenticated and request.user.is_securityuser

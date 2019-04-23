@@ -20,14 +20,33 @@ class APIBaseTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.ais_api_endpoint = 'http://ais_api.example.com'
+        cls.ais_users_endpoint = cls.ais_api_endpoint + '/users'
+        cls.env_vars = {
+            'SLACK_TOKEN': 'testtoken',
+            'SLACK_LIMIT': '100',
+            'AIS_LIMIT': '100',
+            'AIS_URL': cls.ais_api_endpoint,
+            'AIS_TOKEN': 'testtoken',
+            'RETRY_TIMEOUT': '1',
+            'RETRIES': '4',
+            'PROJECT_ID': '',
+            'PRIVATE_KEY': '',
+            'CLIENT_EMAIL': '',
+        }
         # slack calls patch
         cls.patch_slack_id = patch.object(SlackIntegration, 'get_user_slack_id')
         cls.patch_send_message = patch.object(SlackIntegration, 'send_message')
+        cls.patch_firebase = patch('api.authentication.auth')
+        cls.patch_env = patch.dict('os.environ', cls.env_vars)
 
         cls.patch_slack_id.return_value = 'test_id'
         cls.patch_send_message.return_value = ''
         cls.patch_slack_id.start()
         cls.patch_send_message.start()
+
+        cls.patch_firebase.start()
+        cls.patch_env.start()
 
         # locations
         cls.country = apps.get_model('core', 'Country').objects.create(name="Kenya")
@@ -52,38 +71,35 @@ class APIBaseTestCase(TestCase):
 
         # users
         cls.user = User.objects.create(
-            email='test@site.com',
+            email='test@andela.com',
             cohort=20,
-            slack_handle='@test_user',
             password='devpassword',
             location=cls.centre,
         )
         cls.token_user = 'testtoken'
         cls.admin_user = User.objects.create_superuser(
-            email='admin@site.com',
+            email='admin@andela.com',
             cohort=20,
-            slack_handle='@admin',
             password='devpassword',
             location=cls.centre,
         )
         cls.token_admin = 'admintesttoken'
         cls.other_user = User.objects.create_user(
-            email='user1@site.com',
+            email='user1@andela.com',
             cohort=2,
-            slack_handle='@admin',
             password='devpassword',
             location=cls.centre,
         )
         cls.token_other_user = 'otherusertesttoken'
 
-        cls.security_user = apps.get_model('core', 'SecurityUser').objects.create(
+        cls.security_user = User.objects.create(
             email="sectest1@andela.com",
             password="devpassword",
             first_name="TestFirst",
             last_name="TestLast",
             phone_number="254720900900",
-            badge_number="AE23",
             location=cls.centre,
+            is_securityuser=True,
         )
         cls.token_checked_by = "securityusertoken"
 
@@ -188,3 +204,5 @@ class APIBaseTestCase(TestCase):
         super().tearDownClass()
         cls.patch_slack_id.stop()
         cls.patch_send_message.stop()
+        cls.patch_firebase.stop()
+        cls.patch_env.stop()

@@ -13,13 +13,13 @@ from rest_framework.viewsets import ModelViewSet
 
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
-from api.filters import SecurityUserFilter, UserFilter
+from api.filters import UserFilter
 from api.permissions import IsApiUser
 from api.serializers import (
     SecurityUserEmailsSerializer,
-    SecurityUserSerializer,
     UserFeedbackSerializer,
     UserGroupSerializer,
+    UserSerializer,
     UserSerializerWithAssets,
 )
 from core import models
@@ -50,7 +50,7 @@ class SecurityUserEmailsViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         list_of_emails = [
-            security_user.email for security_user in models.SecurityUser.objects.all()
+            user.email for user in models.User.objects.filter(is_securityuser=True)
         ]
 
         return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
@@ -68,12 +68,12 @@ class UserFeedbackViewSet(ModelViewSet):
 
 
 class SecurityUserViewSet(ModelViewSet):
-    serializer_class = SecurityUserSerializer
-    queryset = models.SecurityUser.objects.all()
+    serializer_class = UserSerializer
+    queryset = models.User.objects.filter(is_securityuser=True)
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = SecurityUserFilter
+    filterset_class = UserFilter
 
     def get_queryset(self):
         user_location = self.request.user.location
@@ -92,7 +92,7 @@ class SecurityUserViewSet(ModelViewSet):
         return super(SecurityUserViewSet, self).update(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        serializer.save(location=self.request.user.location)
+        serializer.save(location=self.request.user.location, is_securityuser=True)
 
 
 class UserGroupViewSet(ModelViewSet):

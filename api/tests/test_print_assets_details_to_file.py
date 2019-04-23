@@ -48,9 +48,8 @@ class PrintAssetsDetailsTestCase(APIBaseTestCase):
             name="Epic Towers", country=country
         )
         admin_user = User.objects.create_superuser(
-            email="newadmin@site.com",
+            email="newadmin@andela.com",
             cohort=2,
-            slack_handle="@admin",
             password="adminZpassword",
             location=centre,
         )

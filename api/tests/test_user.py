@@ -17,23 +17,17 @@ class UserTestCase(APIBaseTestCase):
     def test_can_add_user(self):
         users_count_before = User.objects.count()
         new_user = User.objects.create(
-            email='test-1@site.com',
-            cohort=20,
-            slack_handle='@test_user-1',
-            password='devpassword',
+            email='test-1@andela.com', cohort=20, password='devpassword'
         )
         users_count_after = User.objects.count()
-        self.assertEqual(new_user.email, 'test-1@site.com')
+        self.assertEqual(new_user.email, 'test-1@andela.com')
         self.assertEqual(new_user.cohort, 20)
-        self.assertEqual(new_user.slack_handle, '@test_user-1')
         self.assertEqual(new_user.password, 'devpassword')
         self.assertEqual(users_count_before, users_count_after - 1)
 
     def test_add_user_without_password(self):
         users_count_before = User.objects.count()
-        new_user = User.objects.create(
-            email='test-1@site.com', cohort=20, slack_handle='@test_user-1'
-        )
+        new_user = User.objects.create(email='test-1@andela.com', cohort=20)
         users_count_after = User.objects.count()
         self.assertEqual(new_user.password, None)
         self.assertEqual(users_count_before, users_count_after - 1)
@@ -45,10 +39,7 @@ class UserTestCase(APIBaseTestCase):
 
     def test_can_delete_a_user(self):
         new_user = User.objects.create(
-            email='test-1@site.com',
-            cohort=20,
-            slack_handle='@test_user-1',
-            password='devpassword',
+            email='test-1@andela.com', cohort=20, password='devpassword'
         )
         users_count_before = User.objects.count()
         new_user.delete()
@@ -58,25 +49,15 @@ class UserTestCase(APIBaseTestCase):
     def test_user_email_is_required(self):
         with self.assertRaises(ValueError):
             User.objects.create_user(
-                email='',
-                name='test_user1',
-                cohort=20,
-                slack_handle='@test_user1',
-                password='devpassword',
+                email='', name='test_user1', cohort=20, password='devpassword'
             )
 
     def test_create_normal_user(self):
         new_user_1 = User.objects.create_user(
-            email='test-1@site.com',
-            cohort=20,
-            slack_handle='@test_user-1',
-            password='devpassword',
+            email='test-1@andela.com', cohort=20, password='devpassword'
         )
         new_user_2 = User.objects._create_user(
-            email='test-2@site.com',
-            cohort=20,
-            slack_handle='@test_user-2',
-            password='devpassword',
+            email='test-2@andela.com', cohort=20, password='devpassword'
         )
         self.assertFalse(new_user_1.is_staff)
         self.assertFalse(new_user_1.is_superuser)
@@ -85,10 +66,7 @@ class UserTestCase(APIBaseTestCase):
 
     def test_create_superuser(self):
         new_user_1 = User.objects.create_superuser(
-            email='test-2@site.com',
-            cohort=20,
-            slack_handle='@test_user-2',
-            password='devpassword',
+            email='test-2@andela.com', cohort=20, password='devpassword'
         )
         self.assertTrue(new_user_1.is_staff)
         self.assertTrue(new_user_1.is_superuser)
@@ -96,9 +74,8 @@ class UserTestCase(APIBaseTestCase):
     def test_create_superuser_with_staff_false(self):
         with self.assertRaises(ValueError):
             User.objects.create_superuser(
-                email='test-2@site.com',
+                email='test-2@andela.com',
                 cohort=20,
-                slack_handle='@test_user-2',
                 password='devpassword',
                 is_staff=False,
                 is_superuser=True,
@@ -107,9 +84,8 @@ class UserTestCase(APIBaseTestCase):
     def test_create_superuser_with_superuser_false(self):
         with self.assertRaises(ValueError):
             User.objects.create_superuser(
-                email='test-2@site.com',
+                email='test-2@andela.com',
                 cohort=20,
-                slack_handle='@test_user-2',
                 password='devpassword',
                 is_staff=True,
                 is_superuser=False,
@@ -165,7 +141,7 @@ class UserTestCase(APIBaseTestCase):
     def test_admin_user_add_users_from_api_endpoint(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         users_count_before = User.objects.count()
-        data = {"password": "devpassword", "email": "test_user@mail.com"}
+        data = {"password": "devpassword", "email": "test_user@andela.com"}
         response = client.post(
             self.users_url,
             data=data,
@@ -195,9 +171,8 @@ class UserTestCase(APIBaseTestCase):
         )
         location = AndelaCentre.objects.create(name="Kampala", country=self.country)
         User.objects.create(
-            email='test1@site.com',
+            email='test1@andela.com',
             cohort=20,
-            slack_handle='@test1_user',
             password='devpassword',
             location=location,
         )
