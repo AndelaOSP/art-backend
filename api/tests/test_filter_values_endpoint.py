@@ -28,7 +28,7 @@ class FilterValuesApiTest(APIBaseTestCase):
         mock_verify_id_token.return_value = {'email': self.admin_user.email}
         cohorts = []
         asset_count = []
-        User.objects.create(email='nolocation@email.com', cohort=35)
+        User.objects.create(email='nolocation@andela.com', cohort=35)
         for user in User.objects.filter(location=self.admin_user.location):
             cohort_data = {'id': user.cohort, 'option': user.cohort}
             assets = user.assetassignee.asset_set.count()

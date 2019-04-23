@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 # App Imports
 from api.tests import APIBaseTestCase
-from core.models import APIUser, SecurityUser
+from core.models import APIUser
 
 client = APIClient()
 User = get_user_model()
@@ -34,7 +34,10 @@ class SecurityUserTestCase(APIBaseTestCase):
             self.security_users_url,
             HTTP_AUTHORIZATION="Bearer {}".format(self.access_token),
         )
-        self.assertEqual(len(response.data["emails"]), SecurityUser.objects.count())
+        self.assertEqual(
+            len(response.data["emails"]),
+            User.objects.filter(is_securityuser=True).count(),
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_app_cannot_get_security_users_emails_without_token(self):
@@ -82,7 +85,7 @@ class SecurityUserTestCase(APIBaseTestCase):
     def test_admin_user_add_security_users_from_api_endpoint(self, mock_verify_token):
         mock_verify_token.return_value = {'email': self.admin_user.email}
         users_count_before = User.objects.count()
-        data = {"email": "security@mail.com", "badge_number": "B-A-D-G-E-N-O"}
+        data = {"email": "security@andela.com"}
         response = client.post(
             self.security_users_admin_url,
             data=data,
@@ -108,7 +111,10 @@ class SecurityUserTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), SecurityUser.objects.count())
+        self.assertEqual(
+            len(response.data['results']),
+            User.objects.filter(is_securityuser=True).count(),
+        )
 
     @patch('api.authentication.auth.verify_id_token')
     def test_security_user_api_endpoint_cant_allow_patch(self, mock_verify_token):

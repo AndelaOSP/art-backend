@@ -129,6 +129,10 @@ def load_users_to_art(  # noqa: C901
             ):
                 SYNC_ERRORS['other_errors'].add('Invalid Email - {}'.format(email))
             continue
+        else:
+            email_domain = email.split('@')[1]
+            if 'andela' not in email_domain.lower():
+                continue
         try:
             user, user_created = User.objects.get_or_create(email=email)
         except Exception as e:

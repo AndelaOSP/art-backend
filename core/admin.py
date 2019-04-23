@@ -28,67 +28,15 @@ admin.site.register(
 )
 
 
-class SecurityUserAdmin(BaseUserAdmin):
-    add_form = UserRegistrationForm
-    search_fields = ('email', 'first_name', 'last_name')
-    list_display = (
-        'first_name',
-        'last_name',
-        'email',
-        'badge_number',
-        'phone_number',
-        'is_active',
-    )
-
-    list_filter = ('badge_number', 'is_active')
-
-    fieldsets = (
-        (
-            'Account',
-            {
-                'fields': (
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'badge_number',
-                    'phone_number',
-                    'password',
-                    'is_active',
-                )
-            },
-        ),
-    )
-
-    add_fieldsets = (
-        (
-            None,
-            {
-                'classes': ('wide',),
-                'fields': (
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'badge_number',
-                    'phone_number',
-                    'password1',
-                    'password2',
-                ),
-            },
-        ),
-    )
-
-    ordering = ('first_name', 'last_name', 'badge_number')
-
-
 class UserAdmin(BaseUserAdmin):
     add_form = UserRegistrationForm
     search_fields = ('email', 'first_name', 'last_name')
     list_display = (
         'email',
         'cohort',
-        'slack_handle',
         'location',
         'is_active',
+        'is_securityuser',
         'last_modified',
     )
     list_filter = ('cohort',)
@@ -102,12 +50,12 @@ class UserAdmin(BaseUserAdmin):
                     'first_name',
                     'last_name',
                     'cohort',
-                    'slack_handle',
                     'slack_id',
                     'phone_number',
                     'picture',
                     'is_staff',
                     'is_superuser',
+                    'is_securityuser',
                     'location',
                 )
             },
@@ -124,7 +72,6 @@ class UserAdmin(BaseUserAdmin):
                     'first_name',
                     'last_name',
                     'cohort',
-                    'slack_handle',
                     'phone_number',
                     'is_staff',
                     'is_superuser',
@@ -136,7 +83,7 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
 
-    ordering = ('email', 'cohort', 'slack_handle')
+    ordering = ('email', 'cohort')
 
 
 class AssetAdmin(admin.ModelAdmin):
@@ -231,7 +178,6 @@ admin.site.register(models.AISUserSync, AISUserSyncAdmin)
 admin.site.register(models.Asset, AssetAdmin)
 admin.site.register(models.AssetLog, AssetLogsAdmin)
 admin.site.register(models.User, UserAdmin)
-admin.site.register(models.SecurityUser, SecurityUserAdmin)
 admin.site.register(models.AssetStatus, AssetStatusAdmin)
 admin.site.register(models.UserFeedback, UserFeedbackAdmin)
 admin.site.register(models.AllocationHistory, AllocationHistoryAdmin)

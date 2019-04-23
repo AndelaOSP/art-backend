@@ -4,10 +4,12 @@ from io import StringIO
 # Third-Party Imports
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
+
+# App Imports
+from core.tests import CoreBaseTestCase
 
 
-class ImportAssetsCommandTestCase(TestCase):
+class ImportAssetsCommandTestCase(CoreBaseTestCase):
     def setUp(self):
         self.inmemory_out = StringIO()
 
