@@ -12,6 +12,7 @@ from api.authentication import FirebaseTokenAuthentication
 from api.serializers import (
     AndelaCentreSerializer,
     CountrySerializer,
+    DepartmentDetailSerializer,
     DepartmentSerializer,
     OfficeBlockSerializer,
     OfficeFloorSectionSerializer,
@@ -102,6 +103,11 @@ class DepartmentViewSet(ModelViewSet):
     queryset = models.Department.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return DepartmentDetailSerializer
+        return DepartmentSerializer
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

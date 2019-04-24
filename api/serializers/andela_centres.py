@@ -25,8 +25,8 @@ class OfficeFloorSectionSerializer(serializers.ModelSerializer):
 
 
 class OfficeWorkspaceSerializer(serializers.ModelSerializer):
-    floor = serializers.ReadOnlyField(source='section__floor__number')
-    block = serializers.ReadOnlyField(source='section__floor__block__name')
+    floor = serializers.ReadOnlyField(source="section__floor__number")
+    block = serializers.ReadOnlyField(source="section__floor__block__name")
 
     class Meta:
         model = models.OfficeWorkspace
@@ -39,8 +39,35 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = ("name", "id")
 
 
+class DepartmentDetailSerializer(serializers.ModelSerializer):
+    assets_assigned = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Department
+        fields = ("name", "id", "assets_assigned")
+
+    def get_assets_assigned(self, obj):
+        """This method returns assets assigned to a particluar department
+
+        Args:
+            obj (object): current object instance being fetched
+
+        Returns:
+            json : serialized assets belonging to the specified department
+        """
+
+        from api.serializers.assets import DepartmentAssetSerializer
+
+        department_assignee = models.AssetAssignee.objects.filter(
+            department_id=obj.id
+        ).first()
+        assets = models.Asset.objects.filter(assigned_to=department_assignee)
+        serialized_assets = DepartmentAssetSerializer(assets, many=True)
+        return serialized_assets.data
+
+
 class AndelaCentreSerializer(serializers.ModelSerializer):
-    centre_name = serializers.ReadOnlyField(source='name')
+    centre_name = serializers.ReadOnlyField(source="name")
     country = serializers.SlugRelatedField(
         queryset=models.Country.objects.all(), slug_field="name"
     )
