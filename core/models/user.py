@@ -91,16 +91,6 @@ class User(AbstractUser):
         AssetAssignee.objects.get_or_create(user=self)
 
 
-class SecurityUser(User):
-    badge_number = models.CharField(max_length=30, unique=True)
-
-    USERNAME_FIELD = 'badge_number'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'badge_number']
-
-    class Meta:
-        verbose_name = "Security User"
-
-
 class APIUser(AbstractApplication):
     client_type = models.CharField(
         max_length=32,

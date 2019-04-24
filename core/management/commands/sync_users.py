@@ -151,7 +151,11 @@ def load_users_to_art(  # noqa: C901
         andela_center = None
         location = ais_user.get('location')
         cohort = ais_user.get('cohort')
-        picture = ais_user.get('picture').replace('?sz=50', '')
+        picture = ais_user.get('picture')
+        if '?sz=50' in picture:
+            picture = picture.replace('?sz=50', '')
+        elif '/s50/' in picture:
+            picture = picture.replace('/s50/', '/')
         user_status = ais_user.get('status')
         if user_created and sec_url_used:
             ids.add(ais_user.get('id'))
