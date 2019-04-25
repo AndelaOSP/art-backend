@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 # App Imports
 from api.tests import APIBaseTestCase
 from core.constants import CHECKIN, CHECKOUT
-from core.models import Asset, AssetLog, AssetModelNumber
+from core.models import Asset, AssetLog, AssetMake, AssetModelNumber
 
 User = get_user_model()
 client = APIClient()
@@ -19,15 +19,18 @@ class AssetLogModelTest(APIBaseTestCase):
     """Tests for the AssetLog Model and API"""
 
     def setUp(self):
-        self.test_assetmodel1 = AssetModelNumber.objects.create(
-            name="IMN50987", asset_make=self.asset_make
+        self.test_asset_make = AssetMake.objects.create(
+            name="Test Asset Make", asset_type=self.test_asset_type
         )
-
+        self.test_assetmodel1 = AssetModelNumber.objects.create(
+            name="IMN50987", asset_make=self.test_asset_make
+        )
         self.test_other_asset = Asset(
             asset_code="IC00sf",
             serial_number="SN00134",
             model_number=self.test_assetmodel1,
             purchase_date="2018-07-10",
+            asset_location=self.centre,
         )
         self.test_other_asset.save()
         self.checkin = AssetLog.objects.create(
@@ -204,6 +207,42 @@ class AssetLogModelTest(APIBaseTestCase):
         self.assertIn(self.checkout.id, response.data["results"][0].values())
         self.assertEqual(len(response.data["results"]), AssetLog.objects.count())
         self.assertEqual(response.status_code, 200)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_admin_user_get_filtered_list_of_asset_logs(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        asset_logs_url = (
+            f"{self.asset_logs_url}/?asset_type={self.test_asset_type.name}"
+        )
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(
+            response.data["results"][0]["asset"],
+            f"{self.test_other_asset.serial_number} - {self.test_other_asset.asset_code}",
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_admin_user_get_of_asset_logs_invalid_filter(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        self.checkin = AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        asset_logs_url = f"{self.asset_logs_url}/?asset_type=filterdontexit"
+        response = client.get(
+            self.asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), AssetLog.objects.count())
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_normal_user_create_checkin(self, mock_verify_id_token):

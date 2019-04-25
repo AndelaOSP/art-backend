@@ -162,16 +162,22 @@ class AssetAssigneeViewSet(ModelViewSet):
 
 class AssetLogViewSet(ModelViewSet):
     serializer_class = AssetLogSerializer
-    queryset = models.AssetLog.objects.all()
+    queryset = models.AssetLog.objects
     permission_classes = [IsAdminUser | IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ["get", "post"]
 
     def get_queryset(self):
         user_location = self.request.user.location
+        query_set = self.queryset.none()
         if user_location:
-            return self.queryset.filter(asset__asset_location=user_location)
-        return self.queryset.none()
+            asset_type_name = self.request.query_params.get("asset_type")
+            if asset_type_name is not None:
+                self.queryset = self.queryset.filter(
+                    asset__model_number__asset_make__asset_type__name=asset_type_name
+                )
+            query_set = self.queryset.filter(asset__asset_location=user_location).all()
+        return query_set
 
     def perform_create(self, serializer):
         serializer.save(checked_by=self.request.user)
@@ -412,7 +418,7 @@ class AssetsImportViewSet(APIView):
         error = False
         file_obj = codecs.iterdecode(file_object, "utf-8")
         csv_reader = DictReaderStrip(file_obj, delimiter=",")
-        print('Processing uploaded file:')
+        print("Processing uploaded file:")
         if not process_file(csv_reader, user=user):
             path = request.build_absolute_uri(reverse("skipped"))
             print("path in main end point", path)
@@ -480,7 +486,7 @@ class ExportAssetsDetails(APIView):
         for key, val in dict(request.query_params).items():
             lookup = functools.reduce(
                 operator.or_,
-                {Q(**{'__'.join([key, 'icontains']): item}) for item in val},
+                {Q(**{"__".join([key, "icontains"]): item}) for item in val},
             )
             filters |= lookup
         try:
