@@ -239,10 +239,10 @@ class AssetLogModelTest(APIBaseTestCase):
         )
         asset_logs_url = f"{self.asset_logs_url}/?asset_type=filterdontexit"
         response = client.get(
-            self.asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["results"]), AssetLog.objects.count())
+        self.assertEqual(len(response.data["results"]), 0)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_normal_user_create_checkin(self, mock_verify_id_token):

@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 
 # App Imports
 from api.tests import APIBaseTestCase
-from core.models import AssetCategory, AssetType
+from core.models import AssetType
 
 client = APIClient()
 
