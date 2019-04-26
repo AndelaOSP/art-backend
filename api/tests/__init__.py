@@ -62,6 +62,12 @@ class APIBaseTestCase(TestCase):
         cls.office_block = apps.get_model("core", "OfficeBlock").objects.create(
             name="Epic", location=cls.centre
         )
+        cls.other_centre = apps.get_model("core", "AndelaCentre").objects.create(
+            id=80, name="Epic", country=cls.country
+        )
+        cls.office_block_2 = apps.get_model("core", "OfficeBlock").objects.create(
+            name="ET", location=cls.other_centre
+        )
         cls.office_floor = apps.get_model("core", "OfficeFloor").objects.create(
             number=7, block=cls.office_block
         )
@@ -94,6 +100,16 @@ class APIBaseTestCase(TestCase):
             location=cls.centre,
         )
         cls.token_other_user = "otherusertesttoken"
+
+        cls.normal_admin = User.objects.create_user(
+            email="normaladmin@andela.com",
+            cohort=2,
+            password="devpassword123",
+            is_staff=True,
+            is_superuser=False,
+            location=cls.centre,
+        )
+        cls.test_normaladmin = "normaladmintoken"
 
         cls.security_user = User.objects.create(
             email="sectest1@andela.com",
@@ -154,6 +170,9 @@ class APIBaseTestCase(TestCase):
             asset_location=cls.centre,
         )
 
+        cls.asset_assignee = apps.get_model("core", "AssetAssignee").objects.get(
+            user=cls.user
+        )
         cls.asset_condition = apps.get_model("core", "AssetCondition").objects.create(
             asset=cls.asset, notes="working"
         )
@@ -212,6 +231,12 @@ class APIBaseTestCase(TestCase):
         cls.skipped_assets_url = reverse("skipped")
         cls.users_url = reverse("users-list")
         cls.print_asset_url = reverse("export-assets")
+        cls.center_block_url = reverse(
+            "andela-centres-office-blocks", kwargs={"pk": str(cls.centre.id)}
+        )
+        cls.other_center_block_url = reverse(
+            "andela-centres-office-blocks", kwargs={"pk": str(cls.other_centre.id)}
+        )
 
     @classmethod
     def tearDownClass(cls):

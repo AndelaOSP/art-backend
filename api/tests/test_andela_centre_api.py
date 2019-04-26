@@ -36,6 +36,17 @@ class AndelaCentreAPITest(APIBaseTestCase):
         self.assertEqual(response.data.get("country"), self.country.name)
 
     @patch("api.authentication.auth.verify_id_token")
+    def test_cannot_post_centre_by_non_superuser(self, mock_verify_token):
+        mock_verify_token.return_value = {"email": self.normal_admin.email}
+        data = {"name": "Crest", "country": self.country.id}
+        response = client.post(
+            self.centre_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.status_code, 403)
+
+    @patch("api.authentication.auth.verify_id_token")
     def test_cant_post_centre_with_same_name(self, mock_verify_token):
         mock_verify_token.return_value = {"email": self.admin_user.email}
         center = AndelaCentre.objects.first()
@@ -86,10 +97,10 @@ class AndelaCentreAPITest(APIBaseTestCase):
         self.assertEqual(response.data, {"detail": "Deleted Successfully"})
         self.assertEqual(response.status_code, 204)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_country_create(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
-        data = {"name": countries.lookup('Rwanda').name}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
+        data = {"name": countries.lookup("Rwanda").name}
         response = client.post(
             self.country_url,
             data=data,
@@ -98,9 +109,9 @@ class AndelaCentreAPITest(APIBaseTestCase):
         self.assertIn("name", response.data.keys())
         self.assertEqual(response.status_code, 201)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_duplicate_country_create(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         data = {"name": self.country.name}
         response = client.post(
             self.country_url,
