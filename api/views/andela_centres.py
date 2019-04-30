@@ -3,12 +3,15 @@ import logging
 
 # Third-Party Imports
 from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
+from api.permissions import IsAdminReadOnly, IsSuperAdmin
 from api.serializers import (
     AndelaCentreSerializer,
     CountrySerializer,
@@ -34,7 +37,7 @@ class CountryViewset(ModelViewSet):
 class AndelaCentreViewset(ModelViewSet):
     serializer_class = AndelaCentreSerializer
     queryset = models.AndelaCentre.objects.all()
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, IsAdminReadOnly | IsSuperAdmin]
     authentication_classes = [FirebaseTokenAuthentication]
 
     def destroy(self, request, *args, **kwargs):
@@ -43,13 +46,40 @@ class AndelaCentreViewset(ModelViewSet):
         data = {"detail": "Deleted Successfully"}
         return Response(data=data, status=status.HTTP_204_NO_CONTENT)
 
+    @action(
+        detail=True,
+        permission_classes=[IsAuthenticated, IsAdminUser],
+        serializer_class=OfficeBlockSerializer,
+    )
+    def office_blocks(self, request, pk=None):
+        """This function adds a 'office_block` route to the andela-center
+        route to show office blocks in a center.
+         Args:
+            request (obj): request object
+            pk (str): id of a center
+         Raises:
+            PermissionDenied: If the user is not a super user
+         Returns:
+            dict: a list of block under a certain center
+        """
+        pk = self.kwargs.get("pk")
+        if request.user.is_superuser or str(request.user.location.id) == pk:
+            queryset = models.OfficeBlock.objects.filter(location_id=pk)
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.serializer_class(page, many=True)
+                return self.get_paginated_response(serializer.data)
+        raise PermissionDenied(
+            "Only a super Admin can view Office-blocks in other Centers"
+        )
+
 
 class OfficeBlockViewSet(ModelViewSet):
     serializer_class = OfficeBlockSerializer
     queryset = models.OfficeBlock.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post']
+    http_method_names = ["get", "post"]
 
     def get_queryset(self):
         user_location = self.request.user.location
@@ -63,7 +93,7 @@ class OfficeFloorViewSet(ModelViewSet):
     queryset = models.OfficeFloor.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    http_method_names = ['get', 'post']
+    http_method_names = ["get", "post"]
 
     def get_queryset(self):
         user_location = self.request.user.location
