@@ -576,16 +576,42 @@ class AssetIncidentReport(models.Model):
         existing_state = StateTransition.objects.filter(asset_incident_report=self)
         if not existing_state:
             StateTransition.objects.create(
-                asset_incident_report=self, state=constants.NEWLY_REPORTED
+                asset_incident_report=self,
+                incident_report_state=constants.NEWLY_REPORTED,
             )
-            self.save()
+
+        # user updates asset_status if lost
+        if self.incident_type == "Loss":
+            AssetStatus.objects.create(
+                current_status=constants.LOST, asset_id=self.asset_id
+            ).save()
 
 
 class StateTransition(models.Model):
     asset_incident_report = models.ForeignKey(
         'AssetIncidentReport', on_delete=models.PROTECT
     )
-    state = models.CharField(max_length=50, default=constants.NEWLY_REPORTED)
+    incident_report_state = models.CharField(
+        max_length=50,
+        choices=constants.REPORT_STATE_OPTIONS,
+        default=constants.NEWLY_REPORTED,
+    )
+    asset_state_from_report = models.CharField(
+        max_length=50,
+        choices=constants.ASSET_STATE_FROM_REPORT_OPTIONS,
+        default=constants.REQUIRES_REPAIR,
+    )
 
     class Meta:
         verbose_name_plural = 'State Transitions'
+
+    def save(self, *args, **kwargs):
+
+        # admin updates asset_status if damaged
+        if self.asset_state_from_report == "Damaged":
+            AssetStatus.objects.create(
+                current_status=constants.DAMAGED,
+                asset_id=self.asset_incident_report.asset_id,
+            ).save()
+
+        super().save(*args, **kwargs)

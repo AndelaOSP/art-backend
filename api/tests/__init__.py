@@ -183,7 +183,7 @@ class APIBaseTestCase(TestCase):
             "core", "AssetIncidentReport"
         ).objects.create(
             asset=cls.asset,
-            incident_type="Loss",
+            incident_type="Damaged",
             incident_location="44",
             incident_description="Mugging",
             injuries_sustained="Black eye",
@@ -201,6 +201,9 @@ class APIBaseTestCase(TestCase):
         )
         cls.asset_status = apps.get_model("core", "AssetStatus").objects.get(
             asset=cls.asset
+        )
+        cls.report_status = apps.get_model("core", "StateTransition").objects.get(
+            asset_incident_report=cls.incident_report
         )
 
         # urls
@@ -226,6 +229,9 @@ class APIBaseTestCase(TestCase):
         cls.floor_number_url = reverse("office-floors-list")
         cls.floor_section_url = reverse("floor-sections-list")
         cls.incident_report_url = reverse("incidence-reports-list")
+        cls.incident_report_status_url = reverse(
+            "state-transitions-detail", kwargs={"pk": str(cls.report_status.id)}
+        )
         cls.manage_asset_urls = reverse("manage-assets-list")
         cls.office_block_url = reverse("office-blocks-list")
         cls.office_workspace_url = reverse("office-workspaces-list")

@@ -479,4 +479,9 @@ class AssetSpecsSerializer(serializers.ModelSerializer):
 class StateTransitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.StateTransition
-        fields = ("asset_incident_report", "state")
+        fields = (
+            "id",
+            "asset_incident_report",
+            "incident_report_state",
+            "asset_state_from_report",
+        )

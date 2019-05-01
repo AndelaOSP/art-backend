@@ -90,4 +90,24 @@ CSV_REQUIRED_HEADING = {MODEL_NUMBER}
 CSV_REQUIRED_HEADING_ASSET_CODE = CSV_REQUIRED_HEADING.union({ASSET_CODE})
 CSV_REQUIRED_HEADING_SERIAL_NO = CSV_REQUIRED_HEADING.union({SERIAL_NUMBER})
 
-NEWLY_REPORTED = "Newly reported"
+NEWLY_REPORTED = "newly reported"
+INTERNAL_ASSESSMENT = "internal assessment"
+EXTERNAL_ASSESSMENT = "external assessment"
+OUT_FOR_REPAIR = "out for repair"
+
+REPORT_STATE_OPTIONS = (
+    (NEWLY_REPORTED, "newly reported"),
+    (INTERNAL_ASSESSMENT, "internal assessment"),
+    (EXTERNAL_ASSESSMENT, "external assessment"),
+    (OUT_FOR_REPAIR, "out for repair"),
+)
+
+
+REQUIRES_REPAIR = "requires repair"
+REQUIRES_EXTERNAL_ASSESSMENT = "requires external assessment"
+
+ASSET_STATE_FROM_REPORT_OPTIONS = (
+    (REQUIRES_REPAIR, "requires repair"),
+    (REQUIRES_EXTERNAL_ASSESSMENT, "requires external assessment"),
+    (DAMAGED, "Damaged"),
+)

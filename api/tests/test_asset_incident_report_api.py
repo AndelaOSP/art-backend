@@ -141,3 +141,42 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         )
         self.assertEqual(response.data, {'detail': 'Method "DELETE" not allowed.'})
         self.assertEqual(response.status_code, 405)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_can_allow_patch_of_incident_report_status(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        data = {
+            "incident_report_state": "internal assessment",
+            "asset_state_from_report": "Damaged",
+        }
+        response = client.patch(
+            f"{self.incident_report_status_url}",
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        data['id'] = self.report_status.id
+        data['asset_incident_report'] = self.report_status.asset_incident_report.id
+        self.assertEqual(response.data, data)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_require_both_fields_to_patch_incident_report_status(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        data = {
+            "asset_incident_report": self.report_status.asset_incident_report.id,
+            "incident_report_state": "internal assessment",
+        }
+        response = client.patch(
+            f"{self.incident_report_status_url}",
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(
+            response.data,
+            {
+                "Error": "Ensure that incident_report_state and asset_state_from_report fields are filled"
+            },
+        )
+        self.assertEqual(response.status_code, 400)
