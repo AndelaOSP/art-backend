@@ -162,7 +162,7 @@ class AssetAssigneeViewSet(ModelViewSet):
 
 class AssetLogViewSet(ModelViewSet):
     serializer_class = AssetLogSerializer
-    queryset = models.AssetLog.objects
+    queryset = models.AssetLog.objects.all()
     permission_classes = [IsAdminUser | IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
     filter_backends = (filters.DjangoFilterBackend,)
@@ -171,15 +171,9 @@ class AssetLogViewSet(ModelViewSet):
 
     def get_queryset(self):
         user_location = self.request.user.location
-        query_set = self.queryset.none()
         if user_location:
-            asset_type_name = self.request.query_params.get("asset_type")
-            if asset_type_name is not None:
-                self.queryset = self.queryset.filter(
-                    asset__model_number__asset_make__asset_type__name=asset_type_name
-                )
-            query_set = self.queryset.filter(asset__asset_location=user_location).all()
-        return query_set
+            return self.queryset.filter(asset__asset_location=user_location)
+        return self.queryset.none()
 
     def perform_create(self, serializer):
         serializer.save(checked_by=self.request.user)
