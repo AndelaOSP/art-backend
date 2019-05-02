@@ -25,12 +25,40 @@ class OfficeFloorSectionSerializer(serializers.ModelSerializer):
 
 
 class OfficeWorkspaceSerializer(serializers.ModelSerializer):
-    floor = serializers.ReadOnlyField(source="section__floor__number")
-    block = serializers.ReadOnlyField(source="section__floor__block__name")
+    floor = serializers.ReadOnlyField(source="section.floor.number")
+    block = serializers.ReadOnlyField(source="section.floor.block.name")
+    section_name = serializers.ReadOnlyField(source="section.name")
+    long_name = serializers.SerializerMethodField()
 
     class Meta:
         model = models.OfficeWorkspace
-        fields = ("id", "name", "section", "floor", "block")
+        fields = (
+            "id",
+            "name",
+            "section",
+            "section_name",
+            "floor",
+            "block",
+            "long_name",
+        )
+
+    def get_long_name(self, obj):
+        """This method creates a value for the long_name field
+
+        Args:
+            obj (object): current object being serialized.
+
+        Returns:
+            string: value for the long name field for each object.
+        """
+        block_name = obj.section.floor.block.name
+        floor_number = obj.section.floor.number
+        section_name = obj.section.name
+        workspace_name = obj.name
+        long_name = "{}-{}-{}-{}".format(
+            block_name, floor_number, section_name, workspace_name
+        )
+        return long_name
 
 
 class DepartmentSerializer(serializers.ModelSerializer):

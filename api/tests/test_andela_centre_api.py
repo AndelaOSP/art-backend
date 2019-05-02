@@ -31,6 +31,7 @@ class AndelaCentreAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
+
         self.assertIn("name", response.data.keys())
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data.get("country"), self.country.name)
@@ -45,6 +46,18 @@ class AndelaCentreAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(response.status_code, 403)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_post_centre_with_missing_field_fails(self, mock_verify_token):
+        mock_verify_token.return_value = {"email": self.admin_user.email}
+        data = {"name": "ET"}
+        response = client.post(
+            self.centre_url,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, {"country": ["This field is required."]})
 
     @patch("api.authentication.auth.verify_id_token")
     def test_cant_post_centre_with_same_name(self, mock_verify_token):
