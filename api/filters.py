@@ -8,7 +8,7 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 
 # App Imports
-from core.models import Asset, User
+from core.models import Asset, AssetLog, User
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,16 @@ class AssetFilter(BaseFilter):
     class Meta:
         model = Asset
         fields = ['asset_type', 'model_number', 'email', 'current_status', 'verified']
+
+
+class AssetLogFilter(BaseFilter):
+    asset_type = filters.CharFilter(
+        field_name="asset__model_number__asset_make__asset_type__name",
+        lookup_expr="iexact"
+    )
+    class Meta:
+        model = AssetLog
+        fields = ['asset_type']
 
 
 class UserFilter(BaseFilter):
