@@ -74,11 +74,12 @@ class AssetFilter(BaseFilter):
 class AssetLogFilter(BaseFilter):
     asset_type = filters.CharFilter(
         field_name="asset__model_number__asset_make__asset_type__name",
-        lookup_expr="iexact"
+        lookup_expr="iexact",
     )
+
     class Meta:
         model = AssetLog
-        fields = ['asset_type']
+        fields = ["asset_type"]
 
 
 class UserFilter(BaseFilter):
