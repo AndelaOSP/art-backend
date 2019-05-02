@@ -26,7 +26,7 @@ from rest_framework.viewsets import ModelViewSet
 
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
-from api.filters import AssetFilter
+from api.filters import AssetFilter, AssetLogFilter
 from api.permissions import IsSecurityUser
 from api.serializers import (
     AllocationsSerializer,
@@ -165,6 +165,8 @@ class AssetLogViewSet(ModelViewSet):
     queryset = models.AssetLog.objects.all()
     permission_classes = [IsAdminUser | IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = AssetLogFilter
     http_method_names = ["get", "post"]
 
     def get_queryset(self):
@@ -412,7 +414,7 @@ class AssetsImportViewSet(APIView):
         error = False
         file_obj = codecs.iterdecode(file_object, "utf-8")
         csv_reader = DictReaderStrip(file_obj, delimiter=",")
-        print('Processing uploaded file:')
+        print("Processing uploaded file:")
         if not process_file(csv_reader, user=user):
             path = request.build_absolute_uri(reverse("skipped"))
             print("path in main end point", path)
@@ -480,7 +482,7 @@ class ExportAssetsDetails(APIView):
         for key, val in dict(request.query_params).items():
             lookup = functools.reduce(
                 operator.or_,
-                {Q(**{'__'.join([key, 'icontains']): item}) for item in val},
+                {Q(**{"__".join([key, "icontains"]): item}) for item in val},
             )
             filters |= lookup
         try:

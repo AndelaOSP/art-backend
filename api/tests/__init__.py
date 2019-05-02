@@ -135,6 +135,9 @@ class APIBaseTestCase(TestCase):
         cls.asset_type = apps.get_model("core", "AssetType").objects.create(
             name="Asset Types", asset_sub_category=cls.asset_sub_category
         )
+        cls.test_asset_type = apps.get_model("core", "AssetType").objects.create(
+            name="Other Asset Types", asset_sub_category=cls.asset_sub_category
+        )
         cls.asset_make = apps.get_model("core", "AssetMake").objects.create(
             name="Asset Makes", asset_type=cls.asset_type
         )
