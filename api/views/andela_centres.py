@@ -135,7 +135,7 @@ class DepartmentViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication]
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
+        if self.action == "retrieve":
             return DepartmentDetailSerializer
         return DepartmentSerializer
 

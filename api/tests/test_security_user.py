@@ -17,7 +17,7 @@ User = get_user_model()
 class SecurityUserTestCase(APIBaseTestCase):
     def setUp(self):
         api_user = APIUser.objects.create(name="test_api_app")
-        url = '/api/v1/o/token/'
+        url = "/api/v1/o/token/"
 
         payload = {
             "grant_type": "client_credentials",
@@ -45,7 +45,7 @@ class SecurityUserTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 401)
         self.assertIn(
             json.loads(response.content)["detail"],
-            'Authentication credentials were not provided.',
+            "Authentication credentials were not provided.",
         )
 
     def test_app_cannot_get_security_users_emails_with_wrong_token(self):
@@ -56,40 +56,40 @@ class SecurityUserTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 401)
         self.assertIn(
             json.loads(response.content)["detail"],
-            'Authentication credentials were not provided.',
+            "Authentication credentials were not provided.",
         )
 
     def test_non_authenticated_user_view_security_user_api_endpoint(self):
         response = client.get(self.security_users_admin_url)
         self.assertEqual(
-            response.data, {'detail': 'Authentication credentials were not provided.'}
+            response.data, {"detail": "Authentication credentials were not provided."}
         )
         self.assertEqual(response.status_code, 401)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_non_admin_user_can_view_security_user_api_endpoint(
         self, mock_verify_token
     ):
-        mock_verify_token.return_value = {'email': self.user.email}
+        mock_verify_token.return_value = {"email": self.user.email}
         response = client.get(
             self.security_users_admin_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(
             response.data,
-            {'detail': 'You do not have permission to perform this action.'},
+            {"detail": "You do not have permission to perform this action."},
         )
         self.assertEqual(response.status_code, 403)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_admin_user_add_security_users_from_api_endpoint(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         users_count_before = User.objects.count()
         data = {"email": "security@andela.com"}
         response = client.post(
             self.security_users_admin_url,
             data=data,
-            format='json',
+            format="json",
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         users_count_after = User.objects.count()
@@ -97,61 +97,61 @@ class SecurityUserTestCase(APIBaseTestCase):
         self.assertEqual(users_count_after, users_count_before + 1)
         response = client.get(
             self.security_users_admin_url,
-            format='json',
+            format="json",
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertIn(data.get('email'), str(response.json().get('results')))
+        self.assertIn(data.get("email"), str(response.json().get("results")))
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_admin_user_view_security_users_from_api_endpoint(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         response = client.get(
             self.security_users_admin_url,
-            format='json',
+            format="json",
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            len(response.data['results']),
+            len(response.data["results"]),
             User.objects.filter(is_securityuser=True).count(),
         )
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_security_user_api_endpoint_cant_allow_patch(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         response = client.patch(
             self.security_users_admin_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(response.data, {'detail': 'Method "PATCH" not allowed.'})
+        self.assertEqual(response.data, {"detail": 'Method "PATCH" not allowed.'})
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_security_user_api_endpoint_cant_allow_delete(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         response = client.delete(
             self.security_users_admin_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(response.data, {'detail': 'Method "DELETE" not allowed.'})
+        self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_admin_can_filter_security_users_by_status(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
-            '{}?active={}'.format(
+            "{}?active={}".format(
                 self.security_users_admin_url, self.security_user.is_active
             ),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['count'], 1)
-        self.assertIn(response.data['results'][0]['email'], self.security_user.email)
+        self.assertEqual(response.data["count"], 1)
+        self.assertIn(response.data["results"][0]["email"], self.security_user.email)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_user_not_in_filter_of_in_active_security_user(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
-            '{}?active={}'.format(
+            "{}?active={}".format(
                 self.security_users_admin_url, not self.security_user.is_active
             ),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),

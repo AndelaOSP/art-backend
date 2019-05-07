@@ -61,40 +61,40 @@ class AssetAssigneeAPITest(APIBaseTestCase):
     def test_non_authenticated_user_get_assets_assignee(self):
         response = client.get(self.asset_assignee_url)
         self.assertEqual(
-            response.data, {'detail': 'Authentication credentials were not provided.'}
+            response.data, {"detail": "Authentication credentials were not provided."}
         )
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_can_get_assets_assignee(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.user.email}
+        mock_verify_token.return_value = {"email": self.user.email}
         response = client.get(
             self.asset_assignee_url,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertIn("assignee", response.data['results'][0].keys())
-        self.assertEqual(len(response.data['results']), AssetAssignee.objects.count())
+        self.assertIn("assignee", response.data["results"][0].keys())
+        self.assertEqual(len(response.data["results"]), AssetAssignee.objects.count())
         self.assertEqual(response.status_code, 200)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_assets_assignee_api_endpoint_cant_allow_put(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         data = {}
         response = client.put(
             f"{self.asset_assignee_url}/{self.asset_assignee.id}/",
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})
+        self.assertEqual(response.data, {"detail": 'Method "PUT" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_assets_assignee_api_cant_allow_delete(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         data = {}
         response = client.delete(
             self.asset_assignee_url,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {'detail': 'Method "DELETE" not allowed.'})
+        self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})
         self.assertEqual(response.status_code, 405)

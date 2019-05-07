@@ -10,7 +10,7 @@ def validate_date(value):
     if value > datetime.date.today():
         raise ValidationError(
             _(
-                '%(value)s is invalid. Purchase date can only be today or a date in the past'
+                "%(value)s is invalid. Purchase date can only be today or a date in the past"
             ),
-            params={'value': value},
+            params={"value": value},
         )

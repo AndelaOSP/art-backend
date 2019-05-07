@@ -66,7 +66,7 @@ class AssetModelNumberAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data.get('name'), 'TEST EDIT')
+        self.assertEqual(response.data.get("name"), "TEST EDIT")
 
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_model_number_api_endpoint_cant_allow_patch(

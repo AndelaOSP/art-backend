@@ -101,7 +101,7 @@ class AssetMakeAPICase(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data.get('name'), "Test Edit")
+        self.assertEqual(response.data.get("name"), "Test Edit")
 
     @patch("api.authentication.auth.verify_id_token")
     def test_can_get_single_asset_make(self, mock_verify_token):

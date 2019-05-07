@@ -16,157 +16,157 @@ User = get_user_model()
 
 class UserSyncCommandsTestCase(CoreBaseTestCase):
     def setUp(self):
-        self.sec_ais_users_endpoint = self.ais_api_endpoint + '/users/basic'
-        self.invalid_email = 'invalidemail@email.com'
-        self.invalid_email1 = 'invalid email @andela.com'
+        self.sec_ais_users_endpoint = self.ais_api_endpoint + "/users/basic"
+        self.invalid_email = "invalidemail@email.com"
+        self.invalid_email1 = "invalid email @andela.com"
         self.sample_user_data = {
-            'values': [
+            "values": [
                 {
-                    'id': 'testid1',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'first_name': 'first1',
-                    'last_name': 'last2',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'active',
-                    'cohort': {'name': 'Class 1 - NBO'},
-                    'location': {'name': 'Nairobi'},
-                    'updated_at': '2018-12-18T13: 30: 02.780Z',
+                    "id": "testid1",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "first_name": "first1",
+                    "last_name": "last2",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "active",
+                    "cohort": {"name": "Class 1 - NBO"},
+                    "location": {"name": "Nairobi"},
+                    "updated_at": "2018-12-18T13: 30: 02.780Z",
                 },
                 {
-                    'id': 'testid2',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'first_name': 'first1',
-                    'last_name': 'last2',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'active',
-                    'location': {'name': 'Nairobi'},
-                    'cohort': {'name': 'test'},
-                    'updated_at': '2018-12-18T13: 30: 02.780Z',
+                    "id": "testid2",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "first_name": "first1",
+                    "last_name": "last2",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "active",
+                    "location": {"name": "Nairobi"},
+                    "cohort": {"name": "test"},
+                    "updated_at": "2018-12-18T13: 30: 02.780Z",
                 },
                 {
-                    'id': 'testid3',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'first_name': 'first1',
-                    'last_name': 'last2',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'active',
-                    'cohort': {'name': 'Class 1 - NBO'},
-                    'location': {'name': 'unknown'},
+                    "id": "testid3",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "first_name": "first1",
+                    "last_name": "last2",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "active",
+                    "cohort": {"name": "Class 1 - NBO"},
+                    "location": {"name": "unknown"},
                 },
                 {
-                    'id': 'testid4',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'first_name': 'first1',
-                    'last_name': 'last2',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'active',
-                    'cohort': {'name': 'Staff'},
-                    'location': {'name': 'Lagos'},
-                    'updated_at': '2018-12-18T13: 30: 02.780Z',
+                    "id": "testid4",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "first_name": "first1",
+                    "last_name": "last2",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "active",
+                    "cohort": {"name": "Staff"},
+                    "location": {"name": "Lagos"},
+                    "updated_at": "2018-12-18T13: 30: 02.780Z",
                 },
                 {
-                    'id': 'testid5',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'first_name': 'first1',
-                    'last_name': 'last2',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'suspended',
-                    'cohort': {'name': 'Class 1 - KLA'},
-                    'location': {'name': 'Kampala'},
-                    'updated_at': '2018-12-18T13: 30: 02.780Z',
+                    "id": "testid5",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "first_name": "first1",
+                    "last_name": "last2",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "suspended",
+                    "cohort": {"name": "Class 1 - KLA"},
+                    "location": {"name": "Kampala"},
+                    "updated_at": "2018-12-18T13: 30: 02.780Z",
                 },
                 {
-                    'id': 'testid6',
-                    'email': self.user.email,
-                    'first_name': 'first1',
-                    'last_name': 'last2',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'suspended',
-                    'cohort': {'name': 'Class 1 - KLA'},
-                    'location': {'name': 'Kampala'},
-                    'updated_at': '2018-12-18T13: 30: 02.780Z',
+                    "id": "testid6",
+                    "email": self.user.email,
+                    "first_name": "first1",
+                    "last_name": "last2",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "suspended",
+                    "cohort": {"name": "Class 1 - KLA"},
+                    "location": {"name": "Kampala"},
+                    "updated_at": "2018-12-18T13: 30: 02.780Z",
                 },
                 {
-                    'id': 'testid7',
-                    'email': self.invalid_email,
-                    'first_name': 'first1',
-                    'last_name': 'last2',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'suspended',
-                    'cohort': {'name': 'Class 1 - KLA'},
-                    'location': {'name': 'Kampala'},
-                    'updated_at': '2018-12-18T13: 30: 02.780Z',
+                    "id": "testid7",
+                    "email": self.invalid_email,
+                    "first_name": "first1",
+                    "last_name": "last2",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "suspended",
+                    "cohort": {"name": "Class 1 - KLA"},
+                    "location": {"name": "Kampala"},
+                    "updated_at": "2018-12-18T13: 30: 02.780Z",
                 },
                 {
-                    'id': 'testid7',
-                    'email': self.invalid_email1,
-                    'first_name': 'first1',
-                    'last_name': 'last2',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'suspended',
-                    'cohort': {'name': 'Class 1 - KLA'},
-                    'location': {'name': 'Kampala'},
-                    'updated_at': '2018-12-18T13: 30: 02.780Z',
+                    "id": "testid7",
+                    "email": self.invalid_email1,
+                    "first_name": "first1",
+                    "last_name": "last2",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "suspended",
+                    "cohort": {"name": "Class 1 - KLA"},
+                    "location": {"name": "Kampala"},
+                    "updated_at": "2018-12-18T13: 30: 02.780Z",
                 },
             ]
         }
         self.sample_basic_user_data = {
-            'values': [
+            "values": [
                 {
-                    'id': 'testid8',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'name': 'first1 last',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'active',
-                    'location': None,
+                    "id": "testid8",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "name": "first1 last",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "active",
+                    "location": None,
                 },
                 {
-                    'id': 'testid9',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'name': 'first1 last',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'active',
-                    'location': None,
+                    "id": "testid9",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "name": "first1 last",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "active",
+                    "location": None,
                 },
                 {
-                    'id': 'testid10',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'name': 'first1 last',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'active',
-                    'location': None,
+                    "id": "testid10",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "name": "first1 last",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "active",
+                    "location": None,
                 },
                 {
-                    'id': 'testid11',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'name': 'first1 last',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'active',
-                    'location': None,
+                    "id": "testid11",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "name": "first1 last",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "active",
+                    "location": None,
                 },
                 {
-                    'id': 'testid12',
-                    'email': 'test.{}@andela.com'.format(random.randint(1, 100)),
-                    'name': 'first1 last',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'suspended',
-                    'location': None,
+                    "id": "testid12",
+                    "email": "test.{}@andela.com".format(random.randint(1, 100)),
+                    "name": "first1 last",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "suspended",
+                    "location": None,
                 },
                 {
-                    'id': 'testid13',
-                    'email': self.user.email,
-                    'name': 'first1 last',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'suspended',
-                    'location': None,
+                    "id": "testid13",
+                    "email": self.user.email,
+                    "name": "first1 last",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "suspended",
+                    "location": None,
                 },
                 {
-                    'id': 'testid14',
-                    'email': self.invalid_email,
-                    'name': 'first1 last',
-                    'picture': 'https://test.example.com/pic/photo.jpg?sz=50',
-                    'status': 'suspended',
-                    'location': None,
+                    "id": "testid14",
+                    "email": self.invalid_email,
+                    "name": "first1 last",
+                    "picture": "https://test.example.com/pic/photo.jpg?sz=50",
+                    "status": "suspended",
+                    "location": None,
                 },
             ]
         }
@@ -174,13 +174,13 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         responses.add(
             responses.GET,
             self.ais_users_endpoint
-            + '?limit={}&page=3'.format(self.env_vars['AIS_LIMIT']),
+            + "?limit={}&page=3".format(self.env_vars["AIS_LIMIT"]),
             json={},
         )
         responses.add(
             responses.GET,
             self.sec_ais_users_endpoint
-            + '?limit={}&page=3'.format(self.env_vars['AIS_LIMIT']),
+            + "?limit={}&page=3".format(self.env_vars["AIS_LIMIT"]),
             json={},
         )
 
@@ -196,8 +196,8 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         "Test no call when env vars missing"
         user_count = User.objects.count()
         responses.add(responses.GET, self.ais_users_endpoint, json={})
-        with patch.dict('os.environ', {'AIS_URL': '', 'AIS_TOKEN': ''}, clear=True):
-            call_command('sync_users')
+        with patch.dict("os.environ", {"AIS_URL": "", "AIS_TOKEN": ""}, clear=True):
+            call_command("sync_users")
         self._confirm_call_count(0)
         # no change in user count
         self.assertEqual(user_count, User.objects.count())
@@ -208,7 +208,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         user_count = User.objects.count()
         responses.add(responses.GET, self.ais_users_endpoint, status=404)
         responses.add(responses.GET, self.sec_ais_users_endpoint, status=404)
-        call_command('sync_users')
+        call_command("sync_users")
         # +3 retries
         self._confirm_call_count(5)
         # no change in user count
@@ -221,7 +221,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         responses.add(
             responses.GET, self.ais_users_endpoint, json=self.sample_user_data
         )
-        call_command('sync_users')
+        call_command("sync_users")
         # calls will exit at call number 3, since page 3 has empty result
         self._confirm_call_count(3)
         # additional users loaded to db
@@ -247,7 +247,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
             responses.GET, self.ais_users_endpoint, json=self.sample_user_data
         )
         responses.add(responses.GET, self.ais_users_endpoint, json={})
-        call_command('sync_users')
+        call_command("sync_users")
 
         self._confirm_call_count(7)
         # additional users loaded to db
@@ -262,7 +262,7 @@ class UserSyncCommandsTestCase(CoreBaseTestCase):
         AISUserSync.objects.create()
         user_count = User.objects.count()
         responses.add(responses.GET, self.ais_users_endpoint, json=[])
-        call_command('sync_users')
+        call_command("sync_users")
         # calls will exit at call number 3, since page 3 has empty result
         self._confirm_call_count(1)
         # no change in user count

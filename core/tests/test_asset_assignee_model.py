@@ -15,7 +15,7 @@ class AssetAssigneeModelTest(CoreBaseTestCase):
     def test_invalid_user_email(self):
         with self.assertRaises(ValidationError):
             User.objects.create(
-                email='test100@gmail.com', cohort=10, password='devpassword'
+                email="test100@gmail.com", cohort=10, password="devpassword"
             )
 
     def test_asset_assignee_is_created_when_a_user_is_saved(self):
@@ -24,7 +24,7 @@ class AssetAssigneeModelTest(CoreBaseTestCase):
          associated with this user is created
         """
         user = User.objects.create(
-            email='test100@andela.com', cohort=10, password='devpassword'
+            email="test100@andela.com", cohort=10, password="devpassword"
         )
         self.assertEqual(len(AssetAssignee.objects.filter(user=user)), 1)
 

@@ -30,33 +30,33 @@ admin.site.register(
 
 class UserAdmin(BaseUserAdmin):
     add_form = UserRegistrationForm
-    search_fields = ('email', 'first_name', 'last_name')
+    search_fields = ("email", "first_name", "last_name")
     list_display = (
-        'email',
-        'cohort',
-        'location',
-        'is_active',
-        'is_securityuser',
-        'last_modified',
+        "email",
+        "cohort",
+        "location",
+        "is_active",
+        "is_securityuser",
+        "last_modified",
     )
-    list_filter = ('cohort',)
+    list_filter = ("cohort",)
 
     fieldsets = (
-        ('Account', {'fields': ('email', 'password')}),
+        ("Account", {"fields": ("email", "password")}),
         (
-            'Personal info',
+            "Personal info",
             {
-                'fields': (
-                    'first_name',
-                    'last_name',
-                    'cohort',
-                    'slack_id',
-                    'phone_number',
-                    'picture',
-                    'is_staff',
-                    'is_superuser',
-                    'is_securityuser',
-                    'location',
+                "fields": (
+                    "first_name",
+                    "last_name",
+                    "cohort",
+                    "slack_id",
+                    "phone_number",
+                    "picture",
+                    "is_staff",
+                    "is_superuser",
+                    "is_securityuser",
+                    "location",
                 )
             },
         ),
@@ -66,112 +66,112 @@ class UserAdmin(BaseUserAdmin):
         (
             None,
             {
-                'classes': ('wide',),
-                'fields': (
-                    'email',
-                    'first_name',
-                    'last_name',
-                    'cohort',
-                    'phone_number',
-                    'is_staff',
-                    'is_superuser',
-                    'picture',
-                    'password1',
-                    'password2',
+                "classes": ("wide",),
+                "fields": (
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "cohort",
+                    "phone_number",
+                    "is_staff",
+                    "is_superuser",
+                    "picture",
+                    "password1",
+                    "password2",
                 ),
             },
         ),
     )
 
-    ordering = ('email', 'cohort')
+    ordering = ("email", "cohort")
 
 
 class AssetAdmin(admin.ModelAdmin):
     list_filter = (
-        'model_number',
-        'model_number__asset_make__asset_type__name',
-        'purchase_date',
-        'verified',
+        "model_number",
+        "model_number__asset_make__asset_type__name",
+        "purchase_date",
+        "verified",
     )
     list_display = (
-        'uuid',
-        'asset_code',
-        'serial_number',
-        'model_number',
-        'created_at',
-        'assigned_to',
-        'current_status',
-        'notes',
-        'purchase_date',
-        'verified',
-        'asset_location',
+        "uuid",
+        "asset_code",
+        "serial_number",
+        "model_number",
+        "created_at",
+        "assigned_to",
+        "current_status",
+        "notes",
+        "purchase_date",
+        "verified",
+        "asset_location",
     )
 
 
 class AISUserSyncAdmin(admin.ModelAdmin):
     form = UserSyncForm
-    list_filter = ('running_time', 'successful', 'created_at')
+    list_filter = ("running_time", "successful", "created_at")
     list_display = (
-        'running_time',
-        'successful',
-        'new_records',
-        'updated_records',
-        'created_at',
+        "running_time",
+        "successful",
+        "new_records",
+        "updated_records",
+        "created_at",
     )
 
     def save_model(self, request, obj, form, change):
         if change:
             return super(AISUserSyncAdmin, self).save_model(request, obj, form, change)
         else:
-            t = threading.Thread(target=call_command, args=('sync_users',))
+            t = threading.Thread(target=call_command, args=("sync_users",))
             t.setDaemon(True)
             t.start()
 
     def get_fields(self, request, obj=None):
         fields = super(AISUserSyncAdmin, self).get_fields(request, obj)
         if obj:
-            fields.remove('new_sync')
+            fields.remove("new_sync")
             return fields
-        return ['new_sync']
+        return ["new_sync"]
 
 
 class AssetStatusAdmin(admin.ModelAdmin):
-    list_display = ('asset', 'current_status', 'previous_status', 'created_at')
+    list_display = ("asset", "current_status", "previous_status", "created_at")
 
 
 class UserFeedbackAdmin(admin.ModelAdmin):
-    list_filter = ('report_type',)
-    list_display = ('message', 'report_type', 'reported_by')
+    list_filter = ("report_type",)
+    list_display = ("message", "report_type", "reported_by")
 
 
 class AllocationHistoryAdmin(admin.ModelAdmin):
-    list_display = ('asset', 'current_owner', 'previous_owner', 'created_at')
+    list_display = ("asset", "current_owner", "previous_owner", "created_at")
 
 
 class AssetConditionAdmin(admin.ModelAdmin):
-    list_display = ('asset', 'notes', 'created_at')
+    list_display = ("asset", "notes", "created_at")
 
 
 class AssetLogsAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'asset', 'checked_by', 'log_type')
+    list_display = ("created_at", "asset", "checked_by", "log_type")
 
 
 class OfficeFloorAdmin(admin.ModelAdmin):
-    list_filter = ('block',)
-    list_display = ('number', 'block')
+    list_filter = ("block",)
+    list_display = ("number", "block")
 
 
 class OfficeFloorSectionAdmin(admin.ModelAdmin):
-    list_filter = ('floor', 'floor__block')
-    list_display = ('name', 'floor')
+    list_filter = ("floor", "floor__block")
+    list_display = ("name", "floor")
 
 
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created_at', 'last_modified')
+    list_display = ("name", "created_at", "last_modified")
 
 
 class OfficeWorkspaceAdmin(admin.ModelAdmin):
-    list_display = ('section', 'name')
+    list_display = ("section", "name")
 
 
 admin.site.register(models.AISUserSync, AISUserSyncAdmin)

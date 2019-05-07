@@ -17,12 +17,12 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
     def test_non_authenticated_user_get_office_workspace(self):
         response = client.get(self.office_workspace_url)
         self.assertEqual(
-            response.data, {'detail': 'Authentication credentials were not provided.'}
+            response.data, {"detail": "Authentication credentials were not provided."}
         )
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_can_post_office_workspace(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         data = {"name": "Entebe", "section": self.floor_section.id}
         response = client.post(
             self.office_workspace_url,
@@ -32,9 +32,9 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
         self.assertIn("name", response.data.keys())
         self.assertEqual(response.status_code, 201)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_cant_post_workspace_with_same_name(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         data = {"name": self.office_workspace.name, "section": self.floor_section.id}
         response = client.post(
             self.office_workspace_url,
@@ -42,14 +42,14 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(
-            {'non_field_errors': ['The fields name, section must make a unique set.']},
+            {"non_field_errors": ["The fields name, section must make a unique set."]},
             response.data,
         )
         self.assertEqual(response.status_code, 400)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_can_edit_workspace(self, mock_verify_token):
-        mock_verify_token.return_value = {'email': self.admin_user.email}
+        mock_verify_token.return_value = {"email": self.admin_user.email}
         data = {"name": "Deva Workspace", "section": self.floor_section.id}
         res = client.post(
             self.office_workspace_url,
@@ -64,12 +64,12 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
             data={"name": "Devb Workspace", "section": self.floor_section.id},
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data.get('name'), 'Devb Workspace')
+        self.assertEqual(response.data.get("name"), "Devb Workspace")
         self.assertEqual(response.status_code, 200)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_delete_of_an_office_workspace(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
         data = {"name": "Oculus1", "section": self.floor_section.id}
 
         res = client.post(
@@ -85,5 +85,5 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {'detail': 'Deleted Successfully'})
+        self.assertEqual(response.data, {"detail": "Deleted Successfully"})
         self.assertEqual(response.status_code, 204)

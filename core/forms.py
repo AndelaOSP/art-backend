@@ -27,11 +27,11 @@ class UserRegistrationForm(UserCreationForm):
 
 class UserSyncForm(forms.ModelForm):
     new_sync = forms.CharField(
-        label='Click Save to sync users',
+        label="Click Save to sync users",
         required=False,
-        widget=forms.TextInput(attrs={'hidden': 'true'}),
+        widget=forms.TextInput(attrs={"hidden": "true"}),
     )
 
     class Meta:
         model = AISUserSync
-        fields = '__all__'
+        fields = "__all__"

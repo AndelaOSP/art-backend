@@ -16,7 +16,7 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
     def test_can_save_to_allocation_history(self):
         """ Test can add an allocation history of an asset """
         count = AllocationHistory.objects.count()
-        AssetStatus.objects.create(asset=self.test_asset, current_status='Available')
+        AssetStatus.objects.create(asset=self.test_asset, current_status="Available")
         AllocationHistory.objects.create(
             asset=self.test_asset, current_owner=self.asset_assignee2
         )
@@ -30,7 +30,7 @@ class AllocationHistoryModelTest(CoreBaseTestCase):
         self.assertEqual(new_history.current_owner.email, self.asset_assignee2.email)
 
     def test_cannot_add_history_for_allocated_asset(self):
-        AssetStatus.objects.create(asset=self.test_asset, current_status='Available')
+        AssetStatus.objects.create(asset=self.test_asset, current_status="Available")
         AllocationHistory.objects.create(
             asset=self.test_asset, current_owner=self.asset_assignee
         )

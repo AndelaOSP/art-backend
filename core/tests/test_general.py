@@ -4,7 +4,7 @@ from django.apps import apps
 # App Imports
 from core.tests import CoreBaseTestCase
 
-app = apps.get_app_config('core')
+app = apps.get_app_config("core")
 
 
 class GeneralStuffTest(CoreBaseTestCase):
