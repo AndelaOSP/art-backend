@@ -230,6 +230,78 @@ class AssetLogModelTest(APIBaseTestCase):
         )
 
     @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_admin_user_get_asset_logs_filtered_by_serial_number(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        asset_logs_url = (
+            f"{self.asset_logs_url}/?asset_serial={self.test_other_asset.serial_number}"
+        )
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(
+            response.data["results"][0]["asset"],
+            f"{self.test_other_asset.serial_number} - {self.test_other_asset.asset_code}",
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_admin_user_get_asset_logs_filtered_by_invalid_serial_number(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        asset_logs_url = f"{self.asset_logs_url}/?asset_serial=QWS^&112"
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 0)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_admin_user_get_asset_logs_filtered_by_asset_code(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        asset_logs_url = (
+            f"{self.asset_logs_url}/?asset_code={self.test_other_asset.asset_code}"
+        )
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(
+            response.data["results"][0]["asset"],
+            f"{self.test_other_asset.serial_number} - {self.test_other_asset.asset_code}",
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_admin_user_get_asset_logs_filtered_by_invalid_asset_code(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        AssetLog.objects.create(
+            checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
+        )
+        asset_logs_url = f"{self.asset_logs_url}/?asset_serial=CODE1122"
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 0)
+
+    @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_admin_user_get_of_asset_logs_invalid_filter(
         self, mock_verify_id_token
     ):
