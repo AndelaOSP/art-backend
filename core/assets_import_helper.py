@@ -76,7 +76,7 @@ def process_file(data, progress=None, user=None):
 
 
 def process_model_number(row_data):
-    logger.info('Checking model numbers.')
+    logger.info("Checking model numbers.")
     row = row_data.get("row")
 
     category_value = read_csv_row_value(CATEGORY, row)
@@ -114,7 +114,7 @@ def process_model_number(row_data):
 def process_asset_data(processed_file_data, location=None):  # noqa: C901
     for model_number_value, row_datas in processed_file_data.items():
         collection = apps.get_model("core", "AssetModelNumber")
-        logger.info(f'Processing asset data for {model_number_value}.')
+        logger.info(f"Processing asset data for {model_number_value}.")
         try:
             asset_model_obj = collection.objects.get(name__iexact=model_number_value)
         except Exception:
@@ -273,10 +273,10 @@ def collection_bootstrap(collection, parent=None, **fields):
     collection = apps.get_model("core", collection)
     query = set()
     for key, val in fields.items():
-        if hasattr(val, 'pk'):
+        if hasattr(val, "pk"):
             query.update({Q(**{key: val})})
         else:
-            query.update({Q(**{'__'.join([key, 'iexact']): val})})
+            query.update({Q(**{"__".join([key, "iexact"]): val})})
     lookup = functools.reduce(operator.and_, query)
     try:
         obj = collection.objects.get(lookup)

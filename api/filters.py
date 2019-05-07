@@ -12,20 +12,20 @@ from core.models import Asset, AssetLog, User
 
 logger = logging.getLogger(__name__)
 
-NULL_VALUE = 'unspecified'
+NULL_VALUE = "unspecified"
 
 
 class BaseFilter(filters.FilterSet):
     def filter_contains_with_multiple_query_values(self, queryset, name, value):
-        options = set(value.split(','))
+        options = set(value.split(","))
         null_lookup = {}
         if NULL_VALUE in options:
             options.remove(NULL_VALUE)
-            null_lookup = {'__'.join([name, 'isnull']): True}
+            null_lookup = {"__".join([name, "isnull"]): True}
         if options:
             lookup = functools.reduce(
                 operator.or_,
-                {Q(**{'__'.join([name, 'icontains']): item}) for item in options},
+                {Q(**{"__".join([name, "icontains"]): item}) for item in options},
             )
         else:
             lookup = Q(**{})
@@ -33,42 +33,42 @@ class BaseFilter(filters.FilterSet):
         return queryset.filter(Q(lookup | Q(**null_lookup)))
 
     def filter_exact_with_multiple_query_values(self, queryset, name, value):
-        options = set(value.split(','))
+        options = set(value.split(","))
         null_lookup = {}
         if NULL_VALUE in options:
             options.remove(NULL_VALUE)
-            null_lookup = {'__'.join([name, 'isnull']): True}
-        lookup = {'__'.join([name, 'in']): options}
+            null_lookup = {"__".join([name, "isnull"]): True}
+        lookup = {"__".join([name, "in"]): options}
         return queryset.filter(Q(**lookup) | Q(**null_lookup))
 
 
 class AssetFilter(BaseFilter):
     email = filters.CharFilter(
-        field_name='assigned_to__user__email', lookup_expr='icontains'
+        field_name="assigned_to__user__email", lookup_expr="icontains"
     )
     model_number = filters.CharFilter(
-        field_name='model_number__name',
-        lookup_expr='iexact',
-        method='filter_contains_with_multiple_query_values',
+        field_name="model_number__name",
+        lookup_expr="iexact",
+        method="filter_contains_with_multiple_query_values",
     )
     serial_number = filters.CharFilter(
-        field_name='serial_number',
-        lookup_expr='icontains',
-        method='filter_contains_with_multiple_query_values',
+        field_name="serial_number",
+        lookup_expr="icontains",
+        method="filter_contains_with_multiple_query_values",
     )
     asset_type = filters.CharFilter(
-        field_name='model_number__asset_make__asset_type__name',
-        lookup_expr='iexact',
-        method='filter_contains_with_multiple_query_values',
+        field_name="model_number__asset_make__asset_type__name",
+        lookup_expr="iexact",
+        method="filter_contains_with_multiple_query_values",
     )
     current_status = filters.CharFilter(
-        field_name='current_status', lookup_expr='iexact'
+        field_name="current_status", lookup_expr="iexact"
     )
-    verified = filters.CharFilter(field_name='verified', lookup_expr='iexact')
+    verified = filters.CharFilter(field_name="verified", lookup_expr="iexact")
 
     class Meta:
         model = Asset
-        fields = ['asset_type', 'model_number', 'email', 'current_status', 'verified']
+        fields = ["asset_type", "model_number", "email", "current_status", "verified"]
 
 
 class AssetLogFilter(BaseFilter):
@@ -90,27 +90,27 @@ class AssetLogFilter(BaseFilter):
 
 class UserFilter(BaseFilter):
     cohort = filters.CharFilter(
-        field_name='cohort',
-        lookup_expr='iexact',
-        method='filter_exact_with_multiple_query_values',
+        field_name="cohort",
+        lookup_expr="iexact",
+        method="filter_exact_with_multiple_query_values",
     )
-    email = filters.CharFilter(field_name='email', lookup_expr='istartswith')
+    email = filters.CharFilter(field_name="email", lookup_expr="istartswith")
     asset_count = filters.CharFilter(
-        field_name='allocated_asset_count',
-        label='Asset count',
-        lookup_expr='iexact',
-        method='filter_by_allocated_asset_count',
+        field_name="allocated_asset_count",
+        label="Asset count",
+        lookup_expr="iexact",
+        method="filter_by_allocated_asset_count",
     )
-    is_active = filters.CharFilter(field_name='is_active', lookup_expr='iexact')
+    is_active = filters.CharFilter(field_name="is_active", lookup_expr="iexact")
 
     def filter_by_allocated_asset_count(self, queryset, name, value):
         users = [
             user.id
             for user in queryset
-            if str(user.assetassignee.asset_set.count()) in value.split(',')
+            if str(user.assetassignee.asset_set.count()) in value.split(",")
         ]
         return queryset.filter(id__in=users)
 
     class Meta:
         model = User
-        fields = ['cohort', 'email', 'asset_count']
+        fields = ["cohort", "email", "asset_count"]

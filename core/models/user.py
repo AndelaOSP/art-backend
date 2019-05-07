@@ -20,8 +20,8 @@ class UserManager(BaseUserManager):
         """
         Create and save a user with the given username, email, and password.
         """
-        email = fields.pop('email')
-        password = fields.get('password')
+        email = fields.pop("email")
+        password = fields.get("password")
         if not email:
             raise ValueError("Email address is required")
         email = self.normalize_email(email)
@@ -31,19 +31,19 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, **fields):
-        fields.setdefault('is_staff', False)
-        fields.setdefault('is_superuser', False)
+        fields.setdefault("is_staff", False)
+        fields.setdefault("is_superuser", False)
 
         return self._create_user(**fields)
 
     def create_superuser(self, **fields):
-        fields.setdefault('is_staff', True)
-        fields.setdefault('is_superuser', True)
+        fields.setdefault("is_staff", True)
+        fields.setdefault("is_superuser", True)
 
-        if fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
+        if fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
 
         return self._create_user(**fields)
 
@@ -58,23 +58,23 @@ class User(AbstractUser):
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     password = models.CharField(max_length=128, blank=True, null=True)
     location = models.ForeignKey(
-        'AndelaCentre', blank=True, null=True, on_delete=models.PROTECT
+        "AndelaCentre", blank=True, null=True, on_delete=models.PROTECT
     )
     is_securityuser = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     objects = UserManager()
 
     class Meta:
         verbose_name_plural = "All Users"
-        ordering = ['-id']
-        indexes = [models.Index(fields=['cohort'])]
+        ordering = ["-id"]
+        indexes = [models.Index(fields=["cohort"])]
 
     def clean(self):
-        email_domain = self.email.split('@')[1]
-        if 'andela' not in email_domain.lower():
-            raise ValidationError('Only andela email addresses allowed')
+        email_domain = self.email.split("@")[1]
+        if "andela" not in email_domain.lower():
+            raise ValidationError("Only andela email addresses allowed")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -105,13 +105,13 @@ class APIUser(AbstractApplication):
 
     class Meta:
         verbose_name = "API User"
-        ordering = ['-id']
+        ordering = ["-id"]
 
 
 class UserFeedback(models.Model):
     """ Stores user feedback data """
 
-    reported_by = models.ForeignKey('User', on_delete=models.PROTECT)
+    reported_by = models.ForeignKey("User", on_delete=models.PROTECT)
     message = models.TextField()
     report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -119,7 +119,7 @@ class UserFeedback(models.Model):
 
     class Meta:
         verbose_name_plural = "User Feedback"
-        ordering = ['-id']
+        ordering = ["-id"]
 
 
 class AISUserSync(models.Model):
@@ -136,7 +136,7 @@ class AISUserSync(models.Model):
         verbose_name_plural = "AIS User Sync"
 
     def __str__(self):
-        result = 'Unknown'
+        result = "Unknown"
         if self.successful is not None:
-            result = 'Success' if self.successful else 'Failure'
+            result = "Success" if self.successful else "Failure"
         return "Date ran: {}, Result: {}".format(self.created_at, result)

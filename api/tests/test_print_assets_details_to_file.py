@@ -37,7 +37,7 @@ class PrintAssetsDetailsTestCase(APIBaseTestCase):
             self.print_asset_url, HTTP_AUTHORIZATION="Token {}".format(self.token_admin)
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn('success', response.json().keys())
+        self.assertIn("success", response.json().keys())
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_admin_cant_print_assets_in_diffrent_location(
@@ -103,30 +103,30 @@ class PrintAssetsDetailsTestCase(APIBaseTestCase):
             model_number=self.assetmodel,
             asset_location=self.centre,
         )
-        available_assets = Asset.objects.filter(current_status='Available')
+        available_assets = Asset.objects.filter(current_status="Available")
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
-            '{}?current_status=Available'.format(self.print_asset_url),
+            "{}?current_status=Available".format(self.print_asset_url),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            '{} assets exported'.format(available_assets.count()),
-            response.data['success'],
+            "{} assets exported".format(available_assets.count()),
+            response.data["success"],
         )
 
         AllocationHistory.objects.create(
             asset=available_assets[0], current_owner=self.user.assetassignee
         )
-        available_assets = Asset.objects.filter(current_status='Available')
+        available_assets = Asset.objects.filter(current_status="Available")
         response = client.get(
-            '{}?current_status=Available'.format(self.print_asset_url),
+            "{}?current_status=Available".format(self.print_asset_url),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            '{} assets exported'.format(available_assets.count()),
-            response.data['success'],
+            "{} assets exported".format(available_assets.count()),
+            response.data["success"],
         )
 
     @patch("api.authentication.auth.verify_id_token")
@@ -140,22 +140,22 @@ class PrintAssetsDetailsTestCase(APIBaseTestCase):
             asset_location=self.centre,
         )
         available_assets = Asset.objects.filter(
-            Q(current_status='Available') | Q(current_status='Allocated')
+            Q(current_status="Available") | Q(current_status="Allocated")
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         AllocationHistory.objects.create(
             asset=available_assets[0], current_owner=self.user.assetassignee
         )
         response = client.get(
-            '{}?current_status=Available&current_status=Allocated'.format(
+            "{}?current_status=Available&current_status=Allocated".format(
                 self.print_asset_url
             ),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            '{} assets exported'.format(available_assets.count()),
-            response.data['success'],
+            "{} assets exported".format(available_assets.count()),
+            response.data["success"],
         )
 
     @patch("api.authentication.auth.verify_id_token")
@@ -164,7 +164,7 @@ class PrintAssetsDetailsTestCase(APIBaseTestCase):
     ):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
-            '{}?test=test'.format(self.print_asset_url),
+            "{}?test=test".format(self.print_asset_url),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 400)

@@ -13,28 +13,28 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = (
-            'id',
-            'first_name',
-            'last_name',
-            'full_name',
-            'email',
-            'is_staff',
-            'cohort',
-            'slack_id',
-            'picture',
-            'phone_number',
-            'location',
-            'allocated_asset_count',
-            'last_modified',
-            'date_joined',
-            'last_login',
+            "id",
+            "first_name",
+            "last_name",
+            "full_name",
+            "email",
+            "is_staff",
+            "cohort",
+            "slack_id",
+            "picture",
+            "phone_number",
+            "location",
+            "allocated_asset_count",
+            "last_modified",
+            "date_joined",
+            "last_login",
         )
 
         extra_kwargs = {
-            'last_modified': {'read_only': True},
-            'date_joined': {'read_only': True},
-            'last_login': {'read_only': True},
-            'cohort': {'min_value': 0},
+            "last_modified": {"read_only": True},
+            "date_joined": {"read_only": True},
+            "last_login": {"read_only": True},
+            "cohort": {"min_value": 0},
         }
 
     def get_full_name(self, obj):
@@ -76,7 +76,7 @@ class UserSerializerWithAssets(UserSerializer):
         return serialized_assets.data
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ('allocated_assets',)
+        fields = UserSerializer.Meta.fields + ("allocated_assets",)
 
 
 class SecurityUserEmailsSerializer(serializers.ModelSerializer):
@@ -93,7 +93,7 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
-        instance_data['reported_by'] = instance.reported_by.email
+        instance_data["reported_by"] = instance.reported_by.email
         return instance_data
 
 

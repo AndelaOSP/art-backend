@@ -17,12 +17,12 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
     def test_non_authenticated_user_view_incident_report(self):
         response = client.get(self.incident_report_url)
         self.assertEqual(
-            response.data, {'detail': 'Authentication credentials were not provided.'}
+            response.data, {"detail": "Authentication credentials were not provided."}
         )
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_post_incident_report(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         data = {
             "asset": self.asset.id,
             "incident_type": "Loss",
@@ -43,12 +43,12 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             response.data.values(),
         )
         self.assertIn("submitted_by", response.data.keys())
-        self.assertEqual(response.data['submitted_by'], self.user.email)
+        self.assertEqual(response.data["submitted_by"], self.user.email)
         self.assertEqual(response.status_code, 201)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_post_invalid_incident_type(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         data = {
             "asset": self.asset.id,
             "incident_type": "Invalid",
@@ -65,13 +65,13 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(
-            response.data, {'incident_type': ['"Invalid" is not a valid choice.']}
+            response.data, {"incident_type": ['"Invalid" is not a valid choice.']}
         )
         self.assertEqual(response.status_code, 400)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_post_empty_incident_fields(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         data = {
             "asset": self.asset.id,
             "incident_type": "Loss",
@@ -85,26 +85,26 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(
-            response.data, {'incident_location': ['This field may not be blank.']}
+            response.data, {"incident_location": ["This field may not be blank."]}
         )
         self.assertEqual(response.status_code, 400)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_incident_report(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.get(
             f"{self.incident_report_url}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertIn(self.incident_report.id, response.data['results'][0].values())
+        self.assertIn(self.incident_report.id, response.data["results"][0].values())
         self.assertEqual(
-            len(response.data['results']), AssetIncidentReport.objects.count()
+            len(response.data["results"]), AssetIncidentReport.objects.count()
         )
         self.assertEqual(response.status_code, 200)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_single_incident_report(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.get(
             f"{self.incident_report_url}/{self.incident_report.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
@@ -112,34 +112,34 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         self.assertIn(self.incident_report.id, response.data.values())
         self.assertEqual(response.status_code, 200)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_cant_allow_put_incident_report(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.put(
             f"{self.incident_report_url}/{self.incident_report.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {'detail': 'Method "PUT" not allowed.'})
+        self.assertEqual(response.data, {"detail": 'Method "PUT" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_cant_allow_patch_incident_report(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.patch(
             f"{self.incident_report_url}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {'detail': 'Method "PATCH" not allowed.'})
+        self.assertEqual(response.data, {"detail": 'Method "PATCH" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_cant_allow_delete_incident_report(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.user.email}
+        mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.delete(
             f"{self.incident_report_url}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {'detail': 'Method "DELETE" not allowed.'})
+        self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
     @patch('api.authentication.auth.verify_id_token')

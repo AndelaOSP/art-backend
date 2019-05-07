@@ -17,7 +17,7 @@ User = get_user_model()
 def side_effect_success(*args, **kwargs):
     resp = {"ok": True}
 
-    if args[0] == 'users.info':
+    if args[0] == "users.info":
         resp = {
             "ok": True,
             "user": {
@@ -38,12 +38,12 @@ class SlackIntegrationTestCase(CoreBaseTestCase):
     @patch("core.slack_bot.SlackClient.api_call")
     def test_no_payload_no_assets(self, fake_slack):
         fake_slack.side_effect = side_effect_success
-        data = {'channel_id': 'some_value', 'user_id': 'some_value'}
+        data = {"channel_id": "some_value", "user_id": "some_value"}
         self.slack.send_incidence_report(data)
         self.assertEqual(fake_slack.call_count, 2)
-        fake_slack.assert_any_call('users.info', user=ANY)
+        fake_slack.assert_any_call("users.info", user=ANY)
         fake_slack.assert_any_call(
-            'chat.postEphemeral',
+            "chat.postEphemeral",
             username=ANY,
             channel=ANY,
             user=ANY,
@@ -54,14 +54,14 @@ class SlackIntegrationTestCase(CoreBaseTestCase):
 
     @patch("core.slack_bot.SlackClient.api_call")
     def test_no_payload_with_assets(self, fake_slack):
-        self.user.slack_id = 'comeid'
-        self.user.email = 'testslack@andela.com'
+        self.user.slack_id = "comeid"
+        self.user.email = "testslack@andela.com"
         self.user.save()
         AllocationHistory.objects.create(
             asset=self.test_asset, current_owner=self.user.assetassignee
         )
         fake_slack.side_effect = side_effect_success
-        data = {'channel_id': 'some_value', 'user_id': 'someid'}
+        data = {"channel_id": "some_value", "user_id": "someid"}
         self.slack.send_incidence_report(data)
-        fake_slack.assert_any_call('users.info', user=ANY)
-        fake_slack.assert_any_call('dialog.open', trigger_id=ANY, dialog=ANY)
+        fake_slack.assert_any_call("users.info", user=ANY)
+        fake_slack.assert_any_call("dialog.open", trigger_id=ANY, dialog=ANY)

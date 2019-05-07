@@ -10,19 +10,19 @@ from firebase_admin import auth, credentials, initialize_app
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
 
-ADMIN_USER = 'admin'
-SUPERUSER = 'superuser'
+ADMIN_USER = "admin"
+SUPERUSER = "superuser"
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
-private_key = config('PRIVATE_KEY').replace('\\n', '\n')
+private_key = config("PRIVATE_KEY").replace("\\n", "\n")
 payload = {
-    'type': 'service_account',
-    'project_id': config('PROJECT_ID'),
-    'private_key': private_key,
-    'client_email': config('CLIENT_EMAIL'),
-    'token_uri': 'https://accounts.google.com/o/oauth2/token',
+    "type": "service_account",
+    "project_id": config("PROJECT_ID"),
+    "private_key": private_key,
+    "client_email": config("CLIENT_EMAIL"),
+    "token_uri": "https://accounts.google.com/o/oauth2/token",
 }
 
 cred = credentials.Certificate(payload)
@@ -34,17 +34,17 @@ class FirebaseTokenAuthentication(TokenAuthentication):
         try:
             token = auth.verify_id_token(key)
         except Exception:
-            raise exceptions.AuthenticationFailed('Unable to authenticate.')
+            raise exceptions.AuthenticationFailed("Unable to authenticate.")
         else:
-            email = token.get('email')
+            email = token.get("email")
         try:
             user = User.objects.get(email=email)
         except Exception as e:
             logger.error(str(e))
-            raise exceptions.AuthenticationFailed('User not found')
+            raise exceptions.AuthenticationFailed("User not found")
 
         if not user.is_active:
-            raise exceptions.AuthenticationFailed('User inactive or deleted.')
+            raise exceptions.AuthenticationFailed("User inactive or deleted.")
         return (user, token)
 
 
@@ -53,7 +53,7 @@ def set_firebase_custom_claims(sender, instance, created, **kwargs):
     try:
         user = auth.get_user_by_email(instance.email)
     except Exception:
-        logger.warning('No user record found for the provided email. Creating one')
+        logger.warning("No user record found for the provided email. Creating one")
         user = auth.create_user(email=instance.email)
     else:
         if user.uid:
