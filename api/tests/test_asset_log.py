@@ -258,7 +258,7 @@ class AssetLogModelTest(APIBaseTestCase):
         AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
         )
-        asset_logs_url = f"{self.asset_logs_url}/?asset_serial=QWS^&112"
+        asset_logs_url = f"{self.asset_logs_url}/?asset_serial=SERIALDONTEXIST"
         response = client.get(
             asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
         )
@@ -294,7 +294,7 @@ class AssetLogModelTest(APIBaseTestCase):
         AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
         )
-        asset_logs_url = f"{self.asset_logs_url}/?asset_serial=CODE1122"
+        asset_logs_url = f"{self.asset_logs_url}/?asset_serial=CODEDONTEXIST"
         response = client.get(
             asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
         )
