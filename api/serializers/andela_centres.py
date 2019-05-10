@@ -24,6 +24,51 @@ class OfficeFloorSectionSerializer(serializers.ModelSerializer):
         fields = ("name", "floor", "id")
 
 
+class OfficeFloorSectionDetailSerializer(serializers.ModelSerializer):
+    """Serializer for selected office floor section detils"""
+
+    block = serializers.SerializerMethodField()
+    floor = serializers.SerializerMethodField()
+    workspaces = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.OfficeFloorSection
+        fields = ("id", "name", "floor", "block", "workspaces")
+
+    def get_block(self, obj):
+        """Returns block details for the section
+
+        Args:
+            obj (object): section object
+        """
+        return {"id": obj.floor.block.id, "name": obj.floor.block.name}
+
+    def get_floor(self, obj):
+        """Returns floor details for the section
+
+        Args:
+            obj ([object): section object
+        """
+        return {"id": obj.floor.id, "number": obj.floor.number}
+
+    def get_workspaces(self, obj):
+        """This method gets workspaces connected to the current
+        office floor section current
+
+        Args:
+            obj (object): section object
+
+        Returns:
+            json: serialized workspaces
+        """
+
+        from api.serializers.andela_centres import OfficeWorkspaceSerializer
+
+        workspaces = models.OfficeWorkspace.objects.filter(section=obj.id)
+        serialized_workspaces = OfficeWorkspaceSerializer(workspaces, many=True)
+        return serialized_workspaces.data
+
+
 class OfficeWorkspaceSerializer(serializers.ModelSerializer):
     floor = serializers.ReadOnlyField(source="section.floor.number")
     block = serializers.ReadOnlyField(source="section.floor.block.name")

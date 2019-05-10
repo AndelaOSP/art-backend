@@ -18,6 +18,7 @@ from api.serializers import (
     DepartmentDetailSerializer,
     DepartmentSerializer,
     OfficeBlockSerializer,
+    OfficeFloorSectionDetailSerializer,
     OfficeFloorSectionSerializer,
     OfficeFloorSerializer,
     OfficeWorkspaceSerializer,
@@ -108,6 +109,11 @@ class OfficeFloorSectionViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
 
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return OfficeFloorSectionDetailSerializer
+        return OfficeFloorSectionSerializer
+
     def get_queryset(self):
         user_location = self.request.user.location
         if user_location:
@@ -135,7 +141,7 @@ class DepartmentViewSet(ModelViewSet):
     authentication_classes = [FirebaseTokenAuthentication]
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
+        if self.action == "retrieve":
             return DepartmentDetailSerializer
         return DepartmentSerializer
 

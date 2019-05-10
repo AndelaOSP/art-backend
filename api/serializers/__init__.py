@@ -4,6 +4,7 @@ from .andela_centres import (  # noqa: F401
     DepartmentDetailSerializer,
     DepartmentSerializer,
     OfficeBlockSerializer,
+    OfficeFloorSectionDetailSerializer,
     OfficeFloorSectionSerializer,
     OfficeFloorSerializer,
     OfficeWorkspaceSerializer,
