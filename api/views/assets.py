@@ -11,6 +11,7 @@ import xlsxwriter
 from django.conf import settings
 from django.core.validators import ValidationError
 from django.db.models import Q
+from django.db.utils import IntegrityError
 from django.http import FileResponse
 from django_filters import rest_framework as filters
 from rest_framework import serializers, status
@@ -571,3 +572,25 @@ class StateTransitionViewset(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
     queryset = models.StateTransition.objects.all()
+
+    def perform_update(self, serializer):
+
+        try:
+            serializer.save(
+                incident_report_state=self.request.data.get(
+                    "incident_report_state", None
+                ),
+                asset_state_from_report=self.request.data.get(
+                    "asset_state_from_report", None
+                ),
+                partial=True,
+            )
+        except IntegrityError:
+            raise serializers.ValidationError(
+                {
+                    "Error": "Ensure that incident_report_state\
+                    and asset_state_from_report fields are filled".replace(
+                        " " * 20, " "
+                    )
+                }
+            )
