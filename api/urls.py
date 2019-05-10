@@ -43,6 +43,7 @@ from api.views import (
     UserGroupViewSet,
     UserViewSet,
 )
+from api.views.assets import PoliceAbstract
 
 schema_view = get_schema_view(
     openapi.Info(

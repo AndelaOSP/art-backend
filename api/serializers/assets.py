@@ -483,7 +483,7 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
             "witnesses",
             "submitted_by",
             "police_abstract_obtained",
-            "created_at",
+            "police_abstract",
         )
 
     def get_created_at(self, obj):
