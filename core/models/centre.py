@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 class AndelaCentre(models.Model):
     name = models.CharField(max_length=25, unique=True)
-    country = models.ForeignKey('Country', on_delete=models.PROTECT, null=True)
+    country = models.ForeignKey("Country", on_delete=models.PROTECT, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, editable=False)
 
     objects = CaseInsensitiveManager()
 
     class Meta:
-        verbose_name_plural = 'Andela Centres'
+        verbose_name_plural = "Andela Centres"
 
     def __str__(self):
         return self.name
@@ -36,7 +36,7 @@ class Country(models.Model):
         try:
             country = countries.lookup(self.name)
         except Exception:
-            raise ValidationError('{} is not a valid country'.format(self.name))
+            raise ValidationError("{} is not a valid country".format(self.name))
         else:
             self.name = country.name
 
@@ -84,7 +84,7 @@ class Department(models.Model):
 
 class OfficeBlock(models.Model):
     name = models.CharField(max_length=50)
-    location = models.ForeignKey('AndelaCentre', on_delete=models.PROTECT, null=True)
+    location = models.ForeignKey("AndelaCentre", on_delete=models.PROTECT, null=True)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -95,7 +95,7 @@ class OfficeBlock(models.Model):
 
     class Meta:
         verbose_name = "Office Block"
-        unique_together = (('name', 'location'),)
+        unique_together = (("name", "location"),)
 
     def __str__(self):
         return self.name
@@ -103,12 +103,12 @@ class OfficeBlock(models.Model):
 
 class OfficeFloor(models.Model):
     number = models.PositiveIntegerField()
-    block = models.ForeignKey('OfficeBlock', on_delete=models.PROTECT)
+    block = models.ForeignKey("OfficeBlock", on_delete=models.PROTECT)
 
     class Meta:
-        unique_together = (('block', 'number'),)
-        verbose_name = 'Office Floor'
-        ordering = ['-id']
+        unique_together = (("block", "number"),)
+        verbose_name = "Office Floor"
+        ordering = ["-id"]
 
     def __str__(self):
         return "{}".format(self.number)
@@ -116,7 +116,7 @@ class OfficeFloor(models.Model):
 
 class OfficeFloorSection(models.Model):
     name = models.CharField(max_length=100)
-    floor = models.ForeignKey('OfficeFloor', on_delete=models.PROTECT)
+    floor = models.ForeignKey("OfficeFloor", on_delete=models.PROTECT)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -129,9 +129,9 @@ class OfficeFloorSection(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        unique_together = (('floor', 'name'),)
-        verbose_name = 'Office Floor Section'
-        ordering = ['-id']
+        unique_together = (("floor", "name"),)
+        verbose_name = "Office Floor Section"
+        ordering = ["-id"]
 
     def __str__(self):
         return self.name
@@ -139,7 +139,7 @@ class OfficeFloorSection(models.Model):
 
 class OfficeWorkspace(models.Model):
     name = models.CharField(max_length=50)
-    section = models.ForeignKey('OfficeFloorSection', on_delete=models.PROTECT)
+    section = models.ForeignKey("OfficeFloorSection", on_delete=models.PROTECT)
 
     def clean(self):
         self.name = " ".join(self.name.title().split())
@@ -162,7 +162,7 @@ class OfficeWorkspace(models.Model):
         AssetAssignee.objects.get_or_create(workspace=self)
 
     class Meta:
-        verbose_name = 'Office Workspace'
+        verbose_name = "Office Workspace"
         unique_together = (("name", "section"),)
 
     def __str__(self):

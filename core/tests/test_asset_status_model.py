@@ -36,7 +36,7 @@ class AssetStatusModelTest(CoreBaseTestCase):
         asset_status = AssetStatus(asset=self.test_asset, current_status="Damaged")
         asset_status.save()
         new_asset_status = AssetStatus.objects.filter(asset=self.test_asset).latest(
-            'created_at'
+            "created_at"
         )
         self.assertEqual(new_asset_status.previous_status, "Available")
         self.assertEqual(new_asset_status.current_status, "Damaged")
@@ -68,10 +68,10 @@ class AssetStatusModelTest(CoreBaseTestCase):
         asset_status.save()
 
         new_history = AllocationHistory.objects.filter(asset=self.test_asset).latest(
-            'created_at'
+            "created_at"
         )
 
-        self.assertIn(test_owner, 'test@andela.com')
+        self.assertIn(test_owner, "test@andela.com")
         self.assertIsNone(self.test_asset.assigned_to)
         self.assertIsNone(new_history.current_owner)
-        self.assertIn(str(new_history.previous_owner), 'test@andela.com')
+        self.assertIn(str(new_history.previous_owner), "test@andela.com")

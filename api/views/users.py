@@ -32,7 +32,7 @@ class UserViewSet(ModelViewSet):
     queryset = models.User.objects.all()
     permission_classes = (IsAuthenticated, IsAdminUser)
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ['get', 'post', 'patch']
+    http_method_names = ["get", "post", "patch"]
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = UserFilter
 
@@ -45,7 +45,7 @@ class UserViewSet(ModelViewSet):
 
 class SecurityUserEmailsViewSet(ModelViewSet):
     serializer_class = SecurityUserEmailsSerializer
-    http_method_names = ['get']
+    http_method_names = ["get"]
     permission_classes = (IsApiUser,)
 
     def list(self, request, *args, **kwargs):
@@ -53,7 +53,7 @@ class SecurityUserEmailsViewSet(ModelViewSet):
             user.email for user in models.User.objects.filter(is_securityuser=True)
         ]
 
-        return Response({'emails': list_of_emails}, status=status.HTTP_200_OK)
+        return Response({"emails": list_of_emails}, status=status.HTTP_200_OK)
 
 
 class UserFeedbackViewSet(ModelViewSet):
@@ -61,7 +61,7 @@ class UserFeedbackViewSet(ModelViewSet):
     queryset = models.UserFeedback.objects.all()
     permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
-    http_method_names = ['get', 'post']
+    http_method_names = ["get", "post"]
 
     def perform_create(self, serializer):
         serializer.save(reported_by=self.request.user)
@@ -88,7 +88,7 @@ class SecurityUserViewSet(ModelViewSet):
         return Response(data=data, status=status.HTTP_204_NO_CONTENT)
 
     def update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
+        kwargs["partial"] = True
         return super(SecurityUserViewSet, self).update(request, *args, **kwargs)
 
     def perform_create(self, serializer):
@@ -103,7 +103,7 @@ class UserGroupViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         try:
-            name = " ".join(serializer.validated_data.get('name').title().split())
+            name = " ".join(serializer.validated_data.get("name").title().split())
             serializer.save(name=name)
         except IntegrityError:
             raise serializers.ValidationError(
@@ -124,7 +124,7 @@ class AvailableFilterValues(APIView):
             try:
                 assignee_asset_count = user.assetassignee.asset_set.count()
             except Exception as e:
-                logger.warning('Error: {}. User: {}'.format(str(e), user.id))
+                logger.warning("Error: {}. User: {}".format(str(e), user.id))
             else:
                 asset_count.add(assignee_asset_count)
         cohort_res = [

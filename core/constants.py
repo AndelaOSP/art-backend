@@ -27,10 +27,10 @@ CHECKOUT = "Checkout"
 
 ASSET_LOG_CHOICES = ((CHECKIN, "Checkin"), (CHECKOUT, "Checkout"))
 
-LOSS = 'Loss'
-DAMAGE = 'Damage'
+LOSS = "Loss"
+DAMAGE = "Damage"
 
-INCIDENT_TYPES = ((LOSS, 'Loss'), (DAMAGE, 'Damage'))
+INCIDENT_TYPES = ((LOSS, "Loss"), (DAMAGE, "Damage"))
 
 PROCESSOR_TYPE = (
     ("Intel core i3", "Intel core i3"),
@@ -40,7 +40,7 @@ PROCESSOR_TYPE = (
 
 PROCESSOR_SPEED = ((1.8, "1.8GHz"), (2.3, "2.3GHz"), (3.0, "3.0GHz"), (3.4, "3.4GHz"))
 
-SCREEN_SIZES = ((13, "13\""), (15, "15\""), (17, "17\""))
+SCREEN_SIZES = ((13, '13"'), (15, '15"'), (17, '17"'))
 
 MEMORY = ((4, "4GB"), (8, "8GB"), (16, "16GB"), (32, "32GB"))
 
@@ -49,23 +49,23 @@ YEAR_CHOICES = []
 for year in range(2013, (datetime.now().year + 1)):
     YEAR_CHOICES.append((year, year))
 
-MAKE = 'Make'
-TYPE = 'Type'
-ASSET_CODE = 'Asset Code'
-CATEGORY = 'Category'
-SUB_CATEGORY = 'Sub-Category'
-MODEL_NUMBER = 'Model Number'
-SERIAL_NUMBER = 'Serial No.'
-ASSIGNED_TO = 'Assigned To'
-STATUS = 'Status'
-ASSET_MEMORY = 'Memory'
-VERIFIED = 'Verified'
-NOTES = 'Notes'
-STORAGE = 'Storage'
-ASSET_PROCESSOR_TYPE = 'Processor Type'
-YOM = 'YOM'
-ROW = 'Row'
-ERROR = 'Error'
+MAKE = "Make"
+TYPE = "Type"
+ASSET_CODE = "Asset Code"
+CATEGORY = "Category"
+SUB_CATEGORY = "Sub-Category"
+MODEL_NUMBER = "Model Number"
+SERIAL_NUMBER = "Serial No."
+ASSIGNED_TO = "Assigned To"
+STATUS = "Status"
+ASSET_MEMORY = "Memory"
+VERIFIED = "Verified"
+NOTES = "Notes"
+STORAGE = "Storage"
+ASSET_PROCESSOR_TYPE = "Processor Type"
+YOM = "YOM"
+ROW = "Row"
+ERROR = "Error"
 
 CSV_HEADERS = {
     MAKE,

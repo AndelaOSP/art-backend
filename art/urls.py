@@ -25,11 +25,11 @@ from django.views.generic import TemplateView
 from api import urls
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/v1/', include(urls)),
-    path('jet/', include('jet.urls', 'jet')),
-    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
-    path('', TemplateView.as_view(template_name='api/api-index.html'), name='api-home'),
+    path("admin/", admin.site.urls),
+    path("api/v1/", include(urls)),
+    path("jet/", include("jet.urls", "jet")),
+    path("jet/dashboard/", include("jet.dashboard.urls", "jet-dashboard")),
+    path("", TemplateView.as_view(template_name="api/api-index.html"), name="api-home"),
 ]
 
 if settings.DEBUG:
