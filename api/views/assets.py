@@ -289,8 +289,8 @@ class AssetConditionViewSet(ModelViewSet):
 class AssetIncidentReportViewSet(ModelViewSet):
     serializer_class = AssetIncidentReportSerializer
     queryset = models.AssetIncidentReport.objects.all()
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [FirebaseTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ["get", "post"]
 
     def get_queryset(self):
