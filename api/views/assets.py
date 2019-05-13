@@ -614,4 +614,4 @@ class PoliceAbstract(APIView):
                 data={"success": {"uploaded_file_url": uploaded_file_url}}
             )
         else:
-            return ValidationError("Abstract not provide")
+            return ValidationError("Abstract not provided")
