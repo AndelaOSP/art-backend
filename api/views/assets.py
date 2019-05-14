@@ -583,9 +583,7 @@ class StateTransitionViewset(ModelViewSet):
                 and asset_state == "requires external assessment"
             ):
                 raise serializers.ValidationError(
-                    {
-                        "Error": "Asset state option is not valid for given report state"
-                    }
+                    {"Error": "Asset state option is not valid for given report state"}
                 )
             serializer.save(
                 incident_report_state=self.request.data.get(
