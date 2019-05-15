@@ -123,7 +123,7 @@ jobs:
             at: ~/art-backend/tmp
         - run:
             name: diff cover
-            command: pipenv run diff-cover tmp/coverage.xml --compare-branch=origin/develop --fail-under=80
+            command: pipenv run diff-cover tmp/coverage.xml --compare-branch=origin/develop --fail-under=90
   deploy_staging:
     <<: *default
     steps:
