@@ -575,14 +575,20 @@ class StateTransitionViewset(ModelViewSet):
 
     def perform_update(self, serializer):
 
+        report_state = self.request.data.get("incident_report_state", None)
+        asset_state = self.request.data.get("asset_state_from_report", None)
+        if (
+            report_state == "external assessment"
+            and asset_state == "requires external assessment"
+        ):
+            raise serializers.ValidationError(
+                {"Error": "Asset state option is not valid for given report state"}
+            )
+
         try:
             serializer.save(
-                incident_report_state=self.request.data.get(
-                    "incident_report_state", None
-                ),
-                asset_state_from_report=self.request.data.get(
-                    "asset_state_from_report", None
-                ),
+                incident_report_state=report_state,
+                asset_state_from_report=asset_state,
                 partial=True,
             )
         except IntegrityError:
