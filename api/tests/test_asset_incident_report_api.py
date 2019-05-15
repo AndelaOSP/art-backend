@@ -180,3 +180,23 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+
+    @patch('api.authentication.auth.verify_id_token')
+    def test_restrict_patch_of_incident_report_status_for_external_assessment(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        data = {
+            "incident_report_state": "external assessment",
+            "asset_state_from_report": "requires external assessment",
+        }
+        response = client.patch(
+            f"{self.incident_report_status_url}",
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(
+            response.data,
+            {"Error": "Asset state option is not valid for given report state"},
+        )
+        self.assertEqual(response.status_code, 400)
