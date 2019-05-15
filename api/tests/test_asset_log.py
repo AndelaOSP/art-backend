@@ -1,11 +1,11 @@
 # Standard Library
+from datetime import datetime
 from unittest.mock import patch
 
 # Third-Party Imports
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from rest_framework.test import APIClient
-from datetime import datetime
 
 # App Imports
 from api.tests import APIBaseTestCase
@@ -338,15 +338,18 @@ class AssetLogModelTest(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data["results"]), 0)
 
+    @patch(
+        "django.utils.timezone.now",
+        return_value=datetime(2017, 9, 22, 17, 1, 26, 842_150),
+    )
     @patch("api.authentication.auth.verify_id_token")
-    def test_filter_asset_logs_by_year(self, mock_verify_id_token):
+    def test_filter_asset_logs_by_year(self, mock_verify_id_token, mock_datetime):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
-        AssetLog.objects.create(
+        asset_log = AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
         )
-        asset_logs_url = (
-            f"{self.asset_logs_url}?year={self.test_other_asset.created_at.year}"
-        )
+
+        asset_logs_url = f"{self.asset_logs_url}?year={mock_datetime.return_value.year}"
 
         response = client.get(
             asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
@@ -354,9 +357,12 @@ class AssetLogModelTest(APIBaseTestCase):
         data = response.data["results"]
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            data[0]["created_at"].split("-")[0],
-            f"{self.test_other_asset.created_at.year}",
+            data[0]["created_at"].split("-")[0], f"{asset_log.created_at.year}"
         )
+        logs_count = AssetLog.objects.filter(
+            created_at__year=mock_datetime.return_value.year
+        ).count()
+        self.assertEqual(len(response.data["results"]), logs_count)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_filter_asset_logs_by_invalid_year(self, mock_verify_id_token):
@@ -364,24 +370,27 @@ class AssetLogModelTest(APIBaseTestCase):
         AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
         )
-        asset_logs_url = (
-            f"{self.asset_logs_url}?year=5"
-        )
+        asset_logs_url = f"{self.asset_logs_url}?year=5"
 
         response = client.get(
             asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["results"]), 0)
+        logs_count = AssetLog.objects.filter(created_at__year="5").count()
+        self.assertEqual(len(response.data["results"]), logs_count)
 
+    @patch(
+        "django.utils.timezone.now",
+        return_value=datetime(2017, 9, 22, 17, 1, 26, 842_150),
+    )
     @patch("api.authentication.auth.verify_id_token")
-    def test_filter_asset_logs_by_month(self, mock_verify_id_token):
+    def test_filter_asset_logs_by_month(self, mock_verify_id_token, mock_datetime):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
         )
         asset_logs_url = (
-            f"{self.asset_logs_url}?month={self.test_other_asset.created_at.month}"
+            f"{self.asset_logs_url}?month={mock_datetime.return_value.month}"
         )
         response = client.get(
             asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
@@ -389,7 +398,11 @@ class AssetLogModelTest(APIBaseTestCase):
         data = response.data["results"]
         date = datetime.strptime(data[0]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(date.month, self.test_other_asset.created_at.month)
+        self.assertEqual(date.month, mock_datetime.return_value.month)
+        logs_count = AssetLog.objects.filter(
+            created_at__month=mock_datetime.return_value.month
+        ).count()
+        self.assertEqual(len(response.data["results"]), logs_count)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_filter_asset_logs_by_invalid_month(self, mock_verify_id_token):
@@ -397,25 +410,26 @@ class AssetLogModelTest(APIBaseTestCase):
         AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
         )
-        asset_logs_url = (
-            f"{self.asset_logs_url}?month=34"
-        )
+        asset_logs_url = f"{self.asset_logs_url}?month=34"
 
         response = client.get(
             asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["results"]), 0)
+        logs_count = AssetLog.objects.filter(created_at__month="34").count()
+        self.assertEqual(len(response.data["results"]), logs_count)
 
+    @patch(
+        "django.utils.timezone.now",
+        return_value=datetime(2017, 9, 22, 17, 1, 26, 842_150),
+    )
     @patch("api.authentication.auth.verify_id_token")
-    def test_filter_asset_logs_by_day(self, mock_verify_id_token):
+    def test_filter_asset_logs_by_day(self, mock_verify_id_token, mock_datetime):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
         )
-        asset_logs_url = (
-            f"{self.asset_logs_url}?day={self.test_other_asset.created_at.day}"
-        )
+        asset_logs_url = f"{self.asset_logs_url}?day={mock_datetime.return_value.day}"
 
         response = client.get(
             asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
@@ -423,7 +437,11 @@ class AssetLogModelTest(APIBaseTestCase):
         data = response.data["results"]
         date = datetime.strptime(data[0]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(date.day, self.test_other_asset.created_at.day)
+        self.assertEqual(date.day, mock_datetime.return_value.day)
+        logs_count = AssetLog.objects.filter(
+            created_at__day=mock_datetime.return_value.day
+        ).count()
+        self.assertEqual(len(response.data["results"]), logs_count)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_filter_asset_logs_by_invalid_day(self, mock_verify_id_token):
@@ -431,15 +449,14 @@ class AssetLogModelTest(APIBaseTestCase):
         AssetLog.objects.create(
             checked_by=self.security_user, asset=self.test_other_asset, log_type=CHECKIN
         )
-        asset_logs_url = (
-            f"{self.asset_logs_url}?day=456"
-        )
+        asset_logs_url = f"{self.asset_logs_url}?day=456"
 
         response = client.get(
             asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["results"]), 0)
+        logs_count = AssetLog.objects.filter(created_at__day="456").count()
+        self.assertEqual(len(response.data["results"]), logs_count)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_normal_user_create_checkin(self, mock_verify_id_token):
