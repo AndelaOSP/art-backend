@@ -48,7 +48,6 @@ class AssetFilter(BaseFilter):
     )
     model_number = filters.CharFilter(
         field_name="model_number__name",
-        lookup_expr="iexact",
         method="filter_contains_with_multiple_query_values",
     )
     serial_number = filters.CharFilter(
@@ -58,7 +57,6 @@ class AssetFilter(BaseFilter):
     )
     asset_type = filters.CharFilter(
         field_name="model_number__asset_make__asset_type__name",
-        lookup_expr="iexact",
         method="filter_contains_with_multiple_query_values",
     )
     current_status = filters.CharFilter(
@@ -72,6 +70,9 @@ class AssetFilter(BaseFilter):
 
 
 class AssetLogFilter(BaseFilter):
+    """Filters asset logs by specified fields"""
+
+    # filters asset logs by asset type
     asset_type = filters.CharFilter(
         field_name="asset__model_number__asset_make__asset_type__name",
         lookup_expr="iexact",
@@ -83,9 +84,37 @@ class AssetLogFilter(BaseFilter):
         field_name="asset__asset_code", lookup_expr="iexact"
     )
 
+    # filters asset logs by year
+    year = filters.NumberFilter(field_name="created_at", lookup_expr="year")
+
+    # filters asset logs by month
+    month = filters.NumberFilter(field_name="created_at", lookup_expr="month")
+
+    # filters asset logs by day
+    day = filters.NumberFilter(field_name="created_at", lookup_expr="day")
+
+    # filters asset logs by user/owner of the asset
+    user = filters.CharFilter(
+        field_name="asset__assigned_to__user__email", lookup_expr="icontains"
+    )
+
+    # filter asset logs by checked_by
+    checked_by = filters.CharFilter(
+        field_name="checked_by__email", lookup_expr="icontains"
+    )
+
     class Meta:
         model = AssetLog
-        fields = ["asset_type", "asset_serial", "asset_code"]
+        fields = [
+            "asset_type",
+            "asset_serial",
+            "asset_code",
+            "user",
+            "checked_by",
+            "year",
+            "month",
+            "day",
+        ]
 
 
 class UserFilter(BaseFilter):
