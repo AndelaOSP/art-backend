@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def user_abstract(user, filename):
-    return f'user_{user.id}_{filename}'
+    return f'user_{user}_{filename}'
 
 
 class AssetCategory(models.Model):

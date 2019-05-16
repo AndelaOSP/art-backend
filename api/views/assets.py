@@ -302,7 +302,10 @@ class AssetIncidentReportViewSet(ModelViewSet):
         return self.queryset.none()
 
     def perform_create(self, serializer):
-        serializer.save(submitted_by=self.request.user)
+        abstract = self.request.FILES.get('police_abstract', None)
+        user = self.request.user
+        abstract_name = user_abstract(user, abstract.name)
+        serializer.save(submitted_by=self.request.user, police_abstract=abstract_name)
 
 
 class AssetSlackIncidentReportViewSet(ModelViewSet):
@@ -595,22 +598,3 @@ class StateTransitionViewset(ModelViewSet):
                     )
                 }
             )
-
-
-class PoliceAbstract(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        abstract = request.FILES.get('police_abstract', None)
-        if abstract:
-            user = request.user
-            abstract_name = user_abstract(user, abstract.name)
-            user.police_abstract = abstract_name
-            user.save()
-            fs = FileSystemStorage()
-            filename = fs.save(abstract_name, abstract)
-            uploaded_file_url = fs.url(filename)
-
-            return Response(data={"success": {"uploaded_file_url": uploaded_file_url}})
-        else:
-            return ValidationError("Abstract not provided")
