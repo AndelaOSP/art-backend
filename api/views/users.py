@@ -4,7 +4,6 @@ import logging
 # Third-Party Imports
 from django.contrib.auth.models import Group
 from django.db.utils import IntegrityError
-from django_filters import rest_framework as filters
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -33,7 +32,6 @@ class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsAdminUser)
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ["get", "post", "patch"]
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = UserFilter
 
     def get_queryset(self):
@@ -72,7 +70,6 @@ class SecurityUserViewSet(ModelViewSet):
     queryset = models.User.objects.filter(is_securityuser=True)
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = UserFilter
 
     def get_queryset(self):

@@ -13,7 +13,6 @@ from django.core.validators import ValidationError
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import FileResponse
-from django_filters import rest_framework as filters
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter
@@ -72,7 +71,6 @@ class ManageAssetViewSet(ModelViewSet):
     queryset = models.Asset.objects.all()
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = (FirebaseTokenAuthentication,)
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = AssetFilter
 
     def get_object(self):
@@ -166,7 +164,6 @@ class AssetLogViewSet(ModelViewSet):
     queryset = models.AssetLog.objects.all()
     permission_classes = [IsAdminUser | IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = AssetLogFilter
     http_method_names = ["get", "post"]
 
