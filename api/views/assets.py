@@ -306,7 +306,9 @@ class AssetIncidentReportViewSet(ModelViewSet):
         user = self.request.user
         if abstract:
             abstract_name = user_abstract(user, abstract.name)
-            serializer.save(submitted_by=self.request.user, police_abstract=abstract_name)
+            serializer.save(
+                submitted_by=self.request.user, police_abstract=abstract_name
+            )
             fs = FileSystemStorage()
             filename = fs.save(abstract_name, abstract)
             uploaded_file_url = fs.url(filename)
