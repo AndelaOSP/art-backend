@@ -9,6 +9,7 @@ from itertools import chain
 # Third-Party Imports
 import xlsxwriter
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.core.validators import ValidationError
 from django.db.models import Q
 from django.db.utils import IntegrityError
@@ -303,8 +304,15 @@ class AssetIncidentReportViewSet(ModelViewSet):
     def perform_create(self, serializer):
         abstract = self.request.FILES.get('police_abstract', None)
         user = self.request.user
-        abstract_name = user_abstract(user, abstract.name)
-        serializer.save(submitted_by=self.request.user, police_abstract=abstract_name)
+        if abstract:
+            abstract_name = user_abstract(user, abstract.name)
+            serializer.save(submitted_by=self.request.user, police_abstract=abstract_name)
+            fs = FileSystemStorage()
+            filename = fs.save(abstract_name, abstract)
+            uploaded_file_url = fs.url(filename)
+            return Response(data={"success": {"uploaded_file_url": uploaded_file_url}})
+        else:
+            serializer.save(submitted_by=self.request.user)
 
 
 class AssetSlackIncidentReportViewSet(ModelViewSet):
