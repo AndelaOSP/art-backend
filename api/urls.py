@@ -29,6 +29,7 @@ from api.views import (
     AvailableFilterValues,
     CountryViewset,
     DepartmentViewSet,
+    Downloads,
     ExportAssetsDetails,
     GetPrintAssetsFile,
     ManageAssetViewSet,
@@ -126,6 +127,7 @@ urlpatterns = [
         name="sample-import-file",
     ),
     path("filter-values/", AvailableFilterValues.as_view(), name="available-filters"),
+    path("downloads/?P<filewanted>", Downloads.as_view(), name="Downloads"),
 ]
 if settings.DEBUG:
     urlpatterns += [
