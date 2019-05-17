@@ -63,6 +63,9 @@ class AssetFilter(BaseFilter):
         field_name="current_status", lookup_expr="iexact"
     )
     verified = filters.CharFilter(field_name="verified", lookup_expr="iexact")
+    department = filters.CharFilter(
+        field_name="assigned_to__department__id", lookup_expr="iexact"
+    )
 
     class Meta:
         model = Asset

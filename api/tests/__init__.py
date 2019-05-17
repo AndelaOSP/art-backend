@@ -173,6 +173,14 @@ class APIBaseTestCase(TestCase):
             asset_location=cls.centre,
         )
 
+        cls.asset_3 = apps.get_model("core", "Asset").objects.create(
+            asset_code="I0014567830",
+            serial_number="SN01234567871",
+            purchase_date="2019-01-10",
+            model_number=cls.assetmodel,
+            asset_location=cls.centre,
+        )
+
         cls.asset_assignee = apps.get_model("core", "AssetAssignee").objects.get(
             user=cls.user
         )
