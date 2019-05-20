@@ -111,3 +111,8 @@ ASSET_STATE_FROM_REPORT_OPTIONS = (
     (REQUIRES_EXTERNAL_ASSESSMENT, "requires external assessment"),
     (DAMAGED, "Damaged"),
 )
+
+PAID = "paid"
+POSTPAID = "postpaid"
+
+SIMCARD_ASSET_OPTIONS = ((PAID, "paid"), (POSTPAID, "postpaid"))

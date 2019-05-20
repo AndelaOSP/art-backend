@@ -126,6 +126,10 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         query_filter = {}
+
+        # view only assets in ones location and ones department
+        query_filter = {"department": user.department, "asset_location": user.location}
+
         if not self.request.user.is_securityuser:
             asset_assignee = models.AssetAssignee.objects.filter(user=user).first()
             query_filter = {"assigned_to": asset_assignee}

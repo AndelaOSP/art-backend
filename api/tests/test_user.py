@@ -154,7 +154,11 @@ class UserTestCase(APIBaseTestCase):
     def test_admin_user_add_users_from_api_endpoint(self, mock_verify_token):
         mock_verify_token.return_value = {"email": self.admin_user.email}
         users_count_before = User.objects.count()
-        data = {"password": "devpassword", "email": "test_user@andela.com"}
+        data = {
+            "password": "devpassword",
+            "email": "test_user@andela.com",
+            "department": "Finance",
+        }
         response = client.post(
             self.users_url,
             data=data,

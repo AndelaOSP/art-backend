@@ -22,6 +22,12 @@ class AssetSerializer(serializers.ModelSerializer):
         required=False,
         queryset=models.AndelaCentre.objects.all(),
     )
+    department = serializers.SlugRelatedField(
+        read_only=False,
+        slug_field="name",
+        queryset=models.Department.objects.all(),
+        required=False,
+    )
 
     model_number = serializers.SlugRelatedField(
         queryset=models.AssetModelNumber.objects.all(), slug_field="name"
@@ -52,6 +58,9 @@ class AssetSerializer(serializers.ModelSerializer):
             "asset_location",
             "verified",
             "invoice_receipt",
+            "department",
+            "active",
+            "paid_or_postpaid",
         )
         depth = 1
         read_only_fields = (

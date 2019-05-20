@@ -113,6 +113,8 @@ class ManageAssetTestCase(APIBaseTestCase):
             "model_number": self.assetmodel.name,
             "purchase_date": "2018-07-10",
             "invoice_receipt": receipt,
+            "paid_or_postpaid": "postpaid",
+            "active": "True",
         }
         count = Asset.objects.count()
         response = client.post(
@@ -124,6 +126,8 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(data.get("asset_code"), res_data.get("asset_code"))
         self.assertEqual(data.get("serial_number"), res_data.get("serial_number"))
         self.assertEqual(data.get("model_number"), res_data.get("model_number"))
+        self.assertEqual(data.get("paid_or_postpaid"), res_data.get("paid_or_postpaid"))
+        self.assertEqual(True, res_data.get("active"))
         self.assertEqual(Asset.objects.count(), count + 1)
         self.assertEqual(response.status_code, 201)
         self.assertIn(

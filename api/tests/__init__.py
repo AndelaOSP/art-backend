@@ -84,6 +84,7 @@ class APIBaseTestCase(TestCase):
             cohort=20,
             password="devpassword",
             location=cls.centre,
+            department=cls.department,
         )
         cls.token_user = "testtoken"
         cls.admin_user = User.objects.create_superuser(
@@ -91,6 +92,7 @@ class APIBaseTestCase(TestCase):
             cohort=20,
             password="devpassword",
             location=cls.centre,
+            department=cls.department,
         )
         cls.token_admin = "admintesttoken"
         cls.other_user = User.objects.create_user(
@@ -98,6 +100,7 @@ class APIBaseTestCase(TestCase):
             cohort=2,
             password="devpassword",
             location=cls.centre,
+            department=cls.department,
         )
         cls.token_other_user = "otherusertesttoken"
 
@@ -108,6 +111,7 @@ class APIBaseTestCase(TestCase):
             is_staff=True,
             is_superuser=False,
             location=cls.centre,
+            department=cls.department,
         )
         cls.test_normaladmin = "normaladmintoken"
 
@@ -118,6 +122,7 @@ class APIBaseTestCase(TestCase):
             last_name="TestLast",
             phone_number="254720900900",
             location=cls.centre,
+            department=cls.department,
             is_securityuser=True,
         )
         cls.token_checked_by = "securityusertoken"
@@ -151,6 +156,7 @@ class APIBaseTestCase(TestCase):
             purchase_date="2018-07-10",
             model_number=cls.assetmodel,
             asset_location=cls.centre,
+            department=cls.department,
         )
         cls.asset_1 = apps.get_model("core", "Asset").objects.create(
             asset_code="IC001456",
@@ -158,6 +164,7 @@ class APIBaseTestCase(TestCase):
             purchase_date="2018-07-10",
             model_number=cls.assetmodel,
             asset_location=cls.centre,
+            department=cls.department,
         )
         cls.asset_assignee_department = apps.get_model(
             "core", "AssetAssignee"

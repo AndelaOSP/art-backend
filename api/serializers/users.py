@@ -9,6 +9,12 @@ from core import models
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     allocated_asset_count = serializers.SerializerMethodField()
+    department = serializers.SlugRelatedField(
+        read_only=False,
+        slug_field="name",
+        queryset=models.Department.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = models.User
@@ -28,6 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_modified",
             "date_joined",
             "last_login",
+            "department",
         )
 
         extra_kwargs = {

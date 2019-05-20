@@ -37,13 +37,15 @@ class AssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_authenticated_securityuser_view_assets(self, mock_verify_id_token):
+    def test_authenticated_securityuser_view_assets_in_their_department_and_location(
+        self, mock_verify_id_token
+    ):
         mock_verify_id_token.return_value = {"email": self.security_user.email}
         response = client.get(
             self.asset_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by)
         )
         self.assertIn(self.asset.asset_code, str(response.json().values()))
-        self.assertEqual(len(response.data["results"]), Asset.objects.count())
+        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 1)
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
