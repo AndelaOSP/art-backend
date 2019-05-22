@@ -26,7 +26,7 @@ from rest_framework.viewsets import ModelViewSet
 
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
-from api.filters import AssetFilter, AssetLogFilter
+from api.filters import AllocationsHistoryFilter, AssetFilter, AssetLogFilter
 from api.permissions import IsSecurityUser
 from api.serializers import (
     AllocationsSerializer,
@@ -196,6 +196,7 @@ class AllocationsViewSet(ModelViewSet):
     queryset = models.AllocationHistory.objects.all()
     permission_classes = [IsAuthenticated]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filterset_class = AllocationsHistoryFilter
     http_method_names = ["get", "post"]
 
     def get_queryset(self):
