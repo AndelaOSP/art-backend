@@ -115,7 +115,7 @@ class AllocationTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_filter_allocations_by_current_owner(self, mock_verify_id_token):
+    def test_filter_allocations_by_asset_owner(self, mock_verify_id_token):
 
         mock_verify_id_token.return_value = {"email": self.other_user.email}
         data = {"asset": self.asset.id, "current_owner": self.asset_assignee.id}
@@ -124,9 +124,7 @@ class AllocationTestCase(APIBaseTestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        allocations_url = (
-            f"{self.allocations_urls}/?current_owner={self.asset_assignee.email}"
-        )
+        allocations_url = f"{self.allocations_urls}/?owner={self.asset_assignee.email}"
         response = client.get(
             allocations_url, HTTP_AUTHORIZATION="Token {}".format(self.token_other_user)
         )
@@ -138,54 +136,50 @@ class AllocationTestCase(APIBaseTestCase):
         self.assertEqual(len(response.data["results"]), count)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_filter_allocations_by_current_workspace(self, mock_verify_id_token):
+    def test_filter_allocations_by_workspace(self, mock_verify_id_token):
 
         mock_verify_id_token.return_value = {"email": self.other_user.email}
         workspace = OfficeWorkspace.objects.create(
             name="4E", section=self.floor_section
         )
         asset_assignee = AssetAssignee.objects.get(workspace=workspace)
-        data = {"asset": self.asset.id, "current_owner": asset_assignee.id}
+        data = {"asset": self.asset.id, "current_owner": self.asset_assignee.id}
         response = client.post(
             self.allocations_urls,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        allocations_url = (
-            f"{self.allocations_urls}/?current_workspace={self.asset_assignee.id}"
-        )
+        allocations_url = f"{self.allocations_urls}/?workspace={asset_assignee.id}"
         response = client.get(
             allocations_url, HTTP_AUTHORIZATION="Token {}".format(self.token_other_user)
         )
 
         self.assertEqual(response.status_code, 200)
         count = AllocationHistory.objects.filter(
-            current_owner=self.asset_assignee.id
+            current_owner=asset_assignee.id
         ).count()
         self.assertEqual(len(response.data["results"]), count)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_filter_allocations_by_current_department(self, mock_verify_id_token):
+    def test_filter_allocations_by_department(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.other_user.email}
 
         department = Department.objects.create(name="Success")
         asset_assignee = AssetAssignee.objects.get(department=department)
-        data = {"asset": self.asset.id, "current_owner": asset_assignee.id}
+        data = {"asset": self.asset.id, "current_owner": self.asset_assignee.id}
         client.post(
             self.allocations_urls,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        allocations_url = (
-            f"{self.allocations_urls}/?current_department={asset_assignee.id}"
-        )
+        allocations_url = f"{self.allocations_urls}/?department={asset_assignee.id}"
         response = client.get(
             allocations_url, HTTP_AUTHORIZATION="Token {}".format(self.token_other_user)
         )
 
         self.assertEqual(response.status_code, 200)
         count = AllocationHistory.objects.filter(
-            current_owner=self.asset_assignee.id
+            current_owner=asset_assignee.id
         ).count()
         self.assertEqual(len(response.data["results"]), count)
 
@@ -200,7 +194,7 @@ class AllocationTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         allocations_url = (
-            f"{self.allocations_urls}/?asset_serial={self.asset.serial_number}"
+            f"{self.allocations_urls}/?asset_serial_number={self.asset.serial_number}"
         )
         response = client.get(
             allocations_url, HTTP_AUTHORIZATION="Token {}".format(self.token_other_user)

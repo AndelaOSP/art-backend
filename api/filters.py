@@ -148,16 +148,16 @@ class UserFilter(BaseFilter):
 class AllocationsHistoryFilter(BaseFilter):
     """Filters the allocations"""
 
-    current_owner = filters.CharFilter(
+    owner = filters.CharFilter(
         field_name="current_owner__user__email", lookup_expr="icontains"
     )
-    current_workspace = filters.CharFilter(
+    workspace = filters.CharFilter(
         field_name="current_owner__workspace__id", lookup_expr="iexact"
     )
-    current_department = filters.CharFilter(
+    department = filters.CharFilter(
         field_name="current_owner__department__id", lookup_expr="iexact"
     )
-    asset_serial = filters.CharFilter(
+    asset_serial_number = filters.CharFilter(
         field_name="asset__serial_number", lookup_expr="iexact"
     )
     asset_code = filters.CharFilter(
@@ -167,9 +167,9 @@ class AllocationsHistoryFilter(BaseFilter):
     class Meta:
         model = AllocationHistory
         fields = [
-            "current_owner",
-            "current_workspace",
-            "current_department",
-            "asset_serial",
+            "owner",
+            "workspace",
+            "department",
+            "asset_serial_number",
             "asset_code",
         ]
