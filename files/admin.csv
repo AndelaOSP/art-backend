@@ -1,0 +1,2 @@
+Row,Category,Sub-Category,Type,Make,Model Number,Asset Code,Serial No.,Assigned To,Status,Memory,Verified,Storage,Processor Type,YOM,Notes,Error
+1,Accessories,Computers,Windows PC,Compaq ,"Compaq Presario CQ 57 (15"")",PNT/PDW/117,,,,,,,,,,{'Asset with similar asset code or serial number already imported'}

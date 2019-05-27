@@ -1,0 +1,3 @@
+Row,Category,Sub-Category,Type,Make,Model Number,Asset Code,Serial No.,Assigned To,Status,Memory,Verified,Storage,Processor Type,YOM,Notes,Error
+0,Accessories,Computers,Windows PC,HP 27ES,PNT/PDW/117,,,,,,,,,,,"{'asset_code', 'serial_number'}"
+1,Accessories,Computers,Windows PC,HP 27ES,PNT/PDW/644,YIDQS-ZXC-PHK-QLM,,,,,,,,,,"{'duplicate key value violates unique constraint ""core_asset_pkey""\nDETAIL:  Key (id)=(1) already exists.\n'}"
