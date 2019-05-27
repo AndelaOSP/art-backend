@@ -452,6 +452,32 @@ class AssetsImportViewSet(APIView):
         return Response(data=response, status=200)
 
 
+class FileDownloads(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        email = request.user.email
+        query_dict = request.query_params.dict()
+        file_name = query_dict.get('filename')
+
+        if file_name == 'skipped_assets':
+            filename = "{}.csv".format(email.split("@")[0])
+
+        if file_name == 'sample':
+            filename = "sample_import.csv"
+
+        if file_name == 'asset_details':
+            filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
+
+        # send file
+        file_path = os.path.join(settings.BASE_DIR, "files/{}".format(filename))
+        file = open(file_path, "rb")
+        response = FileResponse(file, content_type="text/csv", filename=filename)
+        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
+
+        return response
+
+
 class SkippedAssets(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
@@ -515,7 +541,7 @@ class ExportAssetsDetails(APIView):
             return Response({"error": "You have no assets"}, status=400)
 
         email = request.user.email
-        filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
+        filename = "files/{}_exported_assets.xlsx".format(email.split("@")[0])
         self.create_sheet(serializer.data, filename=filename)
         path = request.build_absolute_uri(reverse("asset-details"))
         return Response(

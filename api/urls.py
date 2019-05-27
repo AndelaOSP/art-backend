@@ -29,7 +29,6 @@ from api.views import (
     AvailableFilterValues,
     CountryViewset,
     DepartmentViewSet,
-    Downloads,
     ExportAssetsDetails,
     GetPrintAssetsFile,
     ManageAssetViewSet,
@@ -46,6 +45,8 @@ from api.views import (
     UserGroupViewSet,
     UserViewSet,
 )
+
+from api.views.assets import FileDownloads
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -127,8 +128,9 @@ urlpatterns = [
         name="sample-import-file",
     ),
     path("filter-values/", AvailableFilterValues.as_view(), name="available-filters"),
-    path("downloads/?P<filewanted>", Downloads.as_view(), name="Downloads"),
+    path("downloads/", FileDownloads.as_view(), name="downloads"),
 ]
+
 if settings.DEBUG:
     urlpatterns += [
         path(
