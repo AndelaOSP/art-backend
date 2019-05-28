@@ -47,15 +47,15 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         )
 
         self.allocation_user = AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.user.assetassignee
+            asset=self.asset, current_assignee=self.user.assetassignee
         )
 
         self.allocation_department = AllocationHistory.objects.create(
-            asset=self.asset_2, current_owner=self.department.assetassignee
+            asset=self.asset_2, current_assignee=self.department.assetassignee
         )
 
         self.allocation_workspace = AllocationHistory.objects.create(
-            asset=self.asset_3, current_owner=self.office_workspace.assetassignee
+            asset=self.asset_3, current_assignee=self.office_workspace.assetassignee
         )
 
     def test_non_authenticated_user_get_assets_assignee(self):

@@ -463,23 +463,23 @@ class AssetStatus(models.Model):
             if self.current_status == constants.AVAILABLE and last_allocation_record:
                 AllocationHistory.objects.create(
                     asset=self.asset,
-                    previous_owner=last_allocation_record.current_owner,
-                    current_owner=None,
+                    previous_assignee=last_allocation_record.current_assignee,
+                    current_assignee=None,
                 )
 
 
 class AllocationHistory(models.Model):
     asset = models.ForeignKey("Asset", on_delete=models.PROTECT)
-    current_owner = models.ForeignKey(
+    current_assignee = models.ForeignKey(
         "AssetAssignee",
-        related_name="current_owner_asset",
+        related_name="current_assignee_asset",
         blank=True,
         null=True,
         on_delete=models.PROTECT,
     )
-    previous_owner = models.ForeignKey(
+    previous_assignee = models.ForeignKey(
         "AssetAssignee",
-        related_name="previous_owner_asset",
+        related_name="previous_assignee_asset",
         editable=False,
         blank=True,
         null=True,
@@ -511,23 +511,23 @@ class AllocationHistory(models.Model):
             latest_record = AllocationHistory.objects.filter(asset=self.asset).latest(
                 "created_at"
             )
-            self.previous_owner = latest_record.current_owner
+            self.previous_assignee = latest_record.current_assignee
         except Exception:
-            self.previous_owner = None
+            self.previous_assignee = None
         try:
             super().save(*args, **kwargs)
         except Exception:
             raise
         else:
             asset = self.asset
-            asset.assigned_to = self.current_owner
+            asset.assigned_to = self.current_assignee
             asset.save()
             self._create_asset_status_when_asset_is_allocated()
             self._send_notification()
 
     def _create_asset_status_when_asset_is_allocated(self):
         last_status = AssetStatus.objects.filter(asset=self.asset).latest("created_at")
-        if self.current_owner:
+        if self.current_assignee:
             AssetStatus.objects.create(
                 asset=self.asset,
                 current_status=constants.ALLOCATED,
@@ -549,12 +549,12 @@ class AllocationHistory(models.Model):
 
         if asset.assigned_to and asset.current_status == constants.ALLOCATED:
             message += "has been allocated to you. {} {}".format(to_append, env_message)
-            assignee = self.current_owner
-        elif not asset.assigned_to and self.previous_owner:
+            assignee = self.current_assignee
+        elif not asset.assigned_to and self.previous_assignee:
             message += "has been de-allocated from you. {} {}".format(
                 to_append, env_message
             )
-            assignee = self.previous_owner
+            assignee = self.previous_assignee
 
         if assignee and hasattr(assignee, "email"):
             slack.send_message(message, user=assignee.user)

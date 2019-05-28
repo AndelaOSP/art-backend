@@ -23,7 +23,7 @@ class FilterValuesApiTest(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_admin_view_filter_values(self, mock_verify_id_token):
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.asset_assignee
+            asset=self.asset, current_assignee=self.asset_assignee
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         cohorts = []

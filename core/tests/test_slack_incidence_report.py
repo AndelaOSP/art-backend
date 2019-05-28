@@ -58,7 +58,7 @@ class SlackIntegrationTestCase(CoreBaseTestCase):
         self.user.email = "testslack@andela.com"
         self.user.save()
         AllocationHistory.objects.create(
-            asset=self.test_asset, current_owner=self.user.assetassignee
+            asset=self.test_asset, current_assignee=self.user.assetassignee
         )
         fake_slack.side_effect = side_effect_success
         data = {"channel_id": "some_value", "user_id": "someid"}

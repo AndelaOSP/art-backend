@@ -113,11 +113,11 @@ class AssetSerializer(serializers.ModelSerializer):
         return [
             {
                 "id": allocation.id,
-                "current_owner": allocation.current_owner.email
-                if allocation.current_owner
+                "current_assignee": allocation.current_assignee.email
+                if allocation.current_assignee
                 else None,
-                "previous_owner": allocation.previous_owner.email
-                if allocation.previous_owner
+                "previous_assignee": allocation.previous_assignee.email
+                if allocation.previous_assignee
                 else None,
                 "assigner": allocation.assigner.email if allocation.assigner else None,
                 "created_at": allocation.created_at,
@@ -221,21 +221,20 @@ class AssetStatusSerializer(AssetSerializer):
 class AllocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AllocationHistory
-        fields = ("asset", "current_owner", "previous_owner", "assigner", "created_at")
-        read_only_fields = ("previous_owner",)
+        fields = ("asset", "current_assignee", "previous_assignee", "created_at")
+        read_only_fields = ("previous_assignee",)
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
         serial_no = instance.asset.serial_number
         asset_code = instance.asset.asset_code
 
-        if instance.previous_owner:
-            instance_data["previous_owner"] = instance.previous_owner.email
-        if instance.current_owner:
-            instance_data["current_owner"] = instance.current_owner.email
+        if instance.previous_assignee:
+            instance_data["previous_assignee"] = instance.previous_assignee.email
+        if instance.current_assignee:
+            instance_data["current_assignee"] = instance.current_assignee.email
         if instance.assigner:
             instance_data["assigner"] = instance.assigner.email
-
         instance_data["asset"] = f"{serial_no} - {asset_code}"
         return instance_data
 

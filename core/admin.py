@@ -145,7 +145,7 @@ class UserFeedbackAdmin(admin.ModelAdmin):
 
 
 class AllocationHistoryAdmin(admin.ModelAdmin):
-    list_display = ("asset", "current_owner", "previous_owner", "created_at")
+    list_display = ("asset", "current_assignee", "previous_assignee", "created_at")
 
 
 class AssetConditionAdmin(admin.ModelAdmin):

@@ -294,7 +294,7 @@ class UserTestCase(APIBaseTestCase):
         )
         count = response.data["allocated_asset_count"]
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.user.assetassignee
+            asset=self.asset, current_assignee=self.user.assetassignee
         )
         response = client.get(
             "{}/{}/".format(self.users_url, self.user.id),
@@ -404,7 +404,7 @@ class UserTestCase(APIBaseTestCase):
     def test_admin_filter_users_by_asset_count(self, mock_verify_token):
         mock_verify_token.return_value = {"email": self.admin_user.email}
         allocation_user = AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.user.assetassignee
+            asset=self.asset, current_assignee=self.user.assetassignee
         )
         response = client.get(
             "{}?asset_count={}".format(self.users_url, 1),
@@ -420,7 +420,7 @@ class UserTestCase(APIBaseTestCase):
         mock_verify_token.return_value = {"email": self.admin_user.email}
         AssetStatus.objects.create(asset=self.asset, current_status="Available")
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.user.assetassignee
+            asset=self.asset, current_assignee=self.user.assetassignee
         )
         response = client.get(
             "{}?asset_count=0,1".format(self.users_url),

@@ -33,7 +33,7 @@ class AssetHealthTestCase(APIBaseTestCase):
     def test_authenticated_admin_view_assets_health(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.asset_assignee
+            asset=self.asset, current_assignee=self.asset_assignee
         )
         allocated = Asset.objects.filter(current_status="Allocated").count()
         available = Asset.objects.filter(current_status="Available").count()

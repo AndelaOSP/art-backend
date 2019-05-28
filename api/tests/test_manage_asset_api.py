@@ -268,7 +268,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     ):
         AssetStatus.objects.create(asset=self.asset, current_status="Available")
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.user.assetassignee
+            asset=self.asset, current_assignee=self.user.assetassignee
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
@@ -281,7 +281,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_assigned_to_details_has_no_password(self, mock_verify_id_token):
         AllocationHistory.objects.create(
-            asset=self.asset_1, current_owner=self.user.assetassignee
+            asset=self.asset_1, current_assignee=self.user.assetassignee
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
@@ -345,7 +345,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_filter_by_email(self, mock_verify_id_token):
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.user.assetassignee
+            asset=self.asset, current_assignee=self.user.assetassignee
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
