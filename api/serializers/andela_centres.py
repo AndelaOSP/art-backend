@@ -107,9 +107,18 @@ class OfficeWorkspaceSerializer(serializers.ModelSerializer):
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
+    number_of_assets = serializers.SerializerMethodField()
+
     class Meta:
         model = models.Department
-        fields = ("name", "id")
+        fields = ("name", "id", "number_of_assets")
+
+    def get_number_of_assets(self, obj):
+        department_assignee = models.AssetAssignee.objects.filter(
+            department_id=obj.id
+        ).first()
+        assets = models.Asset.objects.filter(assigned_to=department_assignee).count()
+        return assets
 
 
 class DepartmentDetailSerializer(serializers.ModelSerializer):
@@ -135,8 +144,12 @@ class DepartmentDetailSerializer(serializers.ModelSerializer):
             department_id=obj.id
         ).first()
         assets = models.Asset.objects.filter(assigned_to=department_assignee)
-        serialized_assets = DepartmentAssetSerializer(assets, many=True)
-        return serialized_assets.data
+        page = self.context["view"].paginate_queryset(assets)
+        serialized_assets = DepartmentAssetSerializer(page, many=True)
+        paginated_assets = self.context["view"].get_paginated_response(
+            serialized_assets.data
+        )
+        return paginated_assets.data
 
 
 class AndelaCentreSerializer(serializers.ModelSerializer):

@@ -189,6 +189,40 @@ class AssetTestCase(APIBaseTestCase):
         self.assertEqual(response.data["count"], count + 1)
 
     @patch("api.authentication.auth.verify_id_token")
+    def test_admin_can_filter_asset_by_assignee_department(self, mock_verify_id_token):
+        self.asset_3.assigned_to = self.asset_assignee_department
+        self.asset_3.save()
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        response = client.get(
+            "{}?department={}".format(
+                self.manage_asset_urls, self.department_travel.id
+            ),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        returned_data = response.data["results"][0]
+
+        self.assertEqual(returned_data["id"], self.asset_3.id)
+        self.assertEqual(returned_data["asset_category"], self.asset_3.asset_category)
+        self.assertEqual(
+            returned_data["asset_sub_category"], self.asset_3.asset_sub_category
+        )
+        self.assertEqual(returned_data["asset_make"], self.asset_3.asset_make)
+        self.assertEqual(returned_data["asset_code"], self.asset_3.asset_code)
+        self.assertEqual(returned_data["asset_type"], self.asset_3.asset_type)
+        self.assertEqual(returned_data["serial_number"], self.asset_3.serial_number)
+        self.assertEqual(
+            returned_data["asset_location"], self.asset_3.asset_location.name
+        )
+        self.assertEqual(
+            returned_data["assigned_to"]["id"],
+            self.asset_assignee_department.department_id,
+        )
+        self.assertEqual(
+            len(response.data["results"]),
+            Asset.objects.filter(assigned_to=self.asset_assignee_department.id).count(),
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
     def test_assets_detail_api_endpoint_contain_assigned_to_details(
         self, mock_verify_id_token
     ):

@@ -61,7 +61,8 @@ class DepartmentAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(
-            response.data, {"name": "Facilities", "id": res.data.get("id")}
+            response.data,
+            {"name": "Facilities", "id": res.data.get("id"), "number_of_assets": 0},
         )
         self.assertEqual(response.status_code, 200)
 
@@ -73,14 +74,9 @@ class DepartmentAPITest(APIBaseTestCase):
         response = client.get(
             department_url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
-        self.assertEqual(
-            response.data,
-            {
-                "name": self.department.name,
-                "id": self.department.id,
-                "assets_assigned": [],
-            },
-        )
+        self.assertEqual(response.data["name"], self.department.name)
+        self.assertEqual(response.data["id"], self.department.id)
+        self.assertEqual(response.data["assets_assigned"]["results"], [])
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -94,20 +90,23 @@ class DepartmentAPITest(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.data["assets_assigned"][0]["asset_code"], self.asset_2.asset_code
+            response.data["assets_assigned"]["results"][0]["asset_code"],
+            self.asset_2.asset_code,
         )
         self.assertEqual(
-            response.data["assets_assigned"][0]["serial_number"],
+            response.data["assets_assigned"]["results"][0]["serial_number"],
             self.asset_2.serial_number,
         )
         self.assertEqual(
-            response.data["assets_assigned"][0]["asset_type"], self.asset_2.asset_type
+            response.data["assets_assigned"]["results"][0]["asset_type"],
+            self.asset_2.asset_type,
         )
         self.assertEqual(
-            response.data["assets_assigned"][0]["uuid"], str(self.asset_2.uuid)
+            response.data["assets_assigned"]["results"][0]["uuid"],
+            str(self.asset_2.uuid),
         )
         self.assertEqual(
-            response.data["assets_assigned"][0]["asset_category"],
+            response.data["assets_assigned"]["results"][0]["asset_category"],
             self.asset_2.asset_category,
         )
 
