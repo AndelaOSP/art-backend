@@ -8,7 +8,7 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 
 # App Imports
-from core.models import Asset, AssetLog, User
+from core.models import AllocationHistory, Asset, AssetLog, User
 
 logger = logging.getLogger(__name__)
 
@@ -143,3 +143,33 @@ class UserFilter(BaseFilter):
     class Meta:
         model = User
         fields = ["cohort", "email", "asset_count"]
+
+
+class AllocationsHistoryFilter(BaseFilter):
+    """Filters the allocations"""
+
+    owner = filters.CharFilter(
+        field_name="current_owner__user__email", lookup_expr="icontains"
+    )
+    workspace = filters.CharFilter(
+        field_name="current_owner__workspace__id", lookup_expr="iexact"
+    )
+    department = filters.CharFilter(
+        field_name="current_owner__department__id", lookup_expr="iexact"
+    )
+    asset_serial_number = filters.CharFilter(
+        field_name="asset__serial_number", lookup_expr="iexact"
+    )
+    asset_code = filters.CharFilter(
+        field_name="asset__asset_code", lookup_expr="iexact"
+    )
+
+    class Meta:
+        model = AllocationHistory
+        fields = [
+            "owner",
+            "workspace",
+            "department",
+            "asset_serial_number",
+            "asset_code",
+        ]
