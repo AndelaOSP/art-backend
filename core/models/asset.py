@@ -231,7 +231,7 @@ class Asset(models.Model):
         "Department", null=True, blank=True, on_delete=models.PROTECT
     )
     active = models.BooleanField(blank=True, null=True)
-    paid_or_postpaid = models.CharField(
+    prepaid_or_postpaid = models.CharField(
         blank=True, null=True, max_length=8, choices=constants.SIMCARD_ASSET_OPTIONS
     )
     objects = CaseInsensitiveManager()

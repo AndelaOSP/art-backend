@@ -45,7 +45,7 @@ class AssetTestCase(APIBaseTestCase):
             self.asset_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by)
         )
         self.assertIn(self.asset.asset_code, str(response.json().values()))
-        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 1)
+        self.assertEqual(len(response.data["results"]), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -183,6 +183,7 @@ class AssetTestCase(APIBaseTestCase):
             model_number=self.assetmodel,
             purchase_date="2018-07-10",
             asset_location=self.centre,
+            department=self.department,
         ).save()
         response = client.get(
             "{}?current_status={}".format(url, "Available"),
@@ -362,6 +363,7 @@ class AssetTestCase(APIBaseTestCase):
             purchase_date="2018-07-10",
             model_number=self.assetmodel,
             asset_location=self.centre,
+            department=self.department,
             verified=True,
         )
         response = client.get(

@@ -112,8 +112,9 @@ class ManageAssetViewSet(ModelViewSet):
 
     def get_queryset(self):
         location = self.request.user.location
-        if location:
-            return self.queryset.filter(asset_location=location)
+        department = self.request.user.department
+        if location and department:
+            return self.queryset.filter(asset_location=location, department=department)
         return self.queryset.none()
 
 
@@ -126,9 +127,6 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         query_filter = {}
-
-        # view only assets in ones location and ones department
-        query_filter = {"department": user.department, "asset_location": user.location}
 
         if not self.request.user.is_securityuser:
             asset_assignee = models.AssetAssignee.objects.filter(user=user).first()

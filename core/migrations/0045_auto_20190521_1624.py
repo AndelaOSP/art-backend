@@ -35,8 +35,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='asset',
-            name='paid_or_postpaid',
-            field=models.CharField(blank=True, choices=[('paid', 'paid'), ('postpaid', 'postpaid')], max_length=8, null=True),
+            name='prepaid_or_postpaid',
+            field=models.CharField(blank=True, choices=[('prepaid', 'prepaid'), ('postpaid', 'postpaid')], max_length=8, null=True),
         ),
         migrations.AddField(
             model_name='user',

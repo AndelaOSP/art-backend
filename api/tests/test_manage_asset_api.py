@@ -9,7 +9,15 @@ from rest_framework.test import APIClient
 
 # App Imports
 from api.tests import APIBaseTestCase
-from core.models import AllocationHistory, AndelaCentre, Asset, AssetLog, AssetStatus
+
+from core.models import (  # isort:skip
+    AllocationHistory,
+    AndelaCentre,
+    Asset,
+    AssetLog,
+    AssetStatus,
+    Department,
+)
 
 User = get_user_model()
 client = APIClient()
@@ -37,28 +45,30 @@ class ManageAssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(self.asset.asset_code, str(response.data["results"]))
-        self.assertEqual(len(response.data["results"]), Asset.objects.count())
+        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 1)
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_authenticated_admin_view_assets_in_their_centres_only(
+    def test_authenticated_admin_view_assets_in_their_centres_and_departments_only(
         self, mock_verify_id_token
     ):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         location = AndelaCentre.objects.create(name="Kitale", country=self.country)
+        department = Department.objects.create(name="Facilities")
         Asset.objects.create(
             asset_code="IC001457",
             serial_number="SN00123457",
             purchase_date="2018-07-10",
             model_number=self.assetmodel,
             asset_location=location,
+            department=department,
         )
         response = client.get(
             self.manage_asset_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(self.asset.asset_code, str(response.data["results"]))
-        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 1)
+        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 2)
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -98,7 +108,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             self.manage_asset_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(len(response.data["results"]), Asset.objects.count())
+        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 1)
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -113,7 +123,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             "model_number": self.assetmodel.name,
             "purchase_date": "2018-07-10",
             "invoice_receipt": receipt,
-            "paid_or_postpaid": "postpaid",
+            "prepaid_or_postpaid": "postpaid",
             "active": "True",
         }
         count = Asset.objects.count()
@@ -126,7 +136,9 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(data.get("asset_code"), res_data.get("asset_code"))
         self.assertEqual(data.get("serial_number"), res_data.get("serial_number"))
         self.assertEqual(data.get("model_number"), res_data.get("model_number"))
-        self.assertEqual(data.get("paid_or_postpaid"), res_data.get("paid_or_postpaid"))
+        self.assertEqual(
+            data.get("prepaid_or_postpaid"), res_data.get("prepaid_or_postpaid")
+        )
         self.assertEqual(True, res_data.get("active"))
         self.assertEqual(Asset.objects.count(), count + 1)
         self.assertEqual(response.status_code, 201)
@@ -414,6 +426,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             purchase_date="2018-07-10",
             model_number=self.assetmodel,
             asset_location=self.centre,
+            department=self.department,
         )
         asset_1 = Asset.objects.create(
             asset_code="IC-1457",
@@ -421,6 +434,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             purchase_date="2018-07-10",
             model_number=self.assetmodel,
             asset_location=self.centre,
+            department=self.department,
         )
 
         # non-existent serial
