@@ -456,26 +456,22 @@ class FileDownloads(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        email = request.user.email
         query_dict = request.query_params.dict()
-        file_name = query_dict.get('filename')
+        filename = ""
 
-        if file_name == 'skipped_assets':
-            filename = "{}.csv".format(email.split("@")[0])
+        try:
+            filename = query_dict.get("filename")
+            if filename:
+                file_path = os.path.join(settings.BASE_DIR, f"files/{filename}")
+                file = open(file_path, "rb")
 
-        if file_name == 'sample':
-            filename = "sample_import.csv"
+        except FileNotFoundError:
+            return Response({"response": f"No such file or directory as {filename}"})
 
-        if file_name == 'asset_details':
-            filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
-
-        # send file
-        file_path = os.path.join(settings.BASE_DIR, "files/{}".format(filename))
-        file = open(file_path, "rb")
-        response = FileResponse(file, content_type="text/csv", filename=filename)
-        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
-
-        return response
+        else:
+            response = FileResponse(file, content_type="text/csv", filename=filename)
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
+            return response
 
 
 class SkippedAssets(APIView):
@@ -642,97 +638,3 @@ class StateTransitionViewset(ModelViewSet):
                     )
                 }
             )
-
-
-class Downloads(APIView):
-    serializer_class = AssetSerializer
-    queryset = models.Asset.objects.all()
-    permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = (FirebaseTokenAuthentication,)
-
-    def get(self, request, filewanted):
-        if filewanted == "":
-            email = request.user.email
-            filename = "{}.csv".format(email.split("@")[0])
-            file_path = os.path.join(settings.BASE_DIR, "downloads/{}".format(filename))
-            # send file
-            file = open(file_path, "rb")
-            response = FileResponse(file, content_type="text/csv", filename=filename)
-            response["Content-Disposition"] = 'attachment; filename="{}"'.format(
-                filename
-            )
-
-            return response
-
-        else:
-            filters = Q(**{})
-            for key, val in dict(request.query_params).items():
-                lookup = functools.reduce(
-                    operator.or_,
-                    {Q(**{"__".join([key, "icontains"]): item}) for item in val},
-                )
-                filters |= lookup
-            try:
-                assets = self.queryset.filter(
-                    filters, asset_location__name=request.user.location.name
-                )
-            except Exception as e:
-                logger.warning(str(e))
-                return Response({"error": "Unsupported filters included."}, status=400)
-            serializer = self.serializer_class(assets, many=True)
-            asset_count = len(serializer.data)
-            if asset_count == 0:
-                return Response({"error": "You have no assets"}, status=400)
-
-            email = request.user.email
-            filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
-            self.create_sheet(serializer.data, filename=filename)
-            path = request.build_absolute_uri(reverse("asset-details"))
-            return Response(
-                {
-                    "success": f"{asset_count} assets exported to {path} successfully",
-                    "file": path,
-                },
-                status=200,
-            )
-
-    def create_sheet(self, assets_list, filename=None):
-        asset_types = []
-        filename = filename or "exported_assets.xlsx"
-        for asset in assets_list:
-            if asset.get("asset_type") not in asset_types:
-                asset_types.append(asset.get("asset_type"))
-
-        workbook = xlsxwriter.Workbook(filename)
-        bold = workbook.add_format({"bold": True, "bg_color": "silver"})
-        for asset_type in asset_types:
-            worksheet = workbook.add_worksheet(asset_type)
-            worksheet.write("A1", MAKE, bold)
-            worksheet.write("B1", "Location", bold)
-            worksheet.write("C1", ASSET_CODE, bold)
-            worksheet.write("D1", SERIAL_NUMBER, bold)
-            worksheet.write("E1", MODEL_NUMBER, bold)
-            worksheet.write("F1", ASSIGNED_TO, bold)
-            worksheet.write("G1", STATUS, bold)
-            worksheet.write("H1", VERIFIED, bold)
-            worksheet.write("I1", NOTES, bold)
-            grouped_assets = []
-            for asset in assets_list:
-                if asset.get("asset_type") == asset_type:
-                    grouped_assets.append(asset)
-            row = 1
-            column = 0
-            for asset in grouped_assets:
-                worksheet.write(row, column, asset.get("asset_make", ""))
-                worksheet.write(row, column + 1, asset.get("asset_location", ""))
-                worksheet.write(row, column + 2, asset.get("asset_code"))
-                worksheet.write(row, column + 3, asset.get("serial_number", ""))
-                worksheet.write(row, column + 4, asset.get("model_number", ""))
-                assigned = asset.get("assigned_to") or {}
-                assignee = assigned.get("email", "")
-                worksheet.write(row, column + 5, assignee)
-                worksheet.write(row, column + 6, asset.get("current_status", ""))
-                worksheet.write_boolean(row, column + 7, asset.get("verified", ""))
-                worksheet.write(row, column + 8, asset.get("notes", ""))
-                row += 1
-        workbook.close()
