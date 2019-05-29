@@ -45,7 +45,6 @@ from api.views import (
     UserGroupViewSet,
     UserViewSet,
 )
-
 from api.views.assets import FileDownloads
 
 schema_view = get_schema_view(
