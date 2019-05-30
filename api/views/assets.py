@@ -415,13 +415,15 @@ class AssetsImportViewSet(APIView):
         csv_reader = DictReaderStrip(file_obj, delimiter=",")
         print("Processing uploaded file:")
         if not process_file(csv_reader, user=user):
-            path = request.build_absolute_uri(reverse("skipped"))
+            filename = user.email.split("@")[0]
+            path = request.build_absolute_uri(reverse("download-files"))
             print("path in main end point", path)
 
             response[
                 "fail"
             ] = "Some assets were skipped. Download the skipped assets file from"
             response["file"] = "{}".format(path)
+            response["filename"] = f"{filename}"
 
             error = True
 
@@ -456,42 +458,6 @@ class FileDownloads(APIView):
             return response
 
 
-class SkippedAssets(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
-
-    def get(self, request):
-        email = request.user.email
-        filename = "{}.csv".format(email.split("@")[0])
-        file_path = os.path.join(settings.BASE_DIR, "skippedassets/{}".format(filename))
-
-        # send file
-
-        file = open(file_path, "rb")
-        response = FileResponse(file, content_type="text/csv", filename=filename)
-        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
-
-        return response
-
-
-class SampleImportFile(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
-
-    def get(self, request):
-        filename = os.path.join(settings.BASE_DIR, "samples/sample_import.csv")
-
-        # send file
-
-        file = open(filename, "rb")
-        response = FileResponse(
-            file, content_type="text/csv", filename="sample_import_file.csv"
-        )
-        response[
-            "Content-Disposition"
-        ] = 'attachment; filename="sample_import_file.csv"'
-
-        return response
-
-
 class ExportAssetsDetails(APIView):
     serializer_class = AssetSerializer
     queryset = models.Asset.objects.all()
@@ -521,7 +487,7 @@ class ExportAssetsDetails(APIView):
         email = request.user.email
         filename = "files/{}_exported_assets.xlsx".format(email.split("@")[0])
         self.create_sheet(serializer.data, filename=filename)
-        path = request.build_absolute_uri(reverse("asset-details"))
+        path = request.build_absolute_uri(reverse("download-files"))
         return Response(
             {
                 "success": f"{asset_count} assets exported to {path} successfully",
@@ -570,21 +536,6 @@ class ExportAssetsDetails(APIView):
                 worksheet.write(row, column + 8, asset.get("notes", ""))
                 row += 1
         workbook.close()
-
-
-class GetPrintAssetsFile(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
-
-    def get(self, request):
-        email = request.user.email
-        filename = "{}_exported_assets.xlsx".format(email.split("@")[0])
-        file_path = os.path.join(settings.BASE_DIR, "{}".format(filename))
-
-        file = open(file_path, "rb")
-        response = FileResponse(file, content_type="text/xlsx", filename=filename)
-        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
-
-        return response
 
 
 class StateTransitionViewset(ModelViewSet):

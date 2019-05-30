@@ -25,6 +25,7 @@ class AssetsUploadTestCase(APIBaseTestCase):
     def test_authenticated_user_can_upload_csv_file_to_save_assets(
         self, mock_verify_id_token
     ):
+
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         data = {}
         count = Asset.objects.count()
@@ -36,16 +37,13 @@ class AssetsUploadTestCase(APIBaseTestCase):
                 data=data,
                 HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
             )
-
+        skipped_filename = f"{response.data['filename']}.csv"
         self.assertGreater(Asset.objects.count(), count)
         self.assertEqual(200, response.status_code)
 
-        skipped = client.get(
-            self.skipped_assets_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
-        )
         filename = "{}.csv".format(self.admin_user.email.split("@")[0])
-        self.assertEqual(skipped.filename, filename)
+
+        self.assertEqual(skipped_filename, filename)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_upload_csv_file_with_minimum_required_fields(self, mock_verify_id_token):

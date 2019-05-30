@@ -30,22 +30,19 @@ from api.views import (
     CountryViewset,
     DepartmentViewSet,
     ExportAssetsDetails,
-    GetPrintAssetsFile,
+    FileDownloads,
     ManageAssetViewSet,
     OfficeBlockViewSet,
     OfficeFloorSectionViewSet,
     OfficeFloorViewSet,
     OfficeWorkspaceViewSet,
-    SampleImportFile,
     SecurityUserEmailsViewSet,
     SecurityUserViewSet,
-    SkippedAssets,
     StateTransitionViewset,
     UserFeedbackViewSet,
     UserGroupViewSet,
     UserViewSet,
 )
-from api.views.assets import FileDownloads
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -118,16 +115,9 @@ urlpatterns = [
         name="api-version-index",
     ),
     path("export-assets/", ExportAssetsDetails.as_view(), name="export-assets"),
-    path("asset-details/", GetPrintAssetsFile.as_view(), name="asset-details"),
     path("upload/", AssetsImportViewSet.as_view(), name="import-assets"),
-    path("skipped/", SkippedAssets.as_view(), name="skipped"),
-    path(
-        "files/sample_import_file/",
-        SampleImportFile.as_view(),
-        name="sample-import-file",
-    ),
     path("filter-values/", AvailableFilterValues.as_view(), name="available-filters"),
-    path("downloads/", FileDownloads.as_view(), name="downloads"),
+    path("downloads/", FileDownloads.as_view(), name="download-files"),
 ]
 
 if settings.DEBUG:
