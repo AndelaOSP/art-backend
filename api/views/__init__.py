@@ -25,10 +25,8 @@ from .assets import (  # noqa: F401
     AssetTypeViewSet,
     AssetViewSet,
     ExportAssetsDetails,
-    GetPrintAssetsFile,
+    FileDownloads,
     ManageAssetViewSet,
-    SampleImportFile,
-    SkippedAssets,
     StateTransitionViewset,
 )
 from .users import (  # noqa: F401
