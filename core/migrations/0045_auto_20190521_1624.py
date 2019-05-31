@@ -68,4 +68,19 @@ class Migration(migrations.Migration):
             old_name='previous_owner',
             new_name='previous_assignee',
         ),
+        migrations.AlterField(
+            model_name='allocationhistory',
+            name='current_assignee',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='current_assignee_asset', to='core.AssetAssignee'),
+        ),
+        migrations.AlterField(
+            model_name='allocationhistory',
+            name='previous_assignee',
+            field=models.ForeignKey(blank=True, editable=False, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='previous_assignee_asset', to='core.AssetAssignee'),
+        ),
+        migrations.AddField(
+            model_name='asset',
+            name='expiry_date',
+            field=models.DateTimeField(blank=True, null=True),
+        ),
     ]

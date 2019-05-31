@@ -61,6 +61,25 @@ class AllocationTestCase(APIBaseTestCase):
         self.assertIn("assigner", response.data)
 
     @patch("api.authentication.auth.verify_id_token")
+    def test_post_re_allocation_of_asset_to_a_user(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.other_user.email}
+        data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
+        client.post(
+            self.allocations_urls,
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        setattr(self.asset, "current_status", "Available")
+        self.asset.save()
+        response = client.post(
+            self.allocations_urls,
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data["previous_assignee"], self.user.email)
+        self.assertEqual(response.status_code, 201)
+
+    @patch("api.authentication.auth.verify_id_token")
     def test_post_allocation_of_asset_to_a_department(self, mock_verify_id_token):
         """Test allocating an asset to a department"""
         count = AllocationHistory.objects.count()

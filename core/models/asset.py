@@ -234,6 +234,7 @@ class Asset(models.Model):
     prepaid_or_postpaid = models.CharField(
         blank=True, null=True, max_length=8, choices=constants.SIMCARD_ASSET_OPTIONS
     )
+    expiry_date = models.DateTimeField(null=True, blank=True)
     objects = CaseInsensitiveManager()
 
     def __str__(self):

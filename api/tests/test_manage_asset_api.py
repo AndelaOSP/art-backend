@@ -275,6 +275,18 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.data.get("serial_number"), self.asset.serial_number)
 
     @patch("api.authentication.auth.verify_id_token")
+    def test_assets_api_endpoint_cannot_patch_certain_types(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        response = client.patch(
+            "{}/{}/".format(self.manage_asset_urls, self.asset.uuid),
+            data={"active": "True"},
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertIn(
+            "Only mifi cards can be activated or deactivated", response.data['active']
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
     def test_assets_detail_api_endpoint_contain_assigned_to_details(
         self, mock_verify_id_token
     ):
