@@ -158,3 +158,32 @@ class AssetsUploadTestCase(APIBaseTestCase):
             )
         self.assertIn("fail", response.data)
         self.assertEqual(Asset.objects.count(), count + 1)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_download_non_existing_file_fails(self, mock_verify_id_token):
+
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+
+        response = client.get(
+            f"{self.downloads_url}?filename=sample_import.xlsx",
+            HTTP_AUTHORIZATION=f"Token {self.token_admin}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data,
+            {"response": "No such file or directory as sample_import.xlsx"},
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_download_existing_file_succeeds(self, mock_verify_id_token):
+
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+
+        response = client.get(
+            f"{self.downloads_url}?filename=sample_import.csv",
+            HTTP_AUTHORIZATION=f"Token {self.token_admin}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.filename, "sample_import.csv")
