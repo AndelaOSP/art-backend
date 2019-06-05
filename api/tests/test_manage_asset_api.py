@@ -45,7 +45,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(self.asset.asset_code, str(response.data["results"]))
-        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 1)
+        self.assertEqual(len(response.data["results"]), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -68,7 +68,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(self.asset.asset_code, str(response.data["results"]))
-        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 2)
+        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 1)
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -108,7 +108,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             self.manage_asset_urls,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(len(response.data["results"]), Asset.objects.count() - 1)
+        self.assertEqual(len(response.data["results"]), Asset.objects.count())
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")

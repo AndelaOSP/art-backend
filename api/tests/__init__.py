@@ -178,6 +178,7 @@ class APIBaseTestCase(TestCase):
             purchase_date="2019-01-10",
             model_number=cls.assetmodel,
             asset_location=cls.centre,
+            department=cls.department,
         )
 
         cls.asset_3 = apps.get_model("core", "Asset").objects.create(
@@ -186,6 +187,7 @@ class APIBaseTestCase(TestCase):
             purchase_date="2019-01-10",
             model_number=cls.assetmodel,
             asset_location=cls.centre,
+            department=cls.department,
         )
 
         cls.asset_assignee = apps.get_model("core", "AssetAssignee").objects.get(
