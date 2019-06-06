@@ -39,7 +39,6 @@ class UserManager(BaseUserManager):
     def create_superuser(self, **fields):
         fields.setdefault("is_staff", True)
         fields.setdefault("is_superuser", True)
-
         if fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True.")
         if fields.get("is_superuser") is not True:
@@ -77,6 +76,7 @@ class User(AbstractUser):
             raise ValidationError("Only andela email addresses allowed")
 
     def save(self, *args, **kwargs):
+        self.clean()
         self.full_clean()
         try:
             super(User, self).save(*args, **kwargs)

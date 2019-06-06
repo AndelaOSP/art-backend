@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 # Third-Party Imports
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from rest_framework.test import APIClient
 
 # App Imports
@@ -89,6 +90,18 @@ class UserTestCase(APIBaseTestCase):
                 password="devpassword",
                 is_staff=True,
                 is_superuser=False,
+            )
+
+    def test_cannot_add_user_without_andela_email(self):
+        with self.assertRaises(ValidationError):
+            User.objects.create(
+                email="wrongemail@gmail.com", cohort=20, password="devpassword"
+            )
+
+    def test_cannot_add_superuser_without_andela_email(self):
+        with self.assertRaises(ValidationError):
+            User.objects.create_superuser(
+                email="bademail@gmail.com", cohort=20, password="devpassword"
             )
 
     def test_non_authenticated_user_add_user_from_api_endpoint(self):
