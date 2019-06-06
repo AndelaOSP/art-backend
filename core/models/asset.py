@@ -461,6 +461,16 @@ class AllocationHistory(models.Model):
         null=True,
         on_delete=models.PROTECT,
     )
+
+    assigner = models.ForeignKey(
+        "User",
+        related_name="asset_assigner",
+        editable=False,
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
@@ -606,7 +616,7 @@ class StateTransition(models.Model):
     )
 
     class Meta:
-        verbose_name_plural = 'State Transitions'
+        verbose_name_plural = "State Transitions"
 
     def save(self, *args, **kwargs):
 
