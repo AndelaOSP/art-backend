@@ -205,6 +205,9 @@ class AllocationsViewSet(ModelViewSet):
             return self.queryset.filter(asset__asset_location=user_location)
         return self.queryset.none()
 
+    def perform_create(self, serializer):
+        serializer.save(assigner=self.request.user)
+
 
 class AssetCategoryViewSet(ModelViewSet):
     serializer_class = AssetCategorySerializer
