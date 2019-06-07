@@ -51,6 +51,7 @@ class AssetSerializer(serializers.ModelSerializer):
             "assigned_to",
             "asset_location",
             "verified",
+            "invoice_receipt",
         )
         depth = 1
         read_only_fields = (

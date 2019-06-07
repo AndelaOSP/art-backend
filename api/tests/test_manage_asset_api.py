@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 # Third-Party Imports
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
 # App Imports
@@ -102,11 +103,15 @@ class ManageAssetTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_admin_can_post_asset(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        receipt = SimpleUploadedFile(
+            "file.pdf", b"file_content", content_type="document/pdf"
+        )
         data = {
             "asset_code": "IC002",
             "serial_number": "SN002",
             "model_number": self.assetmodel.name,
             "purchase_date": "2018-07-10",
+            "invoice_receipt": receipt,
         }
         count = Asset.objects.count()
         response = client.post(
@@ -120,6 +125,24 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(data.get("model_number"), res_data.get("model_number"))
         self.assertEqual(Asset.objects.count(), count + 1)
         self.assertEqual(response.status_code, 201)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_non_super_admin_cannot_patch_invoice_receipt(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        self.admin_user.is_superuser = False
+        self.admin_user.save()
+
+        receipt = SimpleUploadedFile(
+            "file.pdf", b"file_content", content_type="document/pdf"
+        )
+        data = {"invoice_receipt": receipt}
+
+        response = client.patch(
+            "{}/{}/".format(self.manage_asset_urls, self.asset.uuid),
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.status_code, 403)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_admin_can_post_asset_with_specs(self, mock_verify_id_token):
