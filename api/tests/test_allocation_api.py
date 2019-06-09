@@ -24,16 +24,24 @@ class AllocationTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_get_allocations(self, mock_verify_id_token):
         """Test post new allocation"""
+
         mock_verify_id_token.return_value = {"email": self.other_user.email}
-        response = client.get(
+
+        data = {"asset": self.asset.id, "current_owner": self.asset_assignee.id}
+        client.post(
             self.allocations_urls,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_other_user),
+            data,
+            HTTP_AUTHORIZATION=f"Token {self.token_other_user}",
         )
-        self.assertEqual(response.data["results"], [])
-        self.assertEqual(
-            len(response.data["results"]), AllocationHistory.objects.count()
+        response = client.get(
+            self.allocations_urls, HTTP_AUTHORIZATION=f"Token {self.token_other_user}"
         )
+
+        data = response.data["results"]
+        self.assertEqual(len(data), AllocationHistory.objects.count())
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(data[0]["assigner"], self.other_user.email)
+        self.assertIn("assigner", data[0])
 
     @patch("api.authentication.auth.verify_id_token")
     def test_post_allocation_of_asset_to_a_user(self, mock_verify_id_token):
@@ -53,6 +61,7 @@ class AllocationTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.data["current_owner"], self.user.email)
         self.assertEqual(response.status_code, 201)
+        self.assertIn("assigner", response.data)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_post_allocation_of_asset_to_a_department(self, mock_verify_id_token):
