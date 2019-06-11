@@ -125,7 +125,9 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(data.get("model_number"), res_data.get("model_number"))
         self.assertEqual(Asset.objects.count(), count + 1)
         self.assertEqual(response.status_code, 201)
-        self.assertIn("http://testserver/api/v1/invoice_receipts", res_data.get("invoice_receipt"))
+        self.assertIn(
+            "http://testserver/api/v1/invoice_receipts", res_data.get("invoice_receipt")
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_non_super_admin_cannot_patch_invoice_receipt(self, mock_verify_id_token):
