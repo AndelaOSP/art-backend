@@ -78,9 +78,8 @@ class ManageAssetViewSet(ModelViewSet):
         obj = get_object_or_404(queryset, uuid=self.kwargs["pk"])
         return obj
 
-    @staticmethod
-    def restrict_to_only_super_users(invoice_receipt, user):
-        if invoice_receipt and user.is_superuser is not True:
+    def _restrict_to_only_super_users(self, invoice_receipt, user):
+        if invoice_receipt and not user.is_superuser:
             raise PermissionDenied("Only a super admin can add an invoice_receipt")
 
     def create(self, request, *args, **kwargs):
@@ -92,7 +91,7 @@ class ManageAssetViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
 
-        ManageAssetViewSet.restrict_to_only_super_users(
+        self._restrict_to_only_super_users(
             serializer.validated_data.get("invoice_receipt"), self.request.user
         )
 
@@ -100,7 +99,7 @@ class ManageAssetViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
 
-        ManageAssetViewSet.restrict_to_only_super_users(
+        self._restrict_to_only_super_users(
             serializer.validated_data.get("invoice_receipt"), self.request.user
         )
         serializer.instance.invoice_receipt.delete(save=False)
