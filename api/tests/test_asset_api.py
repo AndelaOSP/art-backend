@@ -368,3 +368,18 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.data["count"], count + 1)
         self.assertEqual(response.status_code, 200)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_asset_allocation_history_has_assigner(self, mock_verify_id_token):
+        """When I request to view an asset 
+        Then I should see the list of allocation history 
+        with timestamps and the list of people who assigned it 
+        in different instances"""
+
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        response = client.get(
+            "{}/{}/".format(self.asset_urls, self.asset.uuid),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertIn("assigner", response.data["allocation_history"][0].keys())
+        self.assertEqual(response.status_code, 200)
