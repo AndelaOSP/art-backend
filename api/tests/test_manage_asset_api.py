@@ -1,4 +1,5 @@
 # Standard Library
+import os
 from unittest.mock import patch
 
 # Third-Party Imports
@@ -126,7 +127,26 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(Asset.objects.count(), count + 1)
         self.assertEqual(response.status_code, 201)
         self.assertIn(
-            "http://testserver/api/v1/invoice_receipts", res_data.get("invoice_receipt")
+            "http://testserver/media/invoice_receipts", res_data.get("invoice_receipt")
+        )
+        os.remove("media/invoice_receipts/file.pdf")
+        print("test file removed!")
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_super_admin_can_patch_invoice_receipt(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        receipt = SimpleUploadedFile(
+            "file.pdf", b"file_content", content_type="document/pdf"
+        )
+        self.assertEqual(None, self.asset.invoice_receipt)
+        response = client.patch(
+            "{}/{}/".format(self.manage_asset_urls, self.asset.uuid),
+            data={"invoice_receipt": receipt},
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertIn(
+            "http://testserver/media/invoice_receipts",
+            response.data.get('invoice_receipt'),
         )
 
     @patch("api.authentication.auth.verify_id_token")
