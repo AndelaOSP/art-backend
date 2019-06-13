@@ -371,9 +371,9 @@ class AssetTestCase(APIBaseTestCase):
 
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_allocation_history_has_assigner(self, mock_verify_id_token):
-        """When I request to view an asset 
-        Then I should see the list of allocation history 
-        with timestamps and the list of people who assigned it 
+        """When I request to view an asset
+        Then I should see the list of allocation history
+        with timestamps and the list of people who assigned it
         in different instances"""
 
         mock_verify_id_token.return_value = {"email": self.user.email}
