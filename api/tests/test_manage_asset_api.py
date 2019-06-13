@@ -130,7 +130,6 @@ class ManageAssetTestCase(APIBaseTestCase):
             "http://testserver/media/invoice_receipts", res_data.get("invoice_receipt")
         )
         os.remove("media/invoice_receipts/file.pdf")
-        print("test file removed!")
 
     @patch("api.authentication.auth.verify_id_token")
     def test_super_admin_can_patch_invoice_receipt(self, mock_verify_id_token):
@@ -148,6 +147,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             "http://testserver/media/invoice_receipts",
             response.data.get('invoice_receipt'),
         )
+        os.remove("media/invoice_receipts/file.pdf")
 
     @patch("api.authentication.auth.verify_id_token")
     def test_non_super_admin_cannot_patch_invoice_receipt(self, mock_verify_id_token):
