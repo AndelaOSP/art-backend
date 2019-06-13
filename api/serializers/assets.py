@@ -109,6 +109,7 @@ class AssetSerializer(serializers.ModelSerializer):
                 "previous_owner": allocation.previous_owner.email
                 if allocation.previous_owner
                 else None,
+                "assigner": allocation.assigner.email if allocation.assigner else None,
                 "created_at": allocation.created_at,
             }
             for allocation in allocations
