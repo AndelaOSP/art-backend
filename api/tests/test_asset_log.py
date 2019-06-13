@@ -725,3 +725,62 @@ class AssetLogModelTest(APIBaseTestCase):
         )
         self.assertEqual(response.data, {"detail": 'Method "PATCH" not allowed.'})
         self.assertEqual(response.status_code, 405)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_admin_user_gets_filtered_list_of_asset_logs_by_asset_category(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+
+        asset_logs_url = (
+            f"{self.asset_logs_url}?asset_category={self.asset_category.name}"
+        )
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        asset_log = response.data["results"][0]["asset"]
+        asset_code = asset_log.split("-")[1].strip()
+        asset = Asset.objects.get(asset_code=asset_code)
+        category_name = (
+            asset.model_number.asset_make.asset_type.asset_sub_category.asset_category.name
+        )
+        self.assertEqual(category_name, self.asset_category.name)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_admin_user_gets_filtered_list_of_asset_logs_by_sub_asset_category(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+
+        asset_logs_url = (
+            f"{self.asset_logs_url}?asset_sub_category={self.asset_sub_category.name}"
+        )
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        asset_log = response.data["results"][0]["asset"]
+        asset_code = asset_log.split("-")[1].strip()
+        asset = Asset.objects.get(asset_code=asset_code)
+        sub_category_name = (
+            asset.model_number.asset_make.asset_type.asset_sub_category.name
+        )
+        self.assertEqual(sub_category_name, self.asset_sub_category.name)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_admin_user_gets_filtered_list_of_asset_logs_by_asset_make(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+
+        asset_logs_url = f"{self.asset_logs_url}?asset_make={self.asset_make.name}"
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        asset_log = response.data["results"][0]["asset"]
+        asset_code = asset_log.split("-")[1].strip()
+        asset = Asset.objects.get(asset_code=asset_code)
+        asset_make = asset.model_number.asset_make.name
+        self.assertEqual(asset_make, self.asset_make.name)
