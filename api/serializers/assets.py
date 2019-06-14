@@ -110,6 +110,7 @@ class AssetSerializer(serializers.ModelSerializer):
                 "previous_owner": allocation.previous_owner.email
                 if allocation.previous_owner
                 else None,
+                "assigner": allocation.assigner.email if allocation.assigner else None,
                 "created_at": allocation.created_at,
             }
             for allocation in allocations
@@ -211,7 +212,7 @@ class AssetStatusSerializer(AssetSerializer):
 class AllocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AllocationHistory
-        fields = ("asset", "current_owner", "previous_owner", "created_at")
+        fields = ("asset", "current_owner", "previous_owner", "assigner", "created_at")
         read_only_fields = ("previous_owner",)
 
     def to_representation(self, instance):
@@ -223,6 +224,9 @@ class AllocationsSerializer(serializers.ModelSerializer):
             instance_data["previous_owner"] = instance.previous_owner.email
         if instance.current_owner:
             instance_data["current_owner"] = instance.current_owner.email
+        if instance.assigner:
+            instance_data["assigner"] = instance.assigner.email
+
         instance_data["asset"] = f"{serial_no} - {asset_code}"
         return instance_data
 
