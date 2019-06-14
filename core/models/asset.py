@@ -216,6 +216,9 @@ class Asset(models.Model):
         "AssetSpecs", blank=True, null=True, on_delete=models.PROTECT
     )
     verified = models.BooleanField(default=True)
+    invoice_receipt = models.FileField(
+        null=True, blank=True, upload_to="invoice_receipts/"
+    )
     objects = CaseInsensitiveManager()
 
     def __str__(self):
