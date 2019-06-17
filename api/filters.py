@@ -105,6 +105,17 @@ class AssetLogFilter(BaseFilter):
     checked_by = filters.CharFilter(
         field_name="checked_by__email", lookup_expr="icontains"
     )
+    asset_category = filters.CharFilter(
+        field_name="asset__model_number__asset_make__asset_type__asset_sub_category__asset_category__name",
+        lookup_expr="iexact",
+    )
+    asset_sub_category = filters.CharFilter(
+        field_name="asset__model_number__asset_make__asset_type__asset_sub_category__name",
+        lookup_expr="iexact",
+    )
+    asset_make = filters.CharFilter(
+        field_name="asset__model_number__asset_make__name", lookup_expr="iexact"
+    )
 
     class Meta:
         model = AssetLog
@@ -117,6 +128,9 @@ class AssetLogFilter(BaseFilter):
             "year",
             "month",
             "day",
+            "asset_category",
+            "asset_sub_category",
+            "asset_make",
         ]
 
 
