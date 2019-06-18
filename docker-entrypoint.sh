@@ -9,4 +9,4 @@ python3 manage.py migrate
 python3 manage.py collectstatic --noinput
 
 # Start The Application
-python3 manage.py runserver 0.0.0.0:8080
+python3 manage.py runserver 0.0.0.0:8000
