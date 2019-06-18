@@ -193,9 +193,30 @@ class AssetAssigneeSerializer(serializers.ModelSerializer):
 
 
 class AssetLogSerializer(serializers.ModelSerializer):
+    asset_make = serializers.ReadOnlyField(source="asset.model_number.asset_make.name")
+    asset_type = serializers.ReadOnlyField(
+        source="asset.model_number.asset_make.asset_type.name"
+    )
+    asset_sub_category = serializers.ReadOnlyField(
+        source="asset.model_number.asset_make.asset_type.asset_sub_category.name"
+    )
+    asset_category = serializers.ReadOnlyField(
+        source="asset.model_number.asset_make.asset_type.asset_sub_category.asset_category.name"
+    )
+
     class Meta:
         model = models.AssetLog
-        fields = ("id", "asset", "log_type", "created_at", "last_modified")
+        fields = (
+            "id",
+            "asset",
+            "log_type",
+            "created_at",
+            "last_modified",
+            "asset_make",
+            "asset_type",
+            "asset_sub_category",
+            "asset_category",
+        )
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
