@@ -112,7 +112,8 @@ ASSET_STATE_FROM_REPORT_OPTIONS = (
     (DAMAGED, "Damaged"),
 )
 
-PREPAID = "prepaid"
-POSTPAID = "postpaid"
+BASIC = "basic"
+BUSINESS = "business"
+NONE = "none"
 
-SIMCARD_ASSET_OPTIONS = ((PREPAID, "prepaid"), (POSTPAID, "postpaid"))
+SIMCARD_ASSET_OPTIONS = ((BASIC, "basic"), (BUSINESS, "business"), (NONE, "none"))

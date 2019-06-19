@@ -60,7 +60,7 @@ class AssetSerializer(serializers.ModelSerializer):
             "invoice_receipt",
             "department",
             "active",
-            "prepaid_or_postpaid",
+            "paid",
             "expiry_date",
         )
         depth = 1
@@ -140,26 +140,22 @@ class AssetSerializer(serializers.ModelSerializer):
             internals["specs"] = specs
         return internals
 
-    # # allow updating of active_inactive and paid_prepaid for specific asset_types
+    # # allow updating of active_inactive and paid for specific asset_types
     def update(self, instance, validated_data):
 
         asset_type = instance.model_number.asset_make.asset_type.name
-        prepaid_or_postpaid = validated_data.get('prepaid_or_postpaid')
+        paid = validated_data.get('paid')
         active_inactive = validated_data.get('active')
         expiry_date = validated_data.get('expiry_date')
         instance_type_and_associated_error = {
-            "simcard": {
-                "prepaid_or_postpaid": "Only sim cards can be prepaid or postpaid"
-            },
+            "simcard": {"paid": "Only sim cards can have this field updated"},
             "mifi": {"active": "Only mifi cards can be activated or deactivated"},
-            "atmcard": {"expiry_date": "Only atm cards can have this field updated"},
+            "embursecard": {
+                "expiry_date": "Only emburse cards can have this field updated"
+            },
         }
 
-        if (
-            prepaid_or_postpaid
-            or expiry_date
-            or (active_inactive is False or active_inactive is True)
-        ):
+        if paid or expiry_date or (active_inactive is False or active_inactive is True):
             for instance_type in instance_type_and_associated_error:
 
                 # determine which error to raise by looking up which type is being updated
