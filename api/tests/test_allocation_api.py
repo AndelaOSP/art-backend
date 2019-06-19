@@ -28,7 +28,7 @@ class AllocationTestCase(APIBaseTestCase):
         mock_verify_id_token.return_value = {"email": self.other_user.email}
         AllocationHistory.objects.create(
             asset=self.asset,
-            current_owner=self.asset_assignee,
+            current_assignee=self.asset_assignee,
             assigner=self.other_user,
         )
         response = client.get(
