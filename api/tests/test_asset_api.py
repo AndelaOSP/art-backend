@@ -18,7 +18,7 @@ class AssetTestCase(APIBaseTestCase):
     def setUp(self):
         AssetStatus.objects.create(asset=self.asset, current_status="Available")
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.asset_assignee
+            asset=self.asset, current_assignee=self.asset_assignee
         )
 
     def test_non_authenticated_user_view_assets(self):
@@ -28,7 +28,7 @@ class AssetTestCase(APIBaseTestCase):
         )
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_authenticated_owner_view_assets(self, mock_verify_id_token):
+    def test_authenticated_assignee_view_assets(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.get(
             self.asset_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
@@ -37,7 +37,9 @@ class AssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_authenticated_securityuser_view_assets(self, mock_verify_id_token):
+    def test_authenticated_securityuser_view_assets_in_their_department_and_location(
+        self, mock_verify_id_token
+    ):
         mock_verify_id_token.return_value = {"email": self.security_user.email}
         response = client.get(
             self.asset_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by)
@@ -181,6 +183,7 @@ class AssetTestCase(APIBaseTestCase):
             model_number=self.assetmodel,
             purchase_date="2018-07-10",
             asset_location=self.centre,
+            department=self.department,
         ).save()
         response = client.get(
             "{}?current_status={}".format(url, "Available"),
@@ -360,6 +363,7 @@ class AssetTestCase(APIBaseTestCase):
             purchase_date="2018-07-10",
             model_number=self.assetmodel,
             asset_location=self.centre,
+            department=self.department,
             verified=True,
         )
         response = client.get(

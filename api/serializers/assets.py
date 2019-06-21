@@ -22,6 +22,12 @@ class AssetSerializer(serializers.ModelSerializer):
         required=False,
         queryset=models.AndelaCentre.objects.all(),
     )
+    department = serializers.SlugRelatedField(
+        read_only=False,
+        slug_field="name",
+        queryset=models.Department.objects.all(),
+        required=False,
+    )
 
     model_number = serializers.SlugRelatedField(
         queryset=models.AssetModelNumber.objects.all(), slug_field="name"
@@ -52,6 +58,10 @@ class AssetSerializer(serializers.ModelSerializer):
             "asset_location",
             "verified",
             "invoice_receipt",
+            "department",
+            "active",
+            "paid",
+            "expiry_date",
         )
         depth = 1
         read_only_fields = (
@@ -104,11 +114,11 @@ class AssetSerializer(serializers.ModelSerializer):
         return [
             {
                 "id": allocation.id,
-                "current_owner": allocation.current_owner.email
-                if allocation.current_owner
+                "current_assignee": allocation.current_assignee.email
+                if allocation.current_assignee
                 else None,
-                "previous_owner": allocation.previous_owner.email
-                if allocation.previous_owner
+                "previous_assignee": allocation.previous_assignee.email
+                if allocation.previous_assignee
                 else None,
                 "assigner": allocation.assigner.email if allocation.assigner else None,
                 "created_at": allocation.created_at,
@@ -129,6 +139,39 @@ class AssetSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(err.error_dict)
             internals["specs"] = specs
         return internals
+
+    # # allow updating of active_inactive and paid for specific asset_types
+    def update(self, instance, validated_data):
+
+        asset_type = instance.model_number.asset_make.asset_type.name
+        paid = validated_data.get('paid')
+        active_inactive = validated_data.get('active')
+        expiry_date = validated_data.get('expiry_date')
+        instance_type_and_associated_error = {
+            "simcard": {"paid": "Only sim cards can have this field updated"},
+            "mifi": {"active": "Only mifi cards can be activated or deactivated"},
+            "embursecard": {
+                "expiry_date": "Only emburse cards can have this field updated"
+            },
+        }
+
+        if paid or expiry_date or (active_inactive is False or active_inactive is True):
+            for instance_type in instance_type_and_associated_error:
+
+                # determine which error to raise by looking up which type is being updated
+                if (
+                    validated_data.get(
+                        list(instance_type_and_associated_error[instance_type].keys())[
+                            0
+                        ]
+                    )
+                    and asset_type != instance_type
+                ):
+                    raise serializers.ValidationError(
+                        instance_type_and_associated_error[instance_type]
+                    )
+        instance = super().update(instance, validated_data)
+        return instance
 
 
 class AssetAssigneeSerializer(serializers.ModelSerializer):
@@ -212,21 +255,20 @@ class AssetStatusSerializer(AssetSerializer):
 class AllocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AllocationHistory
-        fields = ("asset", "current_owner", "previous_owner", "assigner", "created_at")
-        read_only_fields = ("previous_owner",)
+        fields = ("asset", "current_assignee", "previous_assignee", "created_at")
+        read_only_fields = ("previous_assignee",)
 
     def to_representation(self, instance):
         instance_data = super().to_representation(instance)
         serial_no = instance.asset.serial_number
         asset_code = instance.asset.asset_code
 
-        if instance.previous_owner:
-            instance_data["previous_owner"] = instance.previous_owner.email
-        if instance.current_owner:
-            instance_data["current_owner"] = instance.current_owner.email
+        if instance.previous_assignee:
+            instance_data["previous_assignee"] = instance.previous_assignee.email
+        if instance.current_assignee:
+            instance_data["current_assignee"] = instance.current_assignee.email
         if instance.assigner:
             instance_data["assigner"] = instance.assigner.email
-
         instance_data["asset"] = f"{serial_no} - {asset_code}"
         return instance_data
 

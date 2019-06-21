@@ -111,3 +111,9 @@ ASSET_STATE_FROM_REPORT_OPTIONS = (
     (REQUIRES_EXTERNAL_ASSESSMENT, "requires external assessment"),
     (DAMAGED, "Damaged"),
 )
+
+BASIC = "basic"
+BUSINESS = "business"
+NONE = "none"
+
+SIMCARD_ASSET_OPTIONS = ((BASIC, "basic"), (BUSINESS, "business"), (NONE, "none"))
