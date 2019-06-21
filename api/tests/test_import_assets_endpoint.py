@@ -25,6 +25,7 @@ class AssetsUploadTestCase(APIBaseTestCase):
     def test_authenticated_user_can_upload_csv_file_to_save_assets(
         self, mock_verify_id_token
     ):
+
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         data = {}
         count = Asset.objects.count()
@@ -36,16 +37,13 @@ class AssetsUploadTestCase(APIBaseTestCase):
                 data=data,
                 HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
             )
-
+        skipped_filename = f"{response.data['filename']}.csv"
         self.assertGreater(Asset.objects.count(), count)
         self.assertEqual(200, response.status_code)
 
-        skipped = client.get(
-            self.skipped_assets_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
-        )
         filename = "{}.csv".format(self.admin_user.email.split("@")[0])
-        self.assertEqual(skipped.filename, filename)
+
+        self.assertEqual(skipped_filename, filename)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_upload_csv_file_with_minimum_required_fields(self, mock_verify_id_token):
@@ -160,3 +158,32 @@ class AssetsUploadTestCase(APIBaseTestCase):
             )
         self.assertIn("fail", response.data)
         self.assertEqual(Asset.objects.count(), count + 1)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_download_non_existing_file_fails(self, mock_verify_id_token):
+
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+
+        response = client.get(
+            f"{self.downloads_url}?filename=sample_import.xlsx",
+            HTTP_AUTHORIZATION=f"Token {self.token_admin}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data,
+            {"response": "No such file or directory as sample_import.xlsx"},
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_download_existing_file_succeeds(self, mock_verify_id_token):
+
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+
+        response = client.get(
+            f"{self.downloads_url}?filename=sample_import.csv",
+            HTTP_AUTHORIZATION=f"Token {self.token_admin}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.filename, "sample_import.csv")
