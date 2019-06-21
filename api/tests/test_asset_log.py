@@ -808,3 +808,6 @@ class AssetLogModelTest(APIBaseTestCase):
         self.assertEqual(
             response.data["results"][0]["asset_category"], self.asset_category.name
         )
+        self.assertEqual(
+            response.data["results"][0]["model_number"], self.assetmodel.name
+        )

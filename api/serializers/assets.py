@@ -160,6 +160,7 @@ class AssetLogSerializer(serializers.ModelSerializer):
     asset_category = serializers.ReadOnlyField(
         source="asset.model_number.asset_make.asset_type.asset_sub_category.asset_category.name"
     )
+    model_number = serializers.ReadOnlyField(source="asset.model_number.name")
 
     class Meta:
         model = models.AssetLog
@@ -171,6 +172,7 @@ class AssetLogSerializer(serializers.ModelSerializer):
             "last_modified",
             "asset_make",
             "asset_type",
+            "model_number",
             "asset_sub_category",
             "asset_category",
         )
