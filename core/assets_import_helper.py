@@ -157,7 +157,7 @@ def process_asset_data(processed_file_data, location=None):  # noqa: C901
                     create_object(
                         "AllocationHistory",
                         parent={"asset": asset},
-                        current_owner=asset_user.assetassignee,
+                        current_assignee=asset_user.assetassignee,
                         **row_data,
                     )
 

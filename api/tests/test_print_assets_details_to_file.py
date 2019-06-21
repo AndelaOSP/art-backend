@@ -116,7 +116,7 @@ class PrintAssetsDetailsTestCase(APIBaseTestCase):
         )
 
         AllocationHistory.objects.create(
-            asset=available_assets[0], current_owner=self.user.assetassignee
+            asset=available_assets[0], current_assignee=self.user.assetassignee
         )
         available_assets = Asset.objects.filter(current_status="Available")
         response = client.get(
@@ -144,7 +144,7 @@ class PrintAssetsDetailsTestCase(APIBaseTestCase):
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         AllocationHistory.objects.create(
-            asset=available_assets[0], current_owner=self.user.assetassignee
+            asset=available_assets[0], current_assignee=self.user.assetassignee
         )
         response = client.get(
             "{}?current_status=Available&current_status=Allocated".format(

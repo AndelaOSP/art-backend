@@ -9,7 +9,15 @@ from rest_framework.test import APIClient
 
 # App Imports
 from api.tests import APIBaseTestCase
-from core.models import AllocationHistory, AndelaCentre, Asset, AssetLog, AssetStatus
+
+from core.models import (  # isort:skip
+    AllocationHistory,
+    AndelaCentre,
+    Asset,
+    AssetLog,
+    AssetStatus,
+    Department,
+)
 
 User = get_user_model()
 client = APIClient()
@@ -41,17 +49,19 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_authenticated_admin_view_assets_in_their_centres_only(
+    def test_authenticated_admin_view_assets_in_their_centres_and_departments_only(
         self, mock_verify_id_token
     ):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         location = AndelaCentre.objects.create(name="Kitale", country=self.country)
+        department = Department.objects.create(name="Facilities")
         Asset.objects.create(
             asset_code="IC001457",
             serial_number="SN00123457",
             purchase_date="2018-07-10",
             model_number=self.assetmodel,
             asset_location=location,
+            department=department,
         )
         response = client.get(
             self.manage_asset_urls,
@@ -113,6 +123,8 @@ class ManageAssetTestCase(APIBaseTestCase):
             "model_number": self.assetmodel.name,
             "purchase_date": "2018-07-10",
             "invoice_receipt": receipt,
+            "paid": "business",
+            "active": "True",
         }
         count = Asset.objects.count()
         response = client.post(
@@ -124,6 +136,8 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(data.get("asset_code"), res_data.get("asset_code"))
         self.assertEqual(data.get("serial_number"), res_data.get("serial_number"))
         self.assertEqual(data.get("model_number"), res_data.get("model_number"))
+        self.assertEqual(data.get("paid"), res_data.get("paid"))
+        self.assertEqual(True, res_data.get("active"))
         self.assertEqual(Asset.objects.count(), count + 1)
         self.assertEqual(response.status_code, 201)
         self.assertIn(
@@ -259,12 +273,24 @@ class ManageAssetTestCase(APIBaseTestCase):
         self.assertEqual(response.data.get("serial_number"), self.asset.serial_number)
 
     @patch("api.authentication.auth.verify_id_token")
+    def test_assets_api_endpoint_cannot_patch_certain_types(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        response = client.patch(
+            "{}/{}/".format(self.manage_asset_urls, self.asset.uuid),
+            data={"active": "True"},
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertIn(
+            "Only mifi cards can be activated or deactivated", response.data['active']
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
     def test_assets_detail_api_endpoint_contain_assigned_to_details(
         self, mock_verify_id_token
     ):
         AssetStatus.objects.create(asset=self.asset, current_status="Available")
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.user.assetassignee
+            asset=self.asset, current_assignee=self.user.assetassignee
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
@@ -277,7 +303,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_assigned_to_details_has_no_password(self, mock_verify_id_token):
         AllocationHistory.objects.create(
-            asset=self.asset_1, current_owner=self.user.assetassignee
+            asset=self.asset_1, current_assignee=self.user.assetassignee
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
@@ -341,7 +367,7 @@ class ManageAssetTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_filter_by_email(self, mock_verify_id_token):
         AllocationHistory.objects.create(
-            asset=self.asset, current_owner=self.user.assetassignee
+            asset=self.asset, current_assignee=self.user.assetassignee
         )
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.get(
@@ -410,6 +436,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             purchase_date="2018-07-10",
             model_number=self.assetmodel,
             asset_location=self.centre,
+            department=self.department,
         )
         asset_1 = Asset.objects.create(
             asset_code="IC-1457",
@@ -417,6 +444,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             purchase_date="2018-07-10",
             model_number=self.assetmodel,
             asset_location=self.centre,
+            department=self.department,
         )
 
         # non-existent serial

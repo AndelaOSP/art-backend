@@ -60,6 +60,9 @@ class User(AbstractUser):
         "AndelaCentre", blank=True, null=True, on_delete=models.PROTECT
     )
     is_securityuser = models.BooleanField(default=False)
+    department = models.ForeignKey(
+        "Department", null=True, blank=True, on_delete=models.PROTECT
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

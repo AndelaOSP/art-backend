@@ -56,14 +56,14 @@ class AssetStatusModelTest(CoreBaseTestCase):
 
     def test_change_assigned_to_none(self):
         allocation_history = AllocationHistory(
-            asset=self.test_asset, current_owner=self.asset_assignee
+            asset=self.test_asset, current_assignee=self.asset_assignee
         )
 
         asset_status = AssetStatus(asset=self.test_asset, current_status="Available")
 
         allocation_history.save()
 
-        test_owner = str(self.test_asset.assigned_to)
+        test_assignee = str(self.test_asset.assigned_to)
 
         asset_status.save()
 
@@ -71,7 +71,7 @@ class AssetStatusModelTest(CoreBaseTestCase):
             "created_at"
         )
 
-        self.assertIn(test_owner, "test@andela.com")
+        self.assertIn(test_assignee, "test@andela.com")
         self.assertIsNone(self.test_asset.assigned_to)
-        self.assertIsNone(new_history.current_owner)
-        self.assertIn(str(new_history.previous_owner), "test@andela.com")
+        self.assertIsNone(new_history.current_assignee)
+        self.assertIn(str(new_history.previous_assignee), "test@andela.com")

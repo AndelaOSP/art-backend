@@ -166,13 +166,13 @@ class AllocationsHistoryFilter(BaseFilter):
     """Filters the allocations"""
 
     owner = filters.CharFilter(
-        field_name="current_owner__user__email", lookup_expr="icontains"
+        field_name="current_assignee__user__email", lookup_expr="icontains"
     )
     workspace = filters.CharFilter(
-        field_name="current_owner__workspace__id", lookup_expr="iexact"
+        field_name="current_assignee__workspace__id", lookup_expr="iexact"
     )
     department = filters.CharFilter(
-        field_name="current_owner__department__id", lookup_expr="iexact"
+        field_name="current_assignee__department__id", lookup_expr="iexact"
     )
     asset_serial_number = filters.CharFilter(
         field_name="asset__serial_number", lookup_expr="iexact"

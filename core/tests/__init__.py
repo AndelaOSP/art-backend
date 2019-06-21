@@ -122,7 +122,7 @@ class CoreBaseTestCase(TestCase):
             name="Finance"
         )
         apps.get_model("core", "AllocationHistory").objects.create(
-            asset=cls.test_asset_1, current_owner=cls.user.assetassignee
+            asset=cls.test_asset_1, current_assignee=cls.user.assetassignee
         )
         apps.get_model("core", "AssetSpecs").objects.create()
         apps.get_model("core", "AssetCondition").objects.create(
