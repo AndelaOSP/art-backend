@@ -784,3 +784,62 @@ class AssetLogModelTest(APIBaseTestCase):
         asset = Asset.objects.get(asset_code=asset_code)
         asset_make = asset.model_number.asset_make.name
         self.assertEqual(asset_make, self.asset_make.name)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_admin_user_gets_asset_logs(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        asset_logs_url = f"{self.asset_logs_url}"
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), AssetLog.objects.count())
+        self.assertEqual(
+            response.data["results"][0]["asset_make"], self.asset_make.name
+        )
+        self.assertEqual(
+            response.data["results"][0]["asset_type"], self.asset_type.name
+        )
+        self.assertEqual(
+            response.data["results"][0]["asset_sub_category"],
+            self.asset_sub_category.name,
+        )
+        self.assertEqual(
+            response.data["results"][0]["asset_category"], self.asset_category.name
+        )
+        self.assertEqual(
+            response.data["results"][0]["model_number"], self.assetmodel.name
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_admin_user_gets_single_asset_log_by_id(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        asset_log = AssetLog.objects.first()
+        asset_logs_url = f"{self.asset_logs_url}/{asset_log.id}"
+        response = client.get(
+            asset_logs_url, HTTP_AUTHORIZATION=f"Token {self.token_admin}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data["asset_make"], asset_log.asset.model_number.asset_make.name
+        )
+        self.assertEqual(
+            response.data["asset_type"],
+            asset_log.asset.model_number.asset_make.asset_type.name,
+        )
+        self.assertEqual(
+            response.data["asset_sub_category"],
+            asset_log.asset.model_number.asset_make.asset_type.asset_sub_category.name,
+        )
+        self.assertEqual(
+            response.data["asset_category"],
+            asset_log.asset.model_number.asset_make.asset_type.asset_sub_category.asset_category.name,
+        )
+        self.assertEqual(
+            response.data["model_number"], asset_log.asset.model_number.name
+        )
+        self.assertEqual(response.data["id"], asset_log.id)
+        self.assertEqual(response.data["log_type"], asset_log.log_type)
+        self.assertEqual(response.data["checked_by"], asset_log.checked_by.email)
