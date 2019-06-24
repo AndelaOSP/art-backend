@@ -29,6 +29,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 
-EXPOSE 8080
+EXPOSE 8000
 RUN python manage.py collectstatic --noinput
 ENTRYPOINT ["gunicorn", "art.wsgi"]
