@@ -86,12 +86,6 @@ class UserSerializerWithAssets(UserSerializer):
         fields = UserSerializer.Meta.fields + ("allocated_assets",)
 
 
-class SecurityUserEmailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.User
-        fields = ("email",)
-
-
 class UserFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserFeedback

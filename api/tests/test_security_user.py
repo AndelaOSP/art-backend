@@ -29,35 +29,12 @@ class SecurityUserTestCase(APIBaseTestCase):
 
         self.access_token = json.loads(response.content)["access_token"]
 
-    def test_app_can_get_security_users_emails(self):
+    def test_get_security_users_emails_endpoint_doesnt_exist(self):
         response = client.get(
-            self.security_users_url,
+            "http://127.0.0.1:8000/api/v1/security-user-emails",
             HTTP_AUTHORIZATION="Bearer {}".format(self.access_token),
         )
-        self.assertEqual(
-            len(response.data["emails"]),
-            User.objects.filter(is_securityuser=True).count(),
-        )
-        self.assertEqual(response.status_code, 200)
-
-    def test_app_cannot_get_security_users_emails_without_token(self):
-        response = client.get(self.security_users_url)
-        self.assertEqual(response.status_code, 401)
-        self.assertIn(
-            json.loads(response.content)["detail"],
-            "Authentication credentials were not provided.",
-        )
-
-    def test_app_cannot_get_security_users_emails_with_wrong_token(self):
-        response = client.get(
-            self.security_users_url,
-            HTTP_AUTHORIZATION="Bearer 8UfdDKsanuqJLRWblvcQC1fRUGOcp1",
-        )
-        self.assertEqual(response.status_code, 401)
-        self.assertIn(
-            json.loads(response.content)["detail"],
-            "Authentication credentials were not provided.",
-        )
+        self.assertEqual(response.status_code, 404)
 
     def test_non_authenticated_user_view_security_user_api_endpoint(self):
         response = client.get(self.security_users_admin_url)
