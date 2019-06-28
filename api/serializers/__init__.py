@@ -27,7 +27,6 @@ from .assets import (  # noqa: F401
     StateTransitionSerializer,
 )
 from .users import (  # noqa: F401
-    SecurityUserEmailsSerializer,
     UserFeedbackSerializer,
     UserGroupSerializer,
     UserSerializer,

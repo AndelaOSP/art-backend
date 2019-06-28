@@ -36,7 +36,6 @@ from api.views import (
     OfficeFloorSectionViewSet,
     OfficeFloorViewSet,
     OfficeWorkspaceViewSet,
-    SecurityUserEmailsViewSet,
     SecurityUserViewSet,
     StateTransitionViewset,
     UserFeedbackViewSet,
@@ -64,9 +63,6 @@ class OptionalSlashRouter(SimpleRouter):
 router = OptionalSlashRouter()
 
 # users
-router.register(
-    "security-user-emails", SecurityUserEmailsViewSet, "security-user-emails"
-)
 router.register("security-users", SecurityUserViewSet, "security-users")
 router.register("user-feedback", UserFeedbackViewSet, "user-feedback")
 router.register("user-groups", UserGroupViewSet, "user-groups")
