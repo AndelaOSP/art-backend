@@ -15,7 +15,6 @@ from api.authentication import FirebaseTokenAuthentication
 from api.filters import UserFilter
 from api.permissions import IsApiUser
 from api.serializers import (
-    SecurityUserEmailsSerializer,
     UserFeedbackSerializer,
     UserGroupSerializer,
     UserSerializer,
@@ -39,19 +38,6 @@ class UserViewSet(ModelViewSet):
         if location:
             return self.queryset.filter(location=location)
         return self.queryset.none()
-
-
-class SecurityUserEmailsViewSet(ModelViewSet):
-    serializer_class = SecurityUserEmailsSerializer
-    http_method_names = ["get"]
-    permission_classes = (IsApiUser,)
-
-    def list(self, request, *args, **kwargs):
-        list_of_emails = [
-            user.email for user in models.User.objects.filter(is_securityuser=True)
-        ]
-
-        return Response({"emails": list_of_emails}, status=status.HTTP_200_OK)
 
 
 class UserFeedbackViewSet(ModelViewSet):
