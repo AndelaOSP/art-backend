@@ -13,7 +13,6 @@ from rest_framework.viewsets import ModelViewSet
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import UserFilter
-from api.permissions import IsApiUser
 from api.serializers import (
     UserFeedbackSerializer,
     UserGroupSerializer,
