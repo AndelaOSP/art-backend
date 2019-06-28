@@ -252,7 +252,6 @@ class APIBaseTestCase(TestCase):
         cls.office_block_url = reverse("office-blocks-list")
         cls.office_workspace_url = reverse("office-workspaces-list")
         cls.security_users_admin_url = reverse("security-users-list")
-        cls.security_users_url = reverse("security-user-emails-list")
         cls.users_url = reverse("users-list")
         cls.print_asset_url = reverse("export-assets")
         cls.center_block_url = reverse(
