@@ -126,12 +126,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.0/howto/static-files/
-
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), os.path.join(BASE_DIR, "media")]
-
 JET_SIDE_MENU_COMPACT = True
 
 JET_DEFAULT_THEME = "andela"
@@ -190,6 +184,3 @@ EMAIL_PORT = config('EMAIL_PORT', None)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', None)
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', None)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', True)
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

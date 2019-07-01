@@ -21,6 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 def user_abstract(user, filename):
+    """Return user abstract name.
+    
+    :params: user -> user object
+    :params: filename -> string
+    
+    """
     return f'user_{user}_{filename}'
 
 
