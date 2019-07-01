@@ -155,7 +155,7 @@ class AssetSerializer(serializers.ModelSerializer):
             },
         }
 
-        if paid or expiry_date or (active_inactive is False or active_inactive is True):
+        if paid or expiry_date or active_inactive:
             for instance_type in instance_type_and_associated_error:
 
                 # determine which error to raise by looking up which type is being updated
