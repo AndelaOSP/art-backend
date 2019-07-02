@@ -1,4 +1,4 @@
-from .andela_centres import (  # isort:skip
+from .andela_centres import (  # noqa: F401  # isort:skip
     AndelaCentreSerializer,
     CountrySerializer,
     DepartmentDetailSerializer,
@@ -9,7 +9,7 @@ from .andela_centres import (  # isort:skip
     OfficeFloorSerializer,
     OfficeWorkspaceSerializer,
 )
-from .assets import (  # isort:skip
+from .assets import (  # noqa: F401  # isort:skip
     AllocationsSerializer,
     AssetAssigneeSerializer,
     AssetCategorySerializer,
@@ -26,7 +26,7 @@ from .assets import (  # isort:skip
     AssetTypeSerializer,
     StateTransitionSerializer,
 )
-from .users import (  # isort:skip
+from .users import (  # noqa: F401  # isort:skip
     UserFeedbackSerializer,
     UserGroupSerializer,
     UserSerializer,
