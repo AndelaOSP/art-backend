@@ -29,13 +29,6 @@ class SecurityUserTestCase(APIBaseTestCase):
 
         self.access_token = json.loads(response.content)["access_token"]
 
-    def test_get_security_users_emails_endpoint_doesnt_exist(self):
-        response = client.get(
-            "http://127.0.0.1:8000/api/v1/security-user-emails",
-            HTTP_AUTHORIZATION="Bearer {}".format(self.access_token),
-        )
-        self.assertEqual(response.status_code, 404)
-
     def test_non_authenticated_user_view_security_user_api_endpoint(self):
         response = client.get(self.security_users_admin_url)
         self.assertEqual(

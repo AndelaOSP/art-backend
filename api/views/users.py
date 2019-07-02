@@ -13,13 +13,14 @@ from rest_framework.viewsets import ModelViewSet
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import UserFilter
-from api.serializers import (
+from core import models
+
+from api.serializers import (  # isort:skip
     UserFeedbackSerializer,
     UserGroupSerializer,
     UserSerializer,
     UserSerializerWithAssets,
 )
-from core import models
 
 logger = logging.getLogger(__name__)
 
