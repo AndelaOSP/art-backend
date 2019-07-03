@@ -159,7 +159,7 @@ class ManageAssetTestCase(APIBaseTestCase):
         )
         self.assertIn(
             "http://testserver/media/invoice_receipts",
-            response.data.get('invoice_receipt'),
+            response.data.get("invoice_receipt"),
         )
         os.remove("media/invoice_receipts/file.pdf")
 
@@ -281,7 +281,7 @@ class ManageAssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(
-            "Only mifi cards can be activated or deactivated", response.data['active']
+            "Only mifi cards can be activated or deactivated", response.data["active"]
         )
 
     @patch("api.authentication.auth.verify_id_token")

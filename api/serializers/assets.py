@@ -529,6 +529,14 @@ class AssetHealthSerializer(serializers.ModelSerializer):
         fields = ("asset_type", "model_number", "count_by_status")
 
 
+class WorkspaceAssetSerializer(serializers.ModelSerializer):
+    asset_type = serializers.ReadOnlyField()
+
+    class Meta:
+        model = models.Asset
+        fields = ("uuid", "asset_category", "serial_number", "asset_code", "asset_type")
+
+
 class DepartmentAssetSerializer(serializers.ModelSerializer):
     asset_type = serializers.ReadOnlyField()
 

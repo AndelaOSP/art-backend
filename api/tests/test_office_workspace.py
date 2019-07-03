@@ -48,7 +48,7 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
         self.assertEqual(response.status_code, 400)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_can_get_workspace(self, mock_verify_token):
+    def est_can_get_workspacet(self, mock_verify_token):
         mock_verify_token.return_value = {"email": self.admin_user.email}
         office_workspace_url = reverse(
             "office-workspaces-detail", args={self.office_workspace.id}

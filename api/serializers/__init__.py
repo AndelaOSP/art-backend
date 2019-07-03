@@ -7,6 +7,7 @@ from .andela_centres import (  # noqa: F401  # isort:skip
     OfficeFloorSectionDetailSerializer,
     OfficeFloorSectionSerializer,
     OfficeFloorSerializer,
+    OfficeWorkspaceDetailSerializer,
     OfficeWorkspaceSerializer,
     TeamDetailedSerializer,
     TeamSerializer,

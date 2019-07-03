@@ -109,6 +109,37 @@ class OfficeWorkspaceSerializer(serializers.ModelSerializer):
         return long_name
 
 
+class OfficeWorkspaceDetailSerializer(serializers.ModelSerializer):
+    assets_assigned = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.OfficeWorkspace
+        fields = ("id", "name", "floor", "block", "workspaces", "assets_assigned")
+
+    def get_assets_assigned(self, obj):
+        """This method returns assets assigned to a particuluar workspace
+
+        Args:
+            obj (object): current object instance being fetched
+
+        Returns:
+            json : serialized assets belonging to the specified workspace
+        """
+
+        from api.serializers.assets import WorkspaceAssetSerializer
+
+        workspace_assigned = models.AssetAssignee.objects.filter(
+            asset_location_id=obj.id
+        ).first()
+        assets = models.Asset.objects.filter(assigned_to=workspace_assigned)
+        page = self.context["view"].paginate_queryset(assets)
+        serialized_assets = WorkspaceAssetSerializer(page, many=True)
+        paginated_assets = self.context["view"].get_paginated_response(
+            serialized_assets.data
+        )
+        return paginated_assets.data
+
+
 class DepartmentSerializer(serializers.ModelSerializer):
     number_of_assets = serializers.SerializerMethodField()
 
