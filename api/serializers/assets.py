@@ -144,9 +144,9 @@ class AssetSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
 
         asset_type = instance.model_number.asset_make.asset_type.name
-        paid = validated_data.get('paid')
-        active_inactive = validated_data.get('active')
-        expiry_date = validated_data.get('expiry_date')
+        paid = validated_data.get("paid")
+        active_inactive = validated_data.get("active")
+        expiry_date = validated_data.get("expiry_date")
         instance_type_and_associated_error = {
             "simcard": {"paid": "Only sim cards can have this field updated"},
             "mifi": {"active": "Only mifi cards can be activated or deactivated"},
@@ -468,6 +468,7 @@ class AssetMakeSerializer(serializers.ModelSerializer):
 
 class AssetIncidentReportSerializer(serializers.ModelSerializer):
     submitted_by = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
 
     class Meta:
         model = models.AssetIncidentReport
@@ -482,7 +483,13 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
             "witnesses",
             "submitted_by",
             "police_abstract_obtained",
+            "created_at",
         )
+
+    def get_created_at(self, obj):
+        date = obj.created_at
+        date = f"{date.year}-{date.month}-{date.day} {date.hour}:{date.minute}"
+        return date
 
     def get_submitted_by(self, instance):
         if instance.submitted_by:

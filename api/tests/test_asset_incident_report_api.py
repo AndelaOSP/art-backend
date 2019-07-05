@@ -100,7 +100,37 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         self.assertEqual(
             len(response.data["results"]), AssetIncidentReport.objects.count()
         )
+        date = self.incident_report.created_at
+        date = f"{date.year}-{date.month}-{date.day} {date.hour}:{date.minute}"
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["results"][0]["created_at"], date)
+        self.assertEqual(
+            response.data["results"][0]["incident_type"],
+            self.incident_report.incident_type,
+        )
+        self.assertEqual(
+            response.data["results"][0]["incident_location"],
+            self.incident_report.incident_location,
+        )
+        self.assertEqual(
+            response.data["results"][0]["incident_description"],
+            self.incident_report.incident_description,
+        )
+        self.assertEqual(
+            response.data["results"][0]["injuries_sustained"],
+            self.incident_report.injuries_sustained,
+        )
+        self.assertEqual(
+            response.data["results"][0]["loss_of_property"],
+            self.incident_report.loss_of_property,
+        )
+        self.assertEqual(
+            response.data["results"][0]["witnesses"], self.incident_report.witnesses
+        )
+        self.assertEqual(
+            response.data["results"][0]["police_abstract_obtained"],
+            self.incident_report.police_abstract_obtained,
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_single_incident_report(self, mock_verify_id_token):
@@ -111,6 +141,31 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         )
         self.assertIn(self.incident_report.id, response.data.values())
         self.assertEqual(response.status_code, 200)
+        date = self.incident_report.created_at
+        date = f"{date.year}-{date.month}-{date.day} {date.hour}:{date.minute}"
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["created_at"], date)
+        self.assertEqual(
+            response.data["incident_type"], self.incident_report.incident_type
+        )
+        self.assertEqual(
+            response.data["incident_location"], self.incident_report.incident_location
+        )
+        self.assertEqual(
+            response.data["incident_description"],
+            self.incident_report.incident_description,
+        )
+        self.assertEqual(
+            response.data["injuries_sustained"], self.incident_report.injuries_sustained
+        )
+        self.assertEqual(
+            response.data["loss_of_property"], self.incident_report.loss_of_property
+        )
+        self.assertEqual(response.data["witnesses"], self.incident_report.witnesses)
+        self.assertEqual(
+            response.data["police_abstract_obtained"],
+            self.incident_report.police_abstract_obtained,
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_cant_allow_put_incident_report(self, mock_verify_id_token):
@@ -142,9 +197,9 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_can_allow_patch_of_incident_report_status(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
         data = {
             "incident_report_state": "internal assessment",
             "asset_state_from_report": "Damaged",
@@ -154,16 +209,16 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        data['id'] = self.report_status.id
-        data['asset_incident_report'] = self.report_status.asset_incident_report.id
+        data["id"] = self.report_status.id
+        data["asset_incident_report"] = self.report_status.asset_incident_report.id
         self.assertEqual(response.data, data)
         self.assertEqual(response.status_code, 200)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_require_both_fields_to_patch_incident_report_status(
         self, mock_verify_id_token
     ):
-        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
         data = {
             "asset_incident_report": self.report_status.asset_incident_report.id,
             "incident_report_state": "internal assessment",
@@ -181,11 +236,11 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-    @patch('api.authentication.auth.verify_id_token')
+    @patch("api.authentication.auth.verify_id_token")
     def test_restrict_patch_of_incident_report_status_for_external_assessment(
         self, mock_verify_id_token
     ):
-        mock_verify_id_token.return_value = {'email': self.admin_user.email}
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
         data = {
             "incident_report_state": "external assessment",
             "asset_state_from_report": "requires external assessment",

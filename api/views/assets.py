@@ -294,7 +294,9 @@ class AssetIncidentReportViewSet(ModelViewSet):
     def get_queryset(self):
         user_location = self.request.user.location
         if user_location:
-            return self.queryset.filter(asset__asset_location=user_location)
+            return self.queryset.filter(asset__asset_location=user_location).order_by(
+                "created_at"
+            )
         return self.queryset.none()
 
     def perform_create(self, serializer):
