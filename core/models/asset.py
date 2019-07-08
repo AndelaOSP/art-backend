@@ -2,6 +2,7 @@
 import logging
 import os
 import uuid
+from datetime import datetime
 
 # Third-Party Imports
 from django.conf import settings
@@ -595,6 +596,7 @@ class AssetIncidentReport(models.Model):
     witnesses = models.TextField(null=True, blank=True)
     police_abstract_obtained = models.CharField(max_length=255)
     submitted_by = models.ForeignKey("User", null=True, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(default=datetime.now, editable=False)
 
     def __str__(self):
         return f"{self.incident_type}: {self.asset}"
