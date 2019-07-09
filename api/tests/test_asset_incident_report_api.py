@@ -276,7 +276,9 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         self, mock_verify_id_token
     ):
         mock_verify_id_token.return_value = {"email": self.user.email}
-        police_abstract = SimpleUploadedFile("file.mp4", b"file_content", content_type="video/mp4")
+        police_abstract = SimpleUploadedFile(
+            "file.mp4", b"file_content", content_type="video/mp4"
+        )
         data = {
             "asset": self.asset.id,
             "incident_type": "Loss",
@@ -286,7 +288,7 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             "loss_of_property": "Mobile Phone",
             "witnesses": "John Doe +2347548458457",
             "police_abstract_obtained": "Yes",
-            "police_abstract": police_abstract
+            "police_abstract": police_abstract,
         }
         response = client.post(
             f"{self.incident_report_url}",
