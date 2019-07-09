@@ -473,16 +473,16 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AssetIncidentReport
         fields = (
-            "id",	
-            "asset",	
-            "incident_type",	
-            "incident_location",	
-            "incident_description",	
-            "injuries_sustained",	
-            "loss_of_property",	
-            "witnesses",	
-            "submitted_by",	
-            "police_abstract_obtained",	
+            "id",
+            "asset",
+            "incident_type",
+            "incident_location",
+            "incident_description",
+            "injuries_sustained",
+            "loss_of_property",
+            "witnesses",
+            "submitted_by",
+            "police_abstract_obtained",
             "created_at",
         )
 
