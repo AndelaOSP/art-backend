@@ -299,6 +299,7 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             f"{self.asset.serial_number} - {self.asset.asset_code}",
             response.data.values(),
         )
+        print(response.data)
         self.assertTrue("police_abstract" in response.data)
         self.assertTrue("submitted_by" in response.data)
         self.assertEqual(response.data["submitted_by"], self.user.email)
