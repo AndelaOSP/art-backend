@@ -472,7 +472,19 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.AssetIncidentReport
-        fields = '__all__'
+        fields = (
+            "id",	
+            "asset",	
+            "incident_type",	
+            "incident_location",	
+            "incident_description",	
+            "injuries_sustained",	
+            "loss_of_property",	
+            "witnesses",	
+            "submitted_by",	
+            "police_abstract_obtained",	
+            "created_at",
+        )
 
     def get_created_at(self, obj):
         date = obj.created_at
