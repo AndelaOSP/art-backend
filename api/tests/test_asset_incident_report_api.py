@@ -271,7 +271,6 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_post_police_abstract_incident_report(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}
