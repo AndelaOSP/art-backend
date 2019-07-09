@@ -605,6 +605,7 @@ class AssetIncidentReport(models.Model):
     witnesses = models.TextField(null=True, blank=True)
     police_abstract_obtained = models.CharField(max_length=255)
     submitted_by = models.ForeignKey('User', null=True, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(default=datetime.now, editable=False)
     police_abstract = models.FileField(
         'Police Abstract', upload_to=user_abstract, blank=True
     )

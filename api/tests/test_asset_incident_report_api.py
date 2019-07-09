@@ -3,6 +3,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 # Third-Party Imports
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
 # App Imports
@@ -269,3 +270,33 @@ class AssetIncidentReportAPITest(APIBaseTestCase):
             {"Error": "Asset state option is not valid for given report state"},
         )
         self.assertEqual(response.status_code, 400)
+
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_user_post_police_abstract_incident_report(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        police_abstract = SimpleUploadedFile("file.mp4", b"file_content", content_type="video/mp4")
+        data = {
+            "asset": self.asset.id,
+            "incident_type": "Loss",
+            "incident_location": "CDB",
+            "incident_description": "Lorem Ipsum",
+            "injuries_sustained": "N/a",
+            "loss_of_property": "Mobile Phone",
+            "witnesses": "John Doe +2347548458457",
+            "police_abstract_obtained": "Yes",
+            "police_abstract": police_abstract
+        }
+        response = client.post(
+            f"{self.incident_report_url}",
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertIn(
+            f"{self.asset.serial_number} - {self.asset.asset_code}",
+            response.data.values(),
+        )
+        self.assertTrue("police_abstract" in response.data)
+        self.assertTrue("submitted_by" in response.data)
+        self.assertEqual(response.data["submitted_by"], self.user.email)
+        self.assertEqual(response.status_code, 201)
