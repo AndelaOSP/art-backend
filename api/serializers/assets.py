@@ -482,6 +482,7 @@ class AssetIncidentReportSerializer(serializers.ModelSerializer):
             "loss_of_property",
             "witnesses",
             "submitted_by",
+            "police_abstract",
             "police_abstract_obtained",
             "created_at",
         )

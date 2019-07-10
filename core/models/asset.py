@@ -20,6 +20,15 @@ slack = SlackIntegration()
 logger = logging.getLogger(__name__)
 
 
+def user_abstract(user, filename):
+    """Return user abstract name.
+
+    :params: user -> user object
+    :params: filename -> string
+    """
+    return f'user_{user}_{filename}'
+
+
 class AssetCategory(models.Model):
     """ Stores all asset categories """
 
@@ -595,8 +604,11 @@ class AssetIncidentReport(models.Model):
     loss_of_property = models.TextField(null=True, blank=True)
     witnesses = models.TextField(null=True, blank=True)
     police_abstract_obtained = models.CharField(max_length=255)
-    submitted_by = models.ForeignKey("User", null=True, on_delete=models.PROTECT)
+    submitted_by = models.ForeignKey('User', null=True, on_delete=models.PROTECT)
     created_at = models.DateTimeField(default=datetime.now, editable=False)
+    police_abstract = models.FileField(
+        'Police Abstract', upload_to=user_abstract, blank=True
+    )
 
     def __str__(self):
         return f"{self.incident_type}: {self.asset}"

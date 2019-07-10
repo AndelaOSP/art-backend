@@ -9,6 +9,7 @@ from itertools import chain
 # Third-Party Imports
 import xlsxwriter
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.core.validators import ValidationError
 from django.db.models import Q
 from django.db.utils import IntegrityError
@@ -60,6 +61,7 @@ from core.constants import (
     STATUS,
     VERIFIED,
 )
+from core.models.asset import user_abstract
 from core.slack_bot import SlackIntegration
 
 slack = SlackIntegration()
@@ -300,7 +302,15 @@ class AssetIncidentReportViewSet(ModelViewSet):
         return self.queryset.none()
 
     def perform_create(self, serializer):
-        serializer.save(submitted_by=self.request.user)
+        abstract = self.request.FILES.get('police_abstract', None)
+        user = self.request.user
+        if abstract:
+            abstract_name = user_abstract(user, abstract.name)
+            serializer.save(submitted_by=user, police_abstract=abstract_name)
+            fs = FileSystemStorage()
+            fs.save(abstract_name, abstract)
+        else:
+            serializer.save(submitted_by=user)
 
 
 class AssetSlackIncidentReportViewSet(ModelViewSet):
