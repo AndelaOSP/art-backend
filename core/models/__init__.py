@@ -24,3 +24,4 @@ from .centre import (  # noqa: F401
     OfficeWorkspace,
 )
 from .user import AISUserSync, APIUser, User, UserFeedback  # noqa: F401
+from .history import History

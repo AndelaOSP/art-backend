@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "corsheaders",
     "django_filters",
+    "crequest"
 ]
 
 AUTH_USER_MODEL = "core.User"
@@ -76,6 +77,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "crequest.middleware.CrequestMiddleware"
 ]
 
 ROOT_URLCONF = "art.urls"

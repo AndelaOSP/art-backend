@@ -42,6 +42,7 @@ from api.views import (
     UserFeedbackViewSet,
     UserGroupViewSet,
     UserViewSet,
+    HistoryViewSet
 )
 
 schema_view = get_schema_view(
@@ -103,6 +104,10 @@ router.register("office-blocks", OfficeBlockViewSet, "office-blocks")
 router.register("office-floors", OfficeFloorViewSet, "office-floors")
 router.register("office-sections", OfficeFloorSectionViewSet, "floor-sections")
 router.register("office-workspaces", OfficeWorkspaceViewSet, "office-workspaces")
+
+#history
+router.register("history", HistoryViewSet, "history")
+
 
 urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),

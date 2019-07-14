@@ -37,3 +37,4 @@ from .users import (  # noqa: F401
     UserGroupViewSet,
     UserViewSet,
 )
+from .history import  HistoryViewSet

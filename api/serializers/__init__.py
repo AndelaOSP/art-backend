@@ -33,3 +33,4 @@ from .users import (  # noqa: F401
     UserSerializer,
     UserSerializerWithAssets,
 )
+from .history import HistorySerializer
