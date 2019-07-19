@@ -65,7 +65,7 @@ class AssetTestCase(APIBaseTestCase):
     ):
         mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.get(
-            "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
+            "{}?search={}".format(self.asset_urls, self.asset.asset_code),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(self.asset.asset_code, response.data["results"][0]["asset_code"])
@@ -77,7 +77,7 @@ class AssetTestCase(APIBaseTestCase):
     ):
         mock_verify_id_token.return_value = {"email": self.security_user.email}
         response = client.get(
-            "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
+            "{}?search={}".format(self.asset_urls, self.asset.asset_code),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -89,7 +89,7 @@ class AssetTestCase(APIBaseTestCase):
     ):
         mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.get(
-            "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
+            "{}?search={}".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(
@@ -103,7 +103,7 @@ class AssetTestCase(APIBaseTestCase):
     ):
         mock_verify_id_token.return_value = {"email": self.security_user.email}
         response = client.get(
-            "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
+            "{}?search={}".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
