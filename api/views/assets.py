@@ -16,7 +16,7 @@ from django.db.utils import IntegrityError
 from django.http import FileResponse
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -127,6 +127,8 @@ class AssetViewSet(ModelViewSet):
     filterset_class = AssetFilter
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ["get"]
+    filter_backends = (SearchFilter,)
+    search_fields = ('asset_code', 'serial_number',)
 
     def get_queryset(self):
         user = self.request.user
@@ -192,7 +194,6 @@ class AssetLogViewSet(ModelViewSet):
     queryset = models.AssetLog.objects.all()
     permission_classes = [IsAdminUser | IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
-    filterset_class = AssetLogFilter
     http_method_names = ["get", "post"]
 
     def get_queryset(self):
@@ -301,6 +302,8 @@ class AssetIncidentReportViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ["get", "post"]
+    filter_backends = (SearchFilter,)
+    search_fields = ('asset_code', 'serial_number',)
 
     def get_queryset(self):
         user_location = self.request.user.location

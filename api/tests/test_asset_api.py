@@ -470,3 +470,58 @@ class AssetTestCase(APIBaseTestCase):
             str(response.data["detail"]),
             "Operation not permitted. You are not authorised.",
         )
+        self.assertEqual(response.status_code, 200)
+
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_asset_search_endpoint(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        self.admin_user.is_securityuser = True
+        self.admin_user.save()
+        self.admin_user.refresh_from_db()
+
+        asset_one = Asset.objects.create(
+            asset_code="ANDELA001",
+            serial_number="SN_ART_001",
+            active=True,
+            model_number=self.assetmodel,
+            purchase_date="2018-07-10",
+            asset_location=self.centre,
+            department=self.department,
+        )
+
+        asset_two = Asset.objects.create(
+            asset_code="ANDELA002",
+            serial_number="RANDOM_SERIAL_NUMBER",
+            model_number=self.assetmodel,
+            purchase_date="2018-07-10",
+            asset_location=self.centre,
+            department=self.department,
+        )
+
+        asset_three = Asset.objects.create(
+            asset_code="NCOOO",
+            serial_number="SN_ART_002",
+            model_number=self.assetmodel,
+            purchase_date="2018-07-10",
+            asset_location=self.centre,
+            department=self.department,
+        )
+        response = client.get(
+            "{}?search={}".format(self.asset_urls, "ANDELA"),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        # return only assets with ANDELA match which is just asset_one and asset_two
+        self.assertEqual(response.data["count"], 2)
+        self.assertEqual(response.data.get('results')[1].get('uuid'), str(asset_one.uuid))
+        self.assertEqual(response.data.get('results')[0].get('uuid'), str(asset_two.uuid))
+
+
+        response = client.get(
+            "{}?search={}".format(self.asset_urls, "SN_ART"),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        # return only assets with SN_ART match which is just asset_one and asset_three
+        self.assertEqual(response.data["count"], 2)
+        self.assertEqual(response.data.get('results')[1].get('uuid'), str(asset_one.uuid))
+        self.assertEqual(response.data.get('results')[0].get('uuid'), str(asset_three.uuid))
