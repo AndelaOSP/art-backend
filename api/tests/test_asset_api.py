@@ -472,7 +472,6 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_search_endpoint(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -513,9 +512,12 @@ class AssetTestCase(APIBaseTestCase):
         )
         # return only assets with ANDELA match which is just asset_one and asset_two
         self.assertEqual(response.data["count"], 2)
-        self.assertEqual(response.data.get('results')[1].get('uuid'), str(asset_one.uuid))
-        self.assertEqual(response.data.get('results')[0].get('uuid'), str(asset_two.uuid))
-
+        self.assertEqual(
+            response.data.get('results')[1].get('uuid'), str(asset_one.uuid)
+        )
+        self.assertEqual(
+            response.data.get('results')[0].get('uuid'), str(asset_two.uuid)
+        )
 
         response = client.get(
             "{}?search={}".format(self.asset_urls, "SN_ART"),
@@ -523,5 +525,9 @@ class AssetTestCase(APIBaseTestCase):
         )
         # return only assets with SN_ART match which is just asset_one and asset_three
         self.assertEqual(response.data["count"], 2)
-        self.assertEqual(response.data.get('results')[1].get('uuid'), str(asset_one.uuid))
-        self.assertEqual(response.data.get('results')[0].get('uuid'), str(asset_three.uuid))
+        self.assertEqual(
+            response.data.get('results')[1].get('uuid'), str(asset_one.uuid)
+        )
+        self.assertEqual(
+            response.data.get('results')[0].get('uuid'), str(asset_three.uuid)
+        )

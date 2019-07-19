@@ -128,7 +128,7 @@ class AssetViewSet(ModelViewSet):
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ["get"]
     filter_backends = (SearchFilter,)
-    search_fields = ('asset_code', 'serial_number',)
+    search_fields = ['asset_code', 'serial_number']
 
     def get_queryset(self):
         user = self.request.user
@@ -194,6 +194,7 @@ class AssetLogViewSet(ModelViewSet):
     queryset = models.AssetLog.objects.all()
     permission_classes = [IsAdminUser | IsSecurityUser]
     authentication_classes = (FirebaseTokenAuthentication,)
+    filterset_class = AssetLogFilter
     http_method_names = ["get", "post"]
 
     def get_queryset(self):
@@ -302,8 +303,6 @@ class AssetIncidentReportViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     authentication_classes = [FirebaseTokenAuthentication]
     http_method_names = ["get", "post"]
-    filter_backends = (SearchFilter,)
-    search_fields = ('asset_code', 'serial_number',)
 
     def get_queryset(self):
         user_location = self.request.user.location
