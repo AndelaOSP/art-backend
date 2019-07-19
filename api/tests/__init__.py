@@ -263,6 +263,7 @@ class APIBaseTestCase(TestCase):
         )
         cls.downloads_url = reverse("download-files")
         cls.history_url = reverse("history-list")
+        cls.assets_url = reverse("assets")
 
     @classmethod
     def tearDownClass(cls):

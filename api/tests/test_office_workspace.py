@@ -48,7 +48,7 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
         self.assertEqual(response.status_code, 400)
 
     @patch("api.authentication.auth.verify_id_token")
-    def est_can_get_workspacet(self, mock_verify_token):
+    def test_can_get_workspace(self, mock_verify_token):
         mock_verify_token.return_value = {"email": self.admin_user.email}
         office_workspace_url = reverse(
             "office-workspaces-detail", args={self.office_workspace.id}
@@ -140,3 +140,13 @@ class OfficeWorkspaceAPITest(APIBaseTestCase):
         )
         self.assertEqual(response.data, {"detail": "Deleted Successfully"})
         self.assertEqual(response.status_code, 204)
+
+    # def test_list_assigned_assets(self):
+    #     mock_verify_id_token.return_value = {"email": self.admin_user.email}
+    #     res = client.post(
+    #         self.assets_url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
+    #     )
+    #     # import pdb; pdb.set_trace()
+
+    #     # self.assertEqual(res.data, {"count": 0, "next": null, "previous": null, "results": []})
+    #     # self.assertEqual(res.status_code, 200)
