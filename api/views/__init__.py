@@ -29,7 +29,7 @@ from .assets import (  # noqa: F401
     ManageAssetViewSet,
     StateTransitionViewset,
 )
-from .history import HistoryViewSet
+from .history import HistoryViewSet # noqa: F401
 from .users import (  # noqa: F401
     AvailableFilterValues,
     SecurityUserEmailsViewSet,

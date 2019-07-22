@@ -23,5 +23,5 @@ from .centre import (  # noqa: F401
     OfficeFloorSection,
     OfficeWorkspace,
 )
+from .history import History  # noqa: F401
 from .user import AISUserSync, APIUser, User, UserFeedback  # noqa: F401
-from .history import History
