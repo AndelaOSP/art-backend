@@ -23,7 +23,7 @@ class HistoryModelTest(CoreBaseTestCase):
         """test cannot add history without action name"""
         count = History.objects.count()
         with self.assertRaises(ValueError):
-            history = History.objects.create(
+            History.objects.create(
                 table_name="core_asset", user="oiuyt", item_id="12", body="body"
             )
         self.assertEqual(History.objects.count(), count)
