@@ -1,3 +1,4 @@
+# Third-Party Imports
 from django.db import models
 
 
@@ -7,7 +8,7 @@ class History(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     item_id = models.CharField(max_length=255, editable=False)
     action = models.CharField(max_length=25, editable=False)
-    body= models.TextField(default ='',editable=False)
+    body = models.TextField(default="", editable=False)
 
     class Meta:
         verbose_name_plural = "History model"

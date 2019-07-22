@@ -3,9 +3,10 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 # App Imports
+from api.authentication import FirebaseTokenAuthentication
 from api.serializers import HistorySerializer
 from core import models
-from api.authentication import FirebaseTokenAuthentication
+
 
 class HistoryViewSet(ModelViewSet):
     serializer_class = HistorySerializer
