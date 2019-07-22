@@ -3,11 +3,11 @@ from django.db import models
 
 
 class History(models.Model):
-    table_name = models.CharField(max_length=255, editable=False)
-    user = models.ForeignKey("User", on_delete=models.PROTECT, null=True)
+    table_name = models.CharField(max_length=255, blank=False, editable=False)
+    user = models.ForeignKey("User", on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    item_id = models.CharField(max_length=255, editable=False)
-    action = models.CharField(max_length=25, editable=False)
+    item_id = models.CharField(max_length=255, null=False, blank=False, editable=False)
+    action = models.CharField(max_length=25, null=False, blank=False, editable=False)
     body = models.TextField(default="", editable=False)
 
     class Meta:

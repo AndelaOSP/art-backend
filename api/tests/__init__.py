@@ -150,6 +150,13 @@ class APIBaseTestCase(TestCase):
             name="IMN50987345", asset_make=cls.asset_make
         )
 
+        cls.history1 = apps.get_model("core", "History").objects.create(
+            table_name="core_country",
+            user=cls.user,
+            item_id="12",
+            action="POST",
+            body="Uganda",
+        )
         cls.asset = apps.get_model("core", "Asset").objects.create(
             asset_code="IC001455",
             serial_number="SN00123455",
@@ -263,6 +270,7 @@ class APIBaseTestCase(TestCase):
             "andela-centres-office-blocks", kwargs={"pk": str(cls.other_centre.id)}
         )
         cls.downloads_url = reverse("download-files")
+        cls.history_url = reverse("history-list")
 
     @classmethod
     def tearDownClass(cls):

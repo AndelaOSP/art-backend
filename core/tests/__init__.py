@@ -66,6 +66,14 @@ class CoreBaseTestCase(TestCase):
             is_securityuser=True,
         )
 
+        cls.history = apps.get_model("core", "History").objects.create(
+            table_name="core_asset",
+            user=cls.user,
+            item_id="123",
+            action="POST",
+            body="body",
+        )
+
         cls.category = apps.get_model("core", "AssetCategory").objects.create(
             name="Computer"
         )
