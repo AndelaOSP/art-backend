@@ -141,7 +141,6 @@ class AllocationTestCase(APIBaseTestCase):
 
     @patch("api.authentication.auth.verify_id_token")
     def test_filter_allocations_by_asset_owner(self, mock_verify_id_token):
-
         mock_verify_id_token.return_value = {"email": self.other_user.email}
         data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
         client.post(
@@ -162,7 +161,6 @@ class AllocationTestCase(APIBaseTestCase):
 
     @patch("api.authentication.auth.verify_id_token")
     def test_filter_allocations_by_workspace(self, mock_verify_id_token):
-
         mock_verify_id_token.return_value = {"email": self.other_user.email}
         workspace = OfficeWorkspace.objects.create(
             name="4E", section=self.floor_section

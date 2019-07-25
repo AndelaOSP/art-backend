@@ -25,7 +25,6 @@ class AssetsUploadTestCase(APIBaseTestCase):
     def test_authenticated_user_can_upload_csv_file_to_save_assets(
         self, mock_verify_id_token
     ):
-
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         data = {}
         count = Asset.objects.count()
@@ -161,7 +160,6 @@ class AssetsUploadTestCase(APIBaseTestCase):
 
     @patch("api.authentication.auth.verify_id_token")
     def test_download_non_existing_file_fails(self, mock_verify_id_token):
-
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
 
         response = client.get(
@@ -177,7 +175,6 @@ class AssetsUploadTestCase(APIBaseTestCase):
 
     @patch("api.authentication.auth.verify_id_token")
     def test_download_existing_file_succeeds(self, mock_verify_id_token):
-
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
 
         response = client.get(

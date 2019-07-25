@@ -8,6 +8,7 @@ from .andela_centres import (  # noqa: F401
     OfficeFloorSectionSerializer,
     OfficeFloorSerializer,
     OfficeWorkspaceSerializer,
+    TeamSerializer,
 )
 from .assets import (  # noqa: F401
     AllocationsSerializer,

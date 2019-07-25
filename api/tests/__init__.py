@@ -59,6 +59,9 @@ class APIBaseTestCase(TestCase):
         cls.department_travel = apps.get_model("core", "Department").objects.create(
             name="Travel"
         )
+        cls.departmental_team = apps.get_model(
+            "core", "DepartmentalTeam"
+        ).objects.create(name="Accounts", department=cls.department)
         cls.office_block = apps.get_model("core", "OfficeBlock").objects.create(
             name="Epic", location=cls.centre
         )
@@ -171,6 +174,9 @@ class APIBaseTestCase(TestCase):
         cls.asset_assignee = apps.get_model("core", "AssetAssignee").objects.get(
             user=cls.user
         )
+        cls.asset_assignee_team = apps.get_model(
+            "core", "AssetAssignee"
+        ).objects.create(team=cls.departmental_team)
         cls.asset_2 = apps.get_model("core", "Asset").objects.create(
             asset_code="I0014567890",
             serial_number="SN01234567890",
@@ -240,6 +246,7 @@ class APIBaseTestCase(TestCase):
         cls.centre_url = reverse("andela-centres-list")
         cls.country_url = reverse("countries-list")
         cls.department_url = reverse("departments-list")
+        cls.departmental_teams_url = reverse("departmental-teams-list")
         cls.feedback_url = reverse("user-feedback-list")
         cls.filter_values_urls = reverse("available-filters")
         cls.floor_number_url = reverse("office-floors-list")

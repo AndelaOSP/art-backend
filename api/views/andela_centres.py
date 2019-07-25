@@ -23,6 +23,7 @@ from api.serializers import (
     OfficeFloorSerializer,
     OfficeWorkspaceSerializer,
 )
+from api.serializers.andela_centres import TeamDetailedSerializer, TeamSerializer
 from core import models
 
 logger = logging.getLogger(__name__)
@@ -137,6 +138,7 @@ class OfficeWorkspaceViewSet(ModelViewSet):
 class DepartmentViewSet(ModelViewSet):
     serializer_class = DepartmentSerializer
     queryset = models.Department.objects.all()
+
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
 
@@ -150,3 +152,14 @@ class DepartmentViewSet(ModelViewSet):
         self.perform_destroy(instance)
         data = {"detail": "Deleted Successfully"}
         return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+
+
+class TeamViewSet(ModelViewSet):
+    queryset = models.DepartmentalTeam.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return TeamDetailedSerializer
+        return TeamSerializer
