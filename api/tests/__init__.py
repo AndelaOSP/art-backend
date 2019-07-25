@@ -149,14 +149,6 @@ class APIBaseTestCase(TestCase):
         cls.assetmodel = apps.get_model("core", "AssetModelNumber").objects.create(
             name="IMN50987345", asset_make=cls.asset_make
         )
-
-        cls.history1 = apps.get_model("core", "History").objects.create(
-            table_name="core_country",
-            user=cls.user,
-            item_id="12",
-            action="POST",
-            body="Uganda",
-        )
         cls.asset = apps.get_model("core", "Asset").objects.create(
             asset_code="IC001455",
             serial_number="SN00123455",
