@@ -1,6 +1,9 @@
 # App Imports
-from core.tests import CoreBaseTestCase
+# Third-Party Imports
 from django.apps import apps
+
+from core.tests import CoreBaseTestCase
+
 from ..models import History
 
 
