@@ -1,23 +1,18 @@
 # Standard Library
 import threading
 
-try:
-    from django.utils.deprecation import MiddlewareMixin
-except ImportError:
-    MiddlewareMixin = object
 
-
-class RequestMiddleware(MiddlewareMixin):
+class RequestMiddleware(object):
     """Class for getting the current request"""
 
     _requestdata = {}
 
-    def process_request(self, request):
-        """Store the current request."""
-        self._requestdata[threading.current_thread()] = request
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-    def process_response(self, request, response):
-        """remove the current request to avoid leaking memory"""
+    def __call__(self, request):
+        self._requestdata[threading.current_thread()] = request
+        response = self.get_response(request)
         self._requestdata.pop(threading.current_thread(), None)
         return response
 
