@@ -38,6 +38,8 @@ PROCESSOR_TYPE = (
     ("Intel core i7", "Intel core i7"),
 )
 
+ACTIONS = (("POST", "POST"), ("DELETE", "DELETE"), ("PUT", "PUT"))
+
 PROCESSOR_SPEED = ((1.8, "1.8GHz"), (2.3, "2.3GHz"), (3.0, "3.0GHz"), (3.4, "3.4GHz"))
 
 SCREEN_SIZES = ((13, '13"'), (15, '15"'), (17, '17"'))

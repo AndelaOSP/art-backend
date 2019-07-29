@@ -31,6 +31,7 @@ from api.views import (
     DepartmentViewSet,
     ExportAssetsDetails,
     FileDownloads,
+    HistoryViewSet,
     ManageAssetViewSet,
     OfficeBlockViewSet,
     OfficeFloorSectionViewSet,
@@ -103,6 +104,10 @@ router.register("office-blocks", OfficeBlockViewSet, "office-blocks")
 router.register("office-floors", OfficeFloorViewSet, "office-floors")
 router.register("office-sections", OfficeFloorSectionViewSet, "floor-sections")
 router.register("office-workspaces", OfficeWorkspaceViewSet, "office-workspaces")
+
+# history
+router.register("history", HistoryViewSet, "history")
+
 
 urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),

@@ -26,6 +26,7 @@ from .assets import (  # noqa: F401
     AssetTypeSerializer,
     StateTransitionSerializer,
 )
+from .history import HistorySerializer  # noqa: F401
 from .users import (  # noqa: F401
     SecurityUserEmailsSerializer,
     UserFeedbackSerializer,
