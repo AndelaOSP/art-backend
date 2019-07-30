@@ -98,10 +98,14 @@ jobs:
       - *cmd_restore_cache
       - attach_workspace:
           at: ~/art-backend/tmp
-      - run:
-          name: run tests
-          command: |
-            pipenv run coverage run --source core,api -m pytest --durations=0
+#      - run:
+#          name: run migrations
+#          command: |
+#            pipenv run python manage.py migrate
+#      - run:
+#          name: run tests
+#          command: |
+#            pipenv run coverage run --source core,api -m pytest --durations=0
       - run:
           name: save coverage
           command: pipenv run coverage xml -o ./tmp/coverage.xml
@@ -162,7 +166,7 @@ jobs:
           name: deploying application to production
           command: |
             bash scripts/deploy.sh
-            
+
   release_notes:
     <<: *default
     steps:

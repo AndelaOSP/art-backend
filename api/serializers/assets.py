@@ -28,6 +28,12 @@ class AssetSerializer(serializers.ModelSerializer):
         queryset=models.Department.objects.all(),
         required=False,
     )
+    team_name = serializers.SlugRelatedField(
+        read_only=False,
+        slug_field="name",
+        queryset=models.DepartmentalTeam.objects.all(),
+        required=False,
+    )
 
     model_number = serializers.SlugRelatedField(
         queryset=models.AssetModelNumber.objects.all(), slug_field="name"
@@ -59,6 +65,7 @@ class AssetSerializer(serializers.ModelSerializer):
             "verified",
             "invoice_receipt",
             "department",
+            "team_name",
             "active",
             "paid",
             "expiry_date",
@@ -105,6 +112,10 @@ class AssetSerializer(serializers.ModelSerializer):
             from api.serializers import UserSerializer
 
             serialized_data = UserSerializer(obj.assigned_to.user)
+        elif obj.assigned_to.team:
+            from api.serializers import TeamSerializer
+
+            serialized_data = TeamSerializer(obj.assigned_to.team)
         else:
             return None
         return serialized_data.data
@@ -190,6 +201,9 @@ class AssetAssigneeSerializer(serializers.ModelSerializer):
 
         elif obj.workspace:
             return obj.workspace.name
+
+        elif obj.team:
+            return obj.team.name
 
 
 class AssetLogSerializer(serializers.ModelSerializer):

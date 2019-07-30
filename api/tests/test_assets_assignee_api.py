@@ -72,7 +72,9 @@ class AssetAssigneeAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn("assignee", response.data["results"][0].keys())
-        self.assertEqual(len(response.data["results"]), AssetAssignee.objects.count())
+        self.assertEqual(
+            len(response.data["results"]), AssetAssignee.objects.count() - 1
+        )
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
