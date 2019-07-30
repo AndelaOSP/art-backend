@@ -18,7 +18,6 @@ class SecurityUserTestCase(APIBaseTestCase):
     def setUp(self):
         api_user = APIUser.objects.create(name="test_api_app")
         url = "/api/v1/o/token/"
-
         payload = {
             "grant_type": "client_credentials",
             "client_secret": api_user.client_secret,
