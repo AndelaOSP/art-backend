@@ -7,8 +7,9 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 # App Imports
+from api.serializers import AssetSerializer
 from api.tests import APIBaseTestCase
-from core.models import AllocationHistory
+from core.models import AllocationHistory, AssetStatus
 
 client = APIClient()
 
@@ -40,7 +41,7 @@ class DepartmentTeamTestCase(APIBaseTestCase):
         self, mock_verify_token
     ):
         mock_verify_token.return_value = {"email": self.admin_user.email}
-        url = "{}/{}/".format(self.departmental_teams_url, self.departmental_team.id)
+        url = "{}/{}/".format(self.departmental_teams_url, self.departmental_team_1.id)
         response = client.get(
             url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
@@ -62,20 +63,24 @@ class DepartmentTeamTestCase(APIBaseTestCase):
             department=self.department,
             team_name=self.departmental_team,
         )
+        AssetStatus.objects.create(asset=new_asset, current_status="Available")
         allocation = AllocationHistory.objects.create(
             asset=new_asset, current_assignee=self.asset_assignee_team
         )
         # authenticate a user
         mock_verify_token.return_value = {"email": self.admin_user.email}
         url = "{}/{}/".format(self.departmental_teams_url, self.departmental_team.id)
-        response = client.get(
+        team_response = client.get(
             url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
-        data = response.json()
-        assert response.status_code == status.HTTP_200_OK
+        asset = AssetSerializer(new_asset).data
+        assert asset['assigned_to']['name'] == self.departmental_team.name
+
+        data = team_response.json()
+        assert team_response.status_code == status.HTTP_200_OK
         assert "assets_assigned" in data
         assert len(data['assets_assigned']['results']) == 1
-        # apps.get_model("core", "Asset").objects.get(id=new_asset.id).delete()
+
         AllocationHistory.objects.get(id=allocation.id).delete()
 
     @patch("api.authentication.auth.verify_id_token")

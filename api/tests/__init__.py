@@ -62,6 +62,9 @@ class APIBaseTestCase(TestCase):
         cls.departmental_team = apps.get_model(
             "core", "DepartmentalTeam"
         ).objects.create(name="Accounts", department=cls.department)
+        cls.departmental_team_1 = apps.get_model(
+            "core", "DepartmentalTeam"
+        ).objects.create(name="Travels", department=cls.department)
         cls.office_block = apps.get_model("core", "OfficeBlock").objects.create(
             name="Epic", location=cls.centre
         )

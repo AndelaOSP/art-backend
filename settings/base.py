@@ -40,8 +40,8 @@ MEDIA_URL = "/media/"
 
 SECRET_KEY = config("SECRET_KEY")
 
-DATABASES = {"default": dj_database_url.config()}
-# DATABASES = {"default": dj_database_url.config(default=config('DATABASE_URL'))}
+# DATABASES = {"default": dj_database_url.config()}
+DATABASES = {"default": dj_database_url.config(default=config('DATABASE_URL'))}
 ALLOWED_HOSTS = config("HOST_IP", cast=Csv())
 # Application definition
 
