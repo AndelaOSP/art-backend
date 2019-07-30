@@ -27,6 +27,7 @@ from .assets import (  # noqa: F401  # isort:skip
     StateTransitionSerializer,
 )
 from .history import HistorySerializer  # noqa: F401
+
 from .users import (  # noqa: F401  # isort:skip
     UserFeedbackSerializer,
     UserGroupSerializer,
