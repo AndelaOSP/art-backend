@@ -13,15 +13,14 @@ from rest_framework.viewsets import ModelViewSet
 # App Imports
 from api.authentication import FirebaseTokenAuthentication
 from api.filters import UserFilter
-from api.permissions import IsApiUser
-from api.serializers import (
-    SecurityUserEmailsSerializer,
+from core import models
+
+from api.serializers import (  # isort:skip
     UserFeedbackSerializer,
     UserGroupSerializer,
     UserSerializer,
     UserSerializerWithAssets,
 )
-from core import models
 
 logger = logging.getLogger(__name__)
 
@@ -39,19 +38,6 @@ class UserViewSet(ModelViewSet):
         if location:
             return self.queryset.filter(location=location)
         return self.queryset.none()
-
-
-class SecurityUserEmailsViewSet(ModelViewSet):
-    serializer_class = SecurityUserEmailsSerializer
-    http_method_names = ["get"]
-    permission_classes = (IsApiUser,)
-
-    def list(self, request, *args, **kwargs):
-        list_of_emails = [
-            user.email for user in models.User.objects.filter(is_securityuser=True)
-        ]
-
-        return Response({"emails": list_of_emails}, status=status.HTTP_200_OK)
 
 
 class UserFeedbackViewSet(ModelViewSet):

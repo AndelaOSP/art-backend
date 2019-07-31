@@ -32,7 +32,6 @@ from .assets import (  # noqa: F401
 from .history import HistoryViewSet  # noqa: F401
 from .users import (  # noqa: F401
     AvailableFilterValues,
-    SecurityUserEmailsViewSet,
     SecurityUserViewSet,
     UserFeedbackViewSet,
     UserGroupViewSet,
