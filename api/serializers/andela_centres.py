@@ -225,7 +225,7 @@ class TeamDetailedSerializer(serializers.ModelSerializer):
 
         team_assignee = models.AssetAssignee.objects.filter(team=obj).first()
         # The following condition introduced to make sure that results are not returned if there are orphan
-        # records in the that have no assignee (assigned_to field is optional so its possible to have an empty
+        # records in the database that have no assignee (assigned_to field is optional so its possible to have an empty
         # field even when its not necessarily assigned to the current team
         if team_assignee:
             assets = models.Asset.objects.filter(assigned_to=team_assignee)

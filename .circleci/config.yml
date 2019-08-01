@@ -99,11 +99,6 @@ jobs:
       - attach_workspace:
           at: ~/art-backend/tmp
       - run:
-          name: run migrations
-          command: |
-            pipenv run python manage.py makemigrations
-            pipenv run python manage.py migrate
-      - run:
           name: run tests
           command: |
             pipenv run coverage run --source core,api -m pytest --durations=0
