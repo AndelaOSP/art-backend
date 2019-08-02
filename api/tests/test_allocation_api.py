@@ -13,33 +13,7 @@ from core.models import AllocationHistory, AssetAssignee, Department, OfficeWork
 User = get_user_model()
 client = APIClient()
 
-
-class AllocationTestCase(APIBaseTestCase):
-    def test_non_authenticated_user_view_assets(self):
-        response = client.get(self.allocations_urls)
-        self.assertEqual(
-            response.data, {"detail": "Authentication credentials were not provided."}
-        )
-
-    @patch("api.authentication.auth.verify_id_token")
-    def test_get_allocations(self, mock_verify_id_token):
-        """Test get allocations"""
-
-        mock_verify_id_token.return_value = {"email": self.other_user.email}
-        AllocationHistory.objects.create(
-            asset=self.asset,
-            current_assignee=self.asset_assignee,
-            assigner=self.other_user,
-        )
-        response = client.get(
-            self.allocations_urls, HTTP_AUTHORIZATION=f"Token {self.token_other_user}"
-        )
-
-        data = response.data["results"]
-        self.assertEqual(len(data), AllocationHistory.objects.count())
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data[0]["assigner"], self.other_user.email)
-
+class Post_AllocationTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_post_allocation_of_asset_to_a_user(self, mock_verify_id_token):
         """Test post new allocation"""
@@ -51,6 +25,7 @@ class AllocationTestCase(APIBaseTestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
+
         self.assertEqual(AllocationHistory.objects.count(), count + 1)
         self.assertEqual(
             response.data["asset"],
@@ -75,6 +50,10 @@ class AllocationTestCase(APIBaseTestCase):
             self.allocations_urls,
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(
+            response.data["asset"],
+            f"{self.asset.serial_number} - {self.asset.asset_code}",
         )
         self.assertEqual(response.data["previous_assignee"], self.user.email)
         self.assertEqual(response.status_code, 201)
@@ -138,6 +117,27 @@ class AllocationTestCase(APIBaseTestCase):
         self.assertEqual(response.data["current_status"], "Allocated")
         self.assertEqual(response.data["serial_number"], self.asset.serial_number)
         self.assertEqual(response.status_code, 200)
+
+
+class Get_AllocationTestCase(APIBaseTestCase):
+    @patch("api.authentication.auth.verify_id_token")
+    def test_get_allocations(self, mock_verify_id_token):
+        """Test get allocations"""
+
+        mock_verify_id_token.return_value = {"email": self.other_user.email}
+        AllocationHistory.objects.create(
+            asset=self.asset,
+            current_assignee=self.asset_assignee,
+            assigner=self.other_user,
+        )
+        response = client.get(
+            self.allocations_urls, HTTP_AUTHORIZATION=f"Token {self.token_other_user}"
+        )
+
+        data = response.data["results"]
+        self.assertEqual(len(data), AllocationHistory.objects.count())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data[0]["assigner"], self.other_user.email)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_filter_allocations_by_asset_owner(self, mock_verify_id_token):
@@ -250,3 +250,61 @@ class AllocationTestCase(APIBaseTestCase):
             response.data["results"][0]["asset"],
             f"{self.asset.serial_number} - {self.asset.asset_code}",
         )
+
+    def test_non_authenticated_user_view_assets(self):
+        response = client.get(self.allocations_urls)
+        self.assertEqual(
+            response.data, {"detail": "Authentication credentials were not provided."}
+        )
+
+
+class Update_AllocationTestCase(APIBaseTestCase):
+    @patch("api.authentication.auth.verify_id_token")
+    def test_cannot_update_allocations(self, mock_verify_id_token):
+        """Test cannot update allocations"""
+
+        mock_verify_id_token.return_value = {"email": self.other_user.email}
+        allocation=AllocationHistory.objects.create(
+            asset=self.asset,
+            current_assignee=self.asset_assignee,
+            assigner=self.other_user,
+        )
+        allocations_url = (
+            f"{self.allocations_urls}/?asset_serial_number={allocation.id}"
+        )
+        data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
+        response = client.put(
+            allocations_url,
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.data['detail'], 'Method "PUT" not allowed.')
+
+
+class Delete_AllocationTestCase(APIBaseTestCase):
+    @patch("api.authentication.auth.verify_id_token")
+    def test_cannot_delete_allocations(self, mock_verify_id_token):
+        """Test cannot delete allocations"""
+
+        mock_verify_id_token.return_value = {"email": self.other_user.email}
+        allocation=AllocationHistory.objects.create(
+            asset=self.asset,
+            current_assignee=self.asset_assignee,
+            assigner=self.other_user,
+        )
+        allocations_url = (
+            f"{self.allocations_urls}/?asset_serial_number={allocation.id}"
+        )
+        data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
+        response = client.delete(
+            allocations_url,
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.data['detail'], 'Method "DELETE" not allowed.')        
+
+            
+
+
