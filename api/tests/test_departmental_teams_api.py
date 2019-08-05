@@ -48,18 +48,21 @@ class DepartmentTeamTestCase(APIBaseTestCase):
         )
         data = response.json()
         # return types assertions
-        assert isinstance(data['results'], list)
-        assert isinstance(data['results'][0], dict)
+        self.assertTrue(isinstance(data['results'], list))
+        self.assertTrue(isinstance(data['results'][0], dict))
         # results field assertions
-        assert 'name' in data['results'][0]
-        assert 'description' in data['results'][0]
-        assert 'department' in data['results'][0]
-        assert (
-            data['count']
-            == apps.get_model("core", "DepartmentalTeam").objects.all().count()
+        self.assertEqual(data['results'][0]['name'], self.departmental_team.name)
+        self.assertEqual(
+            data['results'][0]['description'], self.departmental_team.description
         )
-        # status code assertions
-        assert response.status_code == status.HTTP_200_OK
+        self.assertEqual(
+            data['results'][0]['department'], self.departmental_team.department.id
+        )
+        self.assertEqual(
+            data['count'],
+            apps.get_model("core", "DepartmentalTeam").objects.all().count(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_specific_department_teams_with_no_assets_assigned(
@@ -71,11 +74,12 @@ class DepartmentTeamTestCase(APIBaseTestCase):
             url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
         data = response.json()
-        assert response.status_code == status.HTTP_200_OK
-        assert "department" in data
-        assert "members" in data
-        assert "assets_assigned" in data
-        assert len(data['assets_assigned']['results']) == 0
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertTrue("assets_assigned" in data)
+        self.assertEqual(
+            data['assets_assigned']["count"], len(data['assets_assigned']['results'])
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_specific_department_teams_with_assets_assigned(
@@ -103,11 +107,14 @@ class DepartmentTeamTestCase(APIBaseTestCase):
         )
 
         data = team_response.json()
-        assert team_response.status_code == status.HTTP_200_OK
-        assert "department" in data
-        assert "members" in data
-        assert "assets_assigned" in data
-        assert len(data['assets_assigned']['results']) == 1
+        self.assertEqual(team_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(data['department']['id'], self.departmental_team.department.id)
+        self.assertEqual(
+            data['department']['name'], self.departmental_team.department.name
+        )
+
+        self.assertTrue("assets_assigned" in data)
+        self.assertEqual(len(data['assets_assigned']['results']), 1)
 
         AllocationHistory.objects.get(id=allocation.id).delete()
 
@@ -127,8 +134,8 @@ class DepartmentTeamTestCase(APIBaseTestCase):
             asset=asset, current_assignee=self.asset_assignee_team
         )
         asset = AssetSerializer(asset).data
-        assert asset['assigned_to']['name'] == self.departmental_team.name
-        assert asset['team_name'] == self.departmental_team.name
+        self.assertEqual(asset['assigned_to']['name'], self.departmental_team.name)
+        self.assertEqual(asset['team_name'], self.departmental_team.name)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_get_team_members(self, mock_verify_token):
@@ -144,11 +151,11 @@ class DepartmentTeamTestCase(APIBaseTestCase):
             url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
         data = team_response.json()
-        assert "members" in data
-        assert len(data["members"]["results"]) == 1
-        assert data["members"]["results"][0]["email"] == new_user.email
-        assert data["members"]["results"][0]["cohort"] == new_user.cohort
-        assert team_response.status_code == status.HTTP_200_OK
+        self.assertTrue("members" in data)
+        self.assertEqual(len(data["members"]["results"]), 1)
+        self.assertEqual(data["members"]["results"][0]["email"], new_user.email)
+        self.assertEqual(data["members"]["results"][0]["cohort"], new_user.cohort)
+        self.assertEqual(team_response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_add_department_teams(self, mock_verify_token):
@@ -164,8 +171,9 @@ class DepartmentTeamTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         data = response.json()
-        assert isinstance(data, dict)
-        assert 'name' in data
-        assert 'description' in data
-        assert 'department' in data
-        assert response.status_code == status.HTTP_201_CREATED
+
+        self.assertTrue(isinstance(data, dict))
+        self.assertEqual(data['name'], payload['name'])
+        self.assertEqual(data['description'], payload['description'])
+        self.assertEqual(data['department'], payload['department'])
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
