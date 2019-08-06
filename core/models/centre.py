@@ -167,3 +167,18 @@ class OfficeWorkspace(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class DepartmentalTeam(models.Model):
+    """
+    A model representing a team within a department eg catering team under ops
+    """
+
+    name = models.CharField(unique=True, max_length=50, null=False, blank=False)
+    description = models.TextField(null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, editable=False)
+
+    def __str__(self):
+        return self.name

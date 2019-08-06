@@ -240,6 +240,13 @@ class Asset(models.Model):
     department = models.ForeignKey(
         "Department", null=True, blank=True, on_delete=models.PROTECT
     )
+    team_name = models.ForeignKey(
+        "DepartmentalTeam",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        default=None,
+    )
     active = models.BooleanField(blank=True, null=True)
     paid = models.CharField(
         blank=True, null=True, max_length=8, choices=constants.SIMCARD_ASSET_OPTIONS
@@ -327,13 +334,21 @@ class AssetAssigneeOrOwner(models.Model):
     department = models.OneToOneField(
         "Department", null=True, blank=True, on_delete=models.CASCADE
     )
+    team = models.ForeignKey(
+        "DepartmentalTeam",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        default=None,
+        help_text="refers to the specific team within a department to which an asset is assigned",
+    )
     workspace = models.OneToOneField(
         "OfficeWorkspace", null=True, blank=True, on_delete=models.CASCADE
     )
     user = models.OneToOneField("User", null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        assignee = self.workspace or self.department or self.user
+        assignee = self.workspace or self.department or self.user or self.team
         if assignee:
             return str(assignee)
         else:

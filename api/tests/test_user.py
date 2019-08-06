@@ -8,13 +8,19 @@ from rest_framework.test import APIClient
 
 # App Imports
 from api.tests import APIBaseTestCase
-from core.models import AllocationHistory, AndelaCentre, AssetStatus
+from core.models import AllocationHistory, AndelaCentre, AssetStatus, DepartmentalTeam
 
 User = get_user_model()
 client = APIClient()
 
 
 class UserTestCase(APIBaseTestCase):
+    def setUp(self):
+        self.new_team = DepartmentalTeam(
+            name="Accounts", department_id=self.department.id
+        )
+        self.new_team.save()
+
     def test_can_add_user(self):
         users_count_before = User.objects.count()
         new_user = User.objects.create(
@@ -25,6 +31,8 @@ class UserTestCase(APIBaseTestCase):
         self.assertEqual(new_user.cohort, 20)
         self.assertEqual(new_user.password, "devpassword")
         self.assertEqual(users_count_before, users_count_after - 1)
+        # make assertions regarding presence of the team field
+        self.assertEqual(new_user.team, None)
 
     def test_add_user_without_password(self):
         users_count_before = User.objects.count()

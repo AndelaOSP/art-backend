@@ -1,8 +1,11 @@
 # Third-Party Imports
+from django.contrib.auth import get_user_model
 from pycountry import countries
 from rest_framework import serializers
 
 # App Imports
+from api.serializers.assets import DepartmentAssetSerializer
+from api.serializers.users import UserSerializer
 from core import models
 
 
@@ -196,3 +199,56 @@ class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Country
         fields = ("id", "name", "created_at", "last_modified")
+
+
+class TeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.DepartmentalTeam
+        fields = ('name', 'description', 'department')
+
+
+class TeamDetailedSerializer(serializers.ModelSerializer):
+    assets_assigned = serializers.SerializerMethodField()
+    members = serializers.SerializerMethodField()
+    department = DepartmentSerializer()
+
+    class Meta:
+        model = models.DepartmentalTeam
+        fields = ('name', 'description', 'department', 'members', 'assets_assigned')
+
+    def get_assets_assigned(self, obj):
+        """
+        list all assets assigned to  a specific team
+        :param obj:
+        :return:
+        """
+
+        team_assignee = models.AssetAssignee.objects.filter(team=obj).first()
+        # The following condition introduced to make sure that results are not returned if there are orphan
+        # records in the database that have no assignee (assigned_to field is optional so its possible to have an empty
+        # field even when its not necessarily assigned to the current team
+        if team_assignee:
+            assets = models.Asset.objects.filter(assigned_to=team_assignee)
+            page = self.context["view"].paginate_queryset(assets)
+            serialized_assets = DepartmentAssetSerializer(page, many=True)
+            paginated_assets = self.context["view"].get_paginated_response(
+                serialized_assets.data
+            )
+            return paginated_assets.data
+        # return a standardised response to the api with the same structure as when there are results
+        return {"count": 0, "next": None, "previous": None, "results": []}
+
+    def get_members(self, obj):
+        """
+        Get all users belonging to this team
+        :param obj:
+        :return:
+        """
+        User = get_user_model()
+        members = User.objects.filter(team=obj)
+        page = self.context["view"].paginate_queryset(members)
+        serialized_users = UserSerializer(page, many=True)
+        paginated_users = self.context["view"].get_paginated_response(
+            serialized_users.data
+        )
+        return paginated_users.data

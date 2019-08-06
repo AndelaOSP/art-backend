@@ -63,6 +63,9 @@ class User(AbstractUser):
     department = models.ForeignKey(
         "Department", null=True, blank=True, on_delete=models.PROTECT
     )
+    team = models.ForeignKey(
+        "DepartmentalTeam", null=True, blank=True, on_delete=models.PROTECT
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

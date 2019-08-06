@@ -162,7 +162,7 @@ jobs:
           name: deploying application to production
           command: |
             bash scripts/deploy.sh
-            
+
   release_notes:
     <<: *default
     steps:

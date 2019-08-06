@@ -43,6 +43,7 @@ from api.views import (
     UserGroupViewSet,
     UserViewSet,
 )
+from api.views.andela_centres import TeamViewSet
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -96,6 +97,7 @@ router.register("state-transitions", StateTransitionViewset, "state-transitions"
 router.register("andela-centres", AndelaCentreViewset, "andela-centres")
 router.register("countries", CountryViewset, "countries")
 router.register("departments", DepartmentViewSet, "departments")
+router.register("department-teams", TeamViewSet, "departmental-teams")
 router.register("office-blocks", OfficeBlockViewSet, "office-blocks")
 router.register("office-floors", OfficeFloorViewSet, "office-floors")
 router.register("office-sections", OfficeFloorSectionViewSet, "floor-sections")

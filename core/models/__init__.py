@@ -18,6 +18,7 @@ from .centre import (  # noqa: F401
     AndelaCentre,
     Country,
     Department,
+    DepartmentalTeam,
     OfficeBlock,
     OfficeFloor,
     OfficeFloorSection,
