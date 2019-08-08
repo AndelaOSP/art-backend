@@ -15,7 +15,6 @@ from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import FileResponse
 from rest_framework import serializers, status
-from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import get_object_or_404
@@ -136,7 +135,7 @@ class AssetViewSet(ModelViewSet):
             query_filter["assigned_to"] = asset_assignee
             user_id = self.request.query_params.get("user_id")
             if user_id:
-                if user.is_staff == True:
+                if user.is_staff and models.User.objects.filter(id=user_id):
                     query_filter["assigned_to"] = models.AssetAssignee.objects.filter(
                         user=user_id
                     ).first()

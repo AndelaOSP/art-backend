@@ -422,6 +422,17 @@ class AssetTestCase(APIBaseTestCase):
         )
 
     @patch("api.authentication.auth.verify_id_token")
+    def test_fetching_assets_assigned_to_non_existing_user(self, mock_verify_id_token):
+        """Admin should fetch asset detail for any given user."""
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        response = client.get(
+            f"{self.asset_urls}?user_id=1000",
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get("count"), 0)
+
+    @patch("api.authentication.auth.verify_id_token")
     def test_fetching_assets_assigned_to_a_random_user_by_non_admin(
         self, mock_verify_id_token
     ):
@@ -438,6 +449,11 @@ class AssetTestCase(APIBaseTestCase):
             verified=True,
             assigned_to=self.asset_assignee,
         )
+        # assign asset to a user
+        asset.assigned_to = AssetAssignee.objects.filter(
+            user__email=self.normal_admin.email
+        ).first()
+        asset.save()
         response = client.get(
             f"{self.asset_urls}?user_id={self.other_user.id}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
@@ -445,4 +461,3 @@ class AssetTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get("count"), 0)
         self.assertEqual(response.data["results"], [])
-
