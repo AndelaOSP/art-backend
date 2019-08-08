@@ -3,12 +3,13 @@ from unittest.mock import patch
 
 # Third-Party Imports
 from django.contrib.auth import get_user_model
+from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 # App Imports
 from api.tests import APIBaseTestCase
-from core.models import AllocationHistory, Asset, AssetLog, AssetStatus
+from core.models import AllocationHistory, Asset, AssetAssignee, AssetLog, AssetStatus
 
 User = get_user_model()
 client = APIClient()
@@ -34,7 +35,7 @@ class AssetTestCase(APIBaseTestCase):
             self.asset_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
         self.assertIn(self.asset.asset_code, response.data["results"][0].values())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_securityuser_view_assets_in_their_department_and_location(
@@ -46,7 +47,7 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertIn(self.asset.asset_code, str(response.json().values()))
         self.assertEqual(len(response.data["results"]), Asset.objects.count())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_single_asset(self, mock_verify_id_token):
@@ -56,7 +57,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(self.asset.asset_code, response.data.values())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_single_asset_via_asset_code(
@@ -68,7 +69,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(self.asset.asset_code, response.data["results"][0]["asset_code"])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_securityuser_get_single_asset_via_asset_code(
@@ -79,7 +80,7 @@ class AssetTestCase(APIBaseTestCase):
             "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.asset.asset_code, response.data["results"][0]["asset_code"])
 
     @patch("api.authentication.auth.verify_id_token")
@@ -94,7 +95,7 @@ class AssetTestCase(APIBaseTestCase):
         self.assertIn(
             self.asset.serial_number, response.data["results"][0]["serial_number"]
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_securityuser_get_single_asset_via_serial_number(
@@ -105,7 +106,7 @@ class AssetTestCase(APIBaseTestCase):
             "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(
             self.asset.serial_number, response.data["results"][0]["serial_number"]
         )
@@ -235,7 +236,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(self.user.email, response.data["assigned_to"].values())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_assigned_to_details_has_no_password(self, mock_verify_id_token):
@@ -245,7 +246,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertNotIn("password", response.data["assigned_to"].keys())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_checkin_status_for_non_checked_asset(self, mock_verify_id_token):
@@ -256,7 +257,7 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertIn("checkin_status", response.data.keys())
         self.assertEqual(response.data["checkin_status"], None)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_checkin_status_for_checked_in_asset(self, mock_verify_id_token):
@@ -271,7 +272,7 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertIn("checkin_status", response.data.keys())
         self.assertEqual(response.data["checkin_status"], "checked_in")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_checkin_status_for_checkout_in_asset(self, mock_verify_id_token):
@@ -285,7 +286,7 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertIn("checkin_status", response.data.keys())
         self.assertEqual(response.data["checkin_status"], "checked_out")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_type_in_asset_api(self, mock_verify_id_token):
@@ -296,7 +297,7 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertIn("asset_type", response.data.keys())
         self.assertEqual(response.data["asset_type"], self.asset_type.name)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_have_allocation_history(self, mock_verify_id_token):
@@ -306,7 +307,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn("allocation_history", response.data.keys())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_have_asset_category(self, mock_verify_id_token):
@@ -316,7 +317,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn("asset_category", response.data.keys())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_have_asset_sub_category(self, mock_verify_id_token):
@@ -326,7 +327,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn("asset_sub_category", response.data.keys())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_have_asset_make(self, mock_verify_id_token):
@@ -336,7 +337,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn("asset_make", response.data.keys())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_have_notes(self, mock_verify_id_token):
@@ -346,7 +347,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn("notes", response.data.keys())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_admin_can_filter_assets_by_verified_status(self, mock_verify_id_token):
@@ -371,7 +372,7 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.data["count"], count + 1)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_allocation_history_has_assigner(self, mock_verify_id_token):
@@ -386,4 +387,62 @@ class AssetTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn("assigner", response.data["allocation_history"][0].keys())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_fetching_assets_assigned_to_a_user(self, mock_verify_id_token):
+        """Admin should fetch asset detail for any given user."""
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        new_asset = Asset.objects.create(
+            asset_code="IC0014532",
+            serial_number="SN50123455",
+            purchase_date="2018-07-10",
+            model_number=self.assetmodel,
+            asset_location=self.centre,
+            department=self.department,
+            verified=True,
+        )
+        # assign asset to a user
+        new_asset.assigned_to = AssetAssignee.objects.filter(
+            user__email=self.normal_admin.email
+        ).first()
+        new_asset.save()
+
+        response = client.get(
+            f"{self.asset_urls}?user_id={self.normal_admin.id}",
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data.get("count"),
+            len(Asset.objects.filter(assigned_to=new_asset.assigned_to)),
+        )
+        self.assertEqual(
+            response.data["results"][0]["asset_code"], new_asset.asset_code
+        )
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_fetching_assets_assigned_to_a_random_user_by_non_admin(
+        self, mock_verify_id_token
+    ):
+        """Fails when a non admin user fetches assets assigned to another user."""
+        mock_verify_id_token.return_value = {"email": self.other_user.email}
+        # create the asset and assign it to the user
+        asset = Asset.objects.create(
+            asset_code="IC3314531",
+            serial_number="SN52143455",
+            purchase_date="2018-08-10",
+            model_number=self.assetmodel,
+            asset_location=self.centre,
+            department=self.department,
+            verified=True,
+            assigned_to=self.asset_assignee,
+        )
+        response = client.get(
+            f"{self.asset_urls}?user_id={self.other_user.id}",
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get("count"), 0)
+        self.assertEqual(response.data["results"], [])
+
