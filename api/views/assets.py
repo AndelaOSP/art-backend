@@ -124,6 +124,7 @@ class AssetViewSet(ModelViewSet):
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated]
     queryset = models.Asset.objects
+    filterset_class = AssetFilter
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ["get"]
 
@@ -133,22 +134,18 @@ class AssetViewSet(ModelViewSet):
         if not user.is_securityuser:
             asset_assignee = models.AssetAssignee.objects.filter(user=user).first()
             query_filter["assigned_to"] = asset_assignee
-            user_id = self.request.query_params.get("user_id")
-            if user_id:
-                if not user.is_staff:
-                    raise PermissionDenied(
-                        "Operation not permitted. You are not authorised."
-                    )
-                elif models.User.objects.filter(id=user_id):
-                    query_filter["assigned_to"] = models.AssetAssignee.objects.filter(
-                        user=user_id
-                    ).first()
-                else:
-                    return self.queryset.none()
-        # filter through the query_parameters for serial_number and asset_code
-        for field in self.request.query_params:
-            if field in ["serial_number", "asset_code"]:
-                query_filter[field] = self.request.query_params.get(field)
+        user_id = self.request.query_params.get("user_id")
+        if user_id:
+            if not user.is_staff:
+                raise PermissionDenied(
+                    "Operation not permitted. You are not authorised."
+                )
+            elif models.User.objects.filter(id=user_id):
+                query_filter["assigned_to"] = models.AssetAssignee.objects.filter(
+                    user=user_id
+                ).first()
+            else:
+                return self.queryset.none()
         queryset = models.Asset.objects.filter(**query_filter)
         return queryset
 

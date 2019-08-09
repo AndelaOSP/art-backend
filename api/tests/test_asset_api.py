@@ -470,4 +470,3 @@ class AssetTestCase(APIBaseTestCase):
             str(response.data["detail"]),
             "Operation not permitted. You are not authorised.",
         )
-
