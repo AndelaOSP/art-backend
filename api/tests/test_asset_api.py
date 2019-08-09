@@ -420,6 +420,13 @@ class AssetTestCase(APIBaseTestCase):
         self.assertEqual(
             response.data["results"][0]["asset_code"], new_asset.asset_code
         )
+        self.assertEqual(
+            response.data["results"][0]["assigned_to"]["id"], self.normal_admin.id
+        )
+        self.assertEqual(
+            response.data["results"][0]["assigned_to"]["email"],
+            new_asset.assigned_to.email,
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_fetching_assets_assigned_to_non_existing_user(self, mock_verify_id_token):
@@ -458,6 +465,9 @@ class AssetTestCase(APIBaseTestCase):
             f"{self.asset_urls}?user_id={self.other_user.id}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get("count"), 0)
-        self.assertEqual(response.data["results"], [])
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            str(response.data["detail"]),
+            "Operation not permitted. You are not authorised.",
+        )
+

@@ -130,12 +130,16 @@ class AssetViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         query_filter = {}
-        if not self.request.user.is_securityuser:
+        if not user.is_securityuser:
             asset_assignee = models.AssetAssignee.objects.filter(user=user).first()
             query_filter["assigned_to"] = asset_assignee
             user_id = self.request.query_params.get("user_id")
             if user_id:
-                if user.is_staff and models.User.objects.filter(id=user_id):
+                if not user.is_staff:
+                    raise PermissionDenied(
+                        "Operation not permitted. You are not authorised."
+                    )
+                elif models.User.objects.filter(id=user_id):
                     query_filter["assigned_to"] = models.AssetAssignee.objects.filter(
                         user=user_id
                     ).first()
