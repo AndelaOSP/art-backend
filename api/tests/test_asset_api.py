@@ -65,22 +65,24 @@ class AssetTestCase(APIBaseTestCase):
     ):
         mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.get(
-            "{}?search={}".format(self.asset_urls, self.asset.asset_code),
+            "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertIn(self.asset.asset_code, response.data["results"][0]["asset_code"])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(self.asset.asset_code, response.data["results"][0]["asset_code"])
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_authenticated_securityuser_get_single_asset_via_asset_code(
+    def test_securityuser_filtering_asset_via_asset_code(
         self, mock_verify_id_token
     ):
         mock_verify_id_token.return_value = {"email": self.security_user.email}
         response = client.get(
-            "{}?search={}".format(self.asset_urls, self.asset.asset_code),
+            f"{self.asset_urls}?asset_code={self.asset.asset_code}",
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
+        filtered_assets = Asset.objects.filter(asset_code=self.asset.asset_code)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(filtered_assets), len(response.data["results"]))
         self.assertIn(self.asset.asset_code, response.data["results"][0]["asset_code"])
 
     @patch("api.authentication.auth.verify_id_token")
@@ -89,7 +91,7 @@ class AssetTestCase(APIBaseTestCase):
     ):
         mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.get(
-            "{}?search={}".format(self.asset_urls, self.asset.serial_number),
+            "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertIn(
@@ -103,7 +105,7 @@ class AssetTestCase(APIBaseTestCase):
     ):
         mock_verify_id_token.return_value = {"email": self.security_user.email}
         response = client.get(
-            "{}?search={}".format(self.asset_urls, self.asset.serial_number),
+            "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -470,10 +472,9 @@ class AssetTestCase(APIBaseTestCase):
             str(response.data["detail"]),
             "Operation not permitted. You are not authorised.",
         )
-        self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_asset_search_endpoint(self, mock_verify_id_token):
+    def test_search_fnx_on_asset_endpoint(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         self.admin_user.is_securityuser = True
         self.admin_user.save()
@@ -506,6 +507,7 @@ class AssetTestCase(APIBaseTestCase):
             asset_location=self.centre,
             department=self.department,
         )
+
         response = client.get(
             "{}?search={}".format(self.asset_urls, "ANDELA"),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
@@ -513,10 +515,10 @@ class AssetTestCase(APIBaseTestCase):
         # return only assets with ANDELA match which is just asset_one and asset_two
         self.assertEqual(response.data["count"], 2)
         self.assertEqual(
-            response.data.get('results')[1].get('uuid'), str(asset_one.uuid)
+            response.data.get("results")[1].get("uuid"), str(asset_one.uuid)
         )
         self.assertEqual(
-            response.data.get('results')[0].get('uuid'), str(asset_two.uuid)
+            response.data.get("results")[0].get("uuid"), str(asset_two.uuid)
         )
 
         response = client.get(
@@ -526,8 +528,9 @@ class AssetTestCase(APIBaseTestCase):
         # return only assets with SN_ART match which is just asset_one and asset_three
         self.assertEqual(response.data["count"], 2)
         self.assertEqual(
-            response.data.get('results')[1].get('uuid'), str(asset_one.uuid)
+            response.data.get("results")[1].get("uuid"), str(asset_one.uuid)
         )
         self.assertEqual(
-            response.data.get('results')[0].get('uuid'), str(asset_three.uuid)
+            response.data.get("results")[0].get("uuid"), str(asset_three.uuid)
         )
+

@@ -14,6 +14,7 @@ from django.core.validators import ValidationError
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.http import FileResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -127,7 +128,7 @@ class AssetViewSet(ModelViewSet):
     filterset_class = AssetFilter
     authentication_classes = (FirebaseTokenAuthentication,)
     http_method_names = ["get"]
-    filter_backends = (SearchFilter,)
+    filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ['asset_code', 'serial_number']
 
     def get_queryset(self):
