@@ -50,6 +50,11 @@ class AssetFilter(BaseFilter):
         field_name="model_number__name",
         method="filter_contains_with_multiple_query_values",
     )
+    asset_code = filters.CharFilter(
+        field_name="asset_code",
+        lookup_expr="icontains",
+        method="filter_contains_with_multiple_query_values",
+    )
     serial_number = filters.CharFilter(
         field_name="serial_number",
         lookup_expr="icontains",
