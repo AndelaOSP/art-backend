@@ -63,7 +63,7 @@ class APIBaseTestCase(TestCase):
             name="Epic", location=cls.centre
         )
         cls.other_centre = apps.get_model("core", "AndelaCentre").objects.create(
-            id=80, name="Epic", country=cls.country
+            name="Epic", country=cls.country
         )
         cls.office_block_2 = apps.get_model("core", "OfficeBlock").objects.create(
             name="ET", location=cls.other_centre
