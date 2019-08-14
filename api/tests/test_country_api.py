@@ -19,10 +19,7 @@ class Post_CountryApiTest(APIBaseTestCase):
 
     def test_non_authenticated_users_cannot_add_country(self):
         data = {"name": "Uganda"}
-        response = client.post(
-            self.country_url,
-            data=data,
-        )
+        response = client.post(self.country_url, data=data)
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
@@ -36,7 +33,7 @@ class Post_CountryApiTest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.admin_user),
         )
-        self.assertEqual(response.data['name'],data['name'])
+        self.assertEqual(response.data["name"], data["name"])
         self.assertEqual(response.status_code, 201)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -48,7 +45,9 @@ class Post_CountryApiTest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.admin_user),
         )
-        self.assertEqual(response.data['name'][0],'country with this name already exists.')
+        self.assertEqual(
+            response.data["name"][0], "country with this name already exists."
+        )
         self.assertEqual(response.status_code, 400)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -71,9 +70,7 @@ class Post_CountryApiTest(APIBaseTestCase):
                 self.country_url,
                 data=data,
                 HTTP_AUTHORIZATION="Token {}".format(self.admin_user),
-            )           
-
-    
+            )
 
 
 class Get_CountryApiTest(APIBaseTestCase):
@@ -84,13 +81,13 @@ class Get_CountryApiTest(APIBaseTestCase):
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
+
     @patch("api.authentication.auth.verify_id_token")
     def test_get_country_by_id(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         country_url = reverse("countries-detail", args={self.country.id})
         res = client.get(
-            country_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+            country_url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
         self.assertEqual(res.data["name"], self.country.name)
         self.assertEqual(res.data["id"], self.country.id)
@@ -100,11 +97,10 @@ class Get_CountryApiTest(APIBaseTestCase):
     def test_get_countries(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         res = client.get(
-            self.country_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+            self.country_url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
-        self.assertEqual(res.data['results'][0]["name"], self.country.name)
-        self.assertEqual(res.data['results'][0]["id"], self.country.id)
+        self.assertEqual(res.data["results"][0]["name"], self.country.name)
+        self.assertEqual(res.data["results"][0]["id"], self.country.id)
         self.assertEqual(res.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -112,10 +108,9 @@ class Get_CountryApiTest(APIBaseTestCase):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         country_url = reverse("countries-detail", args={209})
         res = client.get(
-            country_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+            country_url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
-        self.assertEqual(res.data['detail'], 'Not found.')
+        self.assertEqual(res.data["detail"], "Not found.")
         self.assertEqual(res.status_code, 404)
 
 
@@ -123,7 +118,7 @@ class Edit_CountryApiTest(APIBaseTestCase):
     "Test editing of countries"
 
     def test_non_authenticated_users_cannot_update_countries(self):
-        data = {"name":"Uganda"}
+        data = {"name": "Uganda"}
         country_url = reverse("countries-detail", args={self.country.id})
         response = client.get(country_url, data=data)
         self.assertEqual(
@@ -146,19 +141,20 @@ class Edit_CountryApiTest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(res.data["name"], "Gabon")
-        self.assertEqual(res.data["id"], response.data['id'])
+        self.assertEqual(res.data["id"], response.data["id"])
         self.assertEqual(res.status_code, 200)
-    
+
     @patch("api.authentication.auth.verify_id_token")
     def test_edit_country_with_invalid_id_fails(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
-        data = {"name":"Uganda"}
+        data = {"name": "Uganda"}
         country_url = reverse("countries-detail", args={200})
         res = client.put(
-            country_url, data=data,
+            country_url,
+            data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(res.data['detail'],'Not found.')
+        self.assertEqual(res.data["detail"], "Not found.")
         self.assertEqual(res.status_code, 404)
 
 
@@ -171,7 +167,7 @@ class Delete_CountryApiTest(APIBaseTestCase):
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
-    
+
     @patch("api.authentication.auth.verify_id_token")
     def test_can_delete_country(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -195,8 +191,7 @@ class Delete_CountryApiTest(APIBaseTestCase):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         country_url = reverse("countries-detail", args={200})
         res = client.delete(
-            country_url,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+            country_url, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
-        self.assertEqual(res.data['detail'],'Not found.')
+        self.assertEqual(res.data["detail"], "Not found.")
         self.assertEqual(res.status_code, 404)

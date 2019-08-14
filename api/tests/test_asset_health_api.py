@@ -13,12 +13,20 @@ User = get_user_model()
 client = APIClient()
 
 
-class AssetHealthTestCase(APIBaseTestCase):
+class Get_AssetHealthTestCase(APIBaseTestCase):
     def test_non_authenticated_user_view_assets_health(self):
         response = client.get(self.asset_health_urls)
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
+    
+    def test_view_assets_health_with_invlaid_token_fails(self):
+        response = client.get(
+            self.asset_health_urls,
+            HTTP_AUTHORIZATION="Token token",
+        )
+        self.assertEqual(response.data['detail'],'User not found')
+        self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_non_admin_cannot_view_asset_health(self, mock_verify_id_token):
@@ -50,6 +58,19 @@ class AssetHealthTestCase(APIBaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
+    def test_asset_type_in_asset_health_api(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        response = client.get(
+            self.asset_health_urls,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
+        )
+        self.assertIn("asset_type", response.data[0])
+        self.assertEqual(response.data[0]["asset_type"], self.asset_type.name)
+        self.assertEqual(response.status_code, 200)
+
+
+class Edit_AssetHealthTestCase(APIBaseTestCase):
+    @patch("api.authentication.auth.verify_id_token")
     def test_assets_health_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
         response = client.put(
@@ -67,6 +88,8 @@ class AssetHealthTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.data, {"detail": 'Method "PATCH" not allowed.'})
 
+
+class Delete_AssetHealthTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_health__endpoint_cant_allow_delete(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -76,13 +99,14 @@ class AssetHealthTestCase(APIBaseTestCase):
         )
         self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})
 
+
+class Post_AssetHealthTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
-    def test_asset_type_in_asset_health_api(self, mock_verify_id_token):
+    def test_assets_health_api_endpoint_cant_allow_post(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
-        response = client.get(
-            self.asset_health_urls,
+        data={"asset":"asset"}
+        response = client.post(self.asset_health_urls,
+            data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertIn("asset_type", response.data[0])
-        self.assertEqual(response.data[0]["asset_type"], self.asset_type.name)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, {"detail": 'Method "POST" not allowed.'})

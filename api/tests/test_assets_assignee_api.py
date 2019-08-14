@@ -11,7 +11,7 @@ from core.models import AllocationHistory, Asset, AssetAssignee, AssetModelNumbe
 client = APIClient()
 
 
-class AssetAssigneeAPITest(APIBaseTestCase):
+class Get_AssetAssigneeAPITest(APIBaseTestCase):
     """ Tests for the AssetAssignee endpoint"""
 
     def setUp(self):
@@ -38,7 +38,7 @@ class AssetAssigneeAPITest(APIBaseTestCase):
             model_number=self.assetmodel_2,
         )
 
-        self.asset_3 = Asset.objects.create(
+        self.assignee_asset_3 = Asset.objects.create(
             asset_code="IC003",
             serial_number="SN003",
             purchase_date="2018-07-14",
@@ -55,7 +55,8 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         )
 
         self.allocation_workspace = AllocationHistory.objects.create(
-            asset=self.asset_3, current_assignee=self.office_workspace.assetassignee
+            asset=self.assignee_asset_3,
+            current_assignee=self.office_workspace.assetassignee,
         )
 
     def test_non_authenticated_user_get_assets_assignee(self):
@@ -65,16 +66,33 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         )
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_can_get_assets_assignee(self, mock_verify_token):
-        mock_verify_token.return_value = {"email": self.user.email}
+    def test_cannot_get_single_assets_assignee_with_valid_id(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.user.email}
         response = client.get(
-            self.asset_assignee_url,
+            f"{self.asset_assignee_url}/{self.asset_assignee.id}/",
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertIn("assignee", response.data["results"][0].keys())
-        self.assertEqual(len(response.data["results"]), AssetAssignee.objects.count())
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["detail"], "Not found.")
+        self.assertEqual(response.status_code, 404)
 
+
+class Post_AssetAssigneeAPITest(APIBaseTestCase):
+    @patch("api.authentication.auth.verify_id_token")
+    def test_assets_assignee_api_endpoint_cant_allow_post(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        data = {"name": "name"}
+        response = client.post(
+            f"{self.asset_assignee_url}/{self.asset_assignee.id}/",
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data, {"detail": 'Method "POST" not allowed.'})
+        self.assertEqual(response.status_code, 405)
+
+
+class Edit_AssetAssigneeAPITest(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_assignee_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}
@@ -87,6 +105,8 @@ class AssetAssigneeAPITest(APIBaseTestCase):
         self.assertEqual(response.data, {"detail": 'Method "PUT" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
+
+class Delete_AssetAssigneeAPITest(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_assignee_api_cant_allow_delete(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}

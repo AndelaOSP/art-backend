@@ -21,11 +21,34 @@ class AssetTestCase(APIBaseTestCase):
             asset=self.asset, current_assignee=self.asset_assignee
         )
 
+    def responseAssertion(self, asset, response, status_code):
+        self.assertEqual(asset.id, response["id"])
+        self.assertEqual(str(asset.uuid), response["uuid"])
+        self.assertEqual(asset.serial_number, response["serial_number"])
+        self.assertEqual(asset.asset_make, response["asset_make"])
+        self.assertEqual(response["asset_type"], asset.asset_type)
+        self.assertEqual(asset.asset_code, response["asset_code"])
+        self.assertEqual(asset.asset_location.name, response["asset_location"])
+        self.assertEqual(asset.model_number.name, response["model_number"])
+        self.assertEqual(status_code, 200)
+
+
+class Get_AssetTestCase(AssetTestCase):
+    """test class for getting assets"""
+
     def test_non_authenticated_user_view_assets(self):
         response = client.get(self.asset_urls)
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
+    
+    def test_view_assets_with_invlaid_token_fails(self):
+        response = client.get(
+            self.asset_urls,
+            HTTP_AUTHORIZATION="Token token",
+        )
+        self.assertEqual(response.data['detail'],'User not found')
+        self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_assignee_view_assets(self, mock_verify_id_token):
@@ -33,8 +56,9 @@ class AssetTestCase(APIBaseTestCase):
         response = client.get(
             self.asset_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
-        self.assertIn(self.asset.asset_code, response.data["results"][0].values())
-        self.assertEqual(response.status_code, 200)
+        self.responseAssertion(
+            self.asset, response.data["results"][0], response.status_code
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_securityuser_view_assets_in_their_department_and_location(
@@ -44,9 +68,10 @@ class AssetTestCase(APIBaseTestCase):
         response = client.get(
             self.asset_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by)
         )
-        self.assertIn(self.asset.asset_code, str(response.json().values()))
         self.assertEqual(len(response.data["results"]), Asset.objects.count())
-        self.assertEqual(response.status_code, 200)
+        self.responseAssertion(
+            self.asset_3, response.data["results"][0], response.status_code
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_single_asset(self, mock_verify_id_token):
@@ -55,8 +80,19 @@ class AssetTestCase(APIBaseTestCase):
             "{}/{}/".format(self.asset_urls, self.asset.uuid),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertIn(self.asset.asset_code, response.data.values())
-        self.assertEqual(response.status_code, 200)
+        self.responseAssertion(self.asset, response.data, response.status_code)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_user_cannot_get_single_asset_with_invalide_id(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        response = client.get(
+            "{}/{}/".format(self.asset_urls, 500),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data["detail"], "Not found.")
+        self.assertEqual(response.status_code, 404)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_single_asset_via_asset_code(
@@ -67,8 +103,9 @@ class AssetTestCase(APIBaseTestCase):
             "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertIn(self.asset.asset_code, response.data["results"][0]["asset_code"])
-        self.assertEqual(response.status_code, 200)
+        self.responseAssertion(
+            self.asset, response.data["results"][0], response.status_code
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_securityuser_get_single_asset_via_asset_code(
@@ -79,8 +116,9 @@ class AssetTestCase(APIBaseTestCase):
             "{}?asset_code={}".format(self.asset_urls, self.asset.asset_code),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.asset.asset_code, response.data["results"][0]["asset_code"])
+        self.responseAssertion(
+            self.asset, response.data["results"][0], response.status_code
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_user_get_single_asset_via_serial_number(
@@ -91,10 +129,9 @@ class AssetTestCase(APIBaseTestCase):
             "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertIn(
-            self.asset.serial_number, response.data["results"][0]["serial_number"]
+        self.responseAssertion(
+            self.asset, response.data["results"][0], response.status_code
         )
-        self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_authenticated_securityuser_get_single_asset_via_serial_number(
@@ -105,37 +142,9 @@ class AssetTestCase(APIBaseTestCase):
             "{}?serial_number={}".format(self.asset_urls, self.asset.serial_number),
             HTTP_AUTHORIZATION="Token {}".format(self.token_checked_by),
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            self.asset.serial_number, response.data["results"][0]["serial_number"]
+        self.responseAssertion(
+            self.asset, response.data["results"][0], response.status_code
         )
-
-    @patch("api.authentication.auth.verify_id_token")
-    def test_assets_api_endpoint_cant_allow_put(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {"email": self.user.email}
-        response = client.put(
-            "{}/{}/".format(self.asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
-        )
-        self.assertEqual(response.data, {"detail": 'Method "PUT" not allowed.'})
-
-    @patch("api.authentication.auth.verify_id_token")
-    def test_assets_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {"email": self.user.email}
-        response = client.patch(
-            "{}/{}/".format(self.asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
-        )
-        self.assertEqual(response.data, {"detail": 'Method "PATCH" not allowed.'})
-
-    @patch("api.authentication.auth.verify_id_token")
-    def test_assets_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {"email": self.user.email}
-        response = client.delete(
-            "{}/{}/".format(self.asset_urls, self.asset.uuid),
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
-        )
-        self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})
 
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_filter_by_email(self, mock_verify_id_token):
@@ -202,22 +211,12 @@ class AssetTestCase(APIBaseTestCase):
             ),
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        returned_data = response.data["results"][0]
+        self.responseAssertion(
+            self.asset_3, response.data["results"][0], response.status_code
+        )
 
-        self.assertEqual(returned_data["id"], self.asset_3.id)
-        self.assertEqual(returned_data["asset_category"], self.asset_3.asset_category)
         self.assertEqual(
-            returned_data["asset_sub_category"], self.asset_3.asset_sub_category
-        )
-        self.assertEqual(returned_data["asset_make"], self.asset_3.asset_make)
-        self.assertEqual(returned_data["asset_code"], self.asset_3.asset_code)
-        self.assertEqual(returned_data["asset_type"], self.asset_3.asset_type)
-        self.assertEqual(returned_data["serial_number"], self.asset_3.serial_number)
-        self.assertEqual(
-            returned_data["asset_location"], self.asset_3.asset_location.name
-        )
-        self.assertEqual(
-            returned_data["assigned_to"]["id"],
+            response.data["results"][0]["assigned_to"]["id"],
             self.asset_assignee_department.department_id,
         )
         self.assertEqual(
@@ -387,3 +386,47 @@ class AssetTestCase(APIBaseTestCase):
         )
         self.assertIn("assigner", response.data["allocation_history"][0].keys())
         self.assertEqual(response.status_code, 200)
+
+
+class Edit_AssetTestCase(AssetTestCase):
+    @patch("api.authentication.auth.verify_id_token")
+    def test_assets_api_endpoint_cant_allow_put(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        response = client.put(
+            "{}/{}/".format(self.asset_urls, self.asset.uuid),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data, {"detail": 'Method "PUT" not allowed.'})
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_assets_api_endpoint_cant_allow_patch(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        response = client.patch(
+            "{}/{}/".format(self.asset_urls, self.asset.uuid),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data, {"detail": 'Method "PATCH" not allowed.'})
+
+
+class Post_AssetTestCase(AssetTestCase):
+    @patch("api.authentication.auth.verify_id_token")
+    def test_assets_api_endpoint_cant_allow_post_method(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        data = {"asset": "asset"}
+        response = client.post(
+            self.asset_urls,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data, {"detail": 'Method "POST" not allowed.'})
+
+
+class Delete_AssetTestCase(AssetTestCase):
+    @patch("api.authentication.auth.verify_id_token")
+    def test_assets_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        response = client.delete(
+            "{}/{}/".format(self.asset_urls, self.asset.uuid),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})

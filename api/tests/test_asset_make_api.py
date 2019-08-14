@@ -13,29 +13,7 @@ User = get_user_model()
 client = APIClient()
 
 
-class AssetMakeAPICase(APIBaseTestCase):
-    def setUp(self):
-        self.second_asset_make = {"name": "HP Envy", "asset_type": self.asset_type.id}
-
-    def test_non_authenticated_user_view_assets_make_list(self):
-        response = client.get(self.asset_make_urls)
-        self.assertEqual(
-            response.data, {"detail": "Authentication credentials were not provided."}
-        )
-        self.assertEqual(response.status_code, 401)
-
-    @patch("api.authentication.auth.verify_id_token")
-    def test_authenticated_user_view_assets_make(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {"email": self.other_user.email}
-        response = client.get(
-            self.asset_make_urls,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_other_user),
-        )
-        data = response.data
-        self.assertEqual(len(data["results"]), AssetMake.objects.count())
-        self.assertIn(self.asset_make.name, list(data["results"][0].values()))
-        self.assertEqual(response.status_code, 200)
-
+class Post_AssetMakeAPICase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_make_endpoint_post_invalid_data(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}
@@ -45,9 +23,7 @@ class AssetMakeAPICase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         self.assertEqual(response.status_code, 400)
-        # remove comment after deprecation of old fields
-        # response_data = response.data
-        # self.assertEqual(response_data['name'], ['This field may not be blank.'])
+        self.assertEqual(response.data["name"], ["This field may not be null."])
 
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_make_endpoint_post_invalid_asset_type(self, mock_verify_id_token):
@@ -81,17 +57,87 @@ class AssetMakeAPICase(APIBaseTestCase):
     def test_asset_make_endpoint_post_valid_data(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}
         initial_asset_makes = len(AssetMake.objects.all())
+        second_asset_make = {"name": "HP Envy", "asset_type": self.asset_type.id}
         response = client.post(
             self.asset_make_urls,
-            data=self.second_asset_make,
+            data=second_asset_make,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
         latest_asset_makes = AssetMake.objects.all()
         self.assertEqual(response.status_code, 201)
         response_data = response.data
         self.assertEqual(len(latest_asset_makes), initial_asset_makes + 1)
-        self.assertIn(self.second_asset_make["name"].title(), response_data.values())
+        self.assertEqual(response.data["name"], second_asset_make["name"].title())
+        self.assertEqual(response.data["asset_type"], self.asset_type.name)
 
+
+class Get_AssetMakeAPICase(APIBaseTestCase):
+    def test_non_authenticated_user_view_assets_make_list(self):
+        response = client.get(self.asset_make_urls)
+        self.assertEqual(
+            response.data, {"detail": "Authentication credentials were not provided."}
+        )
+        self.assertEqual(response.status_code, 401)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_asset_make_api_endpoint_orders_asset_make_by_make(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        AssetMake.objects.create(name="Sades", asset_type=self.asset_type)
+        AssetMake.objects.create(name="Lenovo Charger", asset_type=self.asset_type)
+
+        response = client.get(
+            self.asset_make_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
+        )
+        self.assertEqual(3, len(response.data.get("results")))
+        self.assertEqual(response.data["results"][0]["name"], "Asset Makes")
+        self.assertEqual(response.data["results"][1]["name"], "Lenovo Charger")
+        self.assertEqual(response.data["results"][2]["name"], "Sades")
+        self.assertEqual(response.status_code, 200)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_user_view_assets_make(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.other_user.email}
+        response = client.get(
+            self.asset_make_urls,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_other_user),
+        )
+        self.assertEqual(response.data["results"][0]["id"], self.asset_make.id)
+        self.assertEqual(response.data["results"][0]["name"], self.asset_make.name)
+        self.assertEqual(
+            response.data["results"][0]["asset_type"], self.asset_make.asset_type.name
+        )
+        self.assertEqual(response.status_code, 200)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_user_view_assets_make_by_valid_id(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.other_user.email}
+        response = client.get(
+            "{}/{}/".format(self.asset_make_urls, self.asset_make.id),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_other_user),
+        )
+        self.assertEqual(response.data["id"], self.asset_make.id)
+        self.assertEqual(response.data["name"], self.asset_make.name)
+        self.assertEqual(response.data["asset_type"], self.asset_make.asset_type.name)
+        self.assertEqual(response.status_code, 200)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_user_cannot_view_assets_make_by_invalid_id(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        response = client.get(
+            "{}/{}/".format(self.asset_make_urls, 300),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_other_user),
+        )
+        self.assertEqual(response.data["detail"], "Not found.")
+        self.assertEqual(response.status_code, 404)
+
+
+class Edit_AssetMakeAPICase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_make_api_endpoint_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.user.email}
@@ -101,18 +147,9 @@ class AssetMakeAPICase(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data.get("name"), "Test Edit")
-
-    @patch("api.authentication.auth.verify_id_token")
-    def test_can_get_single_asset_make(self, mock_verify_token):
-        mock_verify_token.return_value = {"email": self.user.email}
-        response = client.get(
-            f"{self.asset_make_urls}/{self.asset_make.id}/",
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
-        )
-
-        self.assertIn("name", response.data.keys())
-        self.assertIn(self.asset_make.name, response.data.values())
+        self.assertEqual(response.data["id"], self.asset_make.id)
+        self.assertEqual(response.data["name"], data["name"])
+        self.assertEqual(response.data["asset_type"], self.asset_type.name)
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -128,29 +165,46 @@ class AssetMakeAPICase(APIBaseTestCase):
         self.assertEqual(response.status_code, 405)
 
     @patch("api.authentication.auth.verify_id_token")
-    def test_asset_make_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
-        mock_verify_id_token.return_value = {"email": self.user.email}
-        data = {}
-        response = client.delete(
-            self.asset_make_urls,
+    def test_authenticated_user_cannot_edit_asset_make_by_invalid_id(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        data = {"name": "Test Edit", "asset_type": self.asset_type.id}
+        response = client.put(
+            "{}/{}/".format(self.asset_make_urls, 100),
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.data["detail"], "Not found.")
+        self.assertEqual(response.status_code, 404)
 
+
+class delete_AssetMakeAPICase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
-    def test_asset_make_api_endpoint_orders_asset_make_by_make(
+    def test_asset_make_api_endpoint_can_delete_asset_make_with_valid_id(
         self, mock_verify_id_token
     ):
         mock_verify_id_token.return_value = {"email": self.user.email}
-        AssetMake.objects.create(name="Sades", asset_type=self.asset_type)
-        AssetMake.objects.create(name="Lenovo Charger", asset_type=self.asset_type)
-
-        response = client.get(
-            self.asset_make_urls, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
+        second_asset_make = {"name": "mac book pro", "asset_type": self.asset_type.id}
+        response = client.post(
+            self.asset_make_urls,
+            data=second_asset_make,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
-        # I am always sure that Sades will be the last in the response
-        #  since the Makes are ordered.
-        self.assertEqual(3, len(response.data.get("results")))
-        self.assertEqual(response.data.get("results")[2].get("name"), "Sades")
+        response = client.delete(
+            "{}/{}/".format(self.asset_make_urls, response.data["id"]),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.status_code, 204)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_authenticated_user_cannot_delete_assets_make_by_invalid_id(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.admin_user.email}
+        response = client.delete(
+            "{}/{}/".format(self.asset_make_urls, 300),
+            HTTP_AUTHORIZATION="Token {}".format(self.token_other_user),
+        )
+        self.assertEqual(response.data["detail"], "Not found.")
+        self.assertEqual(response.status_code, 404)

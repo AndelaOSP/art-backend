@@ -248,6 +248,7 @@ class APIBaseTestCase(TestCase):
         cls.incident_report_status_url = reverse(
             "state-transitions-detail", kwargs={"pk": str(cls.report_status.id)}
         )
+        cls.state_transitions_url = reverse("state-transitions-list")
         cls.manage_asset_urls = reverse("manage-assets-list")
         cls.office_block_url = reverse("office-blocks-list")
         cls.office_workspace_url = reverse("office-workspaces-list")

@@ -13,7 +13,19 @@ from core.models import AllocationHistory, AssetAssignee, Department, OfficeWork
 User = get_user_model()
 client = APIClient()
 
+
 class Post_AllocationTestCase(APIBaseTestCase):
+
+    def test_non_authenticated_post_allocation_of_assets(self):
+        data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
+        response = client.post(
+            self.allocations_urls,
+            data,
+        )
+        self.assertEqual(
+            response.data, {"detail": "Authentication credentials were not provided."}
+        )
+
     @patch("api.authentication.auth.verify_id_token")
     def test_post_allocation_of_asset_to_a_user(self, mock_verify_id_token):
         """Test post new allocation"""
@@ -26,14 +38,16 @@ class Post_AllocationTestCase(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
 
-        self.assertEqual(AllocationHistory.objects.count(), count + 1)
-        self.assertEqual(
-            response.data["asset"],
-            f"{self.asset.serial_number} - {self.asset.asset_code}",
+    def test_post_allocation_of_asset_to_a_user_with_invlaid_token(self):
+        count = AllocationHistory.objects.count()
+        data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
+        response = client.post(
+            self.allocations_urls,
+            data,
+            HTTP_AUTHORIZATION="Token token",
         )
-        self.assertEqual(response.data["current_assignee"], self.user.email)
-        self.assertEqual(response.status_code, 201)
-        self.assertIn("assigner", response.data)
+        self.assertEqual(response.data['detail'],'User not found')
+        self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")
     def test_post_re_allocation_of_asset_to_a_user(self, mock_verify_id_token):
@@ -264,7 +278,7 @@ class Update_AllocationTestCase(APIBaseTestCase):
         """Test cannot update allocations"""
 
         mock_verify_id_token.return_value = {"email": self.other_user.email}
-        allocation=AllocationHistory.objects.create(
+        allocation = AllocationHistory.objects.create(
             asset=self.asset,
             current_assignee=self.asset_assignee,
             assigner=self.other_user,
@@ -274,12 +288,10 @@ class Update_AllocationTestCase(APIBaseTestCase):
         )
         data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
         response = client.put(
-            allocations_url,
-            data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+            allocations_url, data, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
         self.assertEqual(response.status_code, 405)
-        self.assertEqual(response.data['detail'], 'Method "PUT" not allowed.')
+        self.assertEqual(response.data["detail"], 'Method "PUT" not allowed.')
 
 
 class Delete_AllocationTestCase(APIBaseTestCase):
@@ -288,7 +300,7 @@ class Delete_AllocationTestCase(APIBaseTestCase):
         """Test cannot delete allocations"""
 
         mock_verify_id_token.return_value = {"email": self.other_user.email}
-        allocation=AllocationHistory.objects.create(
+        allocation = AllocationHistory.objects.create(
             asset=self.asset,
             current_assignee=self.asset_assignee,
             assigner=self.other_user,
@@ -298,13 +310,7 @@ class Delete_AllocationTestCase(APIBaseTestCase):
         )
         data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
         response = client.delete(
-            allocations_url,
-            data,
-            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+            allocations_url, data, HTTP_AUTHORIZATION="Token {}".format(self.token_user)
         )
         self.assertEqual(response.status_code, 405)
-        self.assertEqual(response.data['detail'], 'Method "DELETE" not allowed.')        
-
-            
-
-
+        self.assertEqual(response.data["detail"], 'Method "DELETE" not allowed.')
