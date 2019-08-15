@@ -15,13 +15,9 @@ client = APIClient()
 
 
 class Post_AllocationTestCase(APIBaseTestCase):
-
     def test_non_authenticated_post_allocation_of_assets(self):
         data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
-        response = client.post(
-            self.allocations_urls,
-            data,
-        )
+        response = client.post(self.allocations_urls, data)
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
@@ -37,16 +33,22 @@ class Post_AllocationTestCase(APIBaseTestCase):
             data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_user),
         )
+        self.assertEqual(AllocationHistory.objects.count(), count + 1)
+        self.assertEqual(
+            response.data["asset"],
+            f"{self.asset.serial_number} - {self.asset.asset_code}",
+        )
+        self.assertEqual(response.data["current_assignee"], self.user.email)
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("assigner", response.data)
 
     def test_post_allocation_of_asset_to_a_user_with_invlaid_token(self):
         count = AllocationHistory.objects.count()
         data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
         response = client.post(
-            self.allocations_urls,
-            data,
-            HTTP_AUTHORIZATION="Token token",
+            self.allocations_urls, data, HTTP_AUTHORIZATION="Token token"
         )
-        self.assertEqual(response.data['detail'],'User not found')
+        self.assertEqual(response.data["detail"], "User not found")
         self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")

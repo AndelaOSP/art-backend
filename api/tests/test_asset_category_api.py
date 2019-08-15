@@ -24,11 +24,9 @@ class Post_AssetCategoryAPITest(APIBaseTestCase):
     def test_add_asset_category_with_invlaid_token(self):
         data = {"name": "computer"}
         response = client.post(
-            self.category_url,
-            data=data,
-            HTTP_AUTHORIZATION="Token token",
+            self.category_url, data=data, HTTP_AUTHORIZATION="Token token"
         )
-        self.assertEqual(response.data['detail'],'User not found')
+        self.assertEqual(response.data["detail"], "User not found")
         self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")

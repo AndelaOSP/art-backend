@@ -19,13 +19,10 @@ class Get_AssetHealthTestCase(APIBaseTestCase):
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
-    
+
     def test_view_assets_health_with_invlaid_token_fails(self):
-        response = client.get(
-            self.asset_health_urls,
-            HTTP_AUTHORIZATION="Token token",
-        )
-        self.assertEqual(response.data['detail'],'User not found')
+        response = client.get(self.asset_health_urls, HTTP_AUTHORIZATION="Token token")
+        self.assertEqual(response.data["detail"], "User not found")
         self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -104,8 +101,9 @@ class Post_AssetHealthTestCase(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_assets_health_api_endpoint_cant_allow_post(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
-        data={"asset":"asset"}
-        response = client.post(self.asset_health_urls,
+        data = {"asset": "asset"}
+        response = client.post(
+            self.asset_health_urls,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )

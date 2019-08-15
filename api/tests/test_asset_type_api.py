@@ -11,7 +11,7 @@ from core.models import AssetType
 client = APIClient()
 
 
-class Post_AssetCategoryAPITest(APIBaseTestCase):
+class Post_AssetTypeAPITest(APIBaseTestCase):
     """ Tests for the AssetCategory endpoint"""
 
     def test_non_authenticated_user_create_asset_type(self):
@@ -19,10 +19,7 @@ class Post_AssetCategoryAPITest(APIBaseTestCase):
             "name": "Asset Type Example",
             "asset_sub_category": self.asset_sub_category.id,
         }
-        response = client.post(
-            self.asset_type_url,
-            data=data
-        )
+        response = client.post(self.asset_type_url, data=data)
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
@@ -40,26 +37,25 @@ class Post_AssetCategoryAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data["name"], data['name'])
-        self.assertEqual(response.data["asset_sub_category"], self.asset_sub_category.name)
+        self.assertEqual(response.data["name"], data["name"])
+        self.assertEqual(
+            response.data["asset_sub_category"], self.asset_sub_category.name
+        )
 
     @patch("api.authentication.auth.verify_id_token")
     def test_cannot_post_asset_type_with_empty_fields(self, mock_verify_token):
         mock_verify_token.return_value = {"email": self.admin_user.email}
-        data = {
-            "name": "",
-            "asset_sub_category": self.asset_sub_category.id,
-        }
+        data = {"name": "", "asset_sub_category": self.asset_sub_category.id}
         response = client.post(
             self.asset_type_url,
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data["name"][0], 'This field may not be null.')
+        self.assertEqual(response.data["name"][0], "This field may not be null.")
 
-class Get_AssetCategoryAPITest(APIBaseTestCase):
 
+class Get_AssetTypeAPITest(APIBaseTestCase):
     def test_non_authenticated_user_get_asset_asset_type(self):
         response = client.get(self.asset_type_url)
         self.assertEqual(
@@ -74,9 +70,12 @@ class Get_AssetCategoryAPITest(APIBaseTestCase):
         )
 
         self.assertEqual(len(response.data["results"]), AssetType.objects.count())
-        self.assertEqual(response.data["results"][0]['name'],self.asset_type.name)
-        self.assertEqual(response.data["results"][0]['id'],self.asset_type.id)
-        self.assertEqual(response.data['results'][0]['asset_sub_category'],self.asset_sub_category.name)
+        self.assertEqual(response.data["results"][0]["name"], self.asset_type.name)
+        self.assertEqual(response.data["results"][0]["id"], self.asset_type.id)
+        self.assertEqual(
+            response.data["results"][0]["asset_sub_category"],
+            self.asset_sub_category.name,
+        )
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -87,11 +86,13 @@ class Get_AssetCategoryAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
 
-        self.assertEqual(response.data['name'],self.asset_type.name)
-        self.assertEqual(response.data['id'],self.asset_type.id)
-        self.assertEqual(response.data['asset_sub_category'],self.asset_sub_category.name)
+        self.assertEqual(response.data["name"], self.asset_type.name)
+        self.assertEqual(response.data["id"], self.asset_type.id)
+        self.assertEqual(
+            response.data["asset_sub_category"], self.asset_sub_category.name
+        )
         self.assertEqual(response.status_code, 200)
-    
+
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_type_api_orders_asset_types_by_type(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -109,7 +110,6 @@ class Get_AssetCategoryAPITest(APIBaseTestCase):
         self.assertEqual(AssetType.objects.count(), len(response.data.get("results")))
         self.assertEqual(response.data.get("results")[-1].get("name"), "Samsung")
 
-    
     @patch("api.authentication.auth.verify_id_token")
     def test_can_get_single_asset_type_with_invalid_id(self, mock_verify_token):
         mock_verify_token.return_value = {"email": self.admin_user.email}
@@ -121,7 +121,7 @@ class Get_AssetCategoryAPITest(APIBaseTestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class Edit_AssetCategoryAPITest(APIBaseTestCase):
+class Edit_AssetTypeAPITest(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_type_api_endpoint_cant_allow_put(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
@@ -131,9 +131,11 @@ class Edit_AssetCategoryAPITest(APIBaseTestCase):
             data=data,
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
-        self.assertEqual(response.data['name'],data["name"])
-        self.assertEqual(response.data['id'],self.asset_type.id)
-        self.assertEqual(response.data['asset_sub_category'],self.asset_sub_category.name)
+        self.assertEqual(response.data["name"], data["name"])
+        self.assertEqual(response.data["id"], self.asset_type.id)
+        self.assertEqual(
+            response.data["asset_sub_category"], self.asset_sub_category.name
+        )
         self.assertEqual(response.status_code, 200)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -160,14 +162,12 @@ class Edit_AssetCategoryAPITest(APIBaseTestCase):
         self.assertEqual(response.data, {"detail": 'Method "PATCH" not allowed.'})
         self.assertEqual(response.status_code, 405)
 
-class Delete_AssetCategoryAPITest(APIBaseTestCase):
+
+class Delete_AssetTypeAPITest(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_asset_type_api_endpoint_cant_allow_delete(self, mock_verify_id_token):
         mock_verify_id_token.return_value = {"email": self.admin_user.email}
-        data = {
-            "name": "Asset Type3",
-            "asset_sub_category": self.asset_sub_category.id,
-        }
+        data = {"name": "Asset Type3", "asset_sub_category": self.asset_sub_category.id}
         response = client.post(
             self.asset_type_url,
             data=data,
@@ -179,7 +179,7 @@ class Delete_AssetCategoryAPITest(APIBaseTestCase):
             HTTP_AUTHORIZATION="Token {}".format(self.token_admin),
         )
         self.assertEqual(response.status_code, 204)
-    
+
     @patch("api.authentication.auth.verify_id_token")
     def test_can_delete_single_asset_type_with_invalid_id(self, mock_verify_token):
         mock_verify_token.return_value = {"email": self.admin_user.email}

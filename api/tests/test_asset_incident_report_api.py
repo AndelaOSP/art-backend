@@ -15,15 +15,13 @@ client = APIClient()
 
 class Post_AssetIncidentReportAPITest(APIBaseTestCase):
     """ Tests for the AssetIncidentReport API """
-    
+
     def test_create_incident_report_with_invlaid_token_fails(self):
         data = {"asset": self.asset.id, "incident_type": "Loss"}
         response = client.post(
-            self.incident_report_url,
-            data=data,
-            HTTP_AUTHORIZATION="Token token",
+            self.incident_report_url, data=data, HTTP_AUTHORIZATION="Token token"
         )
-        self.assertEqual(response.data['detail'],'User not found')
+        self.assertEqual(response.data["detail"], "User not found")
         self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")
@@ -130,7 +128,6 @@ class Post_AssetIncidentReportAPITest(APIBaseTestCase):
 
 
 class Get_AssetIncidentReportAPITest(APIBaseTestCase):
-
     def test_non_authenticated_user_view_incident_report(self):
         response = client.get(self.incident_report_url)
         self.assertEqual(
@@ -228,6 +225,7 @@ class Get_AssetIncidentReportAPITest(APIBaseTestCase):
             self.incident_report.police_abstract_obtained,
         )
 
+
 class Edit_AssetIncidentReportAPITest(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
     def test_cant_allow_put_incident_report(self, mock_verify_id_token):
@@ -248,6 +246,7 @@ class Edit_AssetIncidentReportAPITest(APIBaseTestCase):
         )
         self.assertEqual(response.data, {"detail": 'Method "PATCH" not allowed.'})
         self.assertEqual(response.status_code, 405)
+
 
 class Delete_AssetIncidentReportAPITest(APIBaseTestCase):
     @patch("api.authentication.auth.verify_id_token")
@@ -318,5 +317,3 @@ class Delete_AssetIncidentReportAPITest(APIBaseTestCase):
             {"Error": "Asset state option is not valid for given report state"},
         )
         self.assertEqual(response.status_code, 400)
-
-    

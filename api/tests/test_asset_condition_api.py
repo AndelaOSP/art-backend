@@ -22,10 +22,9 @@ class Get_AssetConditionAPITest(APIBaseTestCase):
 
     def test_view_asset_condition_with_invlaid_token_fails(self):
         response = client.get(
-            self.asset_condition_urls,
-            HTTP_AUTHORIZATION="Token token",
+            self.asset_condition_urls, HTTP_AUTHORIZATION="Token token"
         )
-        self.assertEqual(response.data['detail'],'User not found')
+        self.assertEqual(response.data["detail"], "User not found")
         self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")

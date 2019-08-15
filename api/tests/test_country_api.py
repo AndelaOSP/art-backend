@@ -2,10 +2,10 @@
 from unittest.mock import patch
 
 # Third-Party Imports
+from django.core.exceptions import ValidationError
 from pycountry import countries
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
-from django.core.exceptions import ValidationError
 
 # App Imports
 from api.tests import APIBaseTestCase

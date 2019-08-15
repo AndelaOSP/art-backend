@@ -22,15 +22,13 @@ class Post_AndelaCentreAPITest(APIBaseTestCase):
         self.assertEqual(
             response.data, {"detail": "Authentication credentials were not provided."}
         )
-    
+
     def test_create_centres_with_invlaid_token_fails(self):
         data = {"name": "ET", "country": self.country.id}
         response = client.post(
-            self.centre_url,
-            data=data,
-            HTTP_AUTHORIZATION="Token token",
+            self.centre_url, data=data, HTTP_AUTHORIZATION="Token token"
         )
-        self.assertEqual(response.data['detail'],'User not found')
+        self.assertEqual(response.data["detail"], "User not found")
         self.assertEqual(response.status_code, 401)
 
     @patch("api.authentication.auth.verify_id_token")
