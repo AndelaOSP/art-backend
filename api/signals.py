@@ -4,6 +4,7 @@ from django.dispatch import receiver
 
 # App Imports
 from api.requestMiddleware import RequestMiddleware
+from core.constants import TABLES
 from core.models import History
 
 
@@ -11,7 +12,11 @@ from core.models import History
 @receiver(post_delete)
 def track_application_actions(sender, instance, **kwargs):
     current_request = RequestMiddleware.get_request()
-    if sender._meta.db_table != "core_history" and current_request:
+    if (
+        sender._meta.db_table not in TABLES
+        and hasattr(current_request, "user")
+        and hasattr(instance, "id")
+    ):
         data = instance.__dict__.copy()
         data.__delitem__("_state")
         try:

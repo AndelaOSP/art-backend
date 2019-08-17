@@ -174,6 +174,10 @@ class OfficeWorkspaceAdmin(admin.ModelAdmin):
     list_display = ("section", "name")
 
 
+class HistoryAdmin(admin.ModelAdmin):
+    list_display = ("table_name", "user", "created_at", "item_id", "action", "body")
+
+
 admin.site.register(models.AISUserSync, AISUserSyncAdmin)
 admin.site.register(models.Asset, AssetAdmin)
 admin.site.register(models.AssetLog, AssetLogsAdmin)
@@ -186,3 +190,4 @@ admin.site.register(models.OfficeFloor, OfficeFloorAdmin)
 admin.site.register(models.OfficeFloorSection, OfficeFloorSectionAdmin)
 admin.site.register(models.OfficeWorkspace, OfficeWorkspaceAdmin)
 admin.site.register(models.Department, DepartmentAdmin)
+admin.site.register(models.History, HistoryAdmin)
