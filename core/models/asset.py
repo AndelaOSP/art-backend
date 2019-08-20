@@ -554,17 +554,11 @@ class AllocationHistory(models.Model):
     def _create_asset_status_when_asset_is_allocated(self):
         last_status = AssetStatus.objects.filter(asset=self.asset).latest("created_at")
         if self.current_assignee:
-            # if Asset status for an asset exits update it else create it
-            try:
-                asset_status = AssetStatus.objects.get(asset=self.asset)
-                asset_status.current_status = constants.ALLOCATED
-                asset_status.save()
-            except AssetStatus.DoesNotExist:
-                AssetStatus.objects.create(
-                    asset=self.asset,
-                    current_status=constants.ALLOCATED,
-                    previous_status=last_status.current_status,
-                )
+            AssetStatus.objects.create(
+                asset=self.asset,
+                current_status=constants.ALLOCATED,
+                previous_status=last_status.current_status,
+            )
 
     def _send_notification(self):
         asset = self.asset
