@@ -119,3 +119,5 @@ BUSINESS = "business"
 NONE = "none"
 
 SIMCARD_ASSET_OPTIONS = ((BASIC, "basic"), (BUSINESS, "business"), (NONE, "none"))
+
+TABLES = ["core_history", "django_admin_log"]
