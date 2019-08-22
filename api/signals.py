@@ -10,7 +10,6 @@ from rest_framework.reverse import reverse
 # App Imports
 from api.requestMiddleware import RequestMiddleware
 from core.constants import TABLES
-from core.models import History
 from core import constants
 from core.models import (  # isort:skip
     AssetIncidentReport,

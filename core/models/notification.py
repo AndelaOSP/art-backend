@@ -17,6 +17,7 @@ class Notifications(models.Model):
         <actor> <verb> <time>
         <actor> <verb> <target> <time>
         <actor> <verb> <action_object> <target> <time>
+
     Examples::
         <user> <reached level 60> <1 minute ago>
         <user2> <commented on> <url/post/1d> <2 hours ago>
