@@ -59,6 +59,7 @@ The easiest way to set up is to run `. ./install_art.sh` which does the followin
 - Create and activate a virtual environment - we recommend using [pipenv](https://github.com/pypa/pipenv) for this by running `pipenv shell`
 - Install the project dependencies stored in [Pipfile](/Pipfile). Run `pipenv install --dev`.
 - Run migrations - `python manage.py migrate`
+- Create cache table `python manage.py createcachetable`
 
 #### Development using Docker
 To use the Docker setup, ensure you have Docker installed then run the following commands:
@@ -71,6 +72,7 @@ To use the Docker setup, ensure you have Docker installed then run the following
 
 ### Running the app
 - Create a Superuser account: `python manage.py createsuperuser`
+- To create cache tables `python manage.py createcachetable`
 - To run tests: `pytest`
 - Run the app: `python manage.py runserver`
 - You can now log into the admin dashboard on `http://127.0.0.1:8000/admin/`
