@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "corsheaders",
     "django_filters",
+    "django_q",
 ]
 
 AUTH_USER_MODEL = "core.User"
@@ -109,7 +110,7 @@ WSGI_APPLICATION = "art.wsgi.application"
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth."
-        "password_validation.UserAttributeSimilarityValidator"
+                "password_validation.UserAttributeSimilarityValidator"
     },
     {"NAME": "django.contrib.auth." "password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth." "password_validation.CommonPasswordValidator"},
@@ -180,10 +181,29 @@ SWAGGER_SETTINGS = {
 
 REDOC_SETTINGS = {"LAZY_RENDERING": True}
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = config("EMAIL_HOST", None)
 EMAIL_PORT = config("EMAIL_PORT", None)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", None)
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", None)
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", True)
+
+Q_CLUSTER = {
+    'name': 'art-backend',
+    'timeout': 60,  # The number of seconds a worker is allowed to spend on a task before it’s terminated.
+    'queue_limit': 500,
+    'cpu_affinity': 1,  # Sets the number of processor each worker can use
+    'label': 'ART',
+    'orm': 'default',  # Use Django’s database backend as a message broker
+}
+# configure Django to store its cached data in the database.
+# useful for monitoring django_q
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'art_cache',
+    }
+}
+# log emails in console rather than sending them
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
