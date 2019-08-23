@@ -84,4 +84,7 @@ class TestStateTransitionNotifications(CoreBaseTestCase):
             self.Notifications.objects.filter(target=incident.submitted_by).count(),
             notifications_count + 1,
         )
-        self.assertEqual(new_notification.title, "Incident Report Status Update")
+        self.assertEqual(
+            new_notification.title,
+            constants.INCIDENT_REPORT_STATUS_UPDATED_NOTIFICATION_TITLE,
+        )

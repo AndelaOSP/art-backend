@@ -32,14 +32,13 @@ class AssetIncidentReportModelTest(CoreBaseTestCase):
 
 class TestAssetIncidentReportNotifications(CoreBaseTestCase):
     """
-    Test Notifications elicited by Asset Incident Report creation
+    Test that notifications are created when asset incident reports are created
     """
 
-    # Asset_model = apps.get_model("core", "Asset")
     User_model = apps.get_model("core", "User")
     Notifications_model = apps.get_model("core", "Notifications")
 
-    def setUp(self):
+    def test_admins_are_notified_when_notification_is_created(self):
         self.admin_user = self.User_model.objects.create(
             email="newuser@andela.com",
             password="devpassword",
@@ -51,8 +50,6 @@ class TestAssetIncidentReportNotifications(CoreBaseTestCase):
             is_securityuser=True,
             is_superuser=True,
         )
-
-    def test_admins_are_notified_when_notification_is_created(self):
         original_notifications_count = self.Notifications_model.objects.count()
         admins = self.User_model.objects.filter(is_superuser=True)
         admin_count = admins.count()
@@ -61,15 +58,25 @@ class TestAssetIncidentReportNotifications(CoreBaseTestCase):
         )
         notifications = self.Notifications_model.objects.filter(target__in=admins)
         notification = notifications[0]
-        incident_url = "{}/{}".format(reverse("incidence-reports-list"), report.id)
-        body = "{} submitted a new incident report {}.".format(
-            self.admin_user.email, incident_url
+        incident_url = f"{reverse('incidence-reports-list')}/{report.id}"
+        body = constants.INCIDENT_REPORT_CREATED_NOTIFICATION_BODY.substitute(
+            email=self.admin_user.email, link=incident_url
         )
 
         self.assertEqual(
             admin_count, notifications.count() - original_notifications_count
         )
         self.assertEqual(notification.origin, report.submitted_by)
-        self.assertEqual(notification.title, "New Incident Report")
+        self.assertEqual(
+            notification.title, constants.INCIDENT_REPORT_CREATED_NOTIFICATION_TITLE
+        )
 
         self.assertEqual(notification.body, body)
+
+    def test_no_new_notifications_are_created_if_admins_dont_exist(self):
+        original_notifications_count = self.Notifications_model.objects.count()
+        AssetIncidentReport.objects.create(
+            asset=self.test_asset, incident_type=constants.LOSS, submitted_by=self.user
+        )
+        notifications = self.Notifications_model.objects.all().exclude(target=self.user)
+        self.assertEqual(original_notifications_count, notifications.count())

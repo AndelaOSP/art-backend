@@ -3,14 +3,15 @@ A module containing signals used to listen to specific events in the models
 isort:skip_file
 """
 # Third-Party Imports
+from django.db import transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from rest_framework.reverse import reverse
 
 # App Imports
 from api.requestMiddleware import RequestMiddleware
-from core.constants import TABLES
 from core import constants
+from core.constants import TABLES
 from core.models import (  # isort:skip
     AssetIncidentReport,
     History,
@@ -54,23 +55,25 @@ def create_notification_on_incident_report_submission(**kwargs):
     instance = kwargs["instance"]
     # if a new notification has been  created
     if kwargs.get("created", False) is True:
-        notification_body = "{} submitted a new incident report {}."
-        notification_title = "New Incident Report"
         notification_targets = User.objects.filter(is_superuser=True)
-        notification_origin = instance.submitted_by
-        incident_url = "{}/{}".format(reverse("incidence-reports-list"), instance.id)
+        incident_url = f'{reverse("incidence-reports-list")}/{instance.id}'
 
         # create notifications to te different admins
-        for target in notification_targets:
-            notification = Notifications(
-                title=notification_title,
-                body=notification_body.format(target.email, incident_url),
-                level=constants.INFO_NOTIFICATION,
-                origin=notification_origin,
-                target=target,
-            )
-            notification.save()
-            # send email to user
+        # carry out as a transaction to eliminate the computational cost of individual operations
+        # and  also to  benefit from having transaction roll-backs if any of the items fail.
+        with transaction.atomic():
+            for target in notification_targets:
+                notification = Notifications(
+                    title=constants.INCIDENT_REPORT_CREATED_NOTIFICATION_TITLE,
+                    body=constants.INCIDENT_REPORT_CREATED_NOTIFICATION_BODY.substitute(
+                        email=target.email, link=incident_url
+                    ),
+                    level=constants.INFO_NOTIFICATION,
+                    origin=instance.submitted_by,
+                    target=target,
+                )
+                notification.save()
+                # send email to user
 
 
 @receiver(post_save, sender=StateTransition)
@@ -82,21 +85,18 @@ def alert_user_when_incident_report_status_is_updated(**kwargs):
     """
     instance = kwargs["instance"]
     # notification details
-    incident_url = "{}/{}".format(reverse("incidence-reports-list"), instance.id)
-    notification_body = "The status of incident report {} that you filed has been updated to `{}`.".format(
-        incident_url, instance.incident_report_state
-    )
-    notification_title = "Incident Report Status Update"
+    incident_url = f'{reverse("incidence-reports-list")}/{instance.id}'
     incident_report = AssetIncidentReport.objects.get(
         id=instance.asset_incident_report.id
     )
     if incident_report.submitted_by is not None:
-        notification_target = incident_report.submitted_by
         # create notification
         notification = Notifications(
-            title=notification_title,
-            body=notification_body,
+            title=constants.INCIDENT_REPORT_STATUS_UPDATED_NOTIFICATION_TITLE,
+            body=constants.INCIDENT_REPORT_STATUS_UPDATED_BODY.substitute(
+                link=incident_url, current_status=instance.incident_report_state
+            ),
             level=constants.INFO_NOTIFICATION,
-            target=notification_target,
+            target=incident_report.submitted_by,
         )
         notification.save()

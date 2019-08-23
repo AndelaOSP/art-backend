@@ -11,7 +11,7 @@ from core import constants
 
 class Notifications(models.Model):
     """
-    A model representing the a notification object
+    A model representing a notification object
     Nomenclature based on https://www.w3.org/TR/notifications/
     Generalized Format for notifications body::
         <actor> <verb> <time>
