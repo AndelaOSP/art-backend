@@ -127,7 +127,7 @@ INCIDENT_REPORT_CREATED_NOTIFICATION_TITLE = "New Incident Report"
 INCIDENT_REPORT_STATUS_UPDATED_NOTIFICATION_TITLE = "Incident Report Status Update"
 # Notification Bodies
 INCIDENT_REPORT_CREATED_NOTIFICATION_BODY = Template(
-    "$email submitted a new incident report {$link}."
+    "$email submitted a new incident report $link."
 )
 INCIDENT_REPORT_STATUS_UPDATED_BODY = Template(
     "The status of incident report $link that you filed has been updated to `$current_status`."
