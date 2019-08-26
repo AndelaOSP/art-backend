@@ -1,5 +1,6 @@
 # Standard Library
 from datetime import datetime
+from string import Template
 
 FEEDBACK = "feedback"
 BUG = "bug"
@@ -104,7 +105,6 @@ REPORT_STATE_OPTIONS = (
     (OUT_FOR_REPAIR, "out for repair"),
 )
 
-
 REQUIRES_REPAIR = "requires repair"
 REQUIRES_EXTERNAL_ASSESSMENT = "requires external assessment"
 
@@ -121,3 +121,23 @@ NONE = "none"
 SIMCARD_ASSET_OPTIONS = ((BASIC, "basic"), (BUSINESS, "business"), (NONE, "none"))
 
 TABLES = ["core_history", "django_admin_log"]
+
+# Notification titles
+INCIDENT_REPORT_CREATED_NOTIFICATION_TITLE = "New Incident Report"
+INCIDENT_REPORT_STATUS_UPDATED_NOTIFICATION_TITLE = "Incident Report Status Update"
+# Notification Bodies
+INCIDENT_REPORT_CREATED_NOTIFICATION_BODY = Template(
+    "$email submitted a new incident report $link."
+)
+INCIDENT_REPORT_STATUS_UPDATED_BODY = Template(
+    "The status of incident report $link that you filed has been updated to `$current_status`."
+)
+
+SUCCESS_NOTIFICATION = "success"
+WARNING_NOTIFICATION = "warning"
+INFO_NOTIFICATION = "information"
+NOTIFICATION_LEVELS = (
+    (SUCCESS_NOTIFICATION, SUCCESS_NOTIFICATION),
+    (WARNING_NOTIFICATION, WARNING_NOTIFICATION),
+    (INFO_NOTIFICATION, INFO_NOTIFICATION),
+)
