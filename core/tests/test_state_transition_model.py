@@ -39,9 +39,8 @@ class StateTransitionModelTest(CoreBaseTestCase):
 
 class TestTransitionStateUpdateFromAssetStatusModification(CoreBaseTestCase):
     """
-    Test updating of transition state when Asset status is modified
-    Update the transition state to CLOSED when an Asset status is changed from (DAMAGED,LOST) to
-    either (AVAILABLE,ALLOCATED)
+    Test updating the transition state to CLOSED when an Asset status is changed from ALLOCATED to
+    either (AVAILABLE,DAMAGED,LOST)
     """
 
     def setUp(self):
@@ -59,89 +58,43 @@ class TestTransitionStateUpdateFromAssetStatusModification(CoreBaseTestCase):
         ).objects.get_or_create(asset_incident_report_id=self.incident_report.id)
         self.transition_state = self.transition_state[0]
 
-    def test_update_asset_status_from_lost_to_available(self):
+    def test_update_asset_status_from_allocated_to_lost(self):
         status = (
             apps.get_model("core", "AssetStatus")
             .objects.filter(asset=self.asset)
             .latest('created_at')
         )
-        # update status to lost
-        status.current_status = constants.LOST
-        status.save()
-        # update status to available
-        status = (
-            apps.get_model("core", "AssetStatus")
-            .objects.filter(asset=self.asset)
-            .latest('created_at')
-        )
-        status.current_status = constants.AVAILABLE
-        status.save()
-        # verify that transition state has been updated to closed
-        transition_state = apps.get_model("core", "StateTransition").objects.get(
-            asset_incident_report=self.incident_report
-        )
-        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
-
-    def test_update_asset_status_from_damaged_to_available(self):
-        status = (
-            apps.get_model("core", "AssetStatus")
-            .objects.filter(asset=self.asset)
-            .latest('created_at')
-        )
-
-        # update status to lost
-        status.current_status = constants.DAMAGED
-        status.save()
-        # update status to available
-        status = (
-            apps.get_model("core", "AssetStatus")
-            .objects.filter(asset=self.asset)
-            .latest('created_at')
-        )
-        status.current_status = constants.AVAILABLE
-        status.save()
-        # verify that transition state has been updated to closed
-        transition_state = apps.get_model("core", "StateTransition").objects.get(
-            asset_incident_report=self.incident_report
-        )
-        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
-
-    def test_update_asset_status_from_lost_to_allocated(self):
-        status = (
-            apps.get_model("core", "AssetStatus")
-            .objects.filter(asset=self.asset)
-            .latest('created_at')
-        )
-
-        # update status to lost
-        status.current_status = constants.LOST
-        status.save()
 
         # allocate asset  to a user
         apps.get_model("core", "AllocationHistory").objects.create(
             asset=self.asset, current_assignee=self.asset_assignee2
         )
 
+        # update status to lost
+        status.current_status = constants.LOST
+        status.save()
+
         transition_state = apps.get_model("core", "StateTransition").objects.get(
             asset_incident_report=self.incident_report
         )
 
         self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
 
-    def test_update_asset_status_from_damaged_to_allocated(self):
+    def test_update_asset_status_from_allocated_to_damaged(self):
         status = (
             apps.get_model("core", "AssetStatus")
             .objects.filter(asset=self.asset)
             .latest('created_at')
         )
 
-        # update status to lost
-        status.current_status = constants.DAMAGED
-        status.save()
         # allocate asset  to a user
         apps.get_model("core", "AllocationHistory").objects.create(
             asset=self.asset, current_assignee=self.asset_assignee2
         )
+
+        # update status to DAMAGED
+        status.current_status = constants.DAMAGED
+        status.save()
 
         transition_state = apps.get_model("core", "StateTransition").objects.get(
             asset_incident_report=self.incident_report
@@ -167,9 +120,11 @@ class TestTransitionStateUpdateFromAssetStatusModification(CoreBaseTestCase):
         )
         self.assertEqual(status.current_status, constants.ALLOCATED)
 
+        # update status to AVAILABLE
+        status.current_status = constants.AVAILABLE
+        status.save()
+
         transition_state = apps.get_model("core", "StateTransition").objects.get(
             asset_incident_report=self.incident_report
         )
-        self.assertEqual(
-            transition_state.incident_report_state, constants.NEWLY_REPORTED
-        )
+        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
