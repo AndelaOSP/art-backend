@@ -577,3 +577,11 @@ class StateTransitionSerializer(serializers.ModelSerializer):
             "incident_report_state",
             "asset_state_from_report",
         )
+
+
+class WorkspaceAssetSerializer(serializers.ModelSerializer):
+    asset_type = serializers.ReadOnlyField()
+
+    class Meta:
+        model = models.Asset
+        fields = ("uuid", "asset_category", "serial_number", "asset_code", "asset_type")

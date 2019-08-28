@@ -21,6 +21,7 @@ from api.serializers import (
     OfficeFloorSectionDetailSerializer,
     OfficeFloorSectionSerializer,
     OfficeFloorSerializer,
+    OfficeWorkspaceDetailSerializer,
     OfficeWorkspaceSerializer,
 )
 from api.serializers.andela_centres import TeamDetailedSerializer, TeamSerializer
@@ -128,6 +129,11 @@ class OfficeWorkspaceViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [FirebaseTokenAuthentication]
 
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return OfficeWorkspaceDetailSerializer
+        return OfficeWorkspaceSerializer
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
@@ -162,3 +168,13 @@ class TeamViewSet(ModelViewSet):
         if self.action == "retrieve":
             return TeamDetailedSerializer
         return TeamSerializer
+
+
+class OfficeWorkspaceDetailViewSet(ModelViewSet):
+    serializer_class = OfficeWorkspaceDetailSerializer
+    queryset = models.OfficeWorkspace.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [FirebaseTokenAuthentication]
+
+    def get_serializer_class(self):
+        return OfficeWorkspaceDetailSerializer
