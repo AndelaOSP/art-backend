@@ -139,10 +139,10 @@ class APIBaseTestCase(TestCase):
             name="Sub Category nameseses", asset_category=cls.asset_category
         )
         cls.asset_type = apps.get_model("core", "AssetType").objects.create(
-            name="Asset Types", asset_sub_category=cls.asset_sub_category
+            name="Asset Types", asset_sub_category=cls.asset_sub_category, threshold=50
         )
         cls.test_asset_type = apps.get_model("core", "AssetType").objects.create(
-            name="Other Asset Types", asset_sub_category=cls.asset_sub_category
+            name="Other Asset Types", asset_sub_category=cls.asset_sub_category, threshold=50
         )
         cls.asset_make = apps.get_model("core", "AssetMake").objects.create(
             name="Asset Makes", asset_type=cls.asset_type

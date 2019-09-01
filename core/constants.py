@@ -141,3 +141,6 @@ NOTIFICATION_LEVELS = (
     (WARNING_NOTIFICATION, WARNING_NOTIFICATION),
     (INFO_NOTIFICATION, INFO_NOTIFICATION),
 )
+SUBJECT = "STOCK LEVEL CRITICAL"
+
+MSG = "Dear Admin, The stock level for the Asset type {} have gone below the minimum threshold."
