@@ -205,5 +205,3 @@ CACHES = {
         'LOCATION': 'art_cache',
     }
 }
-# log emails in console rather than sending them
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
