@@ -9,7 +9,6 @@ from decouple import config
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django_q.tasks import async_task
 
 # App Imports
 from api.send_email import send_email
@@ -546,7 +545,7 @@ class AllocationHistory(models.Model):
             self.previous_assignee = None
         try:
             super().save(*args, **kwargs)
-            if self.previous_assignee == None:
+            if self.previous_assignee is None:
                 threshold_data = self.asset.model_number.asset_make.asset_type
                 threshold_data.threshold = threshold_data.threshold - 1
                 if threshold_data.threshold <= int(config("DEFAULT_THRESHOLD")):
