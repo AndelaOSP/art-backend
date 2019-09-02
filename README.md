@@ -40,13 +40,13 @@ This repository contains the API endpoints and models for the ART project implem
 | <sup>**RETRY_TIMEOUT**</sup> | <sup>**Optional** - Number of seconds to wait before retrying an external request (currently to AIS) if an error other than 401 is received.</sup> | <sup>**10**</sup> |
 | <sup>**LOGLEVEL**</sup> | <sup>**Optional** - Default log level - error, warning, info, debug.</sup> | <sup>**info**</sup> |
 | <sup>**ADMINS**</sup> | <sup>**Optional** - Email addresses to send error logs to.</sup> | <sup>**art:art.andela@andela.com,art_group:art@andela.com**</sup> |
-| <sup>**DEFAULT_THRESHOLD**</sup> | <sup>**REQUIRED** - Minimal asset threshold.</sup> | |
+| <sup>**DEFAULT_THRESHOLD**</sup> | <sup>**REQUIRED** - Minimal asset threshold.</sup> | <sup>**Integer value EG 20**</sup>|
 | <sup>**EMAIL_HOST**</sup> | <sup>**REQUIRED** - email host.</sup> | <sup>**smtp.gmail.com**</sup> |
 | <sup>**EMAIL_HOST_USER**</sup> | <sup>**REQUIRED** - email host user account.</sup> | |
 | <sup>**EMAIL_HOST_PASSWORD**</sup> | <sup>**REQUIRED** - email host user account password.</sup> | |
 | <sup>**EMAIL_PORT**</sup> | <sup>**REQUIRED** - email port.</sup> | <sup>**587**</sup> |
 | <sup>**EMAIL_USE_TLS**</sup> | <sup>**REQUIRED** - email TLS.</sup> | <sup>**True**</sup> |
-| <sup>**EMAIL_SENDER**</sup> | <sup>**REQUIRED** - email sender address.</sup> | |
+| <sup>**EMAIL_SENDER**</sup> | <sup>**REQUIRED** - email sender's address.</sup> | |
 
 
 ### Project setup
