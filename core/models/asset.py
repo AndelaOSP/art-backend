@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 # App Imports
-from api.send_email import send_email
+# from api.send_email import send_email
 from core import constants
 from core.managers import CaseInsensitiveManager
 from core.slack_bot import SlackIntegration
@@ -545,12 +545,12 @@ class AllocationHistory(models.Model):
             self.previous_assignee = None
         try:
             super().save(*args, **kwargs)
-            if self.previous_assignee is None:
-                threshold_data = self.asset.model_number.asset_make.asset_type
-                threshold_data.threshold = threshold_data.threshold - 1
-                if threshold_data.threshold <= int(config("DEFAULT_THRESHOLD")):
-                    send_email(threshold_data)
-                threshold_data.save()
+            # if self.previous_assignee is None:
+            #     threshold_data = self.asset.model_number.asset_make.asset_type
+            #     threshold_data.threshold = threshold_data.threshold - 1
+            #     if threshold_data.threshold <= int(config("DEFAULT_THRESHOLD")):
+            #         send_email(threshold_data)
+            #     threshold_data.save()
 
         except Exception:
             raise
