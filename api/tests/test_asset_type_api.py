@@ -117,28 +117,28 @@ class AssetCategoryAPITest(APIBaseTestCase):
         self.assertEqual(AssetType.objects.count(), len(response.data.get("results")))
         self.assertEqual(response.data.get("results")[-1].get("name"), "Samsung")
 
-    # @patch("api.send_email.async_task")
-    # @patch("api.authentication.auth.verify_id_token")
-    # @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
-    # def test_email_is_sent_when_asset_type_threshold_critical(
-    #     self, mock_verify_token, mail
-    # ):
-    #     mock_verify_token.return_value = {"email": self.admin_user.email}
-    #     assettype = AssetType(
-    #         name="Andelaheadsets",
-    #         asset_sub_category=self.asset_sub_category,
-    #         threshold=20,
-    #     )
-    #     assettype.save()
-    #     self.asset_make.asset_type = assettype
-    #     self.asset_make.save()
-    #     allocate = AllocationHistory(
-    #         asset=self.asset_1, current_assignee=self.asset_assignee
-    #     )
-    #     allocate.save()
-    #     data = User.objects.filter(is_staff=True)
-    #     emails = mail._mock_call_args_list[0]
-    #     self.assertEqual(emails[0][1], constants.SUBJECT)
-    #     self.assertEqual(emails[0][3], os.getenv("EMAIL_SENDER"))
-    #     self.assertEqual(emails[0][2], constants.MSG.format(assettype.name))
-    #     self.assertEqual(emails[0][4][0], data[0].email)
+    @patch("api.send_email.async_task")
+    @patch("api.authentication.auth.verify_id_token")
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_email_is_sent_when_asset_type_threshold_critical(
+        self, mock_verify_token, mail
+    ):
+        mock_verify_token.return_value = {"email": self.admin_user.email}
+        assettype = AssetType(
+            name="Andelaheadsets",
+            asset_sub_category=self.asset_sub_category,
+            threshold=20,
+        )
+        assettype.save()
+        self.asset_make.asset_type = assettype
+        self.asset_make.save()
+        allocate = AllocationHistory(
+            asset=self.asset_1, current_assignee=self.asset_assignee
+        )
+        allocate.save()
+        data = User.objects.filter(is_staff=True)
+        emails = mail._mock_call_args_list[0]
+        self.assertEqual(emails[0][1], constants.SUBJECT)
+        self.assertEqual(emails[0][3], os.getenv("EMAIL_SENDER"))
+        self.assertEqual(emails[0][2], constants.MSG.format(assettype.name))
+        self.assertEqual(emails[0][4][0], data[0].email)

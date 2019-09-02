@@ -181,7 +181,7 @@ SWAGGER_SETTINGS = {
 
 REDOC_SETTINGS = {"LAZY_RENDERING": True}
 
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = config("EMAIL_HOST", None)
 EMAIL_PORT = config("EMAIL_PORT", None)
