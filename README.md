@@ -40,6 +40,7 @@ This repository contains the API endpoints and models for the ART project implem
 | <sup>**RETRY_TIMEOUT**</sup> | <sup>**Optional** - Number of seconds to wait before retrying an external request (currently to AIS) if an error other than 401 is received.</sup> | <sup>**10**</sup> |
 | <sup>**LOGLEVEL**</sup> | <sup>**Optional** - Default log level - error, warning, info, debug.</sup> | <sup>**info**</sup> |
 | <sup>**ADMINS**</sup> | <sup>**Optional** - Email addresses to send error logs to.</sup> | <sup>**art:art.andela@andela.com,art_group:art@andela.com**</sup> |
+| <sup>**oiuytrdfghjhg**</sup> | <sup>**Optional** - emaillllllllll.</sup> | <sup>**oiuytrewasdfghjkjhgf,art_group:art@andela.com**</sup> |
 
 ### Project setup
 #### Installation script
