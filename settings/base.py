@@ -40,12 +40,12 @@ MEDIA_URL = "/media/"
 
 SECRET_KEY = config("SECRET_KEY")
 
-DATABASES = {"default": dj_database_url.config()}
+# DATABASES = {"default": dj_database_url.config()}
 # When starting the application, at least in development if the following error occurs
 # """django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE
 # value. Check settings documentation for more details. """
 # Please uncomment the following instead
-# DATABASES = {"default": dj_database_url.config(default=config('DATABASE_URL'))}
+DATABASES = {"default": dj_database_url.config(default=config('DATABASE_URL'))}
 
 ALLOWED_HOSTS = config("HOST_IP", cast=Csv())
 # Application definition
