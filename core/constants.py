@@ -97,12 +97,14 @@ NEWLY_REPORTED = "newly reported"
 INTERNAL_ASSESSMENT = "internal assessment"
 EXTERNAL_ASSESSMENT = "external assessment"
 OUT_FOR_REPAIR = "out for repair"
+CLOSED = "closed"
 
 REPORT_STATE_OPTIONS = (
     (NEWLY_REPORTED, "newly reported"),
     (INTERNAL_ASSESSMENT, "internal assessment"),
     (EXTERNAL_ASSESSMENT, "external assessment"),
     (OUT_FOR_REPAIR, "out for repair"),
+    (CLOSED, "closed"),
 )
 
 REQUIRES_REPAIR = "requires repair"

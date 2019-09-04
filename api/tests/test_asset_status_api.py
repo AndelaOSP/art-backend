@@ -2,11 +2,15 @@
 from unittest.mock import patch
 
 # Third-Party Imports
+from django.apps import apps
 from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 # App Imports
 from api.tests import APIBaseTestCase
+from core import constants
 from core.models import Asset
 
 User = get_user_model()
@@ -141,3 +145,84 @@ class AssetStatusAPITest(APIBaseTestCase):
         )
         self.assertEqual(response.data, {"detail": 'Method "DELETE" not allowed.'})
         self.assertEqual(response.status_code, 405)
+
+
+class TestTransitionStateUpdateFromAssetStatusAPIModification(APIBaseTestCase):
+    """
+    Test Transition state modification when asset status changes from API modification
+    """
+
+    def setUp(self):
+        self.incident_report = apps.get_model(
+            "core", "AssetIncidentReport"
+        ).objects.create(asset=self.asset)
+
+    def allocate_asset(self):
+        """
+        Allocate asset to update status to allocated
+        :return:
+        """
+        data = {"asset": self.asset.id, "current_assignee": self.asset_assignee.id}
+        response = client.post(
+            self.allocations_urls,
+            data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def get_transition_state(self):
+        url = reverse(
+            "state-transitions-detail", kwargs={"pk": str(self.incident_report.id)}
+        )
+        print(url)
+        response = client.get(
+            f"{url}/", HTTP_AUTHORIZATION="Token {}".format(self.admin_user)
+        )
+        return response.json()
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_update_asset_status_from_allocated_to_lost(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        self.allocate_asset()
+        data = {"asset": self.asset.id, "current_status": constants.LOST}
+        client.post(
+            self.asset_status_urls,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        transition_state = apps.get_model("core", "StateTransition").objects.get(
+            asset_incident_report=self.incident_report
+        )
+        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_update_asset_status_from_allocated_to_damaged(self, mock_verify_id_token):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        self.allocate_asset()
+        data = {"asset": self.asset.id, "current_status": constants.DAMAGED}
+        client.post(
+            self.asset_status_urls,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        transition_state = apps.get_model("core", "StateTransition").objects.get(
+            asset_incident_report=self.incident_report
+        )
+        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
+
+    @patch("api.authentication.auth.verify_id_token")
+    def test_update_asset_status_from_allocated_to_available(
+        self, mock_verify_id_token
+    ):
+        mock_verify_id_token.return_value = {"email": self.user.email}
+        self.allocate_asset()
+        data = {"asset": self.asset.id, "current_status": constants.AVAILABLE}
+        client.post(
+            self.asset_status_urls,
+            data=data,
+            HTTP_AUTHORIZATION="Token {}".format(self.token_user),
+        )
+        transition_state = apps.get_model("core", "StateTransition").objects.get(
+            asset_incident_report=self.incident_report
+        )
+        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)

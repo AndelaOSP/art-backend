@@ -673,7 +673,6 @@ class StateTransition(models.Model):
         verbose_name_plural = "State Transitions"
 
     def save(self, *args, **kwargs):
-
         # admin updates asset_status if damaged
         if self.asset_state_from_report == "Damaged":
             AssetStatus.objects.create(

@@ -3,17 +3,20 @@ from django.apps import apps
 
 # App Imports
 from core import constants
-from core.models import AssetIncidentReport, StateTransition
 from core.tests import CoreBaseTestCase
 
 
 class StateTransitionModelTest(CoreBaseTestCase):
-    "Tests state trensition model"
+    """Tests state transition model"""
 
     def test_create_incident_report_creates_new_state_transition(self):
-        incident_report_count = AssetIncidentReport.objects.count()
-        state_transition_count = StateTransition.objects.count()
-        AssetIncidentReport.objects.create(
+        incident_report_count = apps.get_model(
+            "core", "AssetIncidentReport"
+        ).objects.count()
+        state_transition_count = apps.get_model(
+            "core", "StateTransition"
+        ).objects.count()
+        apps.get_model("core", "AssetIncidentReport").objects.create(
             asset=self.test_asset,
             incident_type="Loss",
             incident_location="44",
@@ -24,67 +27,104 @@ class StateTransitionModelTest(CoreBaseTestCase):
             police_abstract_obtained="Yes",
             submitted_by=self.user,
         )
-        self.assertEqual(AssetIncidentReport.objects.count(), incident_report_count + 1)
-        self.assertEqual(StateTransition.objects.count(), state_transition_count + 1)
+        self.assertEqual(
+            apps.get_model("core", "AssetIncidentReport").objects.count(),
+            incident_report_count + 1,
+        )
+        self.assertEqual(
+            apps.get_model("core", "StateTransition").objects.count(),
+            state_transition_count + 1,
+        )
 
 
-class TestStateTransitionNotifications(CoreBaseTestCase):
+class TestTransitionStateUpdateFromAssetStatusModification(CoreBaseTestCase):
     """
-    Test notifications are created when  Transition states are modified appropriately
+    Test updating the transition state to CLOSED when an Asset status is changed from ALLOCATED to
+    either (AVAILABLE,DAMAGED,LOST)
     """
 
-    Notifications = apps.get_model("core", "Notifications")
-
-    def test_notification_created_when_Transition_state_is_created(self):
-        state_transition_count = StateTransition.objects.count()
-        notifications_count = self.Notifications.objects.filter(
-            target=self.user
-        ).count()
-        incident = AssetIncidentReport.objects.create(
-            asset=self.test_asset,
-            incident_type="Loss",
-            incident_location="44",
-            incident_description="Mugging",
-            injuries_sustained="Black eye",
-            loss_of_property="Laptop",
-            witnesses="Omosh wa mtura",
-            police_abstract_obtained="Yes",
-            submitted_by=self.user,
+    def setUp(self):
+        self.asset = apps.get_model("core", "Asset").objects.create(
+            asset_code="IC0019009",
+            serial_number="SN001000098",
+            model_number=self.test_assetmodel,
+            purchase_date="2019-07-10",
         )
-        self.assertEqual(StateTransition.objects.count(), state_transition_count + 1)
-        self.assertEqual(
-            self.Notifications.objects.filter(target=incident.submitted_by).count(),
-            notifications_count + 1,
+        self.incident_report = apps.get_model(
+            "core", "AssetIncidentReport"
+        ).objects.create(asset=self.asset)
+        self.transition_state = apps.get_model(
+            "core", "StateTransition"
+        ).objects.get_or_create(asset_incident_report_id=self.incident_report.id)
+        self.transition_state = self.transition_state[0]
+
+    def test_update_asset_status_from_allocated_to_lost(self):
+        status = (
+            apps.get_model("core", "AssetStatus")
+            .objects.filter(asset=self.asset)
+            .latest('created_at')
         )
 
-    def test_notification_created_when_transition_state_is_updated(self):
-        incident = AssetIncidentReport.objects.create(
-            asset=self.test_asset,
-            incident_type="Loss",
-            incident_location="44",
-            incident_description="Mugging",
-            injuries_sustained="Black eye",
-            loss_of_property="Laptop",
-            witnesses="Omosh wa mtura",
-            police_abstract_obtained="Yes",
-            submitted_by=self.user,
-        )
-        # state_transition_count = StateTransition.objects.count()
-        notifications_count = self.Notifications.objects.filter(
-            target=self.user
-        ).count()
-        transition_state = StateTransition.objects.get(asset_incident_report=incident)
-        transition_state.incident_report_state = constants.INTERNAL_ASSESSMENT
-        transition_state.save()
-        new_notification = self.Notifications.objects.filter(target=self.user).latest(
-            'created_at'
+        # allocate asset  to a user
+        apps.get_model("core", "AllocationHistory").objects.create(
+            asset=self.asset, current_assignee=self.asset_assignee2
         )
 
-        self.assertEqual(
-            self.Notifications.objects.filter(target=incident.submitted_by).count(),
-            notifications_count + 1,
+        # update status to lost
+        status.current_status = constants.LOST
+        status.save()
+
+        transition_state = apps.get_model("core", "StateTransition").objects.get(
+            asset_incident_report=self.incident_report
         )
-        self.assertEqual(
-            new_notification.title,
-            constants.INCIDENT_REPORT_STATUS_UPDATED_NOTIFICATION_TITLE,
+
+        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
+
+    def test_update_asset_status_from_allocated_to_damaged(self):
+        status = (
+            apps.get_model("core", "AssetStatus")
+            .objects.filter(asset=self.asset)
+            .latest('created_at')
         )
+
+        # allocate asset  to a user
+        apps.get_model("core", "AllocationHistory").objects.create(
+            asset=self.asset, current_assignee=self.asset_assignee2
+        )
+
+        # update status to DAMAGED
+        status.current_status = constants.DAMAGED
+        status.save()
+
+        transition_state = apps.get_model("core", "StateTransition").objects.get(
+            asset_incident_report=self.incident_report
+        )
+
+        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
+
+    def test_update_asset_status_from_allocated_to_available(self):
+        status = (
+            apps.get_model("core", "AssetStatus")
+            .objects.filter(asset=self.asset)
+            .latest('created_at')
+        )
+        self.assertEqual(status.current_status, constants.AVAILABLE)
+        # allocate asset  to a user
+        apps.get_model("core", "AllocationHistory").objects.create(
+            asset=self.asset, current_assignee=self.asset_assignee2
+        )
+        status = (
+            apps.get_model("core", "AssetStatus")
+            .objects.filter(asset=self.asset)
+            .latest('created_at')
+        )
+        self.assertEqual(status.current_status, constants.ALLOCATED)
+
+        # update status to AVAILABLE
+        status.current_status = constants.AVAILABLE
+        status.save()
+
+        transition_state = apps.get_model("core", "StateTransition").objects.get(
+            asset_incident_report=self.incident_report
+        )
+        self.assertEqual(transition_state.incident_report_state, constants.CLOSED)
