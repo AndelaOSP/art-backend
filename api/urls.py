@@ -36,6 +36,7 @@ from api.views import (
     OfficeBlockViewSet,
     OfficeFloorSectionViewSet,
     OfficeFloorViewSet,
+    OfficeWorkspaceDetailViewSet,
     OfficeWorkspaceViewSet,
     SecurityUserViewSet,
     StateTransitionViewset,
@@ -86,6 +87,7 @@ router.register("asset-sub-categories", AssetSubCategoryViewSet, "asset-sub-cate
 router.register("asset-types", AssetTypeViewSet, "asset-types")
 router.register("incidence-reports", AssetIncidentReportViewSet, "incidence-reports")
 router.register("manage-assets", ManageAssetViewSet, "manage-assets")
+router.register("workspace-detail", OfficeWorkspaceDetailViewSet, "workspace-detail")
 router.register(
     "slack-incidence-reports",
     AssetSlackIncidentReportViewSet,
