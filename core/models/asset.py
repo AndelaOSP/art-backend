@@ -548,8 +548,7 @@ class AllocationHistory(models.Model):
             if self.previous_assignee is None:
                 threshold_data = self.asset.model_number.asset_make.asset_type
                 threshold_data.threshold = threshold_data.threshold - 1
-                # if threshold_data.threshold <= int(config("DEFAULT_THRESHOLD")):
-                if threshold_data.threshold <= 20:
+                if threshold_data.threshold <= int(config("DEFAULT_THRESHOLD")):
                     send_email(threshold_data)
                 threshold_data.save()
 
