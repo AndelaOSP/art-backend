@@ -5,11 +5,13 @@ import uuid
 from datetime import datetime
 
 # Third-Party Imports
+from decouple import config
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
 # App Imports
+from api.send_email import send_email
 from core import constants
 from core.managers import CaseInsensitiveManager
 from core.slack_bot import SlackIntegration
@@ -26,7 +28,7 @@ def user_abstract(user, filename):
     :params: user -> user object
     :params: filename -> string
     """
-    return f'user_{user}_{filename}'
+    return f"user_{user}_{filename}"
 
 
 class AssetCategory(models.Model):
@@ -92,6 +94,7 @@ class AssetType(models.Model):
     last_modified = models.DateTimeField(auto_now=True, editable=False)
     asset_sub_category = models.ForeignKey("AssetSubCategory", on_delete=models.PROTECT)
     has_specs = models.BooleanField(default=False)
+    threshold = models.IntegerField(default=0)
 
     objects = CaseInsensitiveManager()
 
@@ -542,6 +545,13 @@ class AllocationHistory(models.Model):
             self.previous_assignee = None
         try:
             super().save(*args, **kwargs)
+            if self.previous_assignee is None:
+                threshold_data = self.asset.model_number.asset_make.asset_type
+                threshold_data.threshold = threshold_data.threshold - 1
+                if threshold_data.threshold <= int(config("DEFAULT_THRESHOLD")):
+                    send_email(threshold_data)
+                threshold_data.save()
+
         except Exception:
             raise
         else:
@@ -619,10 +629,10 @@ class AssetIncidentReport(models.Model):
     loss_of_property = models.TextField(null=True, blank=True)
     witnesses = models.TextField(null=True, blank=True)
     police_abstract_obtained = models.CharField(max_length=255)
-    submitted_by = models.ForeignKey('User', null=True, on_delete=models.PROTECT)
+    submitted_by = models.ForeignKey("User", null=True, on_delete=models.PROTECT)
     created_at = models.DateTimeField(default=datetime.now, editable=False)
     police_abstract = models.FileField(
-        'Police Abstract', upload_to=user_abstract, blank=True
+        "Police Abstract", upload_to=user_abstract, blank=True
     )
 
     def __str__(self):

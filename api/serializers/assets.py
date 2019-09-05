@@ -365,6 +365,7 @@ class AssetTypeSerializer(serializers.ModelSerializer):
             "created_at",
             "last_modified",
             "asset_type",
+            "threshold",
         )
 
     def to_internal_value(self, data):
